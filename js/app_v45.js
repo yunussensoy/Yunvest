@@ -15886,18 +15886,6 @@ const renderHisseler = (container) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
         let tabsHtml = makeBtn('Özet Rapor') + 
 
 
@@ -15905,36 +15893,6 @@ const renderHisseler = (container) => {
 
 
 
-
-
-
-
-
-                       makeDropdown('Finansal Tablolar', ['Bilanço', 'Gelir Tablosu', 'Nakit Akım Tablosu']) +
-
-
-
-
-
-
-
-
-
-
-
-                       makeDropdown('Oran Analizi', ['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları']) +
-
-
-
-
-
-
-
-
-
-
-
-                       makeBtn('Diğer Kalemler') +
 
 
 
