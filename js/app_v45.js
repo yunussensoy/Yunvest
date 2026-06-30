@@ -26406,30 +26406,38 @@ const renderHisseler = (container) => {
 
             } else if (activeTab === 'Raporlar') {
     const hisseKodu = selectedHisse;
-    
-    // Kullanici istegi uzerine her zaman sabit 5 rapor listelenecek
-    const possibleReports = [
-        { title: 'Araştırma Raporu', file: 'arastirma_raporu.pdf' },
-        { title: 'Faaliyet Raporu', file: 'faaliyet_raporu.pdf' },
-        { title: 'Finansal Rapor', file: 'finansal_rapor.pdf' },
-        { title: 'Toplantı Notları', file: 'toplanti_notlari.pdf' },
-        { title: 'Yatırımcı Sunumu', file: 'yatirimci_sunumu.pdf' }
-    ];
-    
     let raporLinksHtml = '';
     
-    possibleReports.forEach(r => {
-        const relPath = `Hisseler/${hisseKodu}/${r.file}`;
-        raporLinksHtml += `
-            <div style="margin-bottom: 0.5rem; padding: 0.5rem 1rem; background: rgba(255,255,255,0.02); border-radius: 8px;">
-                <a href="javascript:void(0)" 
-                   onclick="window.open('${relPath}', '_blank')"
-                   style="color: #ffffff; font-size: 13px; text-decoration: none; font-weight: normal; display:flex; align-items:center;">
-                   <i class="fas fa-file-pdf" style="margin-right:0.5rem; color: #ff4757; font-size: 14px;"></i>${r.title}
-                </a>
-            </div>
-        `;
-    });
+    // window.stockReports nesnesinden bu hisseye ait pdf dosyalarini alalim
+    const availablePdfs = (window.stockReports && window.stockReports[hisseKodu]) ? window.stockReports[hisseKodu] : [];
+    
+    const titleMap = {
+        'arastirma_raporu.pdf': 'Araştırma Raporu',
+        'faaliyet_raporu.pdf': 'Faaliyet Raporu',
+        'finansal_rapor.pdf': 'Finansal Rapor',
+        'toplanti_notlari.pdf': 'Toplantı Notları',
+        'yatirimci_sunumu.pdf': 'Yatırımcı Sunumu',
+        'fiyat_tespit_raporu.pdf': 'Fiyat Tespit Raporu'
+    };
+    
+    if (availablePdfs.length > 0) {
+        availablePdfs.forEach(fileName => {
+            const relPath = `Hisseler/${hisseKodu}/${fileName}`;
+            const title = titleMap[fileName.toLowerCase()] || fileName;
+            
+            raporLinksHtml += `
+                <div style="margin-bottom: 0.5rem; padding: 0.5rem 1rem; background: rgba(255,255,255,0.02); border-radius: 8px;">
+                    <a href="javascript:void(0)" 
+                       onclick="window.open('${relPath}', '_blank')"
+                       style="color: #ffffff; font-size: 13px; text-decoration: none; font-weight: normal; display:flex; align-items:center;">
+                       <i class="fas fa-file-pdf" style="margin-right:0.5rem; color: #ff4757; font-size: 14px;"></i>${title}
+                    </a>
+                </div>
+            `;
+        });
+    } else {
+        raporLinksHtml = '<div style="padding: 1rem; color: var(--text-secondary); font-style: italic; font-size: 13px;">Bu hisseye ait kayıtlı rapor bulunamadı.</div>';
+    }
 
     contentHtml = `
         <div class="dash-card">
