@@ -54895,6 +54895,18 @@ document.getElementById('auth-toggle').addEventListener('click', toggleAuthMode)
 
 
 
+const getFirebaseErrorTR = (err) => {
+    if (err.code === 'auth/email-already-in-use') return 'Bu e-posta adresi zaten kullanılıyor.';
+    if (err.code === 'auth/invalid-email') return 'Geçersiz e-posta adresi.';
+    if (err.code === 'auth/weak-password') return 'Şifre çok zayıf. En az 6 karakter olmalıdır.';
+    if (err.code === 'auth/user-not-found') return 'Kullanıcı bulunamadı.';
+    if (err.code === 'auth/wrong-password') return 'Hatalı şifre.';
+    if (err.code === 'auth/invalid-credential') return 'E-posta veya şifre hatalı.';
+    if (err.code === 'auth/too-many-requests') return 'Çok fazla başarısız deneme. Lütfen daha sonra tekrar deneyin.';
+    if (err.code === 'auth/network-request-failed') return 'Ağ bağlantısı hatası. Lütfen internetinizi kontrol edin.';
+    return err.message;
+};
+
 document.getElementById('auth-form').addEventListener('submit', (e) => {
 
 
@@ -54908,6 +54920,8 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 
 
     e.preventDefault();
+    const errorDiv = document.getElementById('auth-error');
+    if (errorDiv) errorDiv.style.display = 'none';
 
 
 
@@ -54991,7 +55005,16 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 
 
 
-        auth.signInWithEmailAndPassword(email, password).catch(err => alert(err.message));
+        auth.signInWithEmailAndPassword(email, password).catch(err => {
+            const trMsg = getFirebaseErrorTR(err);
+            const errorDiv = document.getElementById('auth-error');
+            if (errorDiv) {
+                errorDiv.innerText = trMsg;
+                errorDiv.style.display = 'block';
+            } else {
+                alert(trMsg);
+            }
+        });
 
 
 
@@ -55135,7 +55158,16 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 
 
 
-            .catch(err => alert(err.message));
+            .catch(err => {
+                const trMsg = getFirebaseErrorTR(err);
+                const errorDiv = document.getElementById('auth-error');
+                if (errorDiv) {
+                    errorDiv.innerText = trMsg;
+                    errorDiv.style.display = 'block';
+                } else {
+                    alert(trMsg);
+                }
+            });
 
 
 
