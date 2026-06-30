@@ -40,7 +40,6 @@ folders.forEach(hisse => {
     }
 });
 
-const outputJs = 'window.stockData = ' + JSON.stringify(window.stockData, null, 2) + ';\nwindow.stockReports = ' + JSON.stringify(window.stockReports, null, 2) + ';
-';
+const outputJs = 'window.stockData = ' + JSON.stringify(window.stockData, null, 2) + ';\nwindow.stockReports = ' + JSON.stringify(window.stockReports, null, 2) + ';\n';
 fs.writeFileSync(path.join(__dirname, 'stock_data_compiled.js'), outputJs);
 console.log('Derleme basariyla tamamlandi. Toplam hisse sayisi: ' + Object.keys(window.stockData).length);
