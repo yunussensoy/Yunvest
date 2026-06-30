@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUNVest Portföy Yönetimi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="auth-container" class="app-container" style="justify-content: center; align-items: center;">
+        <div class="glass" style="padding: 3rem; width: 400px; text-align: center;">
+            <div class="logo" style="margin-bottom: 2rem; margin-right: 0; font-size: 2rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <div style="background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 50%), var(--accent-color); color: #fff; width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.6rem; box-shadow: 0 4px 15px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.6); flex-shrink: 0; font-family: 'Inter', sans-serif;">Y</div>
+                <div style="display:flex; flex-direction:column; align-items:flex-start; line-height:1;"><span style="font-weight: 700; color: var(--accent-color); letter-spacing: 1px; font-size: 1.8rem;">YUN<span style="font-weight: 300; color: #fff;">Vest</span></span><span style="font-size: 0.8rem; color: var(--text-secondary); letter-spacing: 2px;">PORTFÖY</span></div>
+            </div>
+            <h3 style="margin-bottom: 1.5rem;" id="auth-title">Giriş Yap</h3>
+            <form id="auth-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                <input type="text" id="auth-name" class="form-control" placeholder="Ad Soyadı" style="display: none;">
+                <input type="tel" id="auth-phone" class="form-control" placeholder="Telefon No" style="display: none;">
+                <input type="email" id="auth-email" class="form-control" placeholder="E-posta" required>
+                <input type="password" id="auth-password" class="form-control" placeholder="Şifre" required>
+                <button type="submit" class="btn" id="auth-submit-btn">Giriş Yap</button>
+            </form>
+            <p style="margin-top: 1.5rem; color: var(--text-secondary); cursor: pointer;" id="auth-toggle">
+                Hesabınız yok mu? <span style="color: var(--accent-color);">Kayıt Olun</span>
+            </p>
+        </div>
+    </div>
+
+    <div id="app" class="app-container" style="display: none; flex-direction: row; height: 100vh; overflow: hidden;">
+    <!-- Primary Sidebar -->
+    <aside id="primary-sidebar" class="glass-sidebar expanded">
+        <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <div class="logo" style="cursor: pointer; margin:0; display: flex; align-items: center; gap: 0.5rem;" onclick="if(window.goToAnasayfa) window.goToAnasayfa()">
+                <div style="background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 50%), var(--accent-color); color: #fff; width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.6); flex-shrink: 0; font-family: 'Inter', sans-serif;">Y</div>
+                <span class="nav-text" style="font-weight: 700; font-size: 1.2rem; color: var(--accent-color);">YUN<span style="font-weight: 300; color: #fff;">Vest</span></span>
+            </div>
+            <button id="sidebar-toggle" class="btn" style="padding: 0.3rem 0.5rem; background: transparent; color: var(--text-secondary);" onclick="window.toggleSidebar()"><i class="fas fa-window-maximize"></i></button>
+        </div>
+        <nav class="sidebar-nav" style="display: flex; flex-direction: column; padding: 1rem 0; overflow-y: auto; overflow-x: hidden;">
+            <button id="takip-listesi-btn" class="nav-btn" data-target="anasayfa" onmouseenter="if(window.showSidebarTakip) window.showSidebarTakip(this)" onmouseleave="if(window.hideSidebarTakip) window.hideSidebarTakip()"><i class="fas fa-list"></i> <span class="nav-text">Takip Listesi</span></button>
+            
+            <div class="nav-accordion" style="width: 100%;">
+                <button class="nav-btn" style="width: 100%; justify-content: flex-start;" onclick="const content = this.nextElementSibling; const icon = this.querySelector('.fa-chevron-down, .fa-chevron-up'); if(content.style.display === 'flex') { content.style.display = 'none'; icon.classList.replace('fa-chevron-up', 'fa-chevron-down'); } else { content.style.display = 'flex'; icon.classList.replace('fa-chevron-down', 'fa-chevron-up'); }">
+                    <i class="fas fa-briefcase" style="width: 20px; text-align: center; font-size: 16px;"></i> <span class="nav-text">Portföy</span> <i class="fas fa-chevron-down nav-text" style="font-size: 0.7em; margin-left: auto;"></i>
+                </button>
+                <div class="accordion-content" style="display: none; flex-direction: column; background: rgba(0,0,0,0.1);">
+                    <button class="nav-btn" style="padding: 0.6rem 1rem; padding-left: 3rem; font-size: 13px;" onclick="if(window.goToPortfoyTab) window.goToPortfoyTab('bilgiler');"><span class="nav-text">Portföy Bilgileri</span></button>
+                    <button class="nav-btn" style="padding: 0.6rem 1rem; padding-left: 3rem; font-size: 13px;" onclick="if(window.goToPortfoyTab) window.goToPortfoyTab('varliklar');"><span class="nav-text">Varlıklarım</span></button>
+                    <button class="nav-btn" style="padding: 0.6rem 1rem; padding-left: 3rem; font-size: 13px;" onclick="if(window.goToPortfoyTab) window.goToPortfoyTab('arsiv');"><span class="nav-text">Arşiv</span></button>
+
+                </div>
+            </div>
+            
+            <button class="nav-btn" data-target="hisse_islemleri"><i class="fas fa-chart-line"></i> <span class="nav-text">Hisse İşlemleri</span></button>
+            <button class="nav-btn" data-target="nakit_islemleri"><i class="fas fa-wallet"></i> <span class="nav-text">Nakit İşlemleri</span></button>
+            <button class="nav-btn" data-target="veriler"><i class="fas fa-database"></i> <span class="nav-text">Veri Girişi</span></button>
+        </nav>
+        <!-- User Profile -->
+        <div style="margin-top: auto; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.05);">
+            <div class="nav-dropdown" style="position: relative; display: block; width: 100%;" onmouseover="this.querySelector('.dropdown-content').style.display='flex'" onmouseleave="this.querySelector('.dropdown-content').style.display='none'">
+                <button id="user-name-btn" class="nav-btn" style="color: var(--text-secondary); font-weight: 600; font-size: 14px; width: 100%; justify-content: flex-start; padding: 0.5rem;"><i class="fas fa-user-circle" style="width: 20px; font-size: 16px;"></i> <span id="user-name" class="nav-text">Kullanıcı</span> <i class="fas fa-chevron-up nav-text" style="font-size: 0.7em; margin-left: auto;"></i></button>
+                <div class="dropdown-content glass" style="display: none; position: absolute; bottom: 100%; left: 0; min-width: 180px; z-index: 1000; flex-direction: column; padding: 0.5rem; border-radius: var(--border-radius); box-shadow: 0 -4px 15px rgba(0,0,0,0.5); margin-bottom: 5px;">
+                    <button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; display: flex; align-items: center; font-size: 14px; padding: 0.8rem 1rem;" onclick="if(window.goToAyarlar) window.goToAyarlar(); else document.querySelector('.nav-btn[data-target=\'ayarlar\']').click()"><span><i class="fas fa-cog" style="width: 20px;"></i> Hesap Ayarları</span></button>
+                    
+                    <div class="theme-menu-wrapper" style="position: relative;" onmouseover="this.querySelector('.theme-submenu').style.display='flex'" onmouseleave="this.querySelector('.theme-submenu').style.display='none'">
+                        <button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; padding: 0.8rem 1rem;"><span><i class="fas fa-palette" style="width: 20px;"></i> Tema</span> <i class="fas fa-chevron-right" style="font-size: 0.7em;"></i></button>
+                        <div class="theme-submenu glass" style="display: none; position: absolute; bottom: 0; left: 100%; min-width: 120px; flex-direction: column; padding: 0.5rem; border-radius: var(--border-radius); box-shadow: 0 4px 15px rgba(0,0,0,0.5); margin-left: 5px;">
+                            <button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; font-size: 14px; padding: 0.8rem 1rem;" onclick="window.setTheme('light')"><i class="fas fa-sun" style="width: 20px;"></i> Açık</button>
+                            <button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; font-size: 14px; padding: 0.8rem 1rem;" onclick="window.setTheme('dark')"><i class="fas fa-moon" style="width: 20px;"></i> Koyu</button>
+                        </div>
+                    </div>
+
+                    <div style="height: 1px; background: var(--surface-border); margin: 0.5rem 0;"></div>
+                    <button id="logout-btn" class="nav-btn" style="color: var(--danger-color); text-align: left; width: 100%; border-radius: 4px; font-size: 14px; padding: 0.8rem 1rem;"><i class="fas fa-sign-out-alt" style="width: 20px;"></i> Çıkış</button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Secondary Sidebar -->
+    <aside id="secondary-sidebar" class="glass-sidebar secondary-sidebar expanded" style="display: none; border-left: 1px solid rgba(255,255,255,0.02);">
+        <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <h3 id="secondary-sidebar-title" style="margin: 0; color: var(--accent-color); font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Hisse Detay</h3>
+            <button class="btn" style="padding: 0.3rem 0.5rem; background: transparent; color: var(--danger-color);" onclick="window.closeSecondarySidebar()"><i class="fas fa-times"></i></button>
+        </div>
+        <nav class="sidebar-nav" style="display: flex; flex-direction: column; padding: 1rem 0; overflow-y: auto;">
+            <button class="nav-btn sec-nav-btn active" data-sec-target="degerleme"><i class="fas fa-gem"></i> <span class="nav-text">Değerleme</span></button>
+            <button class="nav-btn sec-nav-btn" data-sec-target="gelir_tablosu"><i class="fas fa-file-invoice-dollar"></i> <span class="nav-text">Gelir Tablosu</span></button>
+            <button class="nav-btn sec-nav-btn" data-sec-target="bilanco"><i class="fas fa-balance-scale"></i> <span class="nav-text">Bilanço</span></button>
+            <button class="nav-btn sec-nav-btn" data-sec-target="nakit_akisi"><i class="fas fa-water"></i> <span class="nav-text">Nakit Akışı</span></button>
+            <button class="nav-btn sec-nav-btn" data-sec-target="carpanlar"><i class="fas fa-percentage"></i> <span class="nav-text">Çarpanlar</span></button>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+        <!-- Topbar -->
+        <div class="top-bar glass" style="display: flex; justify-content: space-between; padding: 0.5rem 1rem; align-items: center; border-radius: 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 1rem; position: relative; z-index: 9999; width: 100%;">
+            
+            <!-- Ticker Bar Wrapper -->
+            <div id="ticker-wrapper" style="flex: 1; overflow: hidden; margin-left: 0.5rem;">
+                <div id="ticker-bar" class="ticker-container" style="display: flex; width: 100%; justify-content: space-between; overflow-x: auto; white-space: nowrap; font-size: 0.75rem; font-weight: 500; align-items: center; padding-bottom: 4px;">
+                    <!-- Ticker items will be injected here -->
+                </div>
+            </div>
+
+            <!-- Search Box -->
+            <div style="position: relative; display: flex; gap: 0.5rem; align-items: center; background: rgba(255,255,255,0.05); padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-left: auto; margin-right: 1rem;">
+                <i class="fas fa-search" style="color: var(--text-secondary); font-size: 12px;"></i>
+                <input type="text" id="anasayfa-arama-input" placeholder="Hisse (Örn: THYAO)" autocomplete="off" style="background: transparent; border: none; color: #fff; width: 130px; font-size: 12px; outline: none; text-transform: uppercase;" onkeydown="if(event.key==='Enter') { window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none'; }">
+                <button style="background: var(--success-color); border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer;" onclick="window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none';"><i class="fas fa-plus" style="font-size: 12px;"></i></button>
+                
+                <!-- Custom Autocomplete Dropdown -->
+                <div id="search-autocomplete-list" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; max-height: 250px; overflow-y: auto; flex-direction: column; padding: 0.5rem 0; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); margin-top: 5px; z-index: 2000; background: var(--surface-color); border: 1px solid var(--surface-border);">
+                </div>
+            </div>
+
+
+        </div>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="content-area">
+            <!-- Pages will be injected here by JS -->
+        </main>
+    </div>
+
+    
+    
+    <!-- Hisse Cikar Modal -->
+    <div id="hisse-remove-modal" class="app-container" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000;">
+        <div class="glass" style="padding: 2rem; width: 350px; text-align: center; border-radius: var(--border-radius);">
+            <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Takipten Çıkar</h3>
+            <select id="modal-remove-select" class="form-control" style="width: 100%; margin-bottom: 1.5rem; text-transform: uppercase; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--surface-border); padding: 0.8rem; border-radius: var(--border-radius);">
+            </select>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button class="btn" style="flex: 1; background: var(--danger-color);" onclick="window.confirmRemoveHisse()">Çıkar</button>
+                <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1);" onclick="document.getElementById('hisse-remove-modal').style.display = 'none'">İptal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hisse Ekle Modal -->
+    <div id="hisse-modal" class="app-container" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000;">
+        <div class="glass" style="padding: 2rem; width: 350px; text-align: center; border-radius: var(--border-radius);">
+            <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Takip Listesine Ekle</h3>
+            <input type="text" id="modal-hisse-input" class="form-control" placeholder="Hisse Kodu (Örn: THYAO)" list="bist-hisse-list" autocomplete="off" style="width: 100%; margin-bottom: 1.5rem; text-transform: uppercase;" onkeydown="if(event.key === 'Enter') window.confirmAddHisse();">
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button class="btn" style="flex: 1; background: var(--accent-color);" onclick="window.confirmAddHisse()">Ekle</button>
+                <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1);" onclick="document.getElementById('hisse-modal').style.display = 'none'">İptal</button>
+            </div>
+        </div>
+    </div>
+
+    
+    <div id="hisse-sil-modal" class="app-container" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000;">
+        <div class="glass" style="padding: 2rem; width: 350px; text-align: center; border-radius: var(--border-radius);">
+            <h3 style="margin-bottom: 1.5rem; color: #ff6b6b;">Takip Listesinden Sil</h3>
+            <select id="modal-hisse-sil-input" class="form-control" style="width: 100%; margin-bottom: 1.5rem; text-transform: uppercase;" onkeydown="if(event.key === 'Enter') window.confirmRemoveHisse();">
+                <!-- Options populated by JS -->
+            </select>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button class="btn" style="flex: 1; background: #ff6b6b;" onclick="window.confirmRemoveHisse()">Sil</button>
+                <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1);" onclick="document.getElementById('hisse-sil-modal').style.display = 'none'">İptal</button>
+            </div>
+        </div>
+    </div>
+    <!-- Firebase Scripts (Compat Version for ease of use without bundler) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+    <!-- Theme Compatible Confirm Modal -->
+    <div id="theme-confirm-modal" class="app-container" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999;">
+        <div class="glass" style="padding: 2rem; width: 350px; text-align: center; border-radius: var(--border-radius); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div style="font-size: 3rem; color: var(--danger-color); margin-bottom: 1rem;"><i class="fas fa-exclamation-circle"></i></div>
+            <h3 style="margin-bottom: 1rem; color: var(--text-primary); font-weight: 600;">Emin misiniz?</h3>
+            <p id="theme-confirm-message" style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 12px; line-height: 1.5;"></p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1); color: var(--text-primary);" onclick="document.getElementById('theme-confirm-modal').style.display='none';">İptal</button>
+                <button class="btn" style="flex: 1; background: var(--danger-color); color: #fff;" onclick="document.getElementById('theme-confirm-modal').style.display='none'; if(window.themeConfirmAction) window.themeConfirmAction();">Evet, Sil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Takip Listesi Fixed Dropdown -->
+    <div id="sidebar-takip-dropdown" class="glass" style="display: none; position: fixed; z-index: 10000; flex-direction: column; padding: 0.5rem; border-radius: var(--border-radius); box-shadow: 0 4px 15px rgba(0,0,0,0.8); background: var(--surface-color); border: 1px solid var(--surface-border);" onmouseenter="if(window.cancelHideTakip) window.cancelHideTakip()" onmouseleave="if(window.hideSidebarTakip) window.hideSidebarTakip()">
+    </div>
+
+    <!-- Chart.js for Pie Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+    <script>
+        window.addEventListener('unhandledrejection', function(event) {
+            const errDiv = document.createElement('div');
+            errDiv.style.color = 'white';
+            errDiv.style.padding = '10px';
+            errDiv.style.background = 'red';
+            errDiv.style.position = 'fixed';
+            errDiv.style.top = '50px';
+            errDiv.style.zIndex = '9999';
+            errDiv.innerText = "PROMISE ERROR: " + (event.reason ? event.reason.message : 'Unknown');
+            document.body.appendChild(errDiv);
+        });
+    </script>
+
+    <script src="js/stock_data_compiled.js"></script>
+    <script src="js/excel_parser_v2.js"></script>
+    <script src="js/import_data.js"></script>
+    <script src="js/app_v45.js"></script>
+</body>
+</html>
