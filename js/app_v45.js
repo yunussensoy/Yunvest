@@ -54993,6 +54993,11 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 
 
 
+    const btn = document.getElementById('auth-submit-btn');
+    const originalBtnText = btn.innerText;
+    btn.innerText = 'Lütfen bekleyin...';
+    btn.disabled = true;
+
     if (isLoginMode) {
 
 
@@ -55005,12 +55010,21 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 
 
 
-        auth.signInWithEmailAndPassword(email, password).catch(err => {
+        auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+            btn.innerText = 'Başarılı!';
+            // onAuthStateChanged will handle the redirect
+        })
+        .catch(err => {
+            btn.innerText = originalBtnText;
+            btn.disabled = false;
             const trMsg = getFirebaseErrorTR(err);
             const errorDiv = document.getElementById('auth-error');
             if (errorDiv) {
                 errorDiv.innerText = trMsg;
                 errorDiv.style.display = 'block';
+                // Also alert to ensure user sees it
+                alert(trMsg);
             } else {
                 alert(trMsg);
             }
@@ -55159,11 +55173,14 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 
 
             .catch(err => {
+                btn.innerText = originalBtnText;
+                btn.disabled = false;
                 const trMsg = getFirebaseErrorTR(err);
                 const errorDiv = document.getElementById('auth-error');
                 if (errorDiv) {
                     errorDiv.innerText = trMsg;
                     errorDiv.style.display = 'block';
+                    alert(trMsg);
                 } else {
                     alert(trMsg);
                 }
