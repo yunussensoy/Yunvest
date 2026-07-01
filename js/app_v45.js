@@ -1,4 +1,26 @@
 
+window.showThemeConfirm = (message, action) => {
+    const msgEl = document.getElementById('theme-confirm-message');
+    if (msgEl) msgEl.textContent = message;
+    window.themeConfirmAction = action;
+    const modal = document.getElementById('theme-confirm-modal');
+    if (modal) modal.style.display = 'flex';
+    else {
+        if (confirm(message)) action();
+    }
+};
+
+window.alert = function(msg) {
+    const alertModal = document.getElementById('theme-alert-modal');
+    if (alertModal) {
+        document.getElementById('theme-alert-message').innerText = msg;
+        alertModal.style.display = 'flex';
+    } else {
+        console.log("ALERT: " + msg);
+    }
+};
+
+
 
 
 
@@ -16444,7 +16466,7 @@ const renderHisseler = (container) => {
 
 
 
-                window.deleteGenelNot = (id) => { if(confirm('Bu notu silmek istediğinize emin misiniz?')) { State.data.genelNotlar = State.data.genelNotlar.filter(n => n.id !== id); State.save(); renderUI(); } };
+                window.deleteGenelNot = (id) => { showThemeConfirm('Bu notu silmek istediğinize emin misiniz?', () => { State.data.genelNotlar = State.data.genelNotlar.filter(n => n.id !== id); State.save(); renderUI(); }); };
 
 
 
@@ -24760,7 +24782,7 @@ const renderHisseler = (container) => {
 
 
 
-                    if (confirm(y + ' yılı verilerini silmek istediğinize emin misiniz?')) {
+                    showThemeConfirm(y + ' yılı verilerini silmek istediğinize emin misiniz?', () => {
 
 
 
@@ -33987,7 +34009,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-        if(confirm('Bu işlemi silmek istediğinize emin misiniz?')) {
+        showThemeConfirm('Bu işlemi silmek istediğinize emin misiniz?', () => {
 
 
 
@@ -34059,7 +34081,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-        }
+        }););
 
 
 
@@ -36915,7 +36937,7 @@ const renderNakitIslemleri = (container) => {
 
 
 
-        if(confirm('Bu nakit hareketini silmek istediğinize emin misiniz?')) {
+        showThemeConfirm('Bu nakit hareketini silmek istediğinize emin misiniz?', () => {
 
 
 
@@ -36987,7 +37009,7 @@ const renderNakitIslemleri = (container) => {
 
 
 
-        }
+        });
 
 
 
@@ -42917,19 +42939,7 @@ window.deleteAnaliz = (id) => {
 
 
 
-        if (!confirm('Bu analizi silmek istediğinize emin misiniz?')) return;
-
-
-
-
-
-
-
-
-
-
-
-        window.themeConfirmAction();
+        if (!window.themeConfirmAction) { showThemeConfirm('Bu analizi silmek istediğinize emin misiniz?', () => { window.deleteAnaliz(id); }); return; } window.themeConfirmAction();
 
 
 
@@ -51698,7 +51708,7 @@ window.removeTakip = (hisse) => {
 
 
 
-    if (confirm(hisse + ' hissesini takip listesinden çıkarmak istediğinize emin misiniz?')) {
+    showThemeConfirm(hisse + ' hissesini takip listesinden çıkarmak istediğinize emin misiniz?', () => {
 
 
 
@@ -51758,7 +51768,7 @@ window.removeTakip = (hisse) => {
 
 
 
-    }
+    });
 
 
 
