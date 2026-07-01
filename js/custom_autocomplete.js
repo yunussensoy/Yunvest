@@ -115,8 +115,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const updateList = () => {
-                const val = target.value.toUpperCase();
-                const filtered = allItems.filter(item => item.toUpperCase().includes(val)).slice(0, 50); // limit to 50
+                const val = target.value.trim().toUpperCase();
+                if (!val) {
+                    renderDropdown([], val);
+                    return;
+                }
+                const filtered = allItems.filter(item => item.toUpperCase().startsWith(val)).slice(0, 50); // limit to 50
                 renderDropdown(filtered, val);
             };
 
