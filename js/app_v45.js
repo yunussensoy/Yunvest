@@ -26436,15 +26436,21 @@ const renderHisseler = (container) => {
             `;
         });
     } else {
-        raporLinksHtml = '<div style="padding: 1rem; color: var(--text-secondary); font-style: italic; font-size: 13px;">Bu hisseye ait kayıtlı rapor bulunamadı.</div>';
+        raporLinksHtml = '<div class="empty-local" style="padding: 1rem; color: var(--text-secondary); font-style: italic; font-size: 13px;">Yerel cihazda bu hisseye ait kayıtlı rapor bulunamadı.</div>';
     }
 
     contentHtml = `
         <div class="dash-card">
             <div class="dash-title" style="font-size: 18px; font-weight: bold; margin-bottom: 1rem;">${hisseKodu} Raporlar</div>
             ${raporLinksHtml}
+            <div id="firebase-raporlar-container">
+                <div style="padding: 1rem; color: var(--text-secondary); font-size: 13px;"><i class="fas fa-spinner fa-spin"></i> Buluttan raporlar yükleniyor...</div>
+            </div>
         </div>
     `;
+    setTimeout(() => {
+        if(window.fetchFirebaseRaporlar) window.fetchFirebaseRaporlar('${hisseKodu}');
+    }, 100);
 } else if (activeTab === 'Hisse Notları') {
 
 
@@ -38649,6 +38655,32 @@ const renderVeriler = (container) => {
 
 
 
+                <!-- Rapor Yükle (Bulut) -->
+                <div class="glass" style="flex: 1; padding: 2rem; min-width: 300px;">
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;"><i class="fas fa-cloud-upload-alt"></i> Buluta Rapor Yükle</h3>
+                    <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 1rem;">Bu bölümden yüklediğiniz PDF raporları anında Raporlar sayfasında görünecektir.</p>
+                    
+                    <div style="display:flex; flex-direction:column; gap: 0.8rem;">
+                        <input type="text" id="upload-hisse" placeholder="Hisse Kodu (Örn: THYAO)" class="form-control" style="width:100%; text-transform: uppercase;">
+                        
+                        <select id="upload-type" class="form-control" style="width:100%; appearance: auto;">
+                            <option value="">-- Rapor Türü Seçin --</option>
+                            <option value="arastirma_raporu.pdf">Araştırma Raporu</option>
+                            <option value="faaliyet_raporu.pdf">Faaliyet Raporu</option>
+                            <option value="finansal_rapor.pdf">Finansal Rapor</option>
+                            <option value="toplanti_notlari.pdf">Toplantı Notları</option>
+                            <option value="yatirimci_sunumu.pdf">Yatırımcı Sunumu</option>
+                            <option value="fiyat_tespit_raporu.pdf">Fiyat Tespit Raporu</option>
+                        </select>
+                        
+                        <input type="file" id="upload-file" accept="application/pdf" class="form-control" style="width:100%; padding: 0.5rem; cursor: pointer;">
+                        
+                        <button class="btn" style="background: var(--accent-color); width: 100%; margin-top: 0.5rem;" onclick="window.uploadRapor()">Yükle</button>
+                        
+                        <div id="upload-status" style="font-size: 13px; font-weight: 500; margin-top: 0.5rem; min-height: 20px;"></div>
+                    </div>
+                </div>
+
                 <!-- Hedef Portföy -->
 
 
@@ -50444,6 +50476,87 @@ window.formatCustomDate = (dateStr) => {
 
 
 
+
+window.fetchFirebaseRaporlar = async (hisseKodu) => {
+    const container = document.getElementById('firebase-raporlar-container');
+    if (!container) return;
+    try {
+        const storageRef = firebase.storage().ref(`Hisseler/${hisseKodu}`);
+        const result = await storageRef.listAll();
+        
+        const titleMap = {
+            'arastirma_raporu.pdf': 'Araştırma Raporu',
+            'faaliyet_raporu.pdf': 'Faaliyet Raporu',
+            'finansal_rapor.pdf': 'Finansal Rapor',
+            'toplanti_notlari.pdf': 'Toplantı Notları',
+            'yatirimci_sunumu.pdf': 'Yatırımcı Sunumu',
+            'fiyat_tespit_raporu.pdf': 'Fiyat Tespit Raporu'
+        };
+
+        let html = '';
+        if (result.items.length > 0) {
+            html += '<div style="margin-top: 1rem; font-weight: bold; color: var(--accent-color); font-size: 14px; margin-bottom: 0.5rem;">Bulut Raporları</div>';
+            for (let itemRef of result.items) {
+                const url = await itemRef.getDownloadURL();
+                const fileName = itemRef.name;
+                const title = titleMap[fileName.toLowerCase()] || fileName;
+                
+                html += `
+                    <div style="margin-bottom: 0.5rem; padding: 0.5rem 1rem; background: rgba(var(--accent-color-rgb), 0.1); border-radius: 8px; border: 1px solid rgba(var(--accent-color-rgb), 0.2);">
+                        <a href="${url}" target="_blank"
+                           style="color: #ffffff; font-size: 13px; text-decoration: none; font-weight: normal; display:flex; align-items:center;">
+                           <i class="fas fa-cloud-download-alt" style="margin-right:0.5rem; color: var(--accent-color); font-size: 14px;"></i>${title}
+                        </a>
+                    </div>
+                `;
+            }
+        }
+        
+        container.innerHTML = html;
+        
+        const parentCard = container.closest('.dash-card');
+        if (result.items.length > 0 && parentCard) {
+            const emptyState = parentCard.querySelector('.empty-local');
+            if(emptyState) emptyState.style.display = 'none';
+        } else if (result.items.length === 0 && parentCard) {
+            const emptyState = parentCard.querySelector('.empty-local');
+            if(!emptyState) {
+                container.innerHTML = '<div style="padding: 1rem; color: var(--text-secondary); font-style: italic; font-size: 13px;">Bulutta kayıtlı rapor bulunamadı.</div>';
+            } else {
+                container.innerHTML = '';
+                emptyState.innerText = 'Yerelde veya bulutta kayıtlı rapor bulunamadı.';
+            }
+        }
+    } catch (error) {
+        console.error("Error fetching firebase raporlar:", error);
+        container.innerHTML = `<div style="padding: 1rem; color: var(--danger-color); font-size: 13px;">Bulut raporları yüklenirken hata oluştu.</div>`;
+    }
+};
+
+window.uploadRapor = async () => {
+    const hisse = document.getElementById('upload-hisse').value.toUpperCase();
+    const fileName = document.getElementById('upload-type').value;
+    const fileInput = document.getElementById('upload-file');
+    const statusDiv = document.getElementById('upload-status');
+    
+    if(!hisse || !fileName || fileInput.files.length === 0) {
+        statusDiv.innerHTML = '<span style="color:var(--danger-color);">Lütfen tüm alanları doldurun ve dosya seçin.</span>';
+        return;
+    }
+    
+    const file = fileInput.files[0];
+    statusDiv.innerHTML = '<span style="color:var(--accent-color);"><i class="fas fa-spinner fa-spin"></i> Yükleniyor... Lütfen bekleyin.</span>';
+    
+    try {
+        const storageRef = firebase.storage().ref(`Hisseler/${hisse}/${fileName}`);
+        await storageRef.put(file);
+        statusDiv.innerHTML = '<span style="color:var(--success-color);"><i class="fas fa-check-circle"></i> Dosya başarıyla yüklendi!</span>';
+        fileInput.value = '';
+    } catch (error) {
+        console.error("Upload error:", error);
+        statusDiv.innerHTML = '<span style="color:var(--danger-color);"><i class="fas fa-times-circle"></i> Yükleme başarısız oldu: ' + error.message + '</span>';
+    }
+};
 
 window.formatCustomCurrency = (val, currencyCode = 'TRY') => {
 

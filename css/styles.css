@@ -250,6 +250,15 @@ tbody tr {
     box-shadow: 0 0 0 2px var(--accent-glow);
 }
 
+/* Tarayıcıların otomatik doldurma (autofill) yaparken arka planı beyaz yapmasını engellemek için */
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover, 
+.form-control:-webkit-autofill:focus, 
+.form-control:-webkit-autofill:active {
+    transition: background-color 5000s ease-in-out 0s;
+    -webkit-text-fill-color: var(--text-primary) !important;
+}
+
 .btn {
     background: var(--accent-color);
     color: #fff;

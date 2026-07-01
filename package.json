@@ -1,5 +1,9 @@
 {
   "dependencies": {
     "xlsx": "^0.18.5"
+  },
+  "scripts": {
+    "build": "node js/compile_excel.js"
   }
 }
+
