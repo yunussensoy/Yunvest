@@ -26465,9 +26465,7 @@ const renderHisseler = (container) => {
         <div class="dash-card">
             <div class="dash-title" style="font-size: 18px; font-weight: bold; margin-bottom: 1rem;">${hisseKodu} Raporlar</div>
             ${raporLinksHtml}
-            <div id="firebase-raporlar-container">
-                <div style="padding: 1rem; color: var(--text-secondary); font-size: 13px;"><i class="fas fa-spinner fa-spin"></i> Buluttan raporlar yükleniyor...</div>
-            </div>
+            <div id="firebase-raporlar-container"></div>
         </div>
     `;
     setTimeout(() => {
