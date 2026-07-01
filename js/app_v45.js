@@ -26463,7 +26463,7 @@ const renderHisseler = (container) => {
 
     contentHtml = `
         <div class="dash-card">
-            <div class="dash-title" style="font-size: 18px; font-weight: bold; margin-bottom: 1rem;">${hisseKodu} Raporlar</div>
+            <div class="dash-title" style="font-size: 18px; font-weight: bold; margin-bottom: 1rem;">Raporlar</div>
             ${raporLinksHtml}
             <div id="firebase-raporlar-container"></div>
         </div>
@@ -50542,7 +50542,7 @@ window.fetchFirebaseRaporlar = async (hisseKodu) => {
         }
     } catch (error) {
         console.error("Error fetching firebase raporlar:", error);
-        container.innerHTML = `<div style="padding: 1rem; color: var(--danger-color); font-size: 13px;">Bulut raporları yüklenirken hata oluştu.</div>`;
+        container.innerHTML = `<div style="padding: 1rem; color: var(--danger-color); font-size: 13px;">Bulut raporları yüklenirken hata oluştu: ${error.message}</div>`;
     }
 };
 
