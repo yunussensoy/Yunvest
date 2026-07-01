@@ -115,6 +115,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const updateList = () => {
+                if (target.getAttribute('data-custom-list') !== 'bist-hisse-list' && target.getAttribute('list') !== 'bist-hisse-list') {
+                    closeDropdown();
+                    return;
+                }
                 const val = target.value.trim().toUpperCase();
                 if (!val) {
                     renderDropdown([], val);

@@ -30913,7 +30913,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-                    <select id="edit-tur" class="form-control" style="width:100%; font-size:12px; padding:2px;" onchange="window.updateEditDatalist()">
+                    <select id="edit-tur" class="form-control" style="width:100%; font-size:12px; padding:4px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--surface-border); border-radius: 4px; outline: none;" onchange="window.updateEditDatalist()">
 
 
 
@@ -32305,7 +32305,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-                                <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px;" onchange="window.updateInlineDatalist()">
+                                <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--surface-border); border-radius: 4px; outline: none;" onchange="window.updateInlineDatalist()">
 
 
 
@@ -32954,6 +32954,7 @@ const renderHisseIslemleri = (container) => {
 
 
             menkulInput.setAttribute('list', 'fon-list');
+            menkulInput.setAttribute('data-custom-list', 'fon-list');
 
 
 
@@ -33050,6 +33051,7 @@ const renderHisseIslemleri = (container) => {
 
 
             menkulInput.setAttribute('list', 'bist-hisse-list');
+            menkulInput.setAttribute('data-custom-list', 'bist-hisse-list');
 
 
 
@@ -33290,6 +33292,7 @@ const renderHisseIslemleri = (container) => {
 
 
             menkulInput.setAttribute('list', 'fon-list');
+            menkulInput.setAttribute('data-custom-list', 'fon-list');
 
 
 
@@ -33362,6 +33365,7 @@ const renderHisseIslemleri = (container) => {
 
 
             menkulInput.setAttribute('list', 'bist-hisse-list');
+            menkulInput.setAttribute('data-custom-list', 'bist-hisse-list');
 
 
 
