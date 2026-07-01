@@ -32953,7 +32953,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-            menkulInput.setAttribute('list', 'fon-list');
+            menkulInput.removeAttribute('list');
             menkulInput.setAttribute('data-custom-list', 'fon-list');
 
 
@@ -33291,7 +33291,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-            menkulInput.setAttribute('list', 'fon-list');
+            menkulInput.removeAttribute('list');
             menkulInput.setAttribute('data-custom-list', 'fon-list');
 
 

@@ -553,3 +553,8 @@ tbody tr {
 .std-table td[onclick]:not(:has(button)):hover, .std-table td a:hover {
     text-decoration: underline !important;
 }
+
+select.form-control option {
+    background-color: #1f2128;
+    color: var(--text-primary);
+}
