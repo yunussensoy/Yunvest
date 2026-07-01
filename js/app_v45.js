@@ -24854,7 +24854,7 @@ const renderHisseler = (container) => {
 
 
 
-                    }
+                    });
 
 
 
@@ -34081,7 +34081,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-        }););
+        });
 
 
 
@@ -42939,7 +42939,8 @@ window.deleteAnaliz = (id) => {
 
 
 
-        if (!window.themeConfirmAction) { showThemeConfirm('Bu analizi silmek istediğinize emin misiniz?', () => { window.deleteAnaliz(id); }); return; } window.themeConfirmAction();
+        if (!window.themeConfirmAction) { showThemeConfirm('Bu analizi silmek istediğinize emin misiniz?', () => { window.deleteAnaliz(id); }); return; }
+        window.themeConfirmAction();
 
 
 
