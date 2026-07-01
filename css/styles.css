@@ -327,7 +327,7 @@ tbody tr {
 .dash-col { display: flex; flex-direction: column; gap: 1rem; }
 .dash-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); border-radius: var(--border-radius); padding: 1rem; }
 .dash-title { text-align: center; font-size: 18px; font-weight: 600; color: var(--accent-color); margin-bottom: 0.8rem; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.4rem; }
-.dash-table { width: 100%; border-collapse: collapse; font-size: 13px; color: var(--text-primary); }
+.dash-table { width: 100%; border-collapse: collapse; font-size: 13px; color: var(--text-primary); margin-top: 5px; }
 .dash-table th { text-align: center; padding: 7px 0.5rem; color: #ffffff; font-weight: 600; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.1); }
 .dash-table td { text-align: right; padding: 0.7rem 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-weight: 500; font-size: 13px; color: #cccccc; }
 .dash-table td:first-child { text-align: left; font-weight: 500; color: #cccccc; }
@@ -467,6 +467,7 @@ tbody tr {
 .std-table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 5px;
 }
 
 .std-table th {
