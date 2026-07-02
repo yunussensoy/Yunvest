@@ -48,11 +48,11 @@ const genFintablesBilanco = (title, headers, rows) => {
     const leftArrow = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; color:#555;"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
     const rightArrow = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; color:#fff;"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
 
-    let html = `<div style="background:#111216; border-radius:12px; border:1px solid rgba(255,255,255,0.05); overflow:hidden; font-family:var(--font-family);">
+    let html = `<div style="background:#111216; boşrder-radius:12px; boşrder:1px solid rgba(255,255,255,0.05); overflow:hidden; font-family:var(--font-family);">
         <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse; color:#fff; font-size:13px; text-align:right;">
+            <table style="width:100%; boşrder-collapse:collapse; color:#fff; font-size:13px; text-align:right;">
                 <thead>
-                    <tr style="background:#111216; border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <tr style="background:#111216; boşrder-boşttom:1px solid rgba(255,255,255,0.05);">
                         <th style="text-align:left; padding:16px; font-size:15px; font-weight:700;  white-space:nowrap;">Bilanço Kalemleri</th>`;
     
     headers.forEach((h, i) => {
@@ -62,7 +62,7 @@ const genFintablesBilanco = (title, headers, rows) => {
         let eSpan = `<span style="color:#2196f3; font-weight:bold; font-size:10px; margin-left:2px; vertical-align:top;">E</span>`;
         html += `<th style="padding:16px;  white-space:nowrap; color:var(--accent-color); text-align:right;">${h}</th>`;
     });
-    html += `</tr></thead><tbody>`;
+    html += `</tr></thead><tboşdy>`;
 
     const mainCategories = ['dönen varlıklar', 'duran varlıklar', 'toplam varlıklar', 'kısa vadeli yükümlülükler', 'uzun vadeli yükümlülükler', 'özkaynaklar', 'toplam kaynaklar'];
     
@@ -71,20 +71,20 @@ const genFintablesBilanco = (title, headers, rows) => {
         const isMainCat = mainCategories.includes(rowName.toLocaleLowerCase('tr-TR'));
         
         let trStyle = isMainCat ? `background:rgba(255,255,255,0.03); font-weight:600;` : `transition: background 0.2s;`;
-        html += `<tr style="${trStyle} border-bottom:1px solid rgba(255,255,255,0.03);" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='${isMainCat ? 'rgba(255,255,255,0.03)' : 'transparent'}'">`;
+        html += `<tr style="${trStyle} boşrder-boşttom:1px solid rgba(255,255,255,0.03);" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='${isMainCat ? 'rgba(255,255,255,0.03)' : 'transparent'}'">`;
         
         r.forEach((cell, i) => {
             if (i === 0) {
                 let cellColor = isMainCat ? '#fff' : '#aaa';
-                html += `<td style="text-align:left; padding:12px 16px; color:${cellColor}; white-space:nowrap; border-right:none;">${cell}</td>`;
+                html += `<td style="text-align:left; padding:12px 16px; color:${cellColor}; white-space:nowrap; boşrder-right:none;">${cell}</td>`;
             } else {
-                html += `<td style="padding:12px 16px; color:#e0e0e0; white-space:nowrap; border-right:none;">${cell}</td>`;
+                html += `<td style="padding:12px 16px; color:#e0e0e0; white-space:nowrap; boşrder-right:none;">${cell}</td>`;
             }
         });
         html += `</tr>`;
     });
     
-    html += `</tbody></table></div></div>`;
+    html += `</tboşdy></table></div></div>`;
     return html;
 };
 
@@ -93,7 +93,7 @@ const genTable = (title, headers, rows) => {
     headers.forEach((h, i) => {
         html += `<th style="text-align:${i===0 ? 'left' : 'center'}; font-weight: 500;">${h}</th>`;
     });
-    html += `</tr></thead><tbody>`;
+    html += `</tr></thead><tboşdy>`;
     rows.forEach(r => {
         html += `<tr>`;
         r.forEach((cell, i) => {
@@ -103,7 +103,7 @@ const genTable = (title, headers, rows) => {
         });
         html += `</tr>`;
     });
-    html += `</tbody></table></div></div>`;
+    html += `</tboşdy></table></div></div>`;
     return html;
 };
 
@@ -456,7 +456,7 @@ const State = {
         };
 
         if (!currentUser) {
-            const localData = localStorage.getItem('borsa_app_data');
+            const localData = localStorage.getItem('boşrsa_app_data');
             if (localData) {
                 try {
                     this.data = { ...DEFAULT_STATE, ...JSON.parse(localData) };
@@ -488,7 +488,7 @@ const State = {
                     }
                 } catch(e) {}
                 
-                if (!rescuedStr) rescuedStr = localStorage.getItem('borsa_app_data');
+                if (!rescuedStr) rescuedStr = localStorage.getItem('boşrsa_app_data');
 
                 if (rescuedStr) {
                     try {
@@ -520,7 +520,7 @@ const State = {
                 
                 processLoadedData();
             } else {
-                const localData = localStorage.getItem('borsa_app_data');
+                const localData = localStorage.getItem('boşrsa_app_data');
                 if (localData) {
                     try {
                         this.data = { ...DEFAULT_STATE, ...JSON.parse(localData) };
@@ -557,16 +557,16 @@ const State = {
             // ROLLING BACKUP SYSTEM
             try {
                 for (let i = 4; i >= 1; i--) {
-                    const prev = localStorage.getItem(`borsa_app_data_backup_${i}`);
-                    if (prev) localStorage.setItem(`borsa_app_data_backup_${i+1}`, prev);
+                    const prev = localStorage.getItem(`boşrsa_app_data_backup_${i}`);
+                    if (prev) localStorage.setItem(`boşrsa_app_data_backup_${i+1}`, prev);
                 }
-                const currentLocal = localStorage.getItem('borsa_app_data');
-                if (currentLocal) localStorage.setItem('borsa_app_data_backup_1', currentLocal);
+                const currentLocal = localStorage.getItem('boşrsa_app_data');
+                if (currentLocal) localStorage.setItem('boşrsa_app_data_backup_1', currentLocal);
             } catch (e) {
                 console.error('Backup error', e);
             }
             
-            localStorage.setItem('borsa_app_data', JSON.stringify(this.data));
+            localStorage.setItem('boşrsa_app_data', JSON.stringify(this.data));
 
             // FILE SYSTEM BACKUP (ABSOLUTELY BULLETPROOF)
             try {
@@ -688,7 +688,7 @@ const ensureDatalist = () => {
     if (!dl) {
         dl = document.createElement('datalist');
         dl.id = 'bist-hisse-list';
-        document.body.appendChild(dl);
+        document.boşdy.appendChild(dl);
     }
     window.defaultStocksArray = ["HLGYO","KAYSE","OZRDN","FONET","AVGYO","METRO","DARDL","GOODY","CATES","KRGYO","CIMSA","MPARK","ARASE","AVTUR","BRSAN","IHAAS","ZRE20","ARFYE","MERKO","TDGYO","OFSYM","EGSER","AEFES","TCKRC","VERTU","HTTBT","RUZYE","EDIP","BIGCH","ISYAT","BALAT","MEYSU","TRGYO","KUTPO","SEGMN","BJKAS","INTEK","VBTYZ","AVPGY","GLBMD","IEYHO","BEYAZ","GENIL","PAMEL","MERIT","ISBIR","ARMGD","CEOEM","EUHOL","ALARK","HUNER","OPTGY","OZYSR","SODSN","SELEC","BARMA","UNLU","ENTRA","EDATA","TMSN","DURDO","LXGYO","EKSUN","KUYAS","ISCTR","ARCLK","DITAS","TSGYO","EKIZ","ACSEL","AKMGY","ADEL","GLCVY","AKSEN","RODRG","ETYAT","YONGA","PRKAB","ISMEN","VESTL","INFO","PNLSN","MAKIM","KCHOL","EKGYO","AYEN","GLYHO","AVOD","ALGYO","BRKVY","CLEBI","DOFER","AKHAN","BRISA","RUBNS","VAKBN","ISGYO","GLRMK","OSMEN","SUNTK","BASCM","GMTAS","BRMEN","SUWEN","AGESA","BULGS","GWIND","VKING","VERUS","MARTI","SMRTG","TRHOL","YATAS","CMENT","DMSAS","TUCLK","KARTN","CWENE","ZERGY","SKBNK","KRDMD","BANVT","ALKA","PINSU","TGSAS","KOPOL","FADE","TKFEN","SONME","PRKME","SELVA","AKSGY","LYDHO","EUPWR","PEKGY","EKOS","AYCES","QNBTR","ADGYO","TERA","YESIL","BIGTK","A1YEN","ASGYO","ESCAR","CRDFA","MARMR","VAKKO","KFEIN","KLSER","SVGYO","AYGAZ","KZGYO","AHGAZ","OYAKC","PSDTC","PKART","BALSU","EGEEN","LMKDC","BAKAB","DOCO","HATSN","ALCTL","LIDER","DIRIT","MHRGY","SURGY","EREGL","KRTEK","MOBTL","TEZOL","NATEN","BESTE","LOGO","GEDIK","DENGE","VKGYO","ISKPL","LILAK","AKFIS","HEDEF","PNSUT","MERCN","ALKLC","TURGG","PAPIL","ENPRA","BURVA","OYAYO","BEGYO","YKSLN","VAKFN","TLMAN","BESLR","UCAYM","POLTK","MSGYO","MAVI","EUKYO","ORCAY","CASA","AKYHO","TATGD","FORTE","HRKET","NETAS","KMPUR","BIOEN","ADESE","KAPLM","AYDEM","ULUFA","HATEK","ODAS","ANELE","KRVGD","ZPT10","OPX30","GOZDE","AGYO","PSGYO","GLDTR","PAHOL","GARFA","ULUUN","DURKN","ONRYT","SEKFK","DSTKF","KOCMT","INGRM","BSOKE","EUREN","GENKM","MEDTR","SNPAM","KUVVA","SANKO","AZTEK","SKTAS","KENT","JANTS","MEGAP","ULAS","OZKGY","VAKFA","FMIZP","AGROT","ANHYT","VRGYO","GENTS","BRKO","CEMZY","AKCNS","EGEPO","OPT25","AFYON","MIATK","GOKNR","TSKB","GRNYO","KONKA","SAMAT","LKMNH","LINK","ECOGR","BTCIM","ALBRK","TARKM","TRALT","KBORU","REEDR","FLAP","GUNDG","KTSKR","EGPRO","IHEVA","CVKMD","KLYPV","BOSSA","KOTON","ISFIN","DGGYO","GEDZA","GRTHO","VANGD","DOFRB","YGGYO","IZINV","KRPLS","TEHOL","TUPRS","AGHOL","APBDL","TMPOL","KONTR","NUGYO","TTRAK","HEKTS","AKBNK","DMLKT","IZFAS","PRZMA","TRMET","NIBAS","MARKA","OZSUB","FORMT","BAGFS","RNPOL","MNDRS","AKFYE","ALVES","LYDYE","QUAGR","SKYLP","RYSAS","KORDS","VSNMD","ARDYZ","ONCSM","ORMA","OYLUM","ZPBDL","GEREL","ENJSA","KRONT","BINHO","CANTE","FZLGY","TABGD","PENGD","ATAKP","BINBN","BAHKM","GARAN","FENER","RALYH","GMSTR","ARSAN","BASGZ","RYGYO","AVHOL","AHSGY","USDTR","ICUGS","MACKO","Z30KP","DUNYH","OBAMS","EBEBK","NTGAZ","DGNMO","SUMAS","AYES","DOGUB","SKYMD","MANAS","ISKUR","PARSN","HKTM","YIGIT","ARZUM","EMPAE","ZRGYO","DOAS","KATMR","TURSG","KLGYO","KLRHO","PASEU","KRDMB","TNZTP","BORLS","TAVHL","BRKSN","ULKER","KERVN","INVES","FRMPL","A1CAP","OTTO","BERA","BFREN","IZENR","KLSYN","YUNSA","TOASO","PKENT","SEYKM","EGEGY","ASTOR","PETKM","MZHLD","BNTAS","PENTA","ALTNY","DYOBY","GUBRF","ENDAE","MAGEN","TSPOR","CRFSA","ASUZU","CUSAN","ISSEN","ZEDUR","CMBTN","GESAN","LUKSK","KSTUR","ICBCT","ATEKS","PAGYO","EMKEL","ERBOS","KAREL","ODINE","YYAPI","TBORG","OPK30","MTRYO","APX30","MEPET","SEKUR","TCELL","BIGEN","QNBFK","ZGYO","ISDMR","AKFGY","INVEO","ISGLK","OBASE","DCTTR","YEOTK","LRSHO","SASA","KLNMA","ENERY","TRILC","IHYAY","SAYAS","SISE","INDES","KLMSN","TKNSA","MTRKS","ECZYT","CELHA","ANGEN","CONSE","SANEL","HURGZ","IHGZT","ESCOM","OTKAR","CGCAM","YAPRK","HOROZ","SAHOL","UFUK","EYGYO","CEMTS","RAYSG","SNICA","USAK","GZNMI","SERNT","PLTUR","SOKM","ALKIM","BAYRK","MRGYO","DMRGD","YYLGD","NUHCM","ATSYH","GRSEL","SEGYO","MNDTR","COSMO","ENSRI","ERCB","ENKAI","FRIGO","MMCAS","ASELS","KRSTL","KNFRT","ARENA","MOGAN","BUCIM","Z30KE","IDGYO","PRDGS","DOHOL","ALCAR","EGGUB","DNISI","ZPLIB","KCAER","QTEMZ","SDTTR","YBTAS","BIENY","MAKTK","BURCE","ISBTR","DAPGM","BRYAT","KRDMA","MEGMT","TUREX","BYDNR","BVSAN","ATAGY","GOLTS","BIMAS","ETILR","AKSUE","ANSGR","BIZIM","MARBL","YAYLA","EFOR","EMNIS","HDFGS","SAFKR","DERHL","TATEN","TTKOM","SRVGY","MRSHL","CEMAS","NETCD","KGYO","ZOREN","VESBE","BLUME","IMASM","POLHO","ALTIN","SNGYO","FROTO","TRCAS","ORGE","ALFAS","SILVR","MEKAG","GSDHO","PATEK","HALKB","SARKY","ATLAS","ARTMS","TUKAS","AAGYO","IHLAS","KONYA","GIPTA","MCARD","PCILT","ATATR","RGYAS","TEKTU","SMART","EUYO","SMRVA","AKSA","ELITE","YKBNK","KIMMR","BMSTL","BOBET","AKENR","ULUSE","KZBGY","INTEM","BRLSM","CCOLA","OZGYO","BMSCH","DEVA","GSDDE","DESPC","DESA","ERSU","MAALT","DAGI","IZMDC","KTLEV","PETUN","OSTIM","RTALB","DZGYO","IHLGM","OPTLR","MOPAS","PGSUS","DGATE","NTHOL","ZGOLD","SOKE","EKDMR","SANFM","ATATP","MGROS","ECILC","KARSN","GLRYH","OYYAT","LIDFA","OZATD","THYAO","DERIM","ZSR25","DOKTA","HUBVC","VKFYO","EPLAS","GATEG","GSRAY","AKGRT","KLKIM","TRENJ","BORSK","ESEN","ISGSY","BLCYT"];
     const stocks = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : window.defaultStocksArray;
@@ -701,7 +701,7 @@ window.fetchGuncelFiyatlar = async () => {
         const trRes = await fetch('https://scanner.tradingview.com/global/scan', {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain' },
-            body: JSON.stringify({ symbols: { tickers: ['OANDA:XAUUSD', 'FX:USDTRY', 'FX:EURTRY'] }, columns: ['close'] })
+            boşdy: JSON.stringify({ symboşls: { tickers: ['OANDA:XAUUSD', 'FX:USDTRY', 'FX:EURTRY'] }, columns: ['close'] })
         });
         if (trRes.ok) {
             const trJson = await trRes.json();
@@ -725,7 +725,7 @@ window.fetchGuncelFiyatlar = async () => {
         const tvResponse = await fetch('https://scanner.tradingview.com/turkey/scan', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: JSON.stringify({
+            boşdy: JSON.stringify({
                 filter: [{"left":"type","operation":"in_range","right":["stock","dr","fund"]}],
                 markets: ["turkey"],
                 columns: ["name","close","change"],
@@ -754,15 +754,15 @@ window.fetchGuncelFiyatlar = async () => {
     }
 
     try {
-        const symbolsSet = new Set();
-        State.data.hisseFiyatlari.forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
-        State.data.ekstre.forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
+        const symboşlsSet = new Set();
+        State.data.hisseFiyatlari.forEach(h => { if (h.menkul) symboşlsSet.add(h.menkul.trim().toUpperCase()); });
+        State.data.ekstre.forEach(e => { if (e.menkul) symboşlsSet.add(e.menkul.trim().toUpperCase()); });
         const exclude = ['DOLAR', 'GRAM ALTIN', 'NAKIT', 'BIST'];
         
-        const symbolsToFetch = Array.from(symbolsSet).filter(m => !exclude.includes(m) && (!tvBasarili || !State.bistStocks.includes(m) || State.getFiyat(m) === 0));
+        const symboşlsToFetch = Array.from(symboşlsSet).filter(m => !exclude.includes(m) && (!tvBasarili || !State.bistStocks.includes(m) || State.getFiyat(m) === 0));
 
-        if (symbolsToFetch.length > 0) {
-            const fetchPromises = symbolsToFetch.map(async (menkul) => {
+        if (symboşlsToFetch.length > 0) {
+            const fetchPromises = symboşlsToFetch.map(async (menkul) => {
                 let yfSym = menkul;
                 if (menkul === "ALTINS1") yfSym = "ALTIN-S1";
                 const targetUrl = `https://query2.finance.yahoo.com/v8/finance/chart/${yfSym}.IS?interval=1d`;
@@ -795,14 +795,14 @@ window.fetchGuncelFiyatlar = async () => {
 
     // 2.5 Native TEFAS Fetcher (Electron Masaüstü Uygulaması İçin)
     try {
-        const symbolsSet = new Set();
-        State.data.hisseFiyatlari.forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
-        State.data.ekstre.forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
+        const symboşlsSet = new Set();
+        State.data.hisseFiyatlari.forEach(h => { if (h.menkul) symboşlsSet.add(h.menkul.trim().toUpperCase()); });
+        State.data.ekstre.forEach(e => { if (e.menkul) symboşlsSet.add(e.menkul.trim().toUpperCase()); });
         const exclude = ['DOLAR', 'GRAM ALTIN', 'NAKIT', 'BIST'];
-        const symbolsToFetch = Array.from(symbolsSet).filter(m => !exclude.includes(m) && State.getFiyat(m) === 0);
+        const symboşlsToFetch = Array.from(symboşlsSet).filter(m => !exclude.includes(m) && State.getFiyat(m) === 0);
 
-        if (symbolsToFetch.length > 0) {
-            const fetchPromises = symbolsToFetch.map(async (menkul) => {
+        if (symboşlsToFetch.length > 0) {
+            const fetchPromises = symboşlsToFetch.map(async (menkul) => {
                 if (menkul.length === 3 && !menkul.match(/[0-9]/)) {
                     try {
                         const tefasUrl = `https://www.tefas.gov.tr/tr/fon-detayli-analiz/${menkul}`;
@@ -826,13 +826,13 @@ window.fetchGuncelFiyatlar = async () => {
     const gasUrl = localStorage.getItem('exchangeApp_gasUrl');
     if (gasUrl) {
         try {
-            const symbolsSet = new Set();
-            State.data.hisseFiyatlari.forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
-            State.data.ekstre.forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
-            const symbolsToFetch = Array.from(symbolsSet).filter(m => m !== 'DOLAR' && m !== 'GRAM ALTIN' && m !== 'NAKIT' && !State.bistStocks.includes(m));
+            const symboşlsSet = new Set();
+            State.data.hisseFiyatlari.forEach(h => { if (h.menkul) symboşlsSet.add(h.menkul.trim().toUpperCase()); });
+            State.data.ekstre.forEach(e => { if (e.menkul) symboşlsSet.add(e.menkul.trim().toUpperCase()); });
+            const symboşlsToFetch = Array.from(symboşlsSet).filter(m => m !== 'DOLAR' && m !== 'GRAM ALTIN' && m !== 'NAKIT' && !State.bistStocks.includes(m));
             
-            if (symbolsToFetch.length > 0) {
-                const gasRes = await fetch(gasUrl + '?symbols=' + symbolsToFetch.join(','));
+            if (symboşlsToFetch.length > 0) {
+                const gasRes = await fetch(gasUrl + '?symboşls=' + symboşlsToFetch.join(','));
                 if (gasRes.ok) {
                     const gasData = await gasRes.json();
                     for (const sym in gasData) {
@@ -935,19 +935,19 @@ const renderPortfoy = (container) => {
             
             
 
-            <div id="portfoy-bilgiler" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
-                <div class="table-container glass" style="margin-bottom: 0;">
+            <div id="portfoy-bilgiler" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-boşttom: 0;">
+                <div class="table-container glass" style="margin-boşttom: 0;">
                     <div class="table-header">Portföy Bilgileri</div>
                 <div class="flex-row" style="align-items: center; gap: 1rem;">
-                    <table class="dash-table compact-table" style="flex: 1; border-right: 1px solid rgba(255, 255, 255, 0.03);">
-                        <tbody>
+                    <table class="dash-table compact-table" style="flex: 1; boşrder-right: 1px solid rgba(255, 255, 255, 0.03);">
+                        <tboşdy>
                             <tr>
     <td style="text-align:left;">Nakit</td>
     <td><div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
         <span id="nakit-text">${formatCurrency(guncelNakitTutar, 0)}</span>
         <button id="nakit-edit-btn" class="btn" style="padding:0.1rem 0.3rem; font-size:12px; background:var(--accent-color);" onclick="window.toggleNakitEdit()"><i class="fas fa-edit"></i></button>
         <form id="inline-nakit-form" style="display:none; margin:0; gap:0.2rem; align-items:center;" onsubmit="window.saveInlineNakit(event, ${guncelNakitTutar})">
-            <input type="number" step="0.01" id="inline-nakit-input" value="${guncelNakitTutar}" style="width: 80px; padding: 2px; font-size: 12px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--surface-border); border-radius:4px; text-align:right;">
+            <input type="number" step="0.01" id="inline-nakit-input" value="${guncelNakitTutar}" style="width: 80px; padding: 2px; font-size: 12px; background:rgba(0,0,0,0.3); color:#fff; boşrder:1px solid var(--surface-boşrder); boşrder-radius:4px; text-align:right;">
             <button type="submit" class="btn" style="padding:0.1rem 0.3rem; font-size:12px;"><i class="fas fa-check"></i></button>
             <button type="button" class="btn" style="padding:0.1rem 0.3rem; font-size:12px; background:rgba(255,255,255,0.1);" onclick="window.toggleNakitEdit()"><i class="fas fa-times"></i></button>
         </form>
@@ -958,10 +958,10 @@ const renderPortfoy = (container) => {
                             <tr><td style="text-align:left;">Toplam Portföy</td><td>${formatCurrency(portfoyBilgileri.toplamPortfoy, 0)}</td></tr>
                             <tr><td style="text-align:left;">Anapara</td><td>${formatCurrency(portfoyBilgileri.anapara, 0)}</td></tr>
                             <tr><td style="text-align:left;">Kar</td><td class="${portfoyBilgileri.kar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(portfoyBilgileri.kar, 0)}</td></tr>
-                        </tbody>
+                        </tboşdy>
                     </table>
                     <table class="dash-table compact-table" style="flex: 1;">
-                        <tbody>
+                        <tboşdy>
                             <tr><td style="text-align:left;">Nominal Getiri Oranı</td><td class="${portfoyBilgileri.nominalGetiri >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.nominalGetiri)}</td></tr>
                             <tr><td style="text-align:left;">Reel Getiri Oranı (Enflasyon)</td><td class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td></tr>
                             <tr><td style="text-align:left;">BIST 100'e Göre Reel Getiri Oranı</td><td class="${portfoyBilgileri.reelGetiriBist >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriBist)}</td></tr>
@@ -973,14 +973,14 @@ const renderPortfoy = (container) => {
         <span id="hedef-text">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span>
         <button id="hedef-edit-btn" class="btn" style="padding:0.1rem 0.3rem; font-size:12px; background:var(--accent-color);" onclick="window.toggleHedefEdit()"><i class="fas fa-edit"></i></button>
         <form id="inline-hedef-form" style="display:none; margin:0; gap:0.2rem; align-items:center; width:100%; justify-content:flex-end;" onsubmit="window.saveInlineHedef(event)">
-            <input type="number" step="1" id="inline-hedef-input" value="${portfoyBilgileri.hedefPortfoy}" style="width: 100px; padding: 2px; font-size: 12px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--surface-border); border-radius:4px; text-align:right;">
+            <input type="number" step="1" id="inline-hedef-input" value="${portfoyBilgileri.hedefPortfoy}" style="width: 100px; padding: 2px; font-size: 12px; background:rgba(0,0,0,0.3); color:#fff; boşrder:1px solid var(--surface-boşrder); boşrder-radius:4px; text-align:right;">
             <button type="submit" class="btn" style="padding:0.1rem 0.3rem; font-size:12px;"><i class="fas fa-check"></i></button>
             <button type="button" class="btn" style="padding:0.1rem 0.3rem; font-size:12px; background:rgba(255,255,255,0.1);" onclick="window.toggleHedefEdit()"><i class="fas fa-times"></i></button>
         </form>
     </div></td>
 </tr>
                             <tr><td style="text-align:left;">Hedefe Ulaşmak İçin Gereken Artış %</td><td>${formatPercent(portfoyBilgileri.hedefArtis, 0)}</td></tr>
-                        </tbody>
+                        </tboşdy>
                     </table>
                     <div style="width: 180px; height: 180px; display: flex; justify-content: center; align-items: center; padding-left: 1rem;">
                         <canvas id="chart-ozet"></canvas>
@@ -991,8 +991,8 @@ const renderPortfoy = (container) => {
             </div>
             </div>
 
-            <div id="portfoy-varliklar" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
-                <div class="table-container glass" style="margin-bottom: 0;">
+            <div id="portfoy-varliklar" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-boşttom: 0;">
+                <div class="table-container glass" style="margin-boşttom: 0;">
                     <div class="table-header">Varlıklarım</div>
                 <div class="flex-row" style="align-items: center; gap: 1rem;">
                     <div style="flex: 2.5; overflow-x: auto;">
@@ -1000,7 +1000,7 @@ const renderPortfoy = (container) => {
                             <thead>
                                 <tr><th>S.N.</th><th>Menkul</th><th>Tür</th><th>Güncel<br>Fiyat</th><th>Adet</th><th>Güncel<br>Maliyet</th><th>Net<br>Maliyet</th><th>Ödenen<br>Tutar</th><th>Güncel<br>Tutar</th><th>Kar/Zarar</th><th>Kar/Zarar%</th><th>Portföy<br>Oranı</th><th>İlk Alım<br>Tarihi</th><th>Geçen<br>Süre</th></tr>
                             </thead>
-                            <tbody>
+                            <tboşdy>
                                 ${portfoyHtml}
                                 <tr class="total-row">
                                     <td></td>
@@ -1011,7 +1011,7 @@ const renderPortfoy = (container) => {
                                     <td class="${totalKar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(totalKar, 0)}</td>
                                     <td colspan="4"></td>
                                 </tr>
-                            </tbody>
+                            </tboşdy>
                         </table>
                     </div>
                     <div style="width: 220px; height: 220px; display: flex; justify-content: center; align-items: center; padding-left: 1rem;">
@@ -1023,14 +1023,14 @@ const renderPortfoy = (container) => {
             </div>
             </div>
 
-            <div id="portfoy-arsiv" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
-                <div class="table-container glass" style="margin-bottom: 0;">
+            <div id="portfoy-arsiv" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-boşttom: 0;">
+                <div class="table-container glass" style="margin-boşttom: 0;">
                     <div class="table-header">Arşiv</div>
 <table class="dash-table compact-table" style="min-width: 1000px;">
                     <thead>
                         <tr><th>S.N.</th><th>Menkul</th><th>Adet</th><th>Alış Fiyatı</th><th>Satış Fiyatı</th><th>Kar / Zarar</th><th>Kar / Zarar %</th><th>İlk Alım Tarihi</th><th>Son Satım Tarihi</th><th>Taşıma Süresi</th></tr>
                     </thead>
-                    <tbody>
+                    <tboşdy>
                         ${arsivHtml}
                         <tr class="total-row">
                             <td></td>
@@ -1039,7 +1039,7 @@ const renderPortfoy = (container) => {
                             <td class="${arsivKarTotal >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(arsivKarTotal, 0)}</td>
                             <td colspan="4"></td>
                         </tr>
-                    </tbody>
+                    </tboşdy>
                 </table>
             </div>
             </div>
@@ -1111,7 +1111,7 @@ const renderPortfoy = (container) => {
                     datasets: [{
                         data: [guncelNakitTutar, hissePortfoyTutar, fonPortfoyTutar],
                         backgroundColor: ['#4caf50', '#2196f3', '#ff9800'],
-                        borderWidth: 0
+                        boşrderWidth: 0
                     }]
                 },
                 options: {
@@ -1119,12 +1119,12 @@ const renderPortfoy = (container) => {
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { 
-                            position: 'bottom', 
+                            position: 'boşttom', 
                             labels: { 
                                 color: '#fff',
                                 font: { size: 9 },
-                                boxWidth: 10,
-                                boxHeight: 10,
+                                boşxWidth: 10,
+                                boşxHeight: 10,
                                 padding: 15
                             } 
                         },
@@ -1156,7 +1156,7 @@ const renderPortfoy = (container) => {
                     datasets: [{
                         data: data,
                         backgroundColor: colors,
-                        borderWidth: 0
+                        boşrderWidth: 0
                     }]
                 },
                 options: {
@@ -1164,12 +1164,12 @@ const renderPortfoy = (container) => {
                     maintainAspectRatio: false,
                     plugins: { 
                         legend: { 
-                            position: 'bottom', 
+                            position: 'boşttom', 
                             labels: { 
                                 color: '#fff', 
                                 font: { size: 9 },
-                                boxWidth: 10,
-                                boxHeight: 10,
+                                boşxWidth: 10,
+                                boşxHeight: 10,
                                 padding: 10
                             } 
                         },
@@ -1216,11 +1216,11 @@ const renderHisseler = (container) => {
         const filePath = 'Hisse_Verileri/' + folderName + '/' + hisseAdi + '.' + extension;
         if (extension === 'docx' || extension === 'doc') {
             return `
-                <div class="glass" style="margin-top: 0; padding: 3rem; text-align: center; border-radius: var(--border-radius);">
-                    <div style="font-size: 3rem; margin-bottom: 1rem; color: #2b579a;">📄</div>
-                    <h3 style="color: var(--text-primary); margin-bottom: 1rem;">${hisseAdi} - Notlar</h3>
-                    <p style="color: var(--text-secondary); margin-bottom: 0;">Word dosyası bilgisayarınıza / uygulamanıza yönlendirildi.</p>
-                    <a href="${filePath}" target="_blank" style="display: inline-block; padding: 0.8rem 2rem; background: #2b579a; color: #fff; text-decoration: none; border-radius: var(--border-radius); font-weight: bold; transition: all 0.3s ease;">
+                <div class="glass" style="margin-top: 0; padding: 3rem; text-align: center; boşrder-radius: var(--boşrder-radius);">
+                    <div style="font-size: 3rem; margin-boşttom: 1rem; color: #2b579a;">📄</div>
+                    <h3 style="color: var(--text-primary); margin-boşttom: 1rem;">${hisseAdi} - Notlar</h3>
+                    <p style="color: var(--text-secondary); margin-boşttom: 0;">Word dosyası bilgisayarınıza / uygulamanıza yönlendirildi.</p>
+                    <a href="${filePath}" target="_blank" style="display: inline-block; padding: 0.8rem 2rem; background: #2b579a; color: #fff; text-decoration: none; boşrder-radius: var(--boşrder-radius); font-weight: bold; transition: all 0.3s ease;">
                         Eğer açılmadıysa buraya tıklayın
                     </a>
                     <iframe src="${filePath}" style="display:none;"></iframe>
@@ -1229,7 +1229,7 @@ const renderHisseler = (container) => {
         }
         return `
             <div style="margin-top: 0;">
-                <embed src="${filePath}" type="application/pdf" width="100%" height="800px" style="border-radius: var(--border-radius); border: 1px solid rgba(255,255,255,0.05);" />
+                <embed src="${filePath}" type="application/pdf" width="100%" height="800px" style="boşrder-radius: var(--boşrder-radius); boşrder: 1px solid rgba(255,255,255,0.05);" />
             </div>
         `;
     };
@@ -1278,7 +1278,7 @@ const renderHisseler = (container) => {
 
     const renderUI = () => {
         const tabIcons = {
-            'Özet Rapor': 'fas fa-chart-pie',
+            'ÖÖzet Rapor': 'fas fa-chart-pie',
             'Diğer Raporlar': 'fas fa-folder-open',
             'Değerleme': 'fas fa-gem',
             'Gelir Tablosu': 'fas fa-file-invoice-dollar',
@@ -1296,9 +1296,9 @@ const renderHisseler = (container) => {
                 </div>
             </div>`;
 
-        let tabsHtml = makeBtn('Özet Rapor') + 
+        let tabsHtml = makeBtn('ÖÖzet Rapor') + 
                        makeDropdown('Finansal Tablolar', ['Bilanço', 'Gelir Tablosu', 'Nakit Akım Tablosu']) +
-                       makeDropdown('Oran Analizi', ['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları']) +
+                       makeDropdown('Oran Analizi', ['Likidite Oranlarıı', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları']) +
                        makeBtn('Diğer Kalemler') +
                        makeDropdown('Raporlar', ['Finansal Rapor', 'Faaliyet Raporu', 'Yatırımcı Sunumu', 'Araştırma Raporu']) +
                        makeBtn('Değerleme') + makeBtn('Hisse Notları');
@@ -1310,15 +1310,15 @@ const renderHisseler = (container) => {
             if (!State.data.genelNotlar) State.data.genelNotlar = [];
             const colors = ['#f1c40f', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6', '#e67e22'];
             let notesHtml = State.data.genelNotlar.map(not => `
-                <div class="sticky-note" style="background-color: ${not.color || '#f1c40f'}; padding: 1rem; border-radius: 8px; color: #000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); position: relative; display: flex; flex-direction: column; min-height: 200px;">
+                <div class="sticky-note" style="background-color: ${not.color || '#f1c40f'}; padding: 1rem; boşrder-radius: 8px; color: #000; boşx-shadow: 0 4px 6px rgba(0,0,0,0.3); position: relative; display: flex; flex-direction: column; min-height: 200px;">
                     <textarea 
-                        style="flex: 1; background: transparent; border: none; color: #000; font-family: 'Comic Sans MS', 'Gochi Hand', sans-serif; font-size: 1.1rem; resize: none; outline: none;" 
+                        style="flex: 1; background: transparent; boşrder: none; color: #000; font-family: 'Comic Sans MS', 'Gochi Hand', sans-serif; font-size: 1.1rem; resize: none; outline: none;" 
                         oninput="window.updateGenelNot('${not.id}', this.value)"
                         placeholder="Notunuzu buraya yazın..."
                     >${not.text}</textarea>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 0.5rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 0.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 0.5rem; boşrder-top: 1px solid rgba(0,0,0,0.1); padding-top: 0.5rem;">
                         <div style="display:flex; gap: 4px;">
-                            ${colors.map(col => `<div onclick="window.changeGenelNotColor('${not.id}', '${col}')" style="width:15px; height:15px; border-radius:50%; background:${col}; cursor:pointer; border: 1px solid rgba(0,0,0,0.2);"></div>`).join('')}
+                            ${colors.map(col => `<div onclick="window.changeGenelNotColor('${not.id}', '${col}')" style="width:15px; height:15px; boşrder-radius:50%; background:${col}; cursor:pointer; boşrder: 1px solid rgba(0,0,0,0.2);"></div>`).join('')}
                         </div>
                         <i class="fas fa-trash" style="cursor:pointer; color: rgba(0,0,0,0.5);" onclick="window.deleteGenelNot('${not.id}')"></i>
                     </div>
@@ -1327,7 +1327,7 @@ const renderHisseler = (container) => {
 
             contentHtml = `
                 <div style="padding: 1rem; display: flex; flex-direction: column; height: 100%;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-boşttom: 0;">
                         <h2 style="color: var(--accent-color);"><i class="fas fa-sticky-note"></i> Genel Piyasa Notları</h2>
                         <button class="btn btn-primary" onclick="window.addGenelNot()" style="padding: 0.5rem 1rem; font-weight:bold; font-size: 1.1rem;"><i class="fas fa-plus"></i> Yeni Not Ekle</button>
                     </div>
@@ -1362,7 +1362,7 @@ const renderHisseler = (container) => {
                 sData.bilanco.rows.forEach(r => {
                     if (!r[0]) return;
                     const rName = r[0].toLocaleLowerCase('tr-TR');
-                    if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
+                    if (rName.includes('finansal boşrçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
                         const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
                         finansalBorclarTotal += val;
                     }
@@ -1450,10 +1450,10 @@ const renderHisseler = (container) => {
             const tGuncelDynamic = genTable('Güncel Metrikler', ['Metrik', 'Değer'], gRows);
             } catch(err) {
                 console.error(err);
-                contentHtml = '<div style="padding: 3rem; color: #fff; text-align: center; background: rgba(0,0,0,0.2); border-radius: 12px; margin: 1rem;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--danger-color); margin-bottom: 1rem;"></i><h3 style="margin-bottom: 0.5rem;">Veri Bulunamadı veya Hesaplanamadı</h3><p style="color: var(--text-secondary); margin-bottom: 1rem;">Bu hisseye ait bilanço/gelir tablosu verileri eksik veya hatalı olabilir.</p><p style="font-size: 11px; opacity: 0.5;">Hata: ' + err.message + '</p></div>';
+                contentHtml = '<div style="padding: 3rem; color: #fff; text-align: center; background: rgba(0,0,0,0.2); boşrder-radius: 12px; margin: 1rem;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--danger-color); margin-boşttom: 1rem;"></i><h3 style="margin-boşttom: 0.5rem;">Veri Bulunamadı veya Hesaplanamadı</h3><p style="color: var(--text-secondary); margin-boşttom: 1rem;">Bu hisseye ait bilanço/gelir tablosu verileri eksik veya hatalı olabilir.</p><p style="font-size: 11px; opacity: 0.5;">Hata: ' + err.message + '</p></div>';
             }
 
-            if (activeTab === hName || activeTab === 'Özet Rapor') {
+            if (activeTab === hName || activeTab === 'ÖÖzet Rapor') {
                 // FINTABLES STYLE SUMMARY DASHBOARD
                 
                 const fmtVal = (val) => {
@@ -1514,14 +1514,14 @@ const renderHisseler = (container) => {
 
                     gelirHtml = `<table class="dash-table compact-table">
                         <thead>
-                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <tr style="boşrder-boşttom: 1px solid rgba(255,255,255,0.1);">
                                 <th style="text-align:left;">Özet Gelir Tablosu</th>
                                 <th style="text-align:right;">${p1}</th>
                                 <th style="text-align:right;">${p2}</th>
                                 <th style="text-align:right;">%</th>
                             </tr>
                         </thead>
-                        <tbody>`;
+                        <tboşdy>`;
                     
                     gItems.forEach(item => {
                         const vals = getG(item.key);
@@ -1533,7 +1533,7 @@ const renderHisseler = (container) => {
                             <td style="color: ${pct.color}; font-weight:bold;">${pct.text}</td>
                         </tr>`;
                     });
-                    gelirHtml += `</tbody></table>`;
+                    gelirHtml += `</tboşdy></table>`;
 
                     // Bilanço Items
                     const b_headers = sData.bilanco.headers;
@@ -1549,19 +1549,19 @@ const renderHisseler = (container) => {
                     const bp2 = b_headers[bp2_idx];
 
                     const getB = (name) => {
-                        if (name === 'net borç' || name === 'net bor') {
-                            const fBorc = getB('finansal borçlar');
+                        if (name === 'net boşrç' || name === 'net boşr') {
+                            const fBorc = getB('finansal boşrçlar');
                             const nakit = getB('nakit ve nakit');
                             return { v1: fBorc.v1 - nakit.v1, v2: fBorc.v2 - nakit.v2 };
                         }
                         const searchName = name.toLocaleLowerCase('tr-TR');
-                        if (searchName.includes('finansal bor')) {
+                        if (searchName.includes('finansal boşr')) {
                             let v1 = 0, v2 = 0;
                             let addedRows = [];
                             sData.bilanco.rows.forEach((x, idx) => {
                                 if (x[0]) {
                                     const rName = x[0].toLocaleLowerCase('tr-TR');
-                                    if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && idx < sData.bilanco.rows.length - 2) {
+                                    if (rName.includes('finansal boşrçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && idx < sData.bilanco.rows.length - 2) {
                                         let val1 = parseTRNumber(x[1]);
                                         v1 += val1;
                                         v2 += parseTRNumber(x[bp2_idx]);
@@ -1579,21 +1579,21 @@ const renderHisseler = (container) => {
                         { label: 'Dönen Varlıklar', key: 'toplam dönen varlıklar' },
                         { label: 'Duran Varlıklar', key: 'toplam duran varlıklar' },
                         { label: 'Toplam Varlıklar', key: 'toplam varlıklar' },
-                        { label: 'Finansal Borçlar', key: 'finansal borçlar' },
-                        { label: 'Net Borç', key: 'net borç' },
+                        { label: 'Finansal Borçlar', key: 'finansal boşrçlar' },
+                        { label: 'Net Borç', key: 'net boşrç' },
                         { label: 'Özkaynaklar', key: 'ana ortaklığa ait özkaynaklar' }
                     ];
 
                     bilancoHtml = `<table class="dash-table compact-table">
                         <thead>
-                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <tr style="boşrder-boşttom: 1px solid rgba(255,255,255,0.1);">
                                 <th style="text-align:left;">Özet Bilanço</th>
                                 <th style="text-align:right;">${bp1}</th>
                                 <th style="text-align:right;">${bp2}</th>
                                 <th style="text-align:right;">%</th>
                             </tr>
                         </thead>
-                        <tbody>`;
+                        <tboşdy>`;
                     
                     bItems.forEach(item => {
                         const vals = getB(item.key);
@@ -1605,7 +1605,7 @@ const renderHisseler = (container) => {
                             <td style="color: ${pct.color}; font-weight:bold;">${pct.text}</td>
                         </tr>`;
                     });
-                    bilancoHtml += `</tbody></table>`;
+                    bilancoHtml += `</tboşdy></table>`;
 
                     // Chart Data
                     const limit = Math.min(5, headers.length - 1);
@@ -1699,7 +1699,7 @@ const renderHisseler = (container) => {
                                 // Karne Hesaplamaları
                 let karlilikPuan = 0;
                 let buyumePuan = 0;
-                let borclulukPuan = 0;
+                let boşrclulukPuan = 0;
                 
                 if (chartSatislar.length >= 2) {
                     const l = chartSatislar.length - 1;
@@ -1714,8 +1714,8 @@ const renderHisseler = (container) => {
                     if (chartNKM[l] > chartNKM[l-1]) karlilikPuan += 2;
                     
                     // Borçluluk (Cari Oran artmışsa iyi, Kaldıraç düşmüşse iyi)
-                    if (chartCari[l] > chartCari[l-1]) borclulukPuan += 3;
-                    if (chartKaldirac[l] < chartKaldirac[l-1]) borclulukPuan += 3;
+                    if (chartCari[l] > chartCari[l-1]) boşrclulukPuan += 3;
+                    if (chartKaldirac[l] < chartKaldirac[l-1]) boşrclulukPuan += 3;
                 }
                 
                 // Kaynak Dağılımı (pctOz, pctKisa, pctUzun)
@@ -1753,7 +1753,7 @@ const renderHisseler = (container) => {
 
                 contentHtml = `
                 <style>
-                .compact-table { table-layout: auto !important; width: 100%; border-collapse: collapse; }
+                .compact-table { table-layout: auto !important; width: 100%; boşrder-collapse: collapse; }
                 .compact-table th, .compact-table td { padding: 0.6rem 0.5rem !important; white-space: nowrap; }
                 .compact-table th { font-size: 0.85rem !important; font-weight: 600 !important; color: #ffffff !important; height: 39px; }
                 .compact-table td:first-child { font-size: 0.85rem !important; font-weight: 500 !important; color: #cccccc !important; }
@@ -1764,33 +1764,33 @@ const renderHisseler = (container) => {
                 .dash-title { font-size: 0.85rem !important; font-weight: 600 !important; color: #ffffff !important; }
                 .compact-card { padding: 1.2rem !important; }
                 .gauge-container { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 80px; height: 50px; }
-                .gauge-bg { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid rgba(255,255,255,0.1); border-bottom: none; box-sizing: border-box; }
-                .gauge-fill { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid #2ecc71; border-bottom: none; box-sizing: border-box; transform-origin: bottom center; transform: rotate(0deg); transition: transform 1s; }
-                .gauge-text { position: absolute; bottom: 0; font-size: 1.1rem; font-weight: 700; color: #fff; line-height: 1; }
+                .gauge-bg { position: absolute; width: 100%; height: 100%; boşrder-radius: 40px 40px 0 0; boşrder: 8px solid rgba(255,255,255,0.1); boşrder-boşttom: none; boşx-sizing: boşrder-boşx; }
+                .gauge-fill { position: absolute; width: 100%; height: 100%; boşrder-radius: 40px 40px 0 0; boşrder: 8px solid #2ecc71; boşrder-boşttom: none; boşx-sizing: boşrder-boşx; transform-origin: boşttom center; transform: rotate(0deg); transition: transform 1s; }
+                .gauge-text { position: absolute; boşttom: 0; font-size: 1.1rem; font-weight: 700; color: #fff; line-height: 1; }
                 .gauge-label { font-size: 0.7rem; color: #aaa; margin-top: 4px; text-align: center; }
                 </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
                     <!-- Row 1: Özet Gelir & Bilanço -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: stretch;">
-                        <div class="dash-card compact-card" style="margin-bottom:0;">
+                        <div class="dash-card compact-card" style="margin-boşttom:0;">
                             ${gelirHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadı</div>'}
                         </div>
-                        <div class="dash-card compact-card" style="margin-bottom:0;">
+                        <div class="dash-card compact-card" style="margin-boşttom:0;">
                             ${bilancoHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadı</div>'}
                         </div>
                     </div>
                     
                     <!-- Row 2: Çeyreklik Bar Grafikleri -->
                     <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; overflow: hidden;">
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-card" style="margin-boşttom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Çeyreklik Satışlar</div>
                             <div style="flex:1; min-height:180px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-satislar"></canvas></div>
                         </div>
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-card" style="margin-boşttom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Çeyreklik FAVÖK</div>
                             <div style="flex:1; min-height:180px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-favok"></canvas></div>
                         </div>
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-card" style="margin-boşttom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Çeyreklik Net Kar</div>
                             <div style="flex:1; min-height:180px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-netkar"></canvas></div>
                         </div>
@@ -1800,19 +1800,19 @@ const renderHisseler = (container) => {
                     <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch;">
                         
                         <!-- Çarpanlar -->
-                        <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;">Çarpanlar</div>
+                        <div class="dash-card compact-card" style="margin-boşttom:0; display:flex; flex-direction:column;">
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-boşttom: 1rem;">Çarpanlar</div>
                             <table class="dash-table compact-table" style="flex: 1;">
-                                <tbody>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <tboşdy>
+                                    <tr style="boşrder-boşttom: 1px solid rgba(255,255,255,0.05);">
                                         <td >F/K</td>
                                         <td style=" text-align: right;">${fmtDec(fk)}</td>
                                     </tr>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <tr style="boşrder-boşttom: 1px solid rgba(255,255,255,0.05);">
                                         <td >FD/FAVÖK</td>
                                         <td style=" text-align: right;">${fmtDec(fdFavok)}</td>
                                     </tr>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <tr style="boşrder-boşttom: 1px solid rgba(255,255,255,0.05);">
                                         <td >PD/DD</td>
                                         <td style=" text-align: right;">${fmtDec(pdDd)}</td>
                                     </tr>
@@ -1821,37 +1821,37 @@ const renderHisseler = (container) => {
                                         <td >Net Borç / FAVÖK</td>
                                         <td style=" text-align: right;">${fmtDec(netBorcFavok)}</td>
                                     </tr>
-                                </tbody>
+                                </tboşdy>
                             </table>
                         </div>
 
                         <!-- Kaynak Dağılımı -->
-                        <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 0.8rem;">Kaynak Dağılımı</div>
+                        <div class="dash-card compact-card" style="margin-boşttom:0; display:flex; flex-direction:column;">
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-boşttom: 0.8rem;">Kaynak Dağılımı</div>
                             <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-                                <div style="display:flex; height: 12px; border-radius: 6px; overflow:hidden; margin-bottom: 1.5rem;">
+                                <div style="display:flex; height: 12px; boşrder-radius: 6px; overflow:hidden; margin-boşttom: 1.5rem;">
                                     <div style="width:${pctOz}%; background:#6c5ce7;" title="Özkaynaklar: %${pctOz}"></div>
                                     <div style="width:${pctKisa}%; background:#fd79a8;" title="Kısa Vade Yükümlülükler: %${pctKisa}"></div>
                                     <div style="width:${pctUzun}%; background:#636e72;" title="Uzun Vade Yükümlülükler: %${pctUzun}"></div>
                                 </div>
                                 <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 1rem; font-size: 13px; color:#aaa;">
-                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#6c5ce7;"></div>Özkaynaklar: %${pctOz}</div>
-                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#fd79a8;"></div>Kısa Vade Yük.: %${pctKisa}</div>
-                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#636e72;"></div>Uzun Vade Yük.: %${pctUzun}</div>
+                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;boşrder-radius:50%;background:#6c5ce7;"></div>Özkaynaklar: %${pctOz}</div>
+                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;boşrder-radius:50%;background:#fd79a8;"></div>Kısa Vade Yük.: %${pctKisa}</div>
+                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;boşrder-radius:50%;background:#636e72;"></div>Uzun Vade Yük.: %${pctUzun}</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Şirket Detayları -->
-                        <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;">Şirket Detayları</div>
+                        <div class="dash-card compact-card" style="margin-boşttom:0; display:flex; flex-direction:column;">
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-boşttom: 1rem;">Şirket Detayları</div>
                             <table class="dash-table compact-table" style="flex: 1;">
-                                <tbody>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <tboşdy>
+                                    <tr style="boşrder-boşttom: 1px solid rgba(255,255,255,0.05);">
                                         <td >Hisse Başına Kar</td>
                                         <td style=" text-align: right;">${fmtDec(hbk)}</td>
                                     </tr>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <tr style="boşrder-boşttom: 1px solid rgba(255,255,255,0.05);">
                                         <td >Ödenmiş Sermaye</td>
                                         <td style=" text-align: right;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(odenmisSermaye)}</td>
                                     </tr>
@@ -1863,44 +1863,44 @@ const renderHisseler = (container) => {
                                         <td >Piyasa Değeri $</td>
                                         <td style=" text-align: right;">$${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeriUsd)}</td>
                                     </tr>
-                                </tbody>
+                                </tboşdy>
                             </table>
                         </div>
                     </div>
 
                     <!-- Row 4: Line Grafikler -->
                     <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem;">
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-card" style="margin-boşttom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Brüt Kar Marjı (Çeyreklik)</div>
                             <div style="flex: 1; min-height: 150px; position: relative;">
                                 <canvas id="chart-bkm"></canvas>
                             </div>
                         </div>
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-card" style="margin-boşttom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">FAVÖK Marjı (Çeyreklik)</div>
                             <div style="flex: 1; min-height: 150px; position: relative;">
                                 <canvas id="chart-fkm"></canvas>
                             </div>
                         </div>
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-card" style="margin-boşttom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Net Kar Marjı (Çeyreklik)</div>
                             <div style="flex: 1; min-height: 150px; position: relative;">
                                 <canvas id="chart-nkm"></canvas>
                             </div>
                         </div>
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-card" style="margin-boşttom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Cari Oran</div>
                             <div style="flex: 1; min-height: 150px; position: relative;">
                                 <canvas id="chart-cari"></canvas>
                             </div>
                         </div>
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-card" style="margin-boşttom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Kaldıraç Oranı</div>
                             <div style="flex: 1; min-height: 150px; position: relative;">
                                 <canvas id="chart-kaldirac"></canvas>
                             </div>
                         </div>
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-card" style="margin-boşttom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Özkaynak Karlılığı</div>
                             <div style="flex: 1; min-height: 150px; position: relative;">
                                 <canvas id="chart-roe"></canvas>
@@ -1910,8 +1910,8 @@ const renderHisseler = (container) => {
                 </div>
                 `;
                 
-                window.shouldRenderDashboardCharts = true;
-                window.dashboardChartData = {
+                window.shouldRenderDashboşardCharts = true;
+                window.dashboşardChartData = {
                     labels: chartLabels,
                     satislar: chartSatislar,
                     favok: chartFavok,
@@ -1956,11 +1956,11 @@ const renderHisseler = (container) => {
                 </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="dash-card" style="margin-bottom: 0;">
+                        <div class="dash-card" style="margin-boşttom: 0;">
                             <div class="dash-title">Çeyreklik Nakit Akışı</div>
                             <div style="position: relative; height: 250px;"><canvas id="chart-nakit-q"></canvas></div>
                         </div>
-                        <div class="dash-card" style="margin-bottom: 0;">
+                        <div class="dash-card" style="margin-boşttom: 0;">
                             <div class="dash-title">Yıllık Nakit Akışı</div>
                             <div style="position: relative; height: 250px;"><canvas id="chart-nakit-y"></canvas></div>
                         </div>
@@ -1968,13 +1968,13 @@ const renderHisseler = (container) => {
                     ${tNakitDynamic}
                 </div>
                 `;
-                window.shouldRenderDashboardCharts = true;
-            } else if (['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler'].includes(activeTab)) {
+                window.shouldRenderDashboşardCharts = true;
+            } else if (['Likidite Oranlarıı', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler'].includes(activeTab)) {
                 contentHtml = `<div style="display:flex; justify-content:center; align-items:center; height:200px; opacity:0.5; font-style:italic;">${activeTab} sayfası henüz yapım aşamasındadır.</div>`;
             } else if (['Finansal Rapor', 'Faaliyet Raporu', 'Yatırımcı Sunumu', 'Araştırma Raporu'].includes(activeTab)) {
                 contentHtml = `
                 <div style="display:flex; gap: 1rem; padding-top: 0; height: calc(100vh - 250px);">
-                    <div class="dash-card" style="flex:1; margin-bottom: 0; display:flex; flex-direction:column; padding:0; overflow:hidden;" id="rapor-viewer-container">
+                    <div class="dash-card" style="flex:1; margin-boşttom: 0; display:flex; flex-direction:column; padding:0; overflow:hidden;" id="rapor-viewer-container">
                         <div style="flex:1; display:flex; justify-content:center; align-items:center; opacity:0.5; font-style:italic;">Yükleniyor...</div>
                     </div>
                 </div>
@@ -1996,27 +1996,27 @@ const renderHisseler = (container) => {
                     const ytMatch = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
                     if (ytMatch && ytMatch[2].length === 11) {
                         const videoId = ytMatch[2];
-                        return `<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                        return `<div style="position: relative; padding-boşttom: 56.25%; height: 0; overflow: hidden; boşrder-radius: 8px; boşx-shadow: 0 4px 15px rgba(0,0,0,0.3);">
                                     <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
                                             src="https://www.youtube.com/embed/${videoId}" 
-                                            frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
+                                            frameboşrder="0" allow="accelerometer; autoplay; clipboşard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
                                     </iframe>
                                 </div>`;
                     }
                     const twMatch = url.match(/^https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/);
                     if (twMatch) {
-                        return `<div class="glass" style="padding: 1rem; border-radius: 8px; border-left: 4px solid #1DA1F2; display: flex; align-items: center; gap: 1rem;">
+                        return `<div class="glass" style="padding: 1rem; boşrder-radius: 8px; boşrder-left: 4px solid #1DA1F2; display: flex; align-items: center; gap: 1rem;">
                                     <i class="fab fa-twitter" style="color: #1DA1F2; font-size: 32px;"></i>
                                     <div>
-                                        <div style="font-weight: bold; margin-bottom: 0.3rem;">X (Twitter) Bağlantısı</div>
+                                        <div style="font-weight: bold; margin-boşttom: 0.3rem;">X (Twitter) Bağlantısı</div>
                                         <a href="${url}" target="_blank" style="color: var(--accent-color); text-decoration: none;">Gönderiyi Görüntüle <i class="fas fa-external-link-alt"></i></a>
                                     </div>
                                 </div>`;
                     }
-                    return `<div class="glass" style="padding: 1rem; border-radius: 8px; border-left: 4px solid var(--text-secondary); display: flex; align-items: center; gap: 1rem;">
+                    return `<div class="glass" style="padding: 1rem; boşrder-radius: 8px; boşrder-left: 4px solid var(--text-secondary); display: flex; align-items: center; gap: 1rem;">
                                 <i class="fas fa-link" style="color: var(--text-secondary); font-size: 32px;"></i>
                                 <div>
-                                    <div style="font-weight: bold; margin-bottom: 0.3rem;">Dış Bağlantı</div>
+                                    <div style="font-weight: bold; margin-boşttom: 0.3rem;">Dış Bağlantı</div>
                                     <a href="${url}" target="_blank" style="color: var(--accent-color); text-decoration: none;">Bağlantıya Git <i class="fas fa-external-link-alt"></i></a>
                                 </div>
                             </div>`;
@@ -2025,15 +2025,15 @@ const renderHisseler = (container) => {
                 let cardRows = analizler.map(a => {
                     const leftSideHtml = a.baglanti ? `<div style="flex: 1; min-width: 300px; max-width: 500px;">${getMediaEmbedHtml(a.baglanti)}</div>` : '';
                     return `
-                        <div class="glass" style="display: flex; gap: 2rem; padding: 1.5rem; border-radius: 12px; flex-wrap: wrap; margin-bottom: 1rem; border-left: 4px solid var(--accent-color);">
+                        <div class="glass" style="display: flex; gap: 2rem; padding: 1.5rem; boşrder-radius: 12px; flex-wrap: wrap; margin-boşttom: 1rem; boşrder-left: 4px solid var(--accent-color);">
                             ${leftSideHtml}
                             <div style="flex: 2; min-width: 300px; display: flex; flex-direction: column;">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.8rem; margin-bottom: 1rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; boşrder-boşttom: 1px solid rgba(255,255,255,0.1); padding-boşttom: 0.8rem; margin-boşttom: 1rem;">
                                     <div>
-                                        <div style="font-size: 1.1rem; color: var(--text-secondary); margin-top: 0.3rem;"><i class="fas fa-user" style="color: var(--accent-color);"></i> ${a.borsaci || 'Anonim'}</div>
+                                        <div style="font-size: 1.1rem; color: var(--text-secondary); margin-top: 0.3rem;"><i class="fas fa-user" style="color: var(--accent-color);"></i> ${a.boşrsaci || 'Anonim'}</div>
                                     </div>
                                     <div style="text-align: right;">
-                                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem;"><i class="fas fa-calendar-alt"></i> ${a.tarih ? a.tarih.split('-').reverse().join('.') : ''}</div>
+                                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-boşttom: 0.8rem;"><i class="fas fa-calendar-alt"></i> ${a.tarih ? a.tarih.split('-').reverse().join('.') : ''}</div>
                                         <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
                                             <button class="btn btn-icon" style="color: var(--warning-color); padding: 6px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
                                             <button class="btn btn-icon" style="color: var(--danger-color); padding: 6px !important; font-size: 14px;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash"></i></button>
@@ -2047,7 +2047,7 @@ const renderHisseler = (container) => {
                 }).join('');
                 
                 if (analizler.length === 0) {
-                    cardRows = `<div style="text-align: center; padding: 3rem; opacity: 0.5; font-size: 1.1rem;">Henüz eklenmiş bir analiz bulunmuyor.</div>`;
+                    cardRows = `<div style="text-align: center; padding: 3rem; opacity: 0.5; font-size: 1.1rem;">Henüz eklenmişş bir analiz bulunmuyor.</div>`;
                 }
 
                 const today = new Date().toISOString().split('T')[0];
@@ -2055,13 +2055,13 @@ const renderHisseler = (container) => {
                 contentHtml = `
                 <div style="display:flex; flex-direction:column; gap: 1rem; padding-top: 0; height: calc(100vh - 250px);">
                     
-                    <div style="display: flex; justify-content: flex-end; margin-bottom: 0.5rem;">
+                    <div style="display: flex; justify-content: flex-end; margin-boşttom: 0.5rem;">
                         <button class="btn" style="background: var(--success-color); font-weight: 600; padding: 0.5rem 1rem;" onclick="window.toggleInlineAnaliz()"><i class="fas fa-plus"></i> Yeni Not Ekle</button>
                     </div>
 
                     <!-- Yeni Not Ekleme Formu (Gizli) -->
-                    <div id="inline-analiz-row" class="glass" style="display: none; flex-direction: column; gap: 1rem; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--accent-color);">
-                        <div style="font-weight: bold; font-size: 1.1rem; color: #fff; margin-bottom: 0.5rem;">Analiz / Not Ekle</div>
+                    <div id="inline-analiz-row" class="glass" style="display: none; flex-direction: column; gap: 1rem; padding: 1.5rem; boşrder-radius: 8px; margin-boşttom: 1rem; boşrder: 1px solid var(--accent-color);">
+                        <div style="font-weight: bold; font-size: 1.1rem; color: #fff; margin-boşttom: 0.5rem;">Analiz / Not Ekle</div>
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                             <div style="flex: 1; min-width: 150px;">
                                 <label style="font-size: 0.8rem; color: var(--text-secondary);">Tarih</label>
@@ -2069,7 +2069,7 @@ const renderHisseler = (container) => {
                             </div>
                             <div style="flex: 1; min-width: 150px;">
                                 <label style="font-size: 0.8rem; color: var(--text-secondary);">Analist</label>
-                                <input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%;" placeholder="Analist Adı">
+                                <input type="text" id="analiz-boşrsaci" list="analiz-boşrsaci-list" class="form-control" style="width:100%;" placeholder="Analist Adı">
                             </div>
                             <!-- Gizli Hisse Inputu: Zaten secili hissedeyiz, ondan sabit kalacak -->
                             <input type="hidden" id="analiz-hisse" value="${selectedHisse}">
@@ -2105,7 +2105,7 @@ const renderHisseler = (container) => {
             const isPos = hDegisim >= 0;
             const hColor = isPos ? 'var(--success-color)' : 'var(--danger-color)';
             stockHeaderHtml = `
-            <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 1rem 1rem 0 1rem; flex-shrink: 0;">
+            <div id="hisse-header-boşrder" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; boşrder-radius: 12px; boşrder-left: 5px solid ${hColor}; margin: 1rem 1rem 0 1rem; flex-shrink: 0;">
                 <div>
                     <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; color: #fff;">${selectedHisse}</h1>
                 </div>
@@ -2122,12 +2122,12 @@ const renderHisseler = (container) => {
                         fetch('https://scanner.tradingview.com/turkey/scan', {
                             method: 'POST',
                             headers: { 'Content-Type': 'text/plain' },
-                            body: JSON.stringify({ symbols: { tickers: ['BIST:' + '${selectedHisse}'] }, columns: ['close', 'change'] })
+                            boşdy: JSON.stringify({ symboşls: { tickers: ['BIST:' + '${selectedHisse}'] }, columns: ['close', 'change'] })
                         }).then(res => res.json()).then(data => {
                             if (data && data.data && data.data.length > 0) {
                                 const change = data.data[0].d[1];
                                 const changeEl = document.getElementById('hisse-header-change');
-                                const borderEl = document.getElementById('hisse-header-border');
+                                const boşrderEl = document.getElementById('hisse-header-boşrder');
                                 if (changeEl) {
                                     const isPos = change >= 0;
                                     const color = isPos ? 'var(--success-color)' : 'var(--danger-color)';
@@ -2137,7 +2137,7 @@ const renderHisseler = (container) => {
                                     if (isPos && change > 0) changeStr = '+' + changeStr;
                                     else if (!isPos) changeStr = '-' + changeStr;
                                     changeEl.innerHTML = '<i class="fas fa-caret-' + (isPos ? 'up' : 'down') + '"></i> %' + changeStr;
-                                    if(borderEl) borderEl.style.borderLeftColor = color;
+                                    if(boşrderEl) boşrderEl.style.boşrderLeftColor = color;
                                 }
                             }
                         }).catch(e => {
@@ -2151,7 +2151,7 @@ const renderHisseler = (container) => {
 
         container.innerHTML = `
             ${stockHeaderHtml}
-            <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; align-items: center; background: rgba(0,0,0,0.1);">
+            <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; boşrder-boşttom: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; align-items: center; background: rgba(0,0,0,0.1);">
                 ${tabsHtml}
             </div>
             <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0 1rem; padding-top: 0.5rem; flex: 1; overflow-y: auto;">
@@ -2159,11 +2159,11 @@ const renderHisseler = (container) => {
             </div>
         `;
 
-if (window.shouldRenderDashboardCharts) {
-            window.shouldRenderDashboardCharts = false;
+if (window.shouldRenderDashboşardCharts) {
+            window.shouldRenderDashboşardCharts = false;
             setTimeout(() => {
-                if (!window.dashboardChartData) return;
-                const dData = window.dashboardChartData;
+                if (!window.dashboşardChartData) return;
+                const dData = window.dashboşardChartData;
                 if (!dData.labels || dData.labels.length === 0) return;
                 
                 const labels = dData.labels;
@@ -2176,7 +2176,7 @@ if (window.shouldRenderDashboardCharts) {
                     },
                     scales: { 
                         x: { ticks: { color: '#888', font: {size: 10} }, grid: { display:false } }, 
-                        y: { ticks: { display: false }, grid: { display: false }, border: {display: false} }
+                        y: { ticks: { display: false }, grid: { display: false }, boşrder: {display: false} }
                     }
                 };
 
@@ -2203,9 +2203,9 @@ if (window.shouldRenderDashboardCharts) {
                                           datasets: [{
                                               label: label,
                                               data: data,
-                                              borderColor: pinkColor,
+                                              boşrderColor: pinkColor,
                                               backgroundColor: 'rgba(214, 51, 108, 0.1)',
-                                              borderWidth: 2,
+                                              boşrderWidth: 2,
                                               pointBackgroundColor: pinkColor,
                                               pointRadius: 4,
                                               tension: 0
@@ -2233,7 +2233,7 @@ if (window.shouldRenderDashboardCharts) {
                             datasets: [{
                                 data: dData.satislar,
                                 backgroundColor: '#4da6ff',
-                                borderRadius: 4,
+                                boşrderRadius: 4,
                                 barPercentage: 0.6
                             }]
                         },
@@ -2251,7 +2251,7 @@ if (window.shouldRenderDashboardCharts) {
                             datasets: [{
                                 data: dData.favok,
                                 backgroundColor: '#4da6ff',
-                                borderRadius: 4,
+                                boşrderRadius: 4,
                                 barPercentage: 0.6
                             }]
                         },
@@ -2269,7 +2269,7 @@ if (window.shouldRenderDashboardCharts) {
                             datasets: [{
                                 data: dData.netkar,
                                 backgroundColor: '#4da6ff',
-                                borderRadius: 4,
+                                boşrderRadius: 4,
                                 barPercentage: 0.6
                             }]
                         },
@@ -2278,7 +2278,7 @@ if (window.shouldRenderDashboardCharts) {
                 }
                 
     // Clear the temporary data
-                window.dashboardChartData = null;
+                window.dashboşardChartData = null;
 
             }, 300);
         }
@@ -2396,7 +2396,7 @@ const renderHisseIslemleri = (container) => {
                     <thead>
                         <tr><th style="width: 5%;">S.N.</th><th style="width: 15%; text-align: right;">Tarih</th><th style="width: 8%; text-align: left;">Tür</th><th style="width: 12%; text-align: left;">Menkul</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%;">Tutar</th><th style="width: 18%;">İşlem</th></tr>
                     </thead>
-                    <tbody id="hisse-tbody">
+                    <tboşdy id="hisse-tboşdy">
                         <tr id="inline-hisse-row" style="display: none; background: rgba(0,0,0,0.4);">
                             <td>-</td>
                             <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}"></td>
@@ -2416,7 +2416,7 @@ const renderHisseIslemleri = (container) => {
                             </td>
                         </tr>
                         ${ekstreRows}
-                    </tbody>
+                    </tboşdy>
                 </table>
             </div>
         </div>
@@ -2560,7 +2560,7 @@ const renderNakitIslemleri = (container) => {
                     <thead>
                         <tr><th style="width: 5%;">S.N.</th><th style="width: 15%; text-align: right;">Tarih</th><th style="width: 15%;">Tutar</th><th style="width: 15%;">XU100</th><th style="width: 15%;">USDTRY</th><th style="width: 15%;">GRAMALTIN</th><th style="width: 20%;">İşlem</th></tr>
                     </thead>
-                    <tbody id="nakit-tbody">
+                    <tboşdy id="nakit-tboşdy">
                         <tr id="inline-nakit-row" style="display: none; background: rgba(0,0,0,0.4);">
                             <td>-</td>
                             <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}"></td>
@@ -2574,7 +2574,7 @@ const renderNakitIslemleri = (container) => {
                             </td>
                         </tr>
                         ${nakitRows}
-                    </tbody>
+                    </tboşdy>
                 </table>
             </div>
         </div>
@@ -2630,7 +2630,7 @@ const renderNakitIslemleri = (container) => {
 };
 
 const renderVeriler = (container) => {
-    // We will place Enflasyon Form, Hedef Portföy input, and Fon Fiyatlari input here.
+    // We will place Enflasyon Form, Hedef Portföy input, and Fon Fiyatlarıi input here.
     const hedefPortfoy = State.data.hedefPortfoyTL || 0;
     
     // Fon Set
@@ -2643,7 +2643,7 @@ const renderVeriler = (container) => {
     fonSet.forEach(fon => {
         const pFiyat = State.getFiyat(fon);
         fonHtml += `
-            <div style="display:flex; justify-content:space-between; align-items:center; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; background: rgba(255,255,255,0.02); padding: 0.5rem; boşrder-radius: 4px; margin-boşttom: 0.5rem;">
                 <span>${fon}</span>
                 <div style="display:flex; align-items:center; gap: 0.5rem;">
                     <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100px; text-align:right;">
@@ -2659,22 +2659,22 @@ const renderVeriler = (container) => {
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <!-- Nakit Düzenleme -->
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;">Mevcut Nakit Tutarı</h3>
+                    <h3 style="color: var(--accent-color); margin-boşttom: 0.5rem; font-size: 1rem;">Mevcut Nakit Tutarı</h3>
                     <div style="display:flex; gap: 0.5rem;">
                         <input type="number" step="0.01" id="v-nakit-input" value="${State.data.manuelNakitTutar || 0}" class="form-control" style="width:100%;">
                         <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.manuelNakitTutar = parseFloat(document.getElementById('v-nakit-input').value) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
                     </div>
                 </div>
-                <!-- Fon Fiyatları -->
+                <!-- Fon Fiyatlarıı -->
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;">Fon Fiyatları</h3>
+                    <h3 style="color: var(--accent-color); margin-boşttom: 0.5rem; font-size: 1rem;">Fon Fiyatlarıı</h3>
                     <div style="max-height: 150px; overflow-y: auto; padding-right: 0.5rem;">
                         ${fonHtml || '<p style="color:var(--text-secondary);">Portföyde fon bulunmuyor.</p>'}
                     </div>
                 </div>
                 <!-- Hedef Portföy -->
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;">Hedef Portföy</h3>
+                    <h3 style="color: var(--accent-color); margin-boşttom: 0.5rem; font-size: 1rem;">Hedef Portföy</h3>
                     <div style="display:flex; gap: 0.5rem;">
                         <input type="number" step="1" id="v-hedef-input" value="${hedefPortfoy}" class="form-control" style="width:100%;">
                         <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
@@ -2684,7 +2684,7 @@ const renderVeriler = (container) => {
 
             <!-- Rapor Yükle (Bulut) -->
             <div class="glass" style="padding: 8px 1rem; margin-top: 1rem;">
-                <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;"><i class="fas fa-cloud-upload-alt"></i> Buluta Rapor Yükle</h3>
+                <h3 style="color: var(--accent-color); margin-boşttom: 0.5rem; font-size: 1rem;"><i class="fas fa-cloud-upload-alt"></i> Buluta Rapor Yükle</h3>
                 <div style="display:flex; flex-direction:row; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
                     <input type="text" id="upload-hisse" placeholder="Hisse Kodu (Örn: THYAO)" class="form-control" style="flex: 1; min-width: 120px; text-transform: uppercase; padding: 0.3rem;">
                     <select id="upload-type" class="form-control" style="flex: 2; min-width: 150px; appearance: auto; padding: 0.3rem;">
@@ -2704,8 +2704,8 @@ const renderVeriler = (container) => {
 
             <!-- Enflasyon -->
             <div class="glass" style="padding: 8px 1rem; margin-top: 1rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="margin-bottom: 0.5rem; color: var(--accent-color);">Aylık Enflasyon Verileri</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-boşttom: 1rem;">
+                    <h3 style="margin-boşttom: 0.5rem; color: var(--accent-color);">Aylık Enflasyon Verileri</h3>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleEnfForm()">+</button>
                 </div>
                 
@@ -2719,7 +2719,7 @@ const renderVeriler = (container) => {
                                 <th style="text-align:center; width: 80px;">İşlem</th>
                             </tr>
                         </thead>
-                        <tbody id="enf-form-tbody">
+                        <tboşdy id="enf-form-tboşdy">
                             <tr id="enf-form-row" style="display:none; background: rgba(255,255,255,0.05);">
                                 <td style="text-align:center;">
                                     <input type="month" id="i-enf-tarih" class="form-control" style="padding:2px 5px; font-size:12px; height:auto; width:100%;" required>
@@ -2735,10 +2735,10 @@ const renderVeriler = (container) => {
                                     </div>
                                 </td>
                             </tr>
-                        </tbody>
-                        <tbody id="enf-data-tbody">
+                        </tboşdy>
+                        <tboşdy id="enf-data-tboşdy">
                             <!-- JS ile doldurulacak -->
-                        </tbody>
+                        </tboşdy>
                     </table>
                 </div>
             </div>
@@ -2758,7 +2758,7 @@ window.toggleInlineAnaliz = () => {
     if(row) {
         row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
         if (row.style.display === 'table-row') {
-            document.getElementById('analiz-borsaci').focus();
+            document.getElementById('analiz-boşrsaci').focus();
         }
     }
 };
@@ -2779,23 +2779,23 @@ window.sortAnalizler = (analizlerList) => {
 window.addAnaliz = () => {
     try {
         const tarihEl = document.getElementById('analiz-tarih');
-        const borsaciEl = document.getElementById('analiz-borsaci');
+        const boşrsaciEl = document.getElementById('analiz-boşrsaci');
         const hisseEl = document.getElementById('analiz-hisse');
         const baglantiEl = document.getElementById('analiz-baglanti');
         const notTextEl = document.getElementById('analiz-not');
         
-        if (!tarihEl || !borsaciEl || !hisseEl) {
-            alert('DOM elements not found! ' + (!tarihEl ? 'tarih ' : '') + (!borsaciEl ? 'borsaci ' : '') + (!hisseEl ? 'hisse' : ''));
+        if (!tarihEl || !boşrsaciEl || !hisseEl) {
+            alert('DOM elements not found! ' + (!tarihEl ? 'tarih ' : '') + (!boşrsaciEl ? 'boşrsaci ' : '') + (!hisseEl ? 'hisse' : ''));
             return;
         }
 
         const tarih = tarihEl.value;
-        const borsaci = borsaciEl.value.trim();
+        const boşrsaci = boşrsaciEl.value.trim();
         const hisse = hisseEl.value.trim().toUpperCase();
         const baglanti = baglantiEl ? baglantiEl.value.trim() : '';
         const notText = notTextEl ? notTextEl.value.trim() : '';
         
-        if (!tarih || !borsaci || !hisse) {
+        if (!tarih || !boşrsaci || !hisse) {
             alert('Lütfen Tarih, Analist ve Hisse alanlarını doldurun.');
             return;
         }
@@ -2804,7 +2804,7 @@ window.addAnaliz = () => {
         
         State.data.analizler.push({
             tarih,
-            borsaci,
+            boşrsaci,
             hisse,
             baglanti,
             notText,
@@ -2829,7 +2829,7 @@ window.addAnaliz = () => {
         
         // Reset the form so it is ready for the next one
         tarihEl.value = new Date().toISOString().split('T')[0];
-        borsaciEl.value = '';
+        boşrsaciEl.value = '';
         hisseEl.value = '';
         if (baglantiEl) baglantiEl.value = '';
         if (notTextEl) notTextEl.value = '';
@@ -2862,8 +2862,8 @@ window.editAnaliz = (id) => {
         
         const tEl = document.getElementById('analiz-tarih');
         if(tEl) tEl.value = analiz.tarih;
-        const bEl = document.getElementById('analiz-borsaci');
-        if(bEl) bEl.value = analiz.borsaci;
+        const bEl = document.getElementById('analiz-boşrsaci');
+        if(bEl) bEl.value = analiz.boşrsaci;
         const hEl = document.getElementById('analiz-hisse');
         if(hEl) hEl.value = analiz.hisse;
         const lEl = document.getElementById('analiz-baglanti');
@@ -2910,13 +2910,13 @@ window.setupCustomDropdown = (inputId, optionsList) => {
         list.style.overflowY = 'auto';
         list.style.flexDirection = 'column';
         list.style.padding = '0.5rem 0';
-        list.style.borderRadius = '12px';
-        list.style.boxShadow = '0 4px 15px rgba(0,0,0,0.8)';
+        list.style.boşrderRadius = '12px';
+        list.style.boşxShadow = '0 4px 15px rgba(0,0,0,0.8)';
         list.style.marginTop = '5px';
         // Give list a massive z-index
         list.style.zIndex = '99999';
         list.style.background = '#1e1e24';
-        list.style.border = '1px solid var(--surface-border)';
+        list.style.boşrder = '1px solid var(--surface-boşrder)';
         wrapper.appendChild(list);
     }
     
@@ -3004,15 +3004,15 @@ const renderAnalizler = (container) => {
     let analizler = State.data.analizler || [];
     analizler = window.sortAnalizler([...analizler]);
     
-    const uniqueBorsacilar = [...new Set(analizler.map(a => a.borsaci).filter(b => b))].sort();
-    const borsaciOptions = uniqueBorsacilar.map(b => `<option value="${b}">`).join('');
+    const uniqueBorsacilar = [...new Set(analizler.map(a => a.boşrsaci).filter(b => b))].sort();
+    const boşrsaciOptions = uniqueBorsacilar.map(b => `<option value="${b}">`).join('');
     
     let tableRows = analizler.map(a => {
         const linkHtml = a.baglanti ? `<a href="${a.baglanti}" target="_blank" style="color: var(--accent-color); text-decoration: none;"><i class="fas fa-external-link-alt"></i> Link</a>` : '-';
         return `
             <tr>
                 <td style="text-align: right; white-space: nowrap; width: 100px; color: var(--text-secondary);">${a.tarih ? a.tarih.split('-').reverse().join('.') : ''}</td>
-                <td style="text-align: left; white-space: nowrap; width: 140px; padding-left: 10px; color: var(--text-secondary);">${(a.borsaci||'').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu, '').trim()}</td>
+                <td style="text-align: left; white-space: nowrap; width: 140px; padding-left: 10px; color: var(--text-secondary);">${(a.boşrsaci||'').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu, '').trim()}</td>
                 <td style="text-align: left; font-weight: bold; white-space: nowrap; width: 100px; padding-left: 10px;">${a.hisse}</td>
                 <td style="text-align: left; white-space: nowrap; width: 100px; padding-left: 10px;">${linkHtml}</td>
                 <td style="text-align: left; word-break: break-word; width: 100%;">${a.notText || ''}</td>
@@ -3027,7 +3027,7 @@ const renderAnalizler = (container) => {
     }).join('');
     
     if (analizler.length === 0) {
-        tableRows += `<tr><td colspan="6" style="text-align: center; padding: 2rem; opacity: 0.5;">Henüz eklenmiş bir analiz bulunmuyor.</td></tr>`;
+        tableRows += `<tr><td colspan="6" style="text-align: center; padding: 2rem; opacity: 0.5;">Henüz eklenmişş bir analiz bulunmuyor.</td></tr>`;
     }
     
     const today = new Date().toISOString().split('T')[0];
@@ -3037,7 +3037,7 @@ const renderAnalizler = (container) => {
         <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; max-width: 1200px; margin: 0 auto; padding: 0 1rem; padding-top: 0.5rem; height: 100%;">
             
             <div class="table-container glass" style="flex: 1; overflow-y: auto;">
-                <div class="table-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.5rem; border-bottom: 1px solid var(--surface-border); margin-bottom: 0.5rem;">
+                <div class="table-header" style="display: flex; justify-content: space-between; align-items: center; padding-boşttom: 0.5rem; boşrder-boşttom: 1px solid var(--surface-boşrder); margin-boşttom: 0.5rem;">
                     <span>Takip Edilen Analizler</span>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleInlineAnaliz()">+</button>
                 </div>
@@ -3053,10 +3053,10 @@ const renderAnalizler = (container) => {
                                 <th style="text-align: center; color: white; width: 90px; white-space: nowrap;">İşlem</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tboşdy>
                             <tr id="inline-analiz-row" style="display: none; background: rgba(0,0,0,0.4);">
                                 <td><input type="date" id="analiz-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${today}"></td>
-                                <td><input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:left;" placeholder="Analist"></td>
+                                <td><input type="text" id="analiz-boşrsaci" list="analiz-boşrsaci-list" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:left;" placeholder="Analist"></td>
                                 <td><input type="text" id="analiz-hisse" list="bist-hisse-list" class="form-control" style="width:100%; font-size:12px; padding:4px; text-transform:uppercase; text-align:left;" placeholder="Hisse"></td>
                                 <td><input type="text" id="analiz-baglanti" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:left;" placeholder="Link"></td>
                                 <td><input type="text" id="analiz-not" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Not..."></td>
@@ -3068,16 +3068,16 @@ const renderAnalizler = (container) => {
                                 </td>
                             </tr>
                             ${tableRows}
-                        </tbody>
+                        </tboşdy>
                     </table>
                 </div>
             </div>
         </div>
     `;
     setTimeout(() => {
-        const uniqueBorsacilar = [...new Set((State.data.analizler || []).map(a => a.borsaci ? a.borsaci.trim() : '').filter(b => b))].sort();
+        const uniqueBorsacilar = [...new Set((State.data.analizler || []).map(a => a.boşrsaci ? a.boşrsaci.trim() : '').filter(b => b))].sort();
         const hisseler = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : window.defaultStocksArray || [];
-        window.setupCustomDropdown('analiz-borsaci', uniqueBorsacilar);
+        window.setupCustomDropdown('analiz-boşrsaci', uniqueBorsacilar);
         window.setupCustomDropdown('analiz-hisse', hisseler);
     }, 50);
 };
@@ -3086,30 +3086,30 @@ const renderAnalizler = (container) => {
 const renderAyarlar = (container) => {
     container.innerHTML = `
         <div class="page-section active">
-            <h2 style="margin-bottom:1rem;"><i class="fas fa-user-cog"></i> Hesap Ayarları</h2>
+            <h2 style="margin-boşttom:1rem;"><i class="fas fa-user-cog"></i> Hesap Ayarları</h2>
             <div class="glass" style="padding: 2rem; max-width: 500px; margin: 0 auto;">
                 <form id="profile-form" style="display: flex; flex-direction: column; gap: 1rem;">
                     <div>
-                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">E-posta (Değiştirilemez)</label>
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-boşttom: 0.3rem; display: block;">E-posta (Değiştirilemez)</label>
                         <input type="email" id="profile-email" class="form-control" disabled value="${currentUser.email}">
                     </div>
                     <div>
-                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">Adı Soyadı</label>
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-boşttom: 0.3rem; display: block;">Adı Soyadı</label>
                         <input type="text" id="profile-name" class="form-control" value="${currentUser.displayName || ''}" required>
                     </div>
                     <div>
-                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">Telefon No</label>
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-boşttom: 0.3rem; display: block;">Telefon No</label>
                         <input type="tel" id="profile-phone" class="form-control">
                     </div>
                     <button type="submit" class="btn" style="background: var(--accent-color); margin-top: 1rem;">Profili Kaydet</button>
                 </form>
 
-                <div style="height: 1px; background: var(--surface-border); margin: 2rem 0;"></div>
+                <div style="height: 1px; background: var(--surface-boşrder); margin: 2rem 0;"></div>
 
                 <form id="password-form" style="display: flex; flex-direction: column; gap: 1rem;">
-                    <h3 style="margin-bottom: 0.5rem; color: var(--text-primary); font-size: 1.1rem;">Parola Güncelleme</h3>
+                    <h3 style="margin-boşttom: 0.5rem; color: var(--text-primary); font-size: 1.1rem;">Parola Güncelleme</h3>
                     <div>
-                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">Yeni Parola</label>
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-boşttom: 0.3rem; display: block;">Yeni Parola</label>
                         <input type="password" id="profile-new-password" class="form-control" required minlength="6">
                     </div>
                     <button type="submit" class="btn btn-danger" style="margin-top: 0.5rem;">Parolayı Güncelle</button>
@@ -3185,7 +3185,7 @@ const renderHedef = (container) => {
 
     container.innerHTML = `
         <div class="page-section active">
-            <div class="table-container glass" style="margin-bottom: 0;">
+            <div class="table-container glass" style="margin-boşttom: 0;">
                 <div class="table-header">Hedef Fiyatlar</div>
                 <table class="dash-table compact-table" style="min-width: 1000px;">
                     <thead>
@@ -3201,9 +3201,9 @@ const renderHedef = (container) => {
                             <th>2028<br>Potansiyel</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tboşdy>
                         ${rowsHtml}
-                    </tbody>
+                    </tboşdy>
                 </table>
             </div>
             <p style="font-size:0.85rem; color:#aaa;"><i class="fas fa-info-circle"></i> Tablodaki değerler, Hisseler > Anasayfa > Değerleme panelinde girdiğiniz tahminlere göre otomatik hesaplanır ve buraya yansır.</p>
@@ -3298,7 +3298,7 @@ const renderAnasayfa = (container) => {
     });
 
     if (takipList.length === 0) {
-        rowsHtml = `<tr><td colspan="10" style="text-align: center; padding: 2rem;">Takip listeniz boş. Yukarıdan hisse ekleyebilirsiniz.</td></tr>`;
+        rowsHtml = `<tr><td colspan="10" style="text-align: center; padding: 2rem;">Takip listeniz boşş. Yukarıdan hisse ekleyebilirsiniz.</td></tr>`;
     }
 
     container.innerHTML = `
@@ -3308,7 +3308,8 @@ const renderAnasayfa = (container) => {
             <div class="glass" style="flex: 1; overflow-y: auto; padding: 1rem;">
                 <div class="table-header" style="font-size:1.2rem; display:flex; align-items:center; gap:0.5rem;"><i class="fas fa-list" style="color:var(--accent-color);"></i> Takip Listesi</div>
                 <div style="overflow-x: auto;">
-                    <table class="dash-table compact-table" style="text-align: center;">
+                    <style>#takip-table th, #takip-table td { padding: 4px 8px !important; }</style>
+                    <table class="dash-table compact-table" style="text-align: center;" id="takip-table">
                         <thead>
                             <tr>
                                 <th style="text-align: center;">S.N</th>
@@ -3323,9 +3324,9 @@ const renderAnasayfa = (container) => {
                                 <th style="text-align: center;">İşlem</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tboşdy>
                             ${rowsHtml}
-                        </tbody>
+                        </tboşdy>
                     </table>
                 </div>
             </div>
@@ -3372,9 +3373,9 @@ window.saveHisseNotu = (hisse, not) => {
     State.data.hisseNotlari[hisse] = not;
     
     // Save locally immediately
-    localStorage.setItem('borsa_app_data', JSON.stringify(State.data));
+    localStorage.setItem('boşrsa_app_data', JSON.stringify(State.data));
     
-    // Debounce the full save (Firebase sync)
+    // Deboşunce the full save (Firebase sync)
     clearTimeout(notSaveTimeout);
     notSaveTimeout = setTimeout(() => {
         State.save();
@@ -3455,7 +3456,7 @@ window.updateGlobalHisseDropdown = () => {
         let dropdownHtml = '';
         const sortedTakip = [...State.data.takipListesi].sort((a,b) => a.localeCompare(b));
         sortedTakip.forEach(h => {
-            dropdownHtml += `<div class="hisse-menu-item" style="padding: 0.3rem 0.8rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; color: #eee;" onclick="window.openHisseFromDropdown('${h}')">${h}</div>`;
+            dropdownHtml += `<div class="hisse-menu-item" style="padding: 0.3rem 0.8rem; cursor: pointer; boşrder-boşttom: 1px solid rgba(255,255,255,0.05); font-size: 13px; color: #eee;" onclick="window.openHisseFromDropdown('${h}')">${h}</div>`;
         });
         dropdownHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding: 0.3rem 0.8rem;">
             <div style="font-size: 1rem; font-weight:bold; cursor: pointer; color: var(--accent-color);" onclick="document.getElementById('hisse-modal').style.display='flex'; window.hideHisseDropdown(); document.getElementById('modal-hisse-input').focus();">+</div>
@@ -3541,7 +3542,7 @@ window.fetchTickerData = async () => {
             const trRes = await fetch('https://scanner.tradingview.com/global/scan', {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain' },
-                body: JSON.stringify({ symbols: { tickers: ['OANDA:XAUUSD', 'FX:USDTRY', 'FX_IDC:EURTRY'] }, columns: ['close', 'change'] })
+                boşdy: JSON.stringify({ symboşls: { tickers: ['OANDA:XAUUSD', 'FX:USDTRY', 'FX_IDC:EURTRY'] }, columns: ['close', 'change'] })
             });
             if (trRes.ok) {
                 const trJson = await trRes.json();
@@ -3590,7 +3591,7 @@ window.fetchTickerData = async () => {
                     const val = item.data.Selling || item.data.Buying || 0;
                     
                     return `<div style="display: flex; flex-direction: column; align-items: flex-start; min-width: 100px; flex: 1; justify-content: center;">
-                        <span style="color: var(--text-secondary); font-size: 13px; font-weight: 500; margin-bottom: 0.1rem; letter-spacing: 0.5px;">${item.label}</span>
+                        <span style="color: var(--text-secondary); font-size: 13px; font-weight: 500; margin-boşttom: 0.1rem; letter-spacing: 0.5px;">${item.label}</span>
                         <div style="font-size: 13px; font-weight: 400; color: var(--text-primary);">
                             ${val} ${changeHtml}
                         </div>
@@ -3602,14 +3603,14 @@ window.fetchTickerData = async () => {
         // İlk render (Truncgil verileri + Loading yazıları)
         renderTicker();
 
-        const fetchTV = async (market, symbol) => {
+        const fetchTV = async (market, symboşl) => {
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 2500);
+                const controller = new AboşrtController();
+                const timeoutId = setTimeout(() => controller.aboşrt(), 2500);
                 const r = await fetch(`https://scanner.tradingview.com/${market}/scan`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({ symbols: { tickers: [symbol] }, columns: ['close', 'change'] }),
+                    boşdy: JSON.stringify({ symboşls: { tickers: [symboşl] }, columns: ['close', 'change'] }),
                     signal: controller.signal
                 });
                 clearTimeout(timeoutId);
@@ -3641,8 +3642,8 @@ window.fetchTickerData = async () => {
 const initApp = () => {
     ensureDatalist();
 
-    const savedTheme = localStorage.getItem('borsa_theme') || 'dark';
-    document.body.setAttribute('data-theme', savedTheme);
+    const savedTheme = localStorage.getItem('boşrsa_theme') || 'dark';
+    document.boşdy.setAttribute('data-theme', savedTheme);
 
     const navButtons = document.querySelectorAll('.nav-btn[data-target]');
     navButtons.forEach(btn => {
@@ -3727,8 +3728,8 @@ auth.onAuthStateChanged(user => {
         if (unEl) unEl.innerText = displayName || 'Kullanıcı';
         
         window.setTheme = (newTheme) => {
-            document.body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('borsa_theme', newTheme);
+            document.boşdy.setAttribute('data-theme', newTheme);
+            localStorage.setItem('boşrsa_theme', newTheme);
         };
         initApp();
         State.init(renderPage);
@@ -3818,10 +3819,10 @@ window.showSidebarTakip = (btn) => {
     
     const takipList = (State.data.takipListesi || []).slice().sort((a,b) => a.localeCompare(b));
     if (takipList.length === 0) {
-        dropdown.innerHTML = '<div style="padding: 0.5rem; color: var(--text-secondary); font-size: 12px; white-space: nowrap; text-align: center;">Listeniz boş</div>';
+        dropdown.innerHTML = '<div style="padding: 0.5rem; color: var(--text-secondary); font-size: 12px; white-space: nowrap; text-align: center;">Listeniz boşş</div>';
     } else {
         dropdown.innerHTML = takipList.map(hisse => 
-            `<button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; font-size: 12px; padding: 0.5rem 1rem;" onclick="window.goToHisse('${hisse}'); if(window.hideSidebarTakip) window.hideSidebarTakip(true);">${hisse}</button>`
+            `<button class="nav-btn" style="text-align: left; width: 100%; boşrder-radius: 4px; font-size: 12px; padding: 0.5rem 1rem;" onclick="window.goToHisse('${hisse}'); if(window.hideSidebarTakip) window.hideSidebarTakip(true);">${hisse}</button>`
         ).join('');
     }
     
