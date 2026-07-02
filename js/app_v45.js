@@ -53698,7 +53698,7 @@ window.fetchTickerData = async () => {
 
 
 
-                        changeHtml = `<span style="font-size: 0.65rem; font-weight: 400; color: ${color}; margin-left: 0.3rem;">%${displayChange}</span>`;
+                        changeHtml = `<span style="font-size: 13px; font-weight: 400; color: ${color}; margin-left: 0.3rem;">%${displayChange}</span>`;
 
 
 
@@ -53770,7 +53770,7 @@ window.fetchTickerData = async () => {
 
 
 
-                        <span style="color: var(--text-secondary); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.1rem; letter-spacing: 0.5px;">${item.label}</span>
+                        <span style="color: var(--text-secondary); font-size: 13px; font-weight: 500; margin-bottom: 0.1rem; letter-spacing: 0.5px;">${item.label}</span>
 
 
 
@@ -53782,7 +53782,7 @@ window.fetchTickerData = async () => {
 
 
 
-                        <div style="font-size: 0.75rem; font-weight: 400; color: var(--text-primary);">
+                        <div style="font-size: 13px; font-weight: 400; color: var(--text-primary);">
 
 
 
