@@ -28224,7 +28224,7 @@ const renderHisseler = (container) => {
 
 
 
-                    <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; color: #fff;">${selectedHisse}</h1>
+                    <h1 style="margin: 0; font-size: 1.2rem; font-weight: 700; letter-spacing: 1px; color: #fff;">${selectedHisse}</h1>
 
 
 
@@ -28896,7 +28896,10 @@ if (window.shouldRenderDashboardCharts) {
 
 
 
-                                  new Chart(document.getElementById(id).getContext('2d'), {
+                                  let chartCanvas = document.getElementById(id);
+                                  let existingChart = Chart.getChart(chartCanvas);
+                                  if (existingChart) existingChart.destroy();
+                                  new Chart(chartCanvas.getContext('2d'), {
 
 
 
@@ -29244,6 +29247,7 @@ if (window.shouldRenderDashboardCharts) {
 
 
 
+                    let exS = Chart.getChart(ctxSatislar); if (exS) exS.destroy();
                     new Chart(ctxSatislar, {
 
 
@@ -29448,6 +29452,7 @@ if (window.shouldRenderDashboardCharts) {
 
 
 
+                    let exF = Chart.getChart(ctxFavok); if (exF) exF.destroy();
                     new Chart(ctxFavok, {
 
 
@@ -29652,6 +29657,7 @@ if (window.shouldRenderDashboardCharts) {
 
 
 
+                    let exN = Chart.getChart(ctxNetKar); if (exN) exN.destroy();
                     new Chart(ctxNetKar, {
 
 
