@@ -1,4 +1,4 @@
-
+﻿
 window.showThemeConfirm = (message, action) => {
     const msgEl = document.getElementById('theme-confirm-message');
     if (msgEl) msgEl.textContent = message;
@@ -524,7 +524,7 @@ window.loadRapor = (raporTipi, ext = 'pdf') => {
 
 
 
-                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Rapor sisteminizde veya tarayıcınızda açıldı. Eğer açılmadıysa aşağıdaki butonu kullanabilirsiniz.</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Rapor sisteminizde veya tarayÄ±cÄ±nÄ±zda aÃ§Ä±ldÄ±. EÄŸer aÃ§Ä±lmadÄ±ysa aÅŸaÄŸÄ±daki butonu kullanabilirsiniz.</p>
 
 
 
@@ -548,7 +548,7 @@ window.loadRapor = (raporTipi, ext = 'pdf') => {
 
 
 
-                        <i class="fas fa-external-link-alt" style="margin-right: 8px;"></i> Raporu Tekrar Aç
+                        <i class="fas fa-external-link-alt" style="margin-right: 8px;"></i> Raporu Tekrar AÃ§
 
 
 
@@ -620,7 +620,7 @@ console.log("REACHED ELSE BLOCK");
 
 
 
-            container.innerHTML = `<div style="flex:1; display:flex; justify-content:center; align-items:center; opacity:0.5; font-style:italic; font-size:1.2rem;">${hisse} ${raporTipi.toLowerCase()} bulunamadı.</div>`;
+            container.innerHTML = `<div style="flex:1; display:flex; justify-content:center; align-items:center; opacity:0.5; font-style:italic; font-size:1.2rem;">${hisse} ${raporTipi.toLowerCase()} bulunamadÄ±.</div>`;
 
 
 
@@ -656,7 +656,7 @@ console.log("REACHED ELSE BLOCK");
 
 
 
-        container.innerHTML = `<div style="flex:1; display:flex; justify-content:center; align-items:center; opacity:0.5; font-style:italic; font-size:1.2rem;">Sistem hatası: ${e.message}</div>`;
+        container.innerHTML = `<div style="flex:1; display:flex; justify-content:center; align-items:center; opacity:0.5; font-style:italic; font-size:1.2rem;">Sistem hatasÄ±: ${e.message}</div>`;
 
 
 
@@ -920,7 +920,7 @@ const genFintablesBilanco = (title, headers, rows) => {
 
 
 
-                        <th style="text-align:left; padding:16px; font-size:15px; font-weight:700;  white-space:nowrap;">Bilanço Kalemleri</th>`;
+                        <th style="text-align:left; padding:16px; font-size:15px; font-weight:700;  white-space:nowrap;">BilanÃ§o Kalemleri</th>`;
 
 
 
@@ -1052,7 +1052,7 @@ const genFintablesBilanco = (title, headers, rows) => {
 
 
 
-    const mainCategories = ['dönen varlıklar', 'duran varlıklar', 'toplam varlıklar', 'kısa vadeli yükümlülükler', 'uzun vadeli yükümlülükler', 'özkaynaklar', 'toplam kaynaklar'];
+    const mainCategories = ['dÃ¶nen varlÄ±klar', 'duran varlÄ±klar', 'toplam varlÄ±klar', 'kÄ±sa vadeli yÃ¼kÃ¼mlÃ¼lÃ¼kler', 'uzun vadeli yÃ¼kÃ¼mlÃ¼lÃ¼kler', 'Ã¶zkaynaklar', 'toplam kaynaklar'];
 
 
 
@@ -1592,7 +1592,7 @@ const guncelRows = [
 
 
 
-    ['Ödenmiş Sermaye', '150.000.000'],
+    ['Ã–denmiÅŸ Sermaye', '150.000.000'],
 
 
 
@@ -1604,7 +1604,7 @@ const guncelRows = [
 
 
 
-    ['Piyasa Değeri', '6.870.000.000'],
+    ['Piyasa DeÄŸeri', '6.870.000.000'],
 
 
 
@@ -1616,7 +1616,7 @@ const guncelRows = [
 
 
 
-    ['Piyasa Değeri $', '215.500.000'],
+    ['Piyasa DeÄŸeri $', '215.500.000'],
 
 
 
@@ -1628,7 +1628,7 @@ const guncelRows = [
 
 
 
-    ['FD/FAVÖK', '8.50'],
+    ['FD/FAVÃ–K', '8.50'],
 
 
 
@@ -1664,7 +1664,7 @@ const guncelRows = [
 
 
 
-    ['PD/Satışlar', '1.80'],
+    ['PD/SatÄ±ÅŸlar', '1.80'],
 
 
 
@@ -1676,7 +1676,7 @@ const guncelRows = [
 
 
 
-    ['Net Borç/FAVÖK', '0.45'],
+    ['Net BorÃ§/FAVÃ–K', '0.45'],
 
 
 
@@ -1712,7 +1712,7 @@ const guncelRows = [
 
 
 
-const tGuncel = genTable('Güncel', ['Metrik', 'Değer'], guncelRows);
+const tGuncel = genTable('GÃ¼ncel', ['Metrik', 'DeÄŸer'], guncelRows);
 
 
 
@@ -1748,7 +1748,7 @@ const degerlemeRows = [
 
 
 
-    ['Satış Gelirleri', '1.2M', '1.5M', '1.9M'],
+    ['SatÄ±ÅŸ Gelirleri', '1.2M', '1.5M', '1.9M'],
 
 
 
@@ -1760,7 +1760,7 @@ const degerlemeRows = [
 
 
 
-    ['Net Kar Marjı', '%15', '%16', '%18'],
+    ['Net Kar MarjÄ±', '%15', '%16', '%18'],
 
 
 
@@ -1772,7 +1772,7 @@ const degerlemeRows = [
 
 
 
-    ['FAVÖK', '250B', '320B', '450B'],
+    ['FAVÃ–K', '250B', '320B', '450B'],
 
 
 
@@ -1796,7 +1796,7 @@ const degerlemeRows = [
 
 
 
-    ['FD/FAVÖK', '7.2', '5.8', '4.1'],
+    ['FD/FAVÃ–K', '7.2', '5.8', '4.1'],
 
 
 
@@ -1868,7 +1868,7 @@ const degerlemeRows = [
 
 
 
-const tDegerleme = genTable('Değerleme', ['Kalem', '2026', '2027', '2028'], degerlemeRows);
+const tDegerleme = genTable('DeÄŸerleme', ['Kalem', '2026', '2027', '2028'], degerlemeRows);
 
 
 
@@ -1916,7 +1916,7 @@ const qRows = [
 
 
 
-    ['Satış Gelirleri', '450.000', '480.000', '520.000', '580.000'],
+    ['SatÄ±ÅŸ Gelirleri', '450.000', '480.000', '520.000', '580.000'],
 
 
 
@@ -1928,7 +1928,7 @@ const qRows = [
 
 
 
-    ['Brüt Kar', '120.000', '135.000', '150.000', '175.000'],
+    ['BrÃ¼t Kar', '120.000', '135.000', '150.000', '175.000'],
 
 
 
@@ -1940,7 +1940,7 @@ const qRows = [
 
 
 
-    ['Esas Faaliyet Karı', '90.000', '105.000', '118.000', '140.000'],
+    ['Esas Faaliyet KarÄ±', '90.000', '105.000', '118.000', '140.000'],
 
 
 
@@ -1952,7 +1952,7 @@ const qRows = [
 
 
 
-    ['FAVÖK', '95.000', '110.000', '125.000', '148.000'],
+    ['FAVÃ–K', '95.000', '110.000', '125.000', '148.000'],
 
 
 
@@ -1964,7 +1964,7 @@ const qRows = [
 
 
 
-    ['Net Dönem Karı', '65.000', '78.000', '88.000', '110.000']
+    ['Net DÃ¶nem KarÄ±', '65.000', '78.000', '88.000', '110.000']
 
 
 
@@ -1988,7 +1988,7 @@ const qRows = [
 
 
 
-const tGelirQ = genTable('Gelir Tablosu (Çeyreklik)', qHeaders, qRows);
+const tGelirQ = genTable('Gelir Tablosu (Ã‡eyreklik)', qHeaders, qRows);
 
 
 
@@ -2000,7 +2000,7 @@ const tGelirQ = genTable('Gelir Tablosu (Çeyreklik)', qHeaders, qRows);
 
 
 
-const tGelirY = genTable('Gelir Tablosu (Yıllıklandırılmış)', qHeaders, qRows.map(r => [r[0], r[1]+' (Y)', r[2]+' (Y)', r[3]+' (Y)', r[4]+' (Y)']));
+const tGelirY = genTable('Gelir Tablosu (YÄ±llÄ±klandÄ±rÄ±lmÄ±ÅŸ)', qHeaders, qRows.map(r => [r[0], r[1]+' (Y)', r[2]+' (Y)', r[3]+' (Y)', r[4]+' (Y)']));
 
 
 
@@ -2036,7 +2036,7 @@ const bRows = [
 
 
 
-    ['Dönen Varlıklar', '1.200.000', '1.350.000', '1.500.000', '1.750.000'],
+    ['DÃ¶nen VarlÄ±klar', '1.200.000', '1.350.000', '1.500.000', '1.750.000'],
 
 
 
@@ -2048,7 +2048,7 @@ const bRows = [
 
 
 
-    ['Duran Varlıklar', '800.000', '820.000', '850.000', '900.000'],
+    ['Duran VarlÄ±klar', '800.000', '820.000', '850.000', '900.000'],
 
 
 
@@ -2060,7 +2060,7 @@ const bRows = [
 
 
 
-    ['Toplam Varlıklar', '2.000.000', '2.170.000', '2.350.000', '2.650.000'],
+    ['Toplam VarlÄ±klar', '2.000.000', '2.170.000', '2.350.000', '2.650.000'],
 
 
 
@@ -2072,7 +2072,7 @@ const bRows = [
 
 
 
-    ['Kısa Vadeli Yük.', '500.000', '520.000', '550.000', '580.000'],
+    ['KÄ±sa Vadeli YÃ¼k.', '500.000', '520.000', '550.000', '580.000'],
 
 
 
@@ -2084,7 +2084,7 @@ const bRows = [
 
 
 
-    ['Uzun Vadeli Yük.', '300.000', '290.000', '280.000', '270.000'],
+    ['Uzun Vadeli YÃ¼k.', '300.000', '290.000', '280.000', '270.000'],
 
 
 
@@ -2096,7 +2096,7 @@ const bRows = [
 
 
 
-    ['Özkaynaklar', '1.200.000', '1.360.000', '1.520.000', '1.800.000']
+    ['Ã–zkaynaklar', '1.200.000', '1.360.000', '1.520.000', '1.800.000']
 
 
 
@@ -2120,7 +2120,7 @@ const bRows = [
 
 
 
-const tBilanco = genTable('Bilanço', qHeaders, bRows);
+const tBilanco = genTable('BilanÃ§o', qHeaders, bRows);
 
 
 
@@ -2156,7 +2156,7 @@ const chartsHtml = `
 
 
 
-<div class="dash-card"><div class="dash-title">Brüt Kar Marjı (%)</div><canvas id="chart-brut" height="150"></canvas></div>
+<div class="dash-card"><div class="dash-title">BrÃ¼t Kar MarjÄ± (%)</div><canvas id="chart-brut" height="150"></canvas></div>
 
 
 
@@ -2168,7 +2168,7 @@ const chartsHtml = `
 
 
 
-<div class="dash-card"><div class="dash-title">FAVÖK Marjı (%)</div><canvas id="chart-favok" height="150"></canvas></div>
+<div class="dash-card"><div class="dash-title">FAVÃ–K MarjÄ± (%)</div><canvas id="chart-favok" height="150"></canvas></div>
 
 
 
@@ -2180,7 +2180,7 @@ const chartsHtml = `
 
 
 
-<div class="dash-card"><div class="dash-title">Net Kar Marjı (%)</div><canvas id="chart-net" height="150"></canvas></div>
+<div class="dash-card"><div class="dash-title">Net Kar MarjÄ± (%)</div><canvas id="chart-net" height="150"></canvas></div>
 
 
 
@@ -2540,7 +2540,7 @@ const formatCurrency = (val, decimals = 2) => {
 
 
 
-    if (val === null || val === undefined || isNaN(val)) return decimals === 0 ? '₺0' : '₺0,00';
+    if (val === null || val === undefined || isNaN(val)) return decimals === 0 ? 'â‚º0' : 'â‚º0,00';
 
 
 
@@ -2588,7 +2588,7 @@ const formatCurrency = (val, decimals = 2) => {
 
 
 
-    return (isNegative ? '-' : '') + '₺' + numStr;
+    return (isNegative ? '-' : '') + 'â‚º' + numStr;
 
 
 
@@ -2720,7 +2720,7 @@ const formatShortDate = (dateStr) => {
 
 
 
-    const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+    const months = ['Oca', 'Åub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'AÄŸu', 'Eyl', 'Eki', 'Kas', 'Ara'];
 
 
 
@@ -2792,7 +2792,7 @@ const formatMediumDate = (dateStr) => {
 
 
 
-    const months = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+    const months = ['Oca', 'Åub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'AÄŸu', 'Eyl', 'Eki', 'Kas', 'Ara'];
 
 
 
@@ -3284,7 +3284,7 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
 
 
 
-        // Sıfırlanma Durumu (Döngü kapanışı - Nakit hariç)
+        // SÄ±fÄ±rlanma Durumu (DÃ¶ngÃ¼ kapanÄ±ÅŸÄ± - Nakit hariÃ§)
 
 
 
@@ -3716,7 +3716,7 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
 
 
 
-        // Aktif portföyde olanlar (0'dan büyükler) ve NAKİT
+        // Aktif portfÃ¶yde olanlar (0'dan bÃ¼yÃ¼kler) ve NAKÄ°T
 
 
 
@@ -4544,7 +4544,7 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
 
 
 
-    // --- Portföy Bilgileri Hesaplama ---
+    // --- PortfÃ¶y Bilgileri Hesaplama ---
 
 
 
@@ -4940,7 +4940,7 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
 
 
 
-            // Çıkış varsa oransal düşürme (Basitleştirilmiş)
+            // Ã‡Ä±kÄ±ÅŸ varsa oransal dÃ¼ÅŸÃ¼rme (BasitleÅŸtirilmiÅŸ)
 
 
 
@@ -5072,7 +5072,7 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
 
 
 
-    const guncelAltin = getFiyat('Gram Altın') || 1;
+    const guncelAltin = getFiyat('Gram AltÄ±n') || 1;
 
 
 
@@ -5768,7 +5768,7 @@ const State = {
 
 
 
-                        if (e.menkul === 'NAKİT' || e.menkul === 'NAKT' || e.menkul === 'NAKIT') {
+                        if (e.menkul === 'NAKÄ°T' || e.menkul === 'NAKT' || e.menkul === 'NAKIT') {
 
 
 
@@ -7460,7 +7460,7 @@ const State = {
 
 
 
-    // TAKİP LİSTESİ
+    // TAKÄ°P LÄ°STESÄ°
 
 
 
@@ -7652,7 +7652,7 @@ const State = {
 
 
 
-        if (islem.islemTip === 'SATIŞ') islemAdet = -Math.abs(islemAdet);
+        if (islem.islemTip === 'SATIÅ') islemAdet = -Math.abs(islemAdet);
 
 
 
@@ -7964,7 +7964,7 @@ const State = {
 
 
 
-            if (islem.islemTip === 'SATIŞ') islemAdet = -Math.abs(islemAdet);
+            if (islem.islemTip === 'SATIÅ') islemAdet = -Math.abs(islemAdet);
 
 
 
@@ -8840,7 +8840,7 @@ window.fetchGuncelFiyatlar = async () => {
 
 
 
-    // 1. Dolar ve Altın (TradingView)
+    // 1. Dolar ve AltÄ±n (TradingView)
 
 
 
@@ -9128,7 +9128,7 @@ window.fetchGuncelFiyatlar = async () => {
 
 
 
-        console.error('TradingView Dolar/Altın çekilemedi:', e);
+        console.error('TradingView Dolar/AltÄ±n Ã§ekilemedi:', e);
 
 
 
@@ -9440,7 +9440,7 @@ window.fetchGuncelFiyatlar = async () => {
 
 
 
-                if (menkul === "ALTIN") menkul = "ALTINS1"; // Darphane Altın Sertifikası Eşleştirmesi
+                if (menkul === "ALTIN") menkul = "ALTINS1"; // Darphane AltÄ±n SertifikasÄ± EÅŸleÅŸtirmesi
 
 
 
@@ -9536,7 +9536,7 @@ window.fetchGuncelFiyatlar = async () => {
 
 
 
-        console.warn('TradingView engellendi, Yahoo Finance v8 çoklu proxy üzerinden çekilecek...');
+        console.warn('TradingView engellendi, Yahoo Finance v8 Ã§oklu proxy Ã¼zerinden Ã§ekilecek...');
 
 
 
@@ -10016,7 +10016,7 @@ window.fetchGuncelFiyatlar = async () => {
 
 
 
-        console.error('Yahoo Finance yedek sistemi başarısız oldu.', e2);
+        console.error('Yahoo Finance yedek sistemi baÅŸarÄ±sÄ±z oldu.', e2);
 
 
 
@@ -10052,7 +10052,7 @@ window.fetchGuncelFiyatlar = async () => {
 
 
 
-    // 2.5 Native TEFAS Fetcher (Electron Masaüstü Uygulaması İçin)
+    // 2.5 Native TEFAS Fetcher (Electron MasaÃ¼stÃ¼ UygulamasÄ± Ä°Ã§in)
 
 
 
@@ -10400,7 +10400,7 @@ window.fetchGuncelFiyatlar = async () => {
 
 
 
-    // 3. TEFAS Fonları ve Özel Hisseler (Google Apps Script API)
+    // 3. TEFAS FonlarÄ± ve Ã–zel Hisseler (Google Apps Script API)
 
 
 
@@ -10652,7 +10652,7 @@ window.fetchGuncelFiyatlar = async () => {
 
 
 
-            console.error("GAS API hatası:", e);
+            console.error("GAS API hatasÄ±:", e);
 
 
 
@@ -11780,7 +11780,7 @@ const renderPortfoy = (container) => {
 
 
 
-                    <div class="table-header std-table-header">Portföy Bilgileri</div>
+                    <div class="table-header std-table-header">PortfÃ¶y Bilgileri</div>
 
 
 
@@ -11840,7 +11840,7 @@ const renderPortfoy = (container) => {
 
 
 
-                            <tr><td style="text-align:left;">Hisse Portföyü</td><td>${formatCurrency(hissePortfoyTutar, 0)}</td></tr>
+                            <tr><td style="text-align:left;">Hisse PortfÃ¶yÃ¼</td><td>${formatCurrency(hissePortfoyTutar, 0)}</td></tr>
 
 
 
@@ -11852,7 +11852,7 @@ const renderPortfoy = (container) => {
 
 
 
-                            <tr><td style="text-align:left;">Fon Portföyü</td><td>${formatCurrency(fonPortfoyTutar, 0)}</td></tr>
+                            <tr><td style="text-align:left;">Fon PortfÃ¶yÃ¼</td><td>${formatCurrency(fonPortfoyTutar, 0)}</td></tr>
 
 
 
@@ -11864,7 +11864,7 @@ const renderPortfoy = (container) => {
 
 
 
-                            <tr><td style="text-align:left;">Toplam Portföy</td><td>${formatCurrency(portfoyBilgileri.toplamPortfoy, 0)}</td></tr>
+                            <tr><td style="text-align:left;">Toplam PortfÃ¶y</td><td>${formatCurrency(portfoyBilgileri.toplamPortfoy, 0)}</td></tr>
 
 
 
@@ -11948,7 +11948,7 @@ const renderPortfoy = (container) => {
 
 
 
-                            <tr><td style="text-align:left;">Nominal Getiri Oranı</td><td class="${portfoyBilgileri.nominalGetiri >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.nominalGetiri)}</td></tr>
+                            <tr><td style="text-align:left;">Nominal Getiri OranÄ±</td><td class="${portfoyBilgileri.nominalGetiri >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.nominalGetiri)}</td></tr>
 
 
 
@@ -11960,7 +11960,7 @@ const renderPortfoy = (container) => {
 
 
 
-                            <tr><td style="text-align:left;">Reel Getiri Oranı (Enflasyon)</td><td class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td></tr>
+                            <tr><td style="text-align:left;">Reel Getiri OranÄ± (Enflasyon)</td><td class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td></tr>
 
 
 
@@ -11972,7 +11972,7 @@ const renderPortfoy = (container) => {
 
 
 
-                            <tr><td style="text-align:left;">BIST 100'e Göre Reel Getiri Oranı</td><td class="${portfoyBilgileri.reelGetiriBist >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriBist)}</td></tr>
+                            <tr><td style="text-align:left;">BIST 100'e GÃ¶re Reel Getiri OranÄ±</td><td class="${portfoyBilgileri.reelGetiriBist >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriBist)}</td></tr>
 
 
 
@@ -11984,7 +11984,7 @@ const renderPortfoy = (container) => {
 
 
 
-                            <tr><td style="text-align:left;">Dolar Kuruna Göre Reel Getiri Oranı</td><td class="${portfoyBilgileri.reelGetiriDolar >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriDolar)}</td></tr>
+                            <tr><td style="text-align:left;">Dolar Kuruna GÃ¶re Reel Getiri OranÄ±</td><td class="${portfoyBilgileri.reelGetiriDolar >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriDolar)}</td></tr>
 
 
 
@@ -11996,7 +11996,7 @@ const renderPortfoy = (container) => {
 
 
 
-                            <tr><td style="text-align:left;">Gram Altına Göre Reel Getiri Oranı</td><td class="${portfoyBilgileri.reelGetiriAltin >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriAltin)}</td></tr>
+                            <tr><td style="text-align:left;">Gram AltÄ±na GÃ¶re Reel Getiri OranÄ±</td><td class="${portfoyBilgileri.reelGetiriAltin >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriAltin)}</td></tr>
 
 
 
@@ -12008,7 +12008,7 @@ const renderPortfoy = (container) => {
 
 
 
-                            <tr><td style="text-align:left;">Hedef Portföy</td><td>${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</td></tr>
+                            <tr><td style="text-align:left;">Hedef PortfÃ¶y</td><td>${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</td></tr>
 
 
 
@@ -12020,7 +12020,7 @@ const renderPortfoy = (container) => {
 
 
 
-                            <tr><td style="text-align:left;">Hedefe Ulaşmak İçin Gereken Artış %</td><td>${formatPercent(portfoyBilgileri.hedefArtis, 0)}</td></tr>
+                            <tr><td style="text-align:left;">Hedefe UlaÅŸmak Ä°Ã§in Gereken ArtÄ±ÅŸ %</td><td>${formatPercent(portfoyBilgileri.hedefArtis, 0)}</td></tr>
 
 
 
@@ -12188,7 +12188,7 @@ const renderPortfoy = (container) => {
 
 
 
-                    <div class="table-header std-table-header">Varlıklarım</div>
+                    <div class="table-header std-table-header">VarlÄ±klarÄ±m</div>
 
 
 
@@ -12248,7 +12248,7 @@ const renderPortfoy = (container) => {
 
 
 
-                                <tr><th>S.N.</th><th>Menkul</th><th>Tür</th><th>Güncel<br>Fiyat</th><th>Adet</th><th>Güncel<br>Maliyet</th><th>Net<br>Maliyet</th><th>Ödenen<br>Tutar</th><th>Güncel<br>Tutar</th><th>Kar/Zarar</th><th>Kar/Zarar<br>%</th><th>Portföy<br>Oranı</th><th>İlk Alım<br>Tarihi</th><th>Geçen<br>Süre</th></tr>
+                                <tr><th>S.N.</th><th>Menkul</th><th>TÃ¼r</th><th>GÃ¼ncel<br>Fiyat</th><th>Adet</th><th>GÃ¼ncel<br>Maliyet</th><th>Net<br>Maliyet</th><th>Ã–denen<br>Tutar</th><th>GÃ¼ncel<br>Tutar</th><th>Kar/Zarar</th><th>Kar/Zarar<br>%</th><th>PortfÃ¶y<br>OranÄ±</th><th>Ä°lk AlÄ±m<br>Tarihi</th><th>GeÃ§en<br>SÃ¼re</th></tr>
 
 
 
@@ -12572,7 +12572,7 @@ const renderPortfoy = (container) => {
 
 
 
-                    <div class="table-header std-table-header">Arşiv</div>
+                    <div class="table-header std-table-header">ArÅŸiv</div>
 
 
 
@@ -12608,7 +12608,7 @@ const renderPortfoy = (container) => {
 
 
 
-                        <tr><th>S.N.</th><th>Menkul</th><th>Adet</th><th>Alış Fiyatı</th><th>Satış Fiyatı</th><th>Kar / Zarar</th><th>Kar / Zarar %</th><th>İlk Alım Tarihi</th><th>Son Satım Tarihi</th><th>Taşıma Süresi</th></tr>
+                        <tr><th>S.N.</th><th>Menkul</th><th>Adet</th><th>AlÄ±ÅŸ FiyatÄ±</th><th>SatÄ±ÅŸ FiyatÄ±</th><th>Kar / Zarar</th><th>Kar / Zarar %</th><th>Ä°lk AlÄ±m Tarihi</th><th>Son SatÄ±m Tarihi</th><th>TaÅŸÄ±ma SÃ¼resi</th></tr>
 
 
 
@@ -14816,7 +14816,7 @@ const renderHisseler = (container) => {
 
 
 
-    const validTabs = ['Özet Rapor', 'Gelir Tablosu', 'Bilanço', 'Nakit Akım Tablosu', 'Raporlar', 'Değerleme', 'Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler', 'Finansal Rapor', 'Faaliyet Raporu', 'Yatırımcı Sunumu', 'Araştırma Raporu', 'Özet Rapor Notları', 'Hisse Notları'];
+    const validTabs = ['Ã–zet Rapor', 'Gelir Tablosu', 'BilanÃ§o', 'Nakit AkÄ±m Tablosu', 'Raporlar', 'DeÄŸerleme', 'Likidite OranlarÄ±', 'KaldÄ±raÃ§ OranlarÄ±', 'Faaliyet Etkinlik OranlarÄ±', 'KarlÄ±lÄ±k OranlarÄ±', 'DiÄŸer Kalemler', 'Finansal Rapor', 'Faaliyet Raporu', 'YatÄ±rÄ±mcÄ± Sunumu', 'AraÅŸtÄ±rma Raporu', 'Ã–zet Rapor NotlarÄ±', 'Hisse NotlarÄ±'];
 
 
 
@@ -14828,7 +14828,7 @@ const renderHisseler = (container) => {
 
 
 
-    let activeTab = window.currentHisseTab || 'Özet Rapor';
+    let activeTab = window.currentHisseTab || 'Ã–zet Rapor';
 
 
 
@@ -14852,7 +14852,7 @@ const renderHisseler = (container) => {
 
 
 
-        activeTab = 'Özet Rapor';
+        activeTab = 'Ã–zet Rapor';
 
 
 
@@ -14960,7 +14960,7 @@ const renderHisseler = (container) => {
 
 
 
-                    <div style="font-size: 3rem; margin-bottom: 1rem; color: #2b579a;">📄</div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem; color: #2b579a;">ğŸ“„</div>
 
 
 
@@ -14984,7 +14984,7 @@ const renderHisseler = (container) => {
 
 
 
-                    <p style="color: var(--text-secondary); margin-bottom: 0;">Word dosyası bilgisayarınıza / uygulamanıza yönlendirildi.</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 0;">Word dosyasÄ± bilgisayarÄ±nÄ±za / uygulamanÄ±za yÃ¶nlendirildi.</p>
 
 
 
@@ -15008,7 +15008,7 @@ const renderHisseler = (container) => {
 
 
 
-                        Eğer açılmadıysa buraya tıklayın
+                        EÄŸer aÃ§Ä±lmadÄ±ysa buraya tÄ±klayÄ±n
 
 
 
@@ -15200,7 +15200,7 @@ const renderHisseler = (container) => {
 
 
 
-        const searchStr = rowName.toLowerCase().replace(/[öçşğıü]/g, '');
+        const searchStr = rowName.toLowerCase().replace(/[Ã¶Ã§ÅŸÄŸÄ±Ã¼]/g, '');
 
 
 
@@ -15236,7 +15236,7 @@ const renderHisseler = (container) => {
 
 
 
-            const t = r[0].toLowerCase().replace(/[öçşğıü]/g, '');
+            const t = r[0].toLowerCase().replace(/[Ã¶Ã§ÅŸÄŸÄ±Ã¼]/g, '');
 
 
 
@@ -15512,7 +15512,7 @@ const renderHisseler = (container) => {
 
 
 
-                let clean = val.replace(/%/g, '').replace(/\./g, '').replace(/,/g, '.').replace(/[$€]/g, '').trim();
+                let clean = val.replace(/%/g, '').replace(/\./g, '').replace(/,/g, '.').replace(/[$â‚¬]/g, '').trim();
 
 
 
@@ -15704,7 +15704,7 @@ const renderHisseler = (container) => {
 
 
 
-            'Özet Rapor': 'fas fa-chart-pie',
+            'Ã–zet Rapor': 'fas fa-chart-pie',
 
 
 
@@ -15716,7 +15716,7 @@ const renderHisseler = (container) => {
 
 
 
-            'Diğer Raporlar': 'fas fa-folder-open',
+            'DiÄŸer Raporlar': 'fas fa-folder-open',
 
 
 
@@ -15728,7 +15728,7 @@ const renderHisseler = (container) => {
 
 
 
-            'Değerleme': 'fas fa-gem',
+            'DeÄŸerleme': 'fas fa-gem',
 
 
 
@@ -15752,7 +15752,7 @@ const renderHisseler = (container) => {
 
 
 
-            'Nakit Akım Tablosu': 'fas fa-water',
+            'Nakit AkÄ±m Tablosu': 'fas fa-water',
 
 
 
@@ -15776,7 +15776,7 @@ const renderHisseler = (container) => {
 
 
 
-            'Bilanço': 'fas fa-balance-scale'
+            'BilanÃ§o': 'fas fa-balance-scale'
 
 
 
@@ -15908,7 +15908,7 @@ const renderHisseler = (container) => {
 
 
 
-        let tabsHtml = makeBtn('Özet Rapor') + 
+        let tabsHtml = makeBtn('Ã–zet Rapor') + 
 
 
 
@@ -15938,7 +15938,7 @@ const renderHisseler = (container) => {
 
 
 
-                       makeBtn('Değerleme') + makeBtn('Hisse Notları');
+                       makeBtn('DeÄŸerleme') + makeBtn('Hisse NotlarÄ±');
 
 
 
@@ -16118,7 +16118,7 @@ const renderHisseler = (container) => {
 
 
 
-                        placeholder="Notunuzu buraya yazın..."
+                        placeholder="Notunuzu buraya yazÄ±n..."
 
 
 
@@ -16286,7 +16286,7 @@ const renderHisseler = (container) => {
 
 
 
-                        <h2 style="color: var(--accent-color);"><i class="fas fa-sticky-note"></i> Genel Piyasa Notları</h2>
+                        <h2 style="color: var(--accent-color);"><i class="fas fa-sticky-note"></i> Genel Piyasa NotlarÄ±</h2>
 
 
 
@@ -16358,7 +16358,7 @@ const renderHisseler = (container) => {
 
 
 
-                    ${State.data.genelNotlar.length === 0 ? '<div style="text-align:center; opacity:0.5; margin-top:3rem;">Henüz hiç not eklemediniz. Sağ üstten yeni not ekleyebilirsiniz.</div>' : ''}
+                    ${State.data.genelNotlar.length === 0 ? '<div style="text-align:center; opacity:0.5; margin-top:3rem;">HenÃ¼z hiÃ§ not eklemediniz. SaÄŸ Ã¼stten yeni not ekleyebilirsiniz.</div>' : ''}
 
 
 
@@ -16466,7 +16466,7 @@ const renderHisseler = (container) => {
 
 
 
-                window.deleteGenelNot = (id) => { showThemeConfirm('Bu notu silmek istediğinize emin misiniz?', () => { State.data.genelNotlar = State.data.genelNotlar.filter(n => n.id !== id); State.save(); renderUI(); }); };
+                window.deleteGenelNot = (id) => { showThemeConfirm('Bu notu silmek istediÄŸinize emin misiniz?', () => { State.data.genelNotlar = State.data.genelNotlar.filter(n => n.id !== id); State.save(); renderUI(); }); };
 
 
 
@@ -16646,7 +16646,7 @@ const renderHisseler = (container) => {
 
 
 
-            odenmisSermaye = getVal(sData.bilanco, 'Ödenmiş Sermaye');
+            odenmisSermaye = getVal(sData.bilanco, 'Ã–denmiÅŸ Sermaye');
 
 
 
@@ -16754,7 +16754,7 @@ const renderHisseler = (container) => {
 
 
 
-                    if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
+                    if (rName.includes('finansal borÃ§lar') && !rName.includes('kÄ±sÄ±mlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
 
 
 
@@ -16802,7 +16802,7 @@ const renderHisseler = (container) => {
 
 
 
-                    if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
+                    if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit deÄŸerler')) {
 
 
 
@@ -16898,7 +16898,7 @@ const renderHisseler = (container) => {
 
 
 
-                        // Yıllıklandırılmış FAVÖK (TTM)
+                        // YÄ±llÄ±klandÄ±rÄ±lmÄ±ÅŸ FAVÃ–K (TTM)
 
 
 
@@ -16934,7 +16934,7 @@ const renderHisseler = (container) => {
 
 
 
-                const fR = sData.gelirYillik.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
+                const fR = sData.gelirYillik.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favÃ¶k'));
 
 
 
@@ -16994,7 +16994,7 @@ const renderHisseler = (container) => {
 
 
 
-            if (favok === 0) favok = getVal(sData.gelirYillik, 'FAVÖK');
+            if (favok === 0) favok = getVal(sData.gelirYillik, 'FAVÃ–K');
 
 
 
@@ -17054,7 +17054,7 @@ const renderHisseler = (container) => {
 
 
 
-            // Yıllıklandırılmış Net Kar (TTM)
+            // YÄ±llÄ±klandÄ±rÄ±lmÄ±ÅŸ Net Kar (TTM)
 
 
 
@@ -17090,7 +17090,7 @@ const renderHisseler = (container) => {
 
 
 
-                const nR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                const nR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklÄ±k paylarÄ±') || x[0].toLocaleLowerCase('tr-TR').includes('dÃ¶nem net kar')));
 
 
 
@@ -17150,7 +17150,7 @@ const renderHisseler = (container) => {
 
 
 
-            if (yilliklandirilmisNetKar === 0) yilliklandirilmisNetKar = getVal(sData.gelirYillik, 'Net Dönem Karı');
+            if (yilliklandirilmisNetKar === 0) yilliklandirilmisNetKar = getVal(sData.gelirYillik, 'Net DÃ¶nem KarÄ±');
 
 
 
@@ -17198,7 +17198,7 @@ const renderHisseler = (container) => {
 
 
 
-            // PD/DD Hesaplaması (Ana Ortaklığa Ait Özkaynaklar)
+            // PD/DD HesaplamasÄ± (Ana OrtaklÄ±ÄŸa Ait Ã–zkaynaklar)
 
 
 
@@ -17234,7 +17234,7 @@ const renderHisseler = (container) => {
 
 
 
-                const aoRow = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
+                const aoRow = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklÄ±ÄŸa ait Ã¶zkaynaklar'));
 
 
 
@@ -17294,7 +17294,7 @@ const renderHisseler = (container) => {
 
 
 
-            if (anaOrtaklikOzkaynaklar === 0) anaOrtaklikOzkaynaklar = getVal(sData.bilanco, 'Özkaynaklar');
+            if (anaOrtaklikOzkaynaklar === 0) anaOrtaklikOzkaynaklar = getVal(sData.bilanco, 'Ã–zkaynaklar');
 
 
 
@@ -17330,7 +17330,7 @@ const renderHisseler = (container) => {
 
 
 
-            const satislar = getVal(sData.gelirYillik, 'Satış Gelirleri');
+            const satislar = getVal(sData.gelirYillik, 'SatÄ±ÅŸ Gelirleri');
 
 
 
@@ -17390,7 +17390,7 @@ const renderHisseler = (container) => {
 
 
 
-                const nkRow = (sData.gelirYillik && sData.gelirYillik.rows) ? sData.gelirYillik.rows.find(r => r[0] === 'Net Dönem Karı') : null;
+                const nkRow = (sData.gelirYillik && sData.gelirYillik.rows) ? sData.gelirYillik.rows.find(r => r[0] === 'Net DÃ¶nem KarÄ±') : null;
 
 
 
@@ -17534,7 +17534,7 @@ const renderHisseler = (container) => {
 
 
 
-            const donenVarliklar = getVal(sData.bilanco, 'Dönen Varlıklar');
+            const donenVarliklar = getVal(sData.bilanco, 'DÃ¶nen VarlÄ±klar');
 
 
 
@@ -17546,7 +17546,7 @@ const renderHisseler = (container) => {
 
 
 
-            const kisaYukum = getVal(sData.bilanco, 'Kısa Vadeli Yükümlülükler');
+            const kisaYukum = getVal(sData.bilanco, 'KÄ±sa Vadeli YÃ¼kÃ¼mlÃ¼lÃ¼kler');
 
 
 
@@ -17630,7 +17630,7 @@ const renderHisseler = (container) => {
 
 
 
-                ['Ödenmiş Sermaye', fmtNum(odenmisSermaye)],
+                ['Ã–denmiÅŸ Sermaye', fmtNum(odenmisSermaye)],
 
 
 
@@ -17642,7 +17642,7 @@ const renderHisseler = (container) => {
 
 
 
-                ['Piyasa Değeri', fmtNum(piyasaDegeri)],
+                ['Piyasa DeÄŸeri', fmtNum(piyasaDegeri)],
 
 
 
@@ -17654,7 +17654,7 @@ const renderHisseler = (container) => {
 
 
 
-                ['Piyasa Değeri $', fmtNum(piyasaDegeriUsd) + ' $'],
+                ['Piyasa DeÄŸeri $', fmtNum(piyasaDegeriUsd) + ' $'],
 
 
 
@@ -17666,7 +17666,7 @@ const renderHisseler = (container) => {
 
 
 
-                ['Firma Değeri', fmtNum(firmaDegeri)],
+                ['Firma DeÄŸeri', fmtNum(firmaDegeri)],
 
 
 
@@ -17678,7 +17678,7 @@ const renderHisseler = (container) => {
 
 
 
-                ['FD/FAVÖK', fmtDec(fdFavok)],
+                ['FD/FAVÃ–K', fmtDec(fdFavok)],
 
 
 
@@ -17714,7 +17714,7 @@ const renderHisseler = (container) => {
 
 
 
-                ['PD/Satışlar', fmtDec(pdSatislar)],
+                ['PD/SatÄ±ÅŸlar', fmtDec(pdSatislar)],
 
 
 
@@ -17726,7 +17726,7 @@ const renderHisseler = (container) => {
 
 
 
-                ['Net Borç/FAVÖK', fmtDec(netBorcFavok)],
+                ['Net BorÃ§/FAVÃ–K', fmtDec(netBorcFavok)],
 
 
 
@@ -17762,7 +17762,7 @@ const renderHisseler = (container) => {
 
 
 
-            const tGuncelDynamic = genTable('Güncel Metrikler', ['Metrik', 'Değer'], gRows);
+            const tGuncelDynamic = genTable('GÃ¼ncel Metrikler', ['Metrik', 'DeÄŸer'], gRows);
 
 
 
@@ -17798,7 +17798,7 @@ const renderHisseler = (container) => {
 
 
 
-            if (activeTab === hName || activeTab === 'Özet Rapor') {
+            if (activeTab === hName || activeTab === 'Ã–zet Rapor') {
 
 
 
@@ -18410,7 +18410,7 @@ const renderHisseler = (container) => {
 
 
 
-                        { label: 'Satış Gelirleri', key: 'satış gelirleri' },
+                        { label: 'SatÄ±ÅŸ Gelirleri', key: 'satÄ±ÅŸ gelirleri' },
 
 
 
@@ -18422,7 +18422,7 @@ const renderHisseler = (container) => {
 
 
 
-                        { label: 'Brüt Kar', key: 'brüt kar' },
+                        { label: 'BrÃ¼t Kar', key: 'brÃ¼t kar' },
 
 
 
@@ -18434,7 +18434,7 @@ const renderHisseler = (container) => {
 
 
 
-                        { label: 'Esas Faaliyet Karı', key: 'faaliyet kar' },
+                        { label: 'Esas Faaliyet KarÄ±', key: 'faaliyet kar' },
 
 
 
@@ -18446,7 +18446,7 @@ const renderHisseler = (container) => {
 
 
 
-                        { label: 'FAVÖK', key: 'favök' },
+                        { label: 'FAVÃ–K', key: 'favÃ¶k' },
 
 
 
@@ -18458,7 +18458,7 @@ const renderHisseler = (container) => {
 
 
 
-                        { label: 'Net Parasal Pozisyon<br>Kazançları (Kayıpları)', key: 'net parasal pozisyon' },
+                        { label: 'Net Parasal Pozisyon<br>KazanÃ§larÄ± (KayÄ±plarÄ±)', key: 'net parasal pozisyon' },
 
 
 
@@ -18470,7 +18470,7 @@ const renderHisseler = (container) => {
 
 
 
-                        { label: 'Net Dönem Karı', key: 'ana ortaklık payları' }
+                        { label: 'Net DÃ¶nem KarÄ±', key: 'ana ortaklÄ±k paylarÄ±' }
 
 
 
@@ -18542,7 +18542,7 @@ const renderHisseler = (container) => {
 
 
 
-                                <th style="text-align:center;">Özet Gelir Tablosu</th>
+                                <th style="text-align:center;">Ã–zet Gelir Tablosu</th>
 
 
 
@@ -18782,7 +18782,7 @@ const renderHisseler = (container) => {
 
 
 
-                    // Bilanço Items
+                    // BilanÃ§o Items
 
 
 
@@ -18950,7 +18950,7 @@ const renderHisseler = (container) => {
 
 
 
-                        if (name === 'net borç' || name === 'net bor') {
+                        if (name === 'net borÃ§' || name === 'net bor') {
 
 
 
@@ -18962,7 +18962,7 @@ const renderHisseler = (container) => {
 
 
 
-                            const fBorc = getB('finansal borçlar');
+                            const fBorc = getB('finansal borÃ§lar');
 
 
 
@@ -19094,7 +19094,7 @@ const renderHisseler = (container) => {
 
 
 
-                                    if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && idx < sData.bilanco.rows.length - 2) {
+                                    if (rName.includes('finansal borÃ§lar') && !rName.includes('kÄ±sÄ±mlar') && !rName.includes('ksmlar') && idx < sData.bilanco.rows.length - 2) {
 
 
 
@@ -19142,7 +19142,7 @@ const renderHisseler = (container) => {
 
 
 
-                                        addedRows.push(idx + 1 + '. satır: ' + x[0].trim() + ' (' + val1 + ')');
+                                        addedRows.push(idx + 1 + '. satÄ±r: ' + x[0].trim() + ' (' + val1 + ')');
 
 
 
@@ -19274,7 +19274,7 @@ const renderHisseler = (container) => {
 
 
 
-                        { label: 'Dönen Varlıklar', key: 'toplam dönen varlıklar' },
+                        { label: 'DÃ¶nen VarlÄ±klar', key: 'toplam dÃ¶nen varlÄ±klar' },
 
 
 
@@ -19286,7 +19286,7 @@ const renderHisseler = (container) => {
 
 
 
-                        { label: 'Duran Varlıklar', key: 'toplam duran varlıklar' },
+                        { label: 'Duran VarlÄ±klar', key: 'toplam duran varlÄ±klar' },
 
 
 
@@ -19298,7 +19298,7 @@ const renderHisseler = (container) => {
 
 
 
-                        { label: 'Toplam Varlıklar', key: 'toplam varlıklar' },
+                        { label: 'Toplam VarlÄ±klar', key: 'toplam varlÄ±klar' },
 
 
 
@@ -19310,7 +19310,7 @@ const renderHisseler = (container) => {
 
 
 
-                        { label: 'Finansal Borçlar', key: 'finansal borçlar' },
+                        { label: 'Finansal BorÃ§lar', key: 'finansal borÃ§lar' },
 
 
 
@@ -19322,7 +19322,7 @@ const renderHisseler = (container) => {
 
 
 
-                        { label: 'Net Borç', key: 'net borç' },
+                        { label: 'Net BorÃ§', key: 'net borÃ§' },
 
 
 
@@ -19334,7 +19334,7 @@ const renderHisseler = (container) => {
 
 
 
-                        { label: 'Özkaynaklar', key: 'ana ortaklığa ait özkaynaklar' }
+                        { label: 'Ã–zkaynaklar', key: 'ana ortaklÄ±ÄŸa ait Ã¶zkaynaklar' }
 
 
 
@@ -19406,7 +19406,7 @@ const renderHisseler = (container) => {
 
 
 
-                                <th style="text-align:center;">Özet Bilanço</th>
+                                <th style="text-align:center;">Ã–zet BilanÃ§o</th>
 
 
 
@@ -19862,7 +19862,7 @@ const renderHisseler = (container) => {
 
 
 
-                    const brutR = sData.gelirDonemsel.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('brüt kar'));
+                    const brutR = sData.gelirDonemsel.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('brÃ¼t kar'));
 
 
 
@@ -19874,7 +19874,7 @@ const renderHisseler = (container) => {
 
 
 
-                    const donenR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam dönen varlıklar'));
+                    const donenR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam dÃ¶nen varlÄ±klar'));
 
 
 
@@ -19886,7 +19886,7 @@ const renderHisseler = (container) => {
 
 
 
-                    const kisaR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam kısa vadeli'));
+                    const kisaR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam kÄ±sa vadeli'));
 
 
 
@@ -19910,7 +19910,7 @@ const renderHisseler = (container) => {
 
 
 
-                    const toplamVR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam varlıklar'));
+                    const toplamVR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam varlÄ±klar'));
 
 
 
@@ -19922,7 +19922,7 @@ const renderHisseler = (container) => {
 
 
 
-                    const ozR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
+                    const ozR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklÄ±ÄŸa ait Ã¶zkaynaklar'));
 
 
 
@@ -19970,7 +19970,7 @@ const renderHisseler = (container) => {
 
 
 
-                        chartSatislar.push(getG('satış gelirleri').v2); // actually we need the values for each period
+                        chartSatislar.push(getG('satÄ±ÅŸ gelirleri').v2); // actually we need the values for each period
 
 
 
@@ -20054,7 +20054,7 @@ const renderHisseler = (container) => {
 
 
 
-                        const sR = sData.gelirDonemsel.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
+                        const sR = sData.gelirDonemsel.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('satÄ±ÅŸ gelirleri'));
 
 
 
@@ -20066,7 +20066,7 @@ const renderHisseler = (container) => {
 
 
 
-                                                const fR = sData.gelirDonemsel.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
+                                                const fR = sData.gelirDonemsel.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favÃ¶k'));
 
 
 
@@ -20078,7 +20078,7 @@ const renderHisseler = (container) => {
 
 
 
-                        const nR = sData.gelirDonemsel.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                        const nR = sData.gelirDonemsel.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklÄ±k paylarÄ±') || x[0].toLocaleLowerCase('tr-TR').includes('dÃ¶nem net kar')));
 
 
 
@@ -20366,7 +20366,7 @@ const renderHisseler = (container) => {
 
 
 
-                                                    // Özkaynak Karlılığı (ROE) Hesaplaması
+                                                    // Ã–zkaynak KarlÄ±lÄ±ÄŸÄ± (ROE) HesaplamasÄ±
 
 
 
@@ -20402,7 +20402,7 @@ const renderHisseler = (container) => {
 
 
 
-                              const yNkR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                              const yNkR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklÄ±k paylarÄ±') || x[0].toLocaleLowerCase('tr-TR').includes('dÃ¶nem net kar')));
 
 
 
@@ -20714,7 +20714,7 @@ const renderHisseler = (container) => {
 
 
 
-                                // Karne Hesaplamaları
+                                // Karne HesaplamalarÄ±
 
 
 
@@ -20798,7 +20798,7 @@ const renderHisseler = (container) => {
 
 
 
-                    // Büyüme (Satışlar, FAVÖK, Net Kar)
+                    // BÃ¼yÃ¼me (SatÄ±ÅŸlar, FAVÃ–K, Net Kar)
 
 
 
@@ -20858,7 +20858,7 @@ const renderHisseler = (container) => {
 
 
 
-                    // Karlılık (BKM, FKM, NKM)
+                    // KarlÄ±lÄ±k (BKM, FKM, NKM)
 
 
 
@@ -20918,7 +20918,7 @@ const renderHisseler = (container) => {
 
 
 
-                    // Borçluluk (Cari Oran artmışsa iyi, Kaldıraç düşmüşse iyi)
+                    // BorÃ§luluk (Cari Oran artmÄ±ÅŸsa iyi, KaldÄ±raÃ§ dÃ¼ÅŸmÃ¼ÅŸse iyi)
 
 
 
@@ -20978,7 +20978,7 @@ const renderHisseler = (container) => {
 
 
 
-                // Kaynak Dağılımı (pctOz, pctKisa, pctUzun)
+                // Kaynak DaÄŸÄ±lÄ±mÄ± (pctOz, pctKisa, pctUzun)
 
 
 
@@ -20990,7 +20990,7 @@ const renderHisseler = (container) => {
 
 
 
-                const vOzCurrent = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
+                const vOzCurrent = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklÄ±ÄŸa ait Ã¶zkaynaklar'));
 
 
 
@@ -21002,7 +21002,7 @@ const renderHisseler = (container) => {
 
 
 
-                const vKisaCurrent = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam kısa vadeli'));
+                const vKisaCurrent = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam kÄ±sa vadeli'));
 
 
 
@@ -21266,7 +21266,7 @@ const renderHisseler = (container) => {
 
 
 
-                // Hisse Başına Kar (HBK)
+                // Hisse BaÅŸÄ±na Kar (HBK)
 
 
 
@@ -21602,7 +21602,7 @@ const renderHisseler = (container) => {
 
 
 
-                    <!-- Row 1: Özet Gelir & Bilanço -->
+                    <!-- Row 1: Ã–zet Gelir & BilanÃ§o -->
 
 
 
@@ -21638,7 +21638,7 @@ const renderHisseler = (container) => {
 
 
 
-                            ${gelirHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadı</div>'}
+                            ${gelirHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadÄ±</div>'}
 
 
 
@@ -21674,7 +21674,7 @@ const renderHisseler = (container) => {
 
 
 
-                            ${bilancoHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadı</div>'}
+                            ${bilancoHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadÄ±</div>'}
 
 
 
@@ -21722,7 +21722,7 @@ const renderHisseler = (container) => {
 
 
 
-                    <!-- Row 2: Çeyreklik Bar Grafikleri -->
+                    <!-- Row 2: Ã‡eyreklik Bar Grafikleri -->
 
 
 
@@ -21758,7 +21758,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Çeyreklik Satışlar</div>
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Ã‡eyreklik SatÄ±ÅŸlar</div>
 
 
 
@@ -21806,7 +21806,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Çeyreklik FAVÖK</div>
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Ã‡eyreklik FAVÃ–K</div>
 
 
 
@@ -21854,7 +21854,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Çeyreklik Net Kar</div>
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Ã‡eyreklik Net Kar</div>
 
 
 
@@ -21914,7 +21914,7 @@ const renderHisseler = (container) => {
 
 
 
-                    <!-- Row 3: Çarpanlar, Karne, Şirket Detayları -->
+                    <!-- Row 3: Ã‡arpanlar, Karne, Åirket DetaylarÄ± -->
 
 
 
@@ -21950,7 +21950,7 @@ const renderHisseler = (container) => {
 
 
 
-                        <!-- Çarpanlar -->
+                        <!-- Ã‡arpanlar -->
 
 
 
@@ -21974,7 +21974,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;">Çarpanlar</div>
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;">Ã‡arpanlar</div>
 
 
 
@@ -22070,7 +22070,7 @@ const renderHisseler = (container) => {
 
 
 
-                                        <td >FD/FAVÖK</td>
+                                        <td >FD/FAVÃ–K</td>
 
 
 
@@ -22178,7 +22178,7 @@ const renderHisseler = (container) => {
 
 
 
-                                        <td >Net Borç / FAVÖK</td>
+                                        <td >Net BorÃ§ / FAVÃ–K</td>
 
 
 
@@ -22262,7 +22262,7 @@ const renderHisseler = (container) => {
 
 
 
-                        <!-- Kaynak Dağılımı -->
+                        <!-- Kaynak DaÄŸÄ±lÄ±mÄ± -->
 
 
 
@@ -22286,7 +22286,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 0.8rem;">Kaynak Dağılımı</div>
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 0.8rem;">Kaynak DaÄŸÄ±lÄ±mÄ±</div>
 
 
 
@@ -22322,7 +22322,7 @@ const renderHisseler = (container) => {
 
 
 
-                                    <div style="width:${pctOz}%; background:#6c5ce7;" title="Özkaynaklar: %${pctOz}"></div>
+                                    <div style="width:${pctOz}%; background:#6c5ce7;" title="Ã–zkaynaklar: %${pctOz}"></div>
 
 
 
@@ -22334,7 +22334,7 @@ const renderHisseler = (container) => {
 
 
 
-                                    <div style="width:${pctKisa}%; background:#fd79a8;" title="Kısa Vade Yükümlülükler: %${pctKisa}"></div>
+                                    <div style="width:${pctKisa}%; background:#fd79a8;" title="KÄ±sa Vade YÃ¼kÃ¼mlÃ¼lÃ¼kler: %${pctKisa}"></div>
 
 
 
@@ -22346,7 +22346,7 @@ const renderHisseler = (container) => {
 
 
 
-                                    <div style="width:${pctUzun}%; background:#636e72;" title="Uzun Vade Yükümlülükler: %${pctUzun}"></div>
+                                    <div style="width:${pctUzun}%; background:#636e72;" title="Uzun Vade YÃ¼kÃ¼mlÃ¼lÃ¼kler: %${pctUzun}"></div>
 
 
 
@@ -22382,7 +22382,7 @@ const renderHisseler = (container) => {
 
 
 
-                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#6c5ce7;"></div>Özkaynaklar: %${pctOz}</div>
+                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#6c5ce7;"></div>Ã–zkaynaklar: %${pctOz}</div>
 
 
 
@@ -22394,7 +22394,7 @@ const renderHisseler = (container) => {
 
 
 
-                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#fd79a8;"></div>Kısa Vade Yük.: %${pctKisa}</div>
+                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#fd79a8;"></div>KÄ±sa Vade YÃ¼k.: %${pctKisa}</div>
 
 
 
@@ -22406,7 +22406,7 @@ const renderHisseler = (container) => {
 
 
 
-                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#636e72;"></div>Uzun Vade Yük.: %${pctUzun}</div>
+                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#636e72;"></div>Uzun Vade YÃ¼k.: %${pctUzun}</div>
 
 
 
@@ -22466,7 +22466,7 @@ const renderHisseler = (container) => {
 
 
 
-                        <!-- Şirket Detayları -->
+                        <!-- Åirket DetaylarÄ± -->
 
 
 
@@ -22490,7 +22490,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;">Şirket Detayları</div>
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;">Åirket DetaylarÄ±</div>
 
 
 
@@ -22538,7 +22538,7 @@ const renderHisseler = (container) => {
 
 
 
-                                        <td >Hisse Başına Kar</td>
+                                        <td >Hisse BaÅŸÄ±na Kar</td>
 
 
 
@@ -22586,7 +22586,7 @@ const renderHisseler = (container) => {
 
 
 
-                                        <td >Ödenmiş Sermaye</td>
+                                        <td >Ã–denmiÅŸ Sermaye</td>
 
 
 
@@ -22634,7 +22634,7 @@ const renderHisseler = (container) => {
 
 
 
-                                        <td >Piyasa Değeri</td>
+                                        <td >Piyasa DeÄŸeri</td>
 
 
 
@@ -22682,7 +22682,7 @@ const renderHisseler = (container) => {
 
 
 
-                                        <td >Piyasa Değeri $</td>
+                                        <td >Piyasa DeÄŸeri $</td>
 
 
 
@@ -22814,7 +22814,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Brüt Kar Marjı (Çeyreklik)</div>
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">BrÃ¼t Kar MarjÄ± (Ã‡eyreklik)</div>
 
 
 
@@ -22886,7 +22886,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">FAVÖK Marjı (Çeyreklik)</div>
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">FAVÃ–K MarjÄ± (Ã‡eyreklik)</div>
 
 
 
@@ -22958,7 +22958,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Net Kar Marjı (Çeyreklik)</div>
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Net Kar MarjÄ± (Ã‡eyreklik)</div>
 
 
 
@@ -23102,7 +23102,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Kaldıraç Oranı</div>
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">KaldÄ±raÃ§ OranÄ±</div>
 
 
 
@@ -23174,7 +23174,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Özkaynak Karlılığı</div>
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Ã–zkaynak KarlÄ±lÄ±ÄŸÄ±</div>
 
 
 
@@ -23414,7 +23414,7 @@ const renderHisseler = (container) => {
 
 
 
-                if (sData.gelirYillik) tGelirDynamic = genTable('Gelir Tablosu (Yıllık)', sData.gelirYillik.headers, sData.gelirYillik.rows);
+                if (sData.gelirYillik) tGelirDynamic = genTable('Gelir Tablosu (YÄ±llÄ±k)', sData.gelirYillik.headers, sData.gelirYillik.rows);
 
 
 
@@ -23546,7 +23546,7 @@ const renderHisseler = (container) => {
 
 
 
-            } else if (activeTab === 'Bilanço') {
+            } else if (activeTab === 'BilanÃ§o') {
 
 
 
@@ -23570,7 +23570,7 @@ const renderHisseler = (container) => {
 
 
 
-                if (sData.bilanco) tBilancoTabDynamic = genFintablesBilanco('Bilanço', sData.bilanco.headers, sData.bilanco.rows);
+                if (sData.bilanco) tBilancoTabDynamic = genFintablesBilanco('BilanÃ§o', sData.bilanco.headers, sData.bilanco.rows);
 
 
 
@@ -23702,7 +23702,7 @@ const renderHisseler = (container) => {
 
 
 
-            } else if (activeTab === 'Nakit Akım Tablosu') {
+            } else if (activeTab === 'Nakit AkÄ±m Tablosu') {
 
 
 
@@ -23726,7 +23726,7 @@ const renderHisseler = (container) => {
 
 
 
-                if (sData.nakit) tNakitDynamic = genTable('Nakit Akım Tablosu', sData.nakit.headers, sData.nakit.rows);
+                if (sData.nakit) tNakitDynamic = genTable('Nakit AkÄ±m Tablosu', sData.nakit.headers, sData.nakit.rows);
 
 
 
@@ -23846,7 +23846,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <div class="dash-title">Çeyreklik Nakit Akışı</div>
+                            <div class="dash-title">Ã‡eyreklik Nakit AkÄ±ÅŸÄ±</div>
 
 
 
@@ -23894,7 +23894,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <div class="dash-title">Yıllık Nakit Akışı</div>
+                            <div class="dash-title">YÄ±llÄ±k Nakit AkÄ±ÅŸÄ±</div>
 
 
 
@@ -23990,7 +23990,7 @@ const renderHisseler = (container) => {
 
 
 
-            } else if (['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler'].includes(activeTab)) {
+            } else if (['Likidite OranlarÄ±', 'KaldÄ±raÃ§ OranlarÄ±', 'Faaliyet Etkinlik OranlarÄ±', 'KarlÄ±lÄ±k OranlarÄ±', 'DiÄŸer Kalemler'].includes(activeTab)) {
 
 
 
@@ -24002,7 +24002,7 @@ const renderHisseler = (container) => {
 
 
 
-                contentHtml = `<div style="display:flex; justify-content:center; align-items:center; height:200px; opacity:0.5; font-style:italic;">${activeTab} sayfası henüz yapım aşamasındadır.</div>`;
+                contentHtml = `<div style="display:flex; justify-content:center; align-items:center; height:200px; opacity:0.5; font-style:italic;">${activeTab} sayfasÄ± henÃ¼z yapÄ±m aÅŸamasÄ±ndadÄ±r.</div>`;
 
 
 
@@ -24014,7 +24014,7 @@ const renderHisseler = (container) => {
 
 
 
-            } else if (activeTab === 'Değerleme') {
+            } else if (activeTab === 'DeÄŸerleme') {
 
 
 
@@ -24266,7 +24266,7 @@ const renderHisseler = (container) => {
 
 
 
-                        if (cur === 'TRY') formatted = '₺' + formatted;
+                        if (cur === 'TRY') formatted = 'â‚º' + formatted;
 
 
 
@@ -24290,7 +24290,7 @@ const renderHisseler = (container) => {
 
 
 
-                        else if (cur === 'EUR') formatted = '€' + formatted;
+                        else if (cur === 'EUR') formatted = 'â‚¬' + formatted;
 
 
 
@@ -24374,7 +24374,7 @@ const renderHisseler = (container) => {
 
 
 
-                    { id: 'satis', label: 'Satış Gelirleri', isInput: true },
+                    { id: 'satis', label: 'SatÄ±ÅŸ Gelirleri', isInput: true },
 
 
 
@@ -24386,7 +24386,7 @@ const renderHisseler = (container) => {
 
 
 
-                    { id: 'favokMarji', label: 'FAVÖK Marjı (%)', isInput: true },
+                    { id: 'favokMarji', label: 'FAVÃ–K MarjÄ± (%)', isInput: true },
 
 
 
@@ -24398,7 +24398,7 @@ const renderHisseler = (container) => {
 
 
 
-                    { id: 'netKarMarji', label: 'Net Kar Marjı (%)', isInput: true },
+                    { id: 'netKarMarji', label: 'Net Kar MarjÄ± (%)', isInput: true },
 
 
 
@@ -24410,7 +24410,7 @@ const renderHisseler = (container) => {
 
 
 
-                    { id: 'favok', label: 'FAVÖK', isInput: false },
+                    { id: 'favok', label: 'FAVÃ–K', isInput: false },
 
 
 
@@ -24434,7 +24434,7 @@ const renderHisseler = (container) => {
 
 
 
-                    { id: 'ozkaynaklar', label: 'Özkaynaklar', isInput: true },
+                    { id: 'ozkaynaklar', label: 'Ã–zkaynaklar', isInput: true },
 
 
 
@@ -24446,7 +24446,7 @@ const renderHisseler = (container) => {
 
 
 
-                    { id: 'fdFavok', label: 'FD/FAVÖK', isInput: true },
+                    { id: 'fdFavok', label: 'FD/FAVÃ–K', isInput: true },
 
 
 
@@ -24602,7 +24602,7 @@ const renderHisseler = (container) => {
 
 
 
-                        formatted = '₺' + formatted;
+                        formatted = 'â‚º' + formatted;
 
 
 
@@ -24626,7 +24626,7 @@ const renderHisseler = (container) => {
 
 
 
-                        if (currency === 'TRY') formatted = '₺' + formatted;
+                        if (currency === 'TRY') formatted = 'â‚º' + formatted;
 
 
 
@@ -24650,7 +24650,7 @@ const renderHisseler = (container) => {
 
 
 
-                        else if (currency === 'EUR') formatted = '€' + formatted;
+                        else if (currency === 'EUR') formatted = 'â‚¬' + formatted;
 
 
 
@@ -24782,7 +24782,7 @@ const renderHisseler = (container) => {
 
 
 
-                    showThemeConfirm(y + ' yılı verilerini silmek istediğinize emin misiniz?', () => {
+                    showThemeConfirm(y + ' yÄ±lÄ± verilerini silmek istediÄŸinize emin misiniz?', () => {
 
 
 
@@ -24986,7 +24986,7 @@ const renderHisseler = (container) => {
 
 
 
-                                <option value="TRY" ${curCurrency === 'TRY' ? 'selected' : ''} style="background:var(--bg-color); color:var(--text-primary);">₺</option>
+                                <option value="TRY" ${curCurrency === 'TRY' ? 'selected' : ''} style="background:var(--bg-color); color:var(--text-primary);">â‚º</option>
 
 
 
@@ -25010,7 +25010,7 @@ const renderHisseler = (container) => {
 
 
 
-                                <option value="EUR" ${curCurrency === 'EUR' ? 'selected' : ''} style="background:var(--bg-color); color:var(--text-primary);">€</option>
+                                <option value="EUR" ${curCurrency === 'EUR' ? 'selected' : ''} style="background:var(--bg-color); color:var(--text-primary);">â‚¬</option>
 
 
 
@@ -25034,7 +25034,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <i class="fas fa-edit" style="cursor:pointer; color:var(--accent-color);" onclick="window.toggleDegerlemeEdit('${y}')" title="Düzenle"></i>
+                            <i class="fas fa-edit" style="cursor:pointer; color:var(--accent-color);" onclick="window.toggleDegerlemeEdit('${y}')" title="DÃ¼zenle"></i>
 
 
 
@@ -25166,7 +25166,7 @@ const renderHisseler = (container) => {
 
 
 
-                    <div class="dash-title" style="font-size: 18px; font-weight: bold; border-bottom: none; margin-bottom: 0;">Geleceğe İlişkin Beklentiler</div>
+                    <div class="dash-title" style="font-size: 18px; font-weight: bold; border-bottom: none; margin-bottom: 0;">GeleceÄŸe Ä°liÅŸkin Beklentiler</div>
 
 
 
@@ -25418,7 +25418,7 @@ const renderHisseler = (container) => {
 
 
 
-                    // Calc FAVÖK and Net Kar safely
+                    // Calc FAVÃ–K and Net Kar safely
 
 
 
@@ -25718,7 +25718,7 @@ const renderHisseler = (container) => {
 
 
 
-                    // PD3 from Özkaynaklar
+                    // PD3 from Ã–zkaynaklar
 
 
 
@@ -26434,11 +26434,11 @@ const renderHisseler = (container) => {
     const availablePdfs = (window.stockReports && window.stockReports[hisseKodu]) ? window.stockReports[hisseKodu] : [];
     
     const titleMap = {
-        'arastirma_raporu.pdf': 'Araştırma Raporu',
+        'arastirma_raporu.pdf': 'AraÅŸtÄ±rma Raporu',
         'faaliyet_raporu.pdf': 'Faaliyet Raporu',
         'finansal_rapor.pdf': 'Finansal Rapor',
-        'toplanti_notlari.pdf': 'Toplantı Notları',
-        'yatirimci_sunumu.pdf': 'Yatırımcı Sunumu',
+        'toplanti_notlari.pdf': 'ToplantÄ± NotlarÄ±',
+        'yatirimci_sunumu.pdf': 'YatÄ±rÄ±mcÄ± Sunumu',
         'fiyat_tespit_raporu.pdf': 'Fiyat Tespit Raporu'
     };
     
@@ -26458,7 +26458,7 @@ const renderHisseler = (container) => {
             `;
         });
     } else {
-        raporLinksHtml = '<div class="empty-local" style="padding: 1rem; color: var(--text-secondary); font-style: italic; font-size: 13px;">Bu hisseye ait rapor bulunamadı.</div>';
+        raporLinksHtml = '<div class="empty-local" style="padding: 1rem; color: var(--text-secondary); font-style: italic; font-size: 13px;">Bu hisseye ait rapor bulunamadÄ±.</div>';
     }
 
 
@@ -26472,7 +26472,7 @@ const renderHisseler = (container) => {
     setTimeout(() => {
         if(window.fetchFirebaseRaporlar) window.fetchFirebaseRaporlar('${hisseKodu}');
     }, 100);
-} else if (activeTab === 'Hisse Notları') {
+} else if (activeTab === 'Hisse NotlarÄ±') {
 
 
 
@@ -26592,7 +26592,7 @@ const renderHisseler = (container) => {
 
 
 
-                    if (a.baglanti.includes('twitter') || a.baglanti.includes('x.com')) return 'X (Twitter) Bağlantısı';
+                    if (a.baglanti.includes('twitter') || a.baglanti.includes('x.com')) return 'X (Twitter) BaÄŸlantÄ±sÄ±';
 
 
 
@@ -26604,7 +26604,7 @@ const renderHisseler = (container) => {
 
 
 
-                    return 'Dış Bağlantı';
+                    return 'DÄ±ÅŸ BaÄŸlantÄ±';
 
 
 
@@ -26712,7 +26712,7 @@ const renderHisseler = (container) => {
 
 
 
-                            const months = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+                            const months = ["Oca", "Åub", "Mar", "Nis", "May", "Haz", "Tem", "AÄŸu", "Eyl", "Eki", "Kas", "Ara"];
 
 
 
@@ -26856,7 +26856,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <td style="text-align: left; max-width: 400px; font-size: 12px; color: #e0e0e0; white-space: normal; word-wrap: break-word;">${a.notText || '<span style="opacity:0.5; font-style:italic;">Özet not eklenmemiş.</span>'}</td>
+                            <td style="text-align: left; max-width: 400px; font-size: 12px; color: #e0e0e0; white-space: normal; word-wrap: break-word;">${a.notText || '<span style="opacity:0.5; font-style:italic;">Ã–zet not eklenmemiÅŸ.</span>'}</td>
 
 
 
@@ -26880,7 +26880,7 @@ const renderHisseler = (container) => {
 
 
 
-                                <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 13px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 13px;" onclick="window.editAnaliz('${a.id}')" title="DÃ¼zenle"><i class="fas fa-edit"></i></button>
 
 
 
@@ -26976,7 +26976,7 @@ const renderHisseler = (container) => {
 
 
 
-                    tableRows = `<tr><td colspan="6" style="text-align: center; padding: 2rem; opacity: 0.5; font-size: 1.1rem;">Henüz eklenmiş bir analiz bulunmuyor.</td></tr>`;
+                    tableRows = `<tr><td colspan="6" style="text-align: center; padding: 2rem; opacity: 0.5; font-size: 1.1rem;">HenÃ¼z eklenmiÅŸ bir analiz bulunmuyor.</td></tr>`;
 
 
 
@@ -27132,7 +27132,7 @@ const renderHisseler = (container) => {
 
 
 
-                                <input type="checkbox" id="analiz-kisisel-cb" onchange="document.getElementById('analiz-fields-wrapper').style.display = this.checked ? 'none' : 'flex'; document.getElementById('analiz-not').placeholder = this.checked ? 'Özel notunuzu buraya yazın...' : 'Bu analizden / videodan çıkardığınız özet notlar...';"> Sadece Özel Not
+                                <input type="checkbox" id="analiz-kisisel-cb" onchange="document.getElementById('analiz-fields-wrapper').style.display = this.checked ? 'none' : 'flex'; document.getElementById('analiz-not').placeholder = this.checked ? 'Ã–zel notunuzu buraya yazÄ±n...' : 'Bu analizden / videodan Ã§Ä±kardÄ±ÄŸÄ±nÄ±z Ã¶zet notlar...';"> Sadece Ã–zel Not
 
 
 
@@ -27252,7 +27252,7 @@ const renderHisseler = (container) => {
 
 
 
-                                <input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%;" placeholder="Analist Adı">
+                                <input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%;" placeholder="Analist AdÄ±">
 
 
 
@@ -27324,7 +27324,7 @@ const renderHisseler = (container) => {
 
 
 
-                                <label style="font-size: 0.8rem; color: var(--text-secondary);">Bağlantı (YouTube, X, vs.)</label>
+                                <label style="font-size: 0.8rem; color: var(--text-secondary);">BaÄŸlantÄ± (YouTube, X, vs.)</label>
 
 
 
@@ -27372,7 +27372,7 @@ const renderHisseler = (container) => {
 
 
 
-                                <label style="font-size: 0.8rem; color: var(--text-secondary);">Bağlantı Başlığı (İsteğe Bağlı)</label>
+                                <label style="font-size: 0.8rem; color: var(--text-secondary);">BaÄŸlantÄ± BaÅŸlÄ±ÄŸÄ± (Ä°steÄŸe BaÄŸlÄ±)</label>
 
 
 
@@ -27384,7 +27384,7 @@ const renderHisseler = (container) => {
 
 
 
-                                <input type="text" id="analiz-baslik" class="form-control" style="width:100%;" placeholder="Video veya bağlantı başlığı">
+                                <input type="text" id="analiz-baslik" class="form-control" style="width:100%;" placeholder="Video veya baÄŸlantÄ± baÅŸlÄ±ÄŸÄ±">
 
 
 
@@ -27444,7 +27444,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <textarea id="analiz-not" class="form-control" style="width:100%; height: 120px; resize: vertical;" placeholder="Bu analizden / videodan çıkardığınız özet notlar..."></textarea>
+                            <textarea id="analiz-not" class="form-control" style="width:100%; height: 120px; resize: vertical;" placeholder="Bu analizden / videodan Ã§Ä±kardÄ±ÄŸÄ±nÄ±z Ã¶zet notlar..."></textarea>
 
 
 
@@ -27492,7 +27492,7 @@ const renderHisseler = (container) => {
 
 
 
-                            <button class="btn" style="background: var(--danger-color); padding: 0.5rem 1.5rem;" onclick="window.toggleInlineAnaliz()"><i class="fas fa-times"></i> İptal</button>
+                            <button class="btn" style="background: var(--danger-color); padding: 0.5rem 1.5rem;" onclick="window.toggleInlineAnaliz()"><i class="fas fa-times"></i> Ä°ptal</button>
 
 
 
@@ -27540,7 +27540,7 @@ const renderHisseler = (container) => {
 
 
 
-                    <!-- Tablonun Listelendiği Alan -->
+                    <!-- Tablonun ListelendiÄŸi Alan -->
 
 
 
@@ -27648,7 +27648,7 @@ const renderHisseler = (container) => {
 
 
 
-                                    <th style="text-align: center; width: 250px;">Bağlantı</th>
+                                    <th style="text-align: center; width: 250px;">BaÄŸlantÄ±</th>
 
 
 
@@ -27672,7 +27672,7 @@ const renderHisseler = (container) => {
 
 
 
-                                    <th style="text-align: center; width: 90px;">İşlem &nbsp; <button class="btn" style="font-size: 11px; padding: 2px 6px; background: var(--success-color);" onclick="window.toggleInlineAnaliz()" title="Yeni Analiz Ekle"><i class="fas fa-plus"></i></button></th>
+                                    <th style="text-align: center; width: 90px;">Ä°ÅŸlem &nbsp; <button class="btn" style="font-size: 11px; padding: 2px 6px; background: var(--success-color);" onclick="window.toggleInlineAnaliz()" title="Yeni Analiz Ekle"><i class="fas fa-plus"></i></button></th>
 
 
 
@@ -27828,7 +27828,7 @@ const renderHisseler = (container) => {
 
 
 
-                contentHtml = '<div style="padding: 3rem; color: #fff; text-align: center; background: rgba(0,0,0,0.2); border-radius: 12px; margin: 1rem;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--danger-color); margin-bottom: 1rem;"></i><h3 style="margin-bottom: 0.5rem;">Veri Bulunamadı veya Hesaplanamadı</h3><p style="color: var(--text-secondary); margin-bottom: 1rem;">Bu hisseye ait bilanço/gelir tablosu verileri eksik veya hatalı olabilir.</p><p style="font-size: 11px; opacity: 0.5;">Hata: ' + err.message + '</p></div>';
+                contentHtml = '<div style="padding: 3rem; color: #fff; text-align: center; background: rgba(0,0,0,0.2); border-radius: 12px; margin: 1rem;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--danger-color); margin-bottom: 1rem;"></i><h3 style="margin-bottom: 0.5rem;">Veri BulunamadÄ± veya HesaplanamadÄ±</h3><p style="color: var(--text-secondary); margin-bottom: 1rem;">Bu hisseye ait bilanÃ§o/gelir tablosu verileri eksik veya hatalÄ± olabilir.</p><p style="font-size: 11px; opacity: 0.5;">Hata: ' + err.message + '</p></div>';
 
 
 
@@ -28260,7 +28260,7 @@ const renderHisseler = (container) => {
 
 
 
-                    <div style="font-size: 1.2rem; font-weight: bold; color: #fff;">₺${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)}</div>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: #fff;">â‚º${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)}</div>
 
 
 
@@ -29127,7 +29127,7 @@ if (window.shouldRenderDashboardCharts) {
 
 
 
-                              createChart('chart-bkm', dData.bkm, 'Brüt Kar Marjı (%)');
+                              createChart('chart-bkm', dData.bkm, 'BrÃ¼t Kar MarjÄ± (%)');
 
 
 
@@ -29139,7 +29139,7 @@ if (window.shouldRenderDashboardCharts) {
 
 
 
-                              createChart('chart-fkm', dData.fkm, 'FAVÖK Marjı (%)');
+                              createChart('chart-fkm', dData.fkm, 'FAVÃ–K MarjÄ± (%)');
 
 
 
@@ -29151,7 +29151,7 @@ if (window.shouldRenderDashboardCharts) {
 
 
 
-                              createChart('chart-nkm', dData.nkm, 'Net Kar Marjı (%)');
+                              createChart('chart-nkm', dData.nkm, 'Net Kar MarjÄ± (%)');
 
 
 
@@ -29175,7 +29175,7 @@ if (window.shouldRenderDashboardCharts) {
 
 
 
-                              createChart('chart-kaldirac', dData.kaldirac, 'Kaldıraç Oranı (%)');
+                              createChart('chart-kaldirac', dData.kaldirac, 'KaldÄ±raÃ§ OranÄ± (%)');
 
 
 
@@ -29187,7 +29187,7 @@ if (window.shouldRenderDashboardCharts) {
 
 
 
-                              createChart('chart-roe', dData.roe, 'Özkaynak Karlılığı (%)');
+                              createChart('chart-roe', dData.roe, 'Ã–zkaynak KarlÄ±lÄ±ÄŸÄ± (%)');
 
 
 
@@ -29946,7 +29946,7 @@ console.log('REACHED SETHISSETAB DEFINITION');
 
 
 
-        const raporTablari = ['Finansal Rapor', 'Faaliyet Raporu', 'Yatırımcı Sunumu', 'Araştırma Raporu', 'Yatrmc Sunumu', 'Aratrma Raporu'];
+        const raporTablari = ['Finansal Rapor', 'Faaliyet Raporu', 'YatÄ±rÄ±mcÄ± Sunumu', 'AraÅŸtÄ±rma Raporu', 'Yatrmc Sunumu', 'Aratrma Raporu'];
 
 
 
@@ -30258,7 +30258,7 @@ console.log('REACHED SETHISSETAB DEFINITION');
 
 
 
-            return; // Rapor tıklandığında sadece dosyayı aç ve sekmeyi/arayüzü değiştirme
+            return; // Rapor tÄ±klandÄ±ÄŸÄ±nda sadece dosyayÄ± aÃ§ ve sekmeyi/arayÃ¼zÃ¼ deÄŸiÅŸtirme
 
 
 
@@ -30510,7 +30510,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-        if (a.menkul === 'NAKİT' && b.menkul !== 'NAKİT') return -1;
+        if (a.menkul === 'NAKÄ°T' && b.menkul !== 'NAKÄ°T') return -1;
 
 
 
@@ -30534,7 +30534,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-        if (b.menkul === 'NAKİT' && a.menkul !== 'NAKİT') return 1;
+        if (b.menkul === 'NAKÄ°T' && a.menkul !== 'NAKÄ°T') return 1;
 
 
 
@@ -30654,7 +30654,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-    const hisseFonEkstre = sortedEkstre.filter(e => e.menkul !== 'NAKİT');
+    const hisseFonEkstre = sortedEkstre.filter(e => e.menkul !== 'NAKÄ°T');
 
 
 
@@ -31182,7 +31182,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.cancelEdit()">İptal</button>
+                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.cancelEdit()">Ä°ptal</button>
 
 
 
@@ -31494,7 +31494,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-                <button class="btn btn-icon" style="color: var(--accent-color); padding: 0.1rem 0.3rem; font-size: 13px;" onclick="window.setEditEkstre('${e.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-icon" style="color: var(--accent-color); padding: 0.1rem 0.3rem; font-size: 13px;" onclick="window.setEditEkstre('${e.id}')" title="DÃ¼zenle"><i class="fas fa-edit"></i></button>
 
 
 
@@ -32142,7 +32142,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-                        <tr style="text-align: center;"><th style="width: 5%;">S.N.</th><th style="width: 15%;">Tarih</th><th style="width: 8%;">Tür</th><th style="width: 12%;">Menkul</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%;">Tutar</th><th style="width: 18%;">İşlem</th></tr>
+                        <tr style="text-align: center;"><th style="width: 5%;">S.N.</th><th style="width: 15%;">Tarih</th><th style="width: 8%;">TÃ¼r</th><th style="width: 12%;">Menkul</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%;">Tutar</th><th style="width: 18%;">Ä°ÅŸlem</th></tr>
 
 
 
@@ -32430,7 +32430,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-                            <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off"></td>
+                            <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Hisse AdÄ±" list="bist-hisse-list" autocomplete="off"></td>
 
 
 
@@ -32574,7 +32574,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.toggleInlineForm('hisse')">İptal</button>
+                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.toggleInlineForm('hisse')">Ä°ptal</button>
 
 
 
@@ -33080,7 +33080,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-            menkulInput.placeholder = 'Hisse Adı';
+            menkulInput.placeholder = 'Hisse AdÄ±';
 
 
 
@@ -34018,7 +34018,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-        showThemeConfirm('Bu işlemi silmek istediğinize emin misiniz?', () => {
+        showThemeConfirm('Bu iÅŸlemi silmek istediÄŸinize emin misiniz?', () => {
 
 
 
@@ -34546,7 +34546,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-            islemTip: parseFloat(document.getElementById('edit-adet').value) < 0 ? 'SATIŞ' : 'ALIŞ',
+            islemTip: parseFloat(document.getElementById('edit-adet').value) < 0 ? 'SATIÅ' : 'ALIÅ',
 
 
 
@@ -34906,7 +34906,7 @@ const renderHisseIslemleri = (container) => {
 
 
 
-            islemTip: parseFloat(document.getElementById('i-adet').value) < 0 ? 'SATIŞ' : 'ALIŞ',
+            islemTip: parseFloat(document.getElementById('i-adet').value) < 0 ? 'SATIÅ' : 'ALIÅ',
 
 
 
@@ -35554,7 +35554,7 @@ const renderNakitIslemleri = (container) => {
 
 
 
-                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.cancelNakitEdit()">İptal</button>
+                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.cancelNakitEdit()">Ä°ptal</button>
 
 
 
@@ -35722,7 +35722,7 @@ const renderNakitIslemleri = (container) => {
 
 
 
-                <button class="btn btn-icon" style="color: var(--accent-color); padding: 0.1rem 0.3rem; font-size: 13px;" onclick="window.setEditNakit('${n.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-icon" style="color: var(--accent-color); padding: 0.1rem 0.3rem; font-size: 13px;" onclick="window.setEditNakit('${n.id}')" title="DÃ¼zenle"><i class="fas fa-edit"></i></button>
 
 
 
@@ -36130,7 +36130,7 @@ const renderNakitIslemleri = (container) => {
 
 
 
-                        <tr style="text-align: center;"><th style="width: 5%;">S.N.</th><th style="width: 15%;">Tarih</th><th style="width: 15%;">Tutar</th><th style="width: 15%;">XU100</th><th style="width: 15%;">USDTRY</th><th style="width: 15%;">GRAMALTIN</th><th style="width: 20%;">İşlem</th></tr>
+                        <tr style="text-align: center;"><th style="width: 5%;">S.N.</th><th style="width: 15%;">Tarih</th><th style="width: 15%;">Tutar</th><th style="width: 15%;">XU100</th><th style="width: 15%;">USDTRY</th><th style="width: 15%;">GRAMALTIN</th><th style="width: 20%;">Ä°ÅŸlem</th></tr>
 
 
 
@@ -36418,7 +36418,7 @@ const renderNakitIslemleri = (container) => {
 
 
 
-                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.toggleInlineForm('nakit')">İptal</button>
+                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.toggleInlineForm('nakit')">Ä°ptal</button>
 
 
 
@@ -36946,7 +36946,7 @@ const renderNakitIslemleri = (container) => {
 
 
 
-        showThemeConfirm('Bu nakit hareketini silmek istediğinize emin misiniz?', () => {
+        showThemeConfirm('Bu nakit hareketini silmek istediÄŸinize emin misiniz?', () => {
 
 
 
@@ -37930,7 +37930,7 @@ const renderVeriler = (container) => {
 
 
 
-    // We will place Enflasyon Form, Hedef Portföy input, and Fon Fiyatlari input here.
+    // We will place Enflasyon Form, Hedef PortfÃ¶y input, and Fon Fiyatlari input here.
 
 
 
@@ -38338,7 +38338,7 @@ const renderVeriler = (container) => {
 
 
 
-                    <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value); alert('Güncellendi!');" title="Kaydet"><i class="fas fa-save"></i></button>
+                    <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value); alert('GÃ¼ncellendi!');" title="Kaydet"><i class="fas fa-save"></i></button>
 
 
 
@@ -38554,597 +38554,54 @@ const renderVeriler = (container) => {
 
 
 
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <!-- Nakit Düzenleme -->
-
-
-
-
-
-
-
-
-
-
-
-                <div class="glass" style="flex: 1; padding: 2rem; min-width: 300px;">
-
-
-
-
-
-
-
-
-
-
-
-                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">Mevcut Nakit Tutarı</h3>
-
-
-
-
-
-
-
-
-
-
-
+                <div class="glass" style="flex: 1; padding: 1rem; min-width: 200px;">
+                    <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;">Mevcut Nakit Tutarı</h3>
                     <div style="display:flex; gap: 0.5rem;">
-
-
-
-
-
-
-
-
-
-
-
                         <input type="number" step="0.01" id="v-nakit-input" value="${State.data.manuelNakitTutar || 0}" class="form-control" style="width:100%;">
-
-
-
-
-
-
-
-
-
-
-
                         <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.manuelNakitTutar = parseFloat(document.getElementById('v-nakit-input').value) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-
-
-
-
-
-
-
-
-
-
-
-                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <!-- Rapor Yükle (Bulut) -->
-                <div class="glass" style="flex: 1; padding: 2rem; min-width: 300px;">
-                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;"><i class="fas fa-cloud-upload-alt"></i> Buluta Rapor Yükle</h3>
-                    <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 1rem;">Bu bölümden yüklediğiniz PDF raporları anında Raporlar sayfasında görünecektir.</p>
-                    
-                    <div style="display:flex; flex-direction:column; gap: 0.8rem;">
-                        <input type="text" id="upload-hisse" placeholder="Hisse Kodu (Örn: THYAO)" class="form-control" style="width:100%; text-transform: uppercase;">
-                        
-                        <select id="upload-type" class="form-control" style="width:100%; appearance: auto;">
-                            <option value="">-- Rapor Türü Seçin --</option>
-                            <option value="arastirma_raporu.pdf">Araştırma Raporu</option>
-                            <option value="faaliyet_raporu.pdf">Faaliyet Raporu</option>
-                            <option value="finansal_rapor.pdf">Finansal Rapor</option>
-                            <option value="toplanti_notlari.pdf">Toplantı Notları</option>
-                            <option value="yatirimci_sunumu.pdf">Yatırımcı Sunumu</option>
-                            <option value="fiyat_tespit_raporu.pdf">Fiyat Tespit Raporu</option>
-                        </select>
-                        
-                        <input type="file" id="upload-file" accept="application/pdf" class="form-control" style="width:100%; padding: 0.5rem; cursor: pointer;">
-                        
-                        <button class="btn" style="background: var(--accent-color); width: 100%; margin-top: 0.5rem;" onclick="window.uploadRapor()">Yükle</button>
-                        
-                        <div id="upload-status" style="font-size: 13px; font-weight: 500; margin-top: 0.5rem; min-height: 20px;"></div>
                     </div>
                 </div>
-
-                <!-- Hedef Portföy -->
-
-
-
-
-
-
-
-
-
-
-
-                <div class="glass" style="flex: 1; padding: 2rem; min-width: 300px;">
-
-
-
-
-
-
-
-
-
-
-
-                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">Hedef Portföy</h3>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    <div style="display:flex; gap: 0.5rem;">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <input type="number" step="1" id="v-hedef-input" value="${hedefPortfoy}" class="form-control" style="width:100%;">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 <!-- Fon Fiyatları -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                <div class="glass" style="flex: 1; padding: 2rem; min-width: 300px;">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">Fon Fiyatları</h3>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    <div style="max-height: 200px; overflow-y: auto; padding-right: 0.5rem;">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                <div class="glass" style="flex: 1; padding: 1rem; min-width: 200px;">
+                    <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;">Fon Fiyatları</h3>
+                    <div style="max-height: 150px; overflow-y: auto; padding-right: 0.5rem;">
                         ${fonHtml || '<p style="color:var(--text-secondary);">Portföyde fon bulunmuyor.</p>'}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+                <!-- Hedef Portföy -->
+                <div class="glass" style="flex: 1; padding: 1rem; min-width: 200px;">
+                    <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;">Hedef Portföy</h3>
+                    <div style="display:flex; gap: 0.5rem;">
+                        <input type="number" step="1" id="v-hedef-input" value="${hedefPortfoy}" class="form-control" style="width:100%;">
+                        <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
+                    </div>
+                </div>
             </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            <!-- Rapor Yükle (Bulut) -->
+            <div class="glass" style="padding: 1rem; margin-top: 1rem;">
+                <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;"><i class="fas fa-cloud-upload-alt"></i> Buluta Rapor Yükle</h3>
+                <div style="display:flex; flex-direction:row; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
+                    <input type="text" id="upload-hisse" placeholder="Hisse (Örn: THYAO)" class="form-control" style="flex: 1; min-width: 120px; text-transform: uppercase; padding: 0.3rem;">
+                    <select id="upload-type" class="form-control" style="flex: 2; min-width: 150px; appearance: auto; padding: 0.3rem;">
+                        <option value="">-- Rapor Türü Seçin --</option>
+                        <option value="arastirma_raporu.pdf">Araştırma Raporu</option>
+                        <option value="faaliyet_raporu.pdf">Faaliyet Raporu</option>
+                        <option value="finansal_rapor.pdf">Finansal Rapor</option>
+                        <option value="toplanti_notlari.pdf">Toplantı Notları</option>
+                        <option value="yatirimci_sunumu.pdf">Yatırımcı Sunumu</option>
+                        <option value="fiyat_tespit_raporu.pdf">Fiyat Tespit Raporu</option>
+                    </select>
+                    <input type="file" id="upload-file" accept="application/pdf" class="form-control" style="flex: 2; min-width: 180px; padding: 0.3rem; cursor: pointer;">
+                    <button class="btn" style="background: var(--accent-color); flex: 1; min-width: 80px; padding: 0.3rem;" onclick="window.uploadRapor()">Yükle</button>
+                    <div id="upload-status" style="font-size: 13px; font-weight: 500; min-height: 10px; width: 100%;"></div>
+                </div>
+            </div>
 
             <!-- Enflasyon -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            <div class="glass" style="padding: 2rem;">
+            <div class="glass" style="padding: 1rem; margin-top: 1rem;">
 
 
 
@@ -39192,7 +38649,7 @@ const renderVeriler = (container) => {
 
 
 
-                    <h3 style="margin-bottom: 0.5rem; color: var(--accent-color);">Aylık Enflasyon Verileri</h3>
+                    <h3 style="margin-bottom: 0.5rem; color: var(--accent-color);">AylÄ±k Enflasyon Verileri</h3>
 
 
 
@@ -39384,7 +38841,7 @@ const renderVeriler = (container) => {
 
 
 
-                                <th style="text-align:center;">Dönem (Yıl-Ay)</th>
+                                <th style="text-align:center;">DÃ¶nem (YÄ±l-Ay)</th>
 
 
 
@@ -39408,7 +38865,7 @@ const renderVeriler = (container) => {
 
 
 
-                                <th style="text-align:right;">Aylık Enflasyon (%)</th>
+                                <th style="text-align:right;">AylÄ±k Enflasyon (%)</th>
 
 
 
@@ -39432,7 +38889,7 @@ const renderVeriler = (container) => {
 
 
 
-                                <th style="text-align:right;">Kümülatif Enflasyon (%)</th>
+                                <th style="text-align:right;">KÃ¼mÃ¼latif Enflasyon (%)</th>
 
 
 
@@ -39456,7 +38913,7 @@ const renderVeriler = (container) => {
 
 
 
-                                <th style="text-align:center; width: 80px;">İşlem</th>
+                                <th style="text-align:center; width: 80px;">Ä°ÅŸlem</th>
 
 
 
@@ -39816,7 +39273,7 @@ const renderVeriler = (container) => {
 
 
 
-                                        <button class="btn btn-danger" style="padding:0.2rem;" onclick="window.toggleEnfForm()" title="İptal"><i class="fas fa-times"></i></button>
+                                        <button class="btn btn-danger" style="padding:0.2rem;" onclick="window.toggleEnfForm()" title="Ä°ptal"><i class="fas fa-times"></i></button>
 
 
 
@@ -40524,7 +39981,7 @@ window.toggleInlineAnaliz = () => {
 
 
 
-                if(document.getElementById('analiz-not')) document.getElementById('analiz-not').placeholder = 'Bu analizden / videodan çıkardığınız özet notlar...';
+                if(document.getElementById('analiz-not')) document.getElementById('analiz-not').placeholder = 'Bu analizden / videodan Ã§Ä±kardÄ±ÄŸÄ±nÄ±z Ã¶zet notlar...';
 
 
 
@@ -40716,7 +40173,7 @@ window.sortAnalizler = (analizlerList) => {
 
 
 
-        const isPersA = a.isKisiselNot || a.borsaci === 'Yunus Şensoy' || a.borsaci === 'Kişisel Not' || (!a.borsaci && !a.tarih && !a.baglanti);
+        const isPersA = a.isKisiselNot || a.borsaci === 'Yunus Åensoy' || a.borsaci === 'KiÅŸisel Not' || (!a.borsaci && !a.tarih && !a.baglanti);
 
 
 
@@ -40728,7 +40185,7 @@ window.sortAnalizler = (analizlerList) => {
 
 
 
-        const isPersB = b.isKisiselNot || b.borsaci === 'Yunus Şensoy' || b.borsaci === 'Kişisel Not' || (!b.borsaci && !b.tarih && !b.baglanti);
+        const isPersB = b.isKisiselNot || b.borsaci === 'Yunus Åensoy' || b.borsaci === 'KiÅŸisel Not' || (!b.borsaci && !b.tarih && !b.baglanti);
 
 
 
@@ -40944,7 +40401,7 @@ window.addAnaliz = () => {
 
 
 
-                alert('Lütfen bir not girin.');
+                alert('LÃ¼tfen bir not girin.');
 
 
 
@@ -41004,7 +40461,7 @@ window.addAnaliz = () => {
 
 
 
-            let kullaniciAdi = 'Yunus Şensoy';
+            let kullaniciAdi = 'Yunus Åensoy';
 
 
 
@@ -41688,7 +41145,7 @@ window.addAnaliz = () => {
 
 
 
-            alert('Lütfen Tarih, Analist ve Hisse alanlarını doldurun.');
+            alert('LÃ¼tfen Tarih, Analist ve Hisse alanlarÄ±nÄ± doldurun.');
 
 
 
@@ -42312,7 +41769,7 @@ window.addAnaliz = () => {
 
 
 
-        alert('Hata oluştu: ' + e.message);
+        alert('Hata oluÅŸtu: ' + e.message);
 
 
 
@@ -42708,7 +42165,7 @@ window.editAnaliz = (id) => {
 
 
 
-            if(nEl) nEl.placeholder = cb.checked ? 'Özel notunuzu buraya yazın...' : 'Bu analizden / videodan çıkardığınız özet notlar...';
+            if(nEl) nEl.placeholder = cb.checked ? 'Ã–zel notunuzu buraya yazÄ±n...' : 'Bu analizden / videodan Ã§Ä±kardÄ±ÄŸÄ±nÄ±z Ã¶zet notlar...';
 
 
 
@@ -42816,7 +42273,7 @@ window.deleteAnaliz = (id) => {
 
 
 
-    if (msgEl) msgEl.textContent = 'Bu analizi silmek istediğinize emin misiniz?';
+    if (msgEl) msgEl.textContent = 'Bu analizi silmek istediÄŸinize emin misiniz?';
 
 
 
@@ -42948,7 +42405,7 @@ window.deleteAnaliz = (id) => {
 
 
 
-        if (!window.themeConfirmAction) { showThemeConfirm('Bu analizi silmek istediğinize emin misiniz?', () => { window.deleteAnaliz(id); }); return; }
+        if (!window.themeConfirmAction) { showThemeConfirm('Bu analizi silmek istediÄŸinize emin misiniz?', () => { window.deleteAnaliz(id); }); return; }
         window.themeConfirmAction();
 
 
@@ -44545,7 +44002,7 @@ const renderAnalizler = (container) => {
 
 
 
-            else if (a.baglanti.includes('twitter') || a.baglanti.includes('x.com')) linkLabel = 'X (Twitter) Bağlantısı';
+            else if (a.baglanti.includes('twitter') || a.baglanti.includes('x.com')) linkLabel = 'X (Twitter) BaÄŸlantÄ±sÄ±';
 
 
 
@@ -44701,7 +44158,7 @@ const renderAnalizler = (container) => {
 
 
 
-                        <button class="btn btn-icon" style="color: var(--accent-color);" onclick="window.editAnaliz(${a.id})" title="Düzenle"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-icon" style="color: var(--accent-color);" onclick="window.editAnaliz(${a.id})" title="DÃ¼zenle"><i class="fas fa-edit"></i></button>
 
 
 
@@ -44809,7 +44266,7 @@ const renderAnalizler = (container) => {
 
 
 
-        tableRows += `<tr><td colspan="7" style="text-align: center; padding: 2rem; opacity: 0.5;">Henüz eklenmiş bir analiz bulunmuyor.</td></tr>`;
+        tableRows += `<tr><td colspan="7" style="text-align: center; padding: 2rem; opacity: 0.5;">HenÃ¼z eklenmiÅŸ bir analiz bulunmuyor.</td></tr>`;
 
 
 
@@ -45073,7 +44530,7 @@ const renderAnalizler = (container) => {
 
 
 
-                                <th style="text-align: center; color: white; width: 150px; white-space: nowrap;">Bağlantı</th>
+                                <th style="text-align: center; color: white; width: 150px; white-space: nowrap;">BaÄŸlantÄ±</th>
 
 
 
@@ -45097,7 +44554,7 @@ const renderAnalizler = (container) => {
 
 
 
-                                <th style="text-align: center; color: white; width: 90px; white-space: nowrap;">İşlem</th>
+                                <th style="text-align: center; color: white; width: 90px; white-space: nowrap;">Ä°ÅŸlem</th>
 
 
 
@@ -45229,7 +44686,7 @@ const renderAnalizler = (container) => {
 
 
 
-                                    <input type="text" id="analiz-baslik" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:left;" placeholder="Başlık">
+                                    <input type="text" id="analiz-baslik" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:left;" placeholder="BaÅŸlÄ±k">
 
 
 
@@ -45301,7 +44758,7 @@ const renderAnalizler = (container) => {
 
 
 
-                                        <button class="btn btn-icon" style="color: var(--danger-color);" onclick="window.toggleInlineAnaliz()" title="İptal"><i class="fas fa-times"></i></button>
+                                        <button class="btn btn-icon" style="color: var(--danger-color);" onclick="window.toggleInlineAnaliz()" title="Ä°ptal"><i class="fas fa-times"></i></button>
 
 
 
@@ -45613,7 +45070,7 @@ const renderAyarlar = (container) => {
 
 
 
-            <h2 style="margin-bottom:1rem;"><i class="fas fa-user-cog"></i> Hesap Ayarları</h2>
+            <h2 style="margin-bottom:1rem;"><i class="fas fa-user-cog"></i> Hesap AyarlarÄ±</h2>
 
 
 
@@ -45709,7 +45166,7 @@ const renderAyarlar = (container) => {
 
 
 
-                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">E-posta (Değiştirilemez)</label>
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">E-posta (DeÄŸiÅŸtirilemez)</label>
 
 
 
@@ -45805,7 +45262,7 @@ const renderAyarlar = (container) => {
 
 
 
-                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">Adı Soyadı</label>
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">AdÄ± SoyadÄ±</label>
 
 
 
@@ -46117,7 +45574,7 @@ const renderAyarlar = (container) => {
 
 
 
-                    <h3 style="margin-bottom: 0.5rem; color: var(--text-primary); font-size: 1.1rem;">Parola Güncelleme</h3>
+                    <h3 style="margin-bottom: 0.5rem; color: var(--text-primary); font-size: 1.1rem;">Parola GÃ¼ncelleme</h3>
 
 
 
@@ -46237,7 +45694,7 @@ const renderAyarlar = (container) => {
 
 
 
-                    <button type="submit" class="btn btn-danger" style="margin-top: 0.5rem;">Parolayı Güncelle</button>
+                    <button type="submit" class="btn btn-danger" style="margin-top: 0.5rem;">ParolayÄ± GÃ¼ncelle</button>
 
 
 
@@ -46741,7 +46198,7 @@ const renderAyarlar = (container) => {
 
 
 
-            alert('Profil güncellendi!');
+            alert('Profil gÃ¼ncellendi!');
 
 
 
@@ -46933,7 +46390,7 @@ const renderAyarlar = (container) => {
 
 
 
-            alert('Parola başarıyla güncellendi!');
+            alert('Parola baÅŸarÄ±yla gÃ¼ncellendi!');
 
 
 
@@ -47989,7 +47446,7 @@ const renderHedef = (container) => {
 
 
 
-        rowsHtml = `<tr><td colspan="9" style="text-align:center; padding:2rem; opacity:0.5;">Henüz hiçbir hisse için Hedef Fiyat hesaplaması (Değerleme girişi) yapılmamış.</td></tr>`;
+        rowsHtml = `<tr><td colspan="9" style="text-align:center; padding:2rem; opacity:0.5;">HenÃ¼z hiÃ§bir hisse iÃ§in Hedef Fiyat hesaplamasÄ± (DeÄŸerleme giriÅŸi) yapÄ±lmamÄ±ÅŸ.</td></tr>`;
 
 
 
@@ -48157,7 +47614,7 @@ const renderHedef = (container) => {
 
 
 
-                            <th>Güncel Fiyat</th>
+                            <th>GÃ¼ncel Fiyat</th>
 
 
 
@@ -48325,7 +47782,7 @@ const renderHedef = (container) => {
 
 
 
-            <p style="font-size:0.85rem; color:#aaa;"><i class="fas fa-info-circle"></i> Tablodaki değerler, Hisseler > Anasayfa > Değerleme panelinde girdiğiniz tahminlere göre otomatik hesaplanır ve buraya yansır.</p>
+            <p style="font-size:0.85rem; color:#aaa;"><i class="fas fa-info-circle"></i> Tablodaki deÄŸerler, Hisseler > Anasayfa > DeÄŸerleme panelinde girdiÄŸiniz tahminlere gÃ¶re otomatik hesaplanÄ±r ve buraya yansÄ±r.</p>
 
 
 
@@ -48421,7 +47878,7 @@ window.goToHisse = (h) => {
 
 
 
-        if (currentPage !== 'hisse_detay') window.currentHisseTab = 'Özet Rapor';
+        if (currentPage !== 'hisse_detay') window.currentHisseTab = 'Ã–zet Rapor';
 
 
 
@@ -48601,7 +48058,7 @@ window.openHisseFromDropdown = (h) => {
 
 
 
-    if (currentPage !== 'hisse_detay') window.currentHisseTab = 'Özet Rapor';
+    if (currentPage !== 'hisse_detay') window.currentHisseTab = 'Ã–zet Rapor';
 
 
 
@@ -49105,7 +48562,7 @@ window.removeHisseFromTakip = (hisseKodu) => {
 
 
 
-    document.getElementById('theme-confirm-message').innerText = hisseKodu + ' takip listesinden çikarilacak. Emin misiniz?';
+    document.getElementById('theme-confirm-message').innerText = hisseKodu + ' takip listesinden Ã§ikarilacak. Emin misiniz?';
 
 
 
@@ -49921,7 +49378,7 @@ const renderAnasayfa = (container) => {
 
 
 
-        rowsHtml = `<tr><td colspan="10" style="text-align: center; padding: 2rem;">Takip listeniz boş. Yukarıdan hisse ekleyebilirsiniz.</td></tr>`;
+        rowsHtml = `<tr><td colspan="10" style="text-align: center; padding: 2rem;">Takip listeniz boÅŸ. YukarÄ±dan hisse ekleyebilirsiniz.</td></tr>`;
 
 
 
@@ -50185,7 +49642,7 @@ const renderAnasayfa = (container) => {
 
 
 
-                                <th style="text-align: center;">İşlem</th>
+                                <th style="text-align: center;">Ä°ÅŸlem</th>
 
 
 
@@ -50437,7 +49894,7 @@ window.formatCustomDate = (dateStr) => {
 
 
 
-        const months = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+        const months = ["Oca", "Åub", "Mar", "Nis", "May", "Haz", "Tem", "AÄŸu", "Eyl", "Eki", "Kas", "Ara"];
 
 
 
@@ -50505,17 +49962,17 @@ window.fetchFirebaseRaporlar = async (hisseKodu) => {
         const result = await storageRef.listAll();
         
         const titleMap = {
-            'arastirma_raporu.pdf': 'Araştırma Raporu',
+            'arastirma_raporu.pdf': 'AraÅŸtÄ±rma Raporu',
             'faaliyet_raporu.pdf': 'Faaliyet Raporu',
             'finansal_rapor.pdf': 'Finansal Rapor',
-            'toplanti_notlari.pdf': 'Toplantı Notları',
-            'yatirimci_sunumu.pdf': 'Yatırımcı Sunumu',
+            'toplanti_notlari.pdf': 'ToplantÄ± NotlarÄ±',
+            'yatirimci_sunumu.pdf': 'YatÄ±rÄ±mcÄ± Sunumu',
             'fiyat_tespit_raporu.pdf': 'Fiyat Tespit Raporu'
         };
 
         let html = '';
         if (result.items.length > 0) {
-            html += '<div style="margin-top: 1rem; font-weight: bold; color: var(--accent-color); font-size: 14px; margin-bottom: 0.5rem;">Bulut Raporları</div>';
+            html += '<div style="margin-top: 1rem; font-weight: bold; color: var(--accent-color); font-size: 14px; margin-bottom: 0.5rem;">Bulut RaporlarÄ±</div>';
             for (let itemRef of result.items) {
                 const url = await itemRef.getDownloadURL();
                 const fileName = itemRef.name;
@@ -50541,10 +49998,10 @@ window.fetchFirebaseRaporlar = async (hisseKodu) => {
         } else if (result.items.length === 0 && parentCard) {
             const emptyState = parentCard.querySelector('.empty-local');
             if(!emptyState) {
-                container.innerHTML = '<div style="padding: 1rem; color: var(--text-secondary); font-style: italic; font-size: 13px;">Bu hisseye ait rapor bulunamadı.</div>';
+                container.innerHTML = '<div style="padding: 1rem; color: var(--text-secondary); font-style: italic; font-size: 13px;">Bu hisseye ait rapor bulunamadÄ±.</div>';
             } else {
                 container.innerHTML = '';
-                emptyState.innerText = 'Bu hisseye ait rapor bulunamadı.';
+                emptyState.innerText = 'Bu hisseye ait rapor bulunamadÄ±.';
             }
         }
     } catch (error) {
@@ -50560,21 +50017,21 @@ window.uploadRapor = async () => {
     const statusDiv = document.getElementById('upload-status');
     
     if(!hisse || !fileName || fileInput.files.length === 0) {
-        statusDiv.innerHTML = '<span style="color:var(--danger-color);">Lütfen tüm alanları doldurun ve dosya seçin.</span>';
+        statusDiv.innerHTML = '<span style="color:var(--danger-color);">LÃ¼tfen tÃ¼m alanlarÄ± doldurun ve dosya seÃ§in.</span>';
         return;
     }
     
     const file = fileInput.files[0];
-    statusDiv.innerHTML = '<span style="color:var(--accent-color);"><i class="fas fa-spinner fa-spin"></i> Yükleniyor... Lütfen bekleyin.</span>';
+    statusDiv.innerHTML = '<span style="color:var(--accent-color);"><i class="fas fa-spinner fa-spin"></i> YÃ¼kleniyor... LÃ¼tfen bekleyin.</span>';
     
     try {
         const storageRef = firebase.storage().ref(`Hisseler/${hisse}/${fileName}`);
         await storageRef.put(file);
-        statusDiv.innerHTML = '<span style="color:var(--success-color);"><i class="fas fa-check-circle"></i> Dosya başarıyla yüklendi!</span>';
+        statusDiv.innerHTML = '<span style="color:var(--success-color);"><i class="fas fa-check-circle"></i> Dosya baÅŸarÄ±yla yÃ¼klendi!</span>';
         fileInput.value = '';
     } catch (error) {
         console.error("Upload error:", error);
-        statusDiv.innerHTML = '<span style="color:var(--danger-color);"><i class="fas fa-times-circle"></i> Yükleme başarısız oldu: ' + error.message + '</span>';
+        statusDiv.innerHTML = '<span style="color:var(--danger-color);"><i class="fas fa-times-circle"></i> YÃ¼kleme baÅŸarÄ±sÄ±z oldu: ' + error.message + '</span>';
     }
 };
 
@@ -50602,7 +50059,7 @@ window.formatCustomCurrency = (val, currencyCode = 'TRY') => {
 
 
 
-    let symbol = '₺';
+    let symbol = 'â‚º';
 
 
 
@@ -50626,7 +50083,7 @@ window.formatCustomCurrency = (val, currencyCode = 'TRY') => {
 
 
 
-    if (currencyCode === 'EUR') symbol = '€';
+    if (currencyCode === 'EUR') symbol = 'â‚¬';
 
 
 
@@ -50842,7 +50299,7 @@ window.confirmAddHisse = () => {
 
 
 
-            alert('Lütfen geçerli bir BİST hisse kodu giriniz veya listeden seçiniz.');
+            alert('LÃ¼tfen geÃ§erli bir BÄ°ST hisse kodu giriniz veya listeden seÃ§iniz.');
 
 
 
@@ -51442,7 +50899,7 @@ window.confirmRemoveHisse = () => {
 
 
 
-            alert(hisseKodu + ' takip listesinde bulunamadı!');
+            alert(hisseKodu + ' takip listesinde bulunamadÄ±!');
 
 
 
@@ -51718,7 +51175,7 @@ window.removeTakip = (hisse) => {
 
 
 
-    showThemeConfirm(hisse + ' hissesini takip listesinden çıkarmak istediğinize emin misiniz?', () => {
+    showThemeConfirm(hisse + ' hissesini takip listesinden Ã§Ä±karmak istediÄŸinize emin misiniz?', () => {
 
 
 
@@ -51958,7 +51415,7 @@ window.openHisseFromDropdown = (h) => {
 
 
 
-    if (currentPage !== 'hisse_detay') window.currentHisseTab = 'Özet Rapor';
+    if (currentPage !== 'hisse_detay') window.currentHisseTab = 'Ã–zet Rapor';
 
 
 
@@ -53878,7 +53335,7 @@ window.fetchTickerData = async () => {
 
 
 
-        // İlk render (Truncgil verileri + Loading yazıları)
+        // Ä°lk render (Truncgil verileri + Loading yazÄ±larÄ±)
 
 
 
@@ -54202,7 +53659,7 @@ window.fetchTickerData = async () => {
 
 
 
-        // XU100 ve BRENT'i arka planda çekip tekrar renderla
+        // XU100 ve BRENT'i arka planda Ã§ekip tekrar renderla
 
 
 
@@ -54298,7 +53755,7 @@ window.fetchTickerData = async () => {
 
 
 
-        console.error('Ticker verisi alınamadı:', e);
+        console.error('Ticker verisi alÄ±namadÄ±:', e);
 
 
 
@@ -54550,7 +54007,7 @@ const initApp = () => {
 
 
 
-    // İlk açılışta fiyatları webden al
+    // Ä°lk aÃ§Ä±lÄ±ÅŸta fiyatlarÄ± webden al
 
 
 
@@ -54586,7 +54043,7 @@ const initApp = () => {
 
 
 
-        // İsteğe bağlı olarak her 5 dakikada bir güncelleyebiliriz
+        // Ä°steÄŸe baÄŸlÄ± olarak her 5 dakikada bir gÃ¼ncelleyebiliriz
 
 
 
@@ -54766,7 +54223,7 @@ const toggleAuthMode = () => {
 
 
 
-    document.getElementById('auth-title').innerText = isLoginMode ? 'Giriş Yap' : 'Kayıt Ol';
+    document.getElementById('auth-title').innerText = isLoginMode ? 'GiriÅŸ Yap' : 'KayÄ±t Ol';
 
 
 
@@ -54778,7 +54235,7 @@ const toggleAuthMode = () => {
 
 
 
-    document.getElementById('auth-submit-btn').innerText = isLoginMode ? 'Giriş Yap' : 'Kayıt Ol';
+    document.getElementById('auth-submit-btn').innerText = isLoginMode ? 'GiriÅŸ Yap' : 'KayÄ±t Ol';
 
 
 
@@ -54802,7 +54259,7 @@ const toggleAuthMode = () => {
 
 
 
-        'Hesabınız yok mu? <span style="color: var(--accent-color);">Kayıt Olun</span>' : 
+        'HesabÄ±nÄ±z yok mu? <span style="color: var(--accent-color);">KayÄ±t Olun</span>' : 
 
 
 
@@ -54814,7 +54271,7 @@ const toggleAuthMode = () => {
 
 
 
-        'Zaten hesabınız var mı? <span style="color: var(--accent-color);">Giriş Yapın</span>';
+        'Zaten hesabÄ±nÄ±z var mÄ±? <span style="color: var(--accent-color);">GiriÅŸ YapÄ±n</span>';
 
 
 
@@ -54995,14 +54452,14 @@ document.getElementById('auth-toggle').addEventListener('click', toggleAuthMode)
 
 
 const getFirebaseErrorTR = (err) => {
-    if (err.code === 'auth/email-already-in-use') return 'Bu e-posta adresi zaten kullanılıyor.';
-    if (err.code === 'auth/invalid-email') return 'Geçersiz e-posta adresi.';
-    if (err.code === 'auth/weak-password') return 'Şifre çok zayıf. En az 6 karakter olmalıdır.';
-    if (err.code === 'auth/user-not-found') return 'Kullanıcı bulunamadı.';
-    if (err.code === 'auth/wrong-password') return 'Hatalı şifre.';
-    if (err.code === 'auth/invalid-credential') return 'E-posta veya şifre hatalı.';
-    if (err.code === 'auth/too-many-requests') return 'Çok fazla başarısız deneme. Lütfen daha sonra tekrar deneyin.';
-    if (err.code === 'auth/network-request-failed') return 'Ağ bağlantısı hatası. Lütfen internetinizi kontrol edin.';
+    if (err.code === 'auth/email-already-in-use') return 'Bu e-posta adresi zaten kullanÄ±lÄ±yor.';
+    if (err.code === 'auth/invalid-email') return 'GeÃ§ersiz e-posta adresi.';
+    if (err.code === 'auth/weak-password') return 'Åifre Ã§ok zayÄ±f. En az 6 karakter olmalÄ±dÄ±r.';
+    if (err.code === 'auth/user-not-found') return 'KullanÄ±cÄ± bulunamadÄ±.';
+    if (err.code === 'auth/wrong-password') return 'HatalÄ± ÅŸifre.';
+    if (err.code === 'auth/invalid-credential') return 'E-posta veya ÅŸifre hatalÄ±.';
+    if (err.code === 'auth/too-many-requests') return 'Ã‡ok fazla baÅŸarÄ±sÄ±z deneme. LÃ¼tfen daha sonra tekrar deneyin.';
+    if (err.code === 'auth/network-request-failed') return 'AÄŸ baÄŸlantÄ±sÄ± hatasÄ±. LÃ¼tfen internetinizi kontrol edin.';
     return err.message;
 };
 
@@ -55094,7 +54551,7 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 
     const btn = document.getElementById('auth-submit-btn');
     const originalBtnText = btn.innerText;
-    btn.innerText = 'Lütfen bekleyin...';
+    btn.innerText = 'LÃ¼tfen bekleyin...';
     btn.disabled = true;
 
     if (isLoginMode) {
@@ -55111,7 +54568,7 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 
         auth.signInWithEmailAndPassword(email, password)
         .then(() => {
-            btn.innerText = 'Başarılı!';
+            btn.innerText = 'BaÅŸarÄ±lÄ±!';
             // onAuthStateChanged will handle the redirect
         })
         .catch(err => {
@@ -55151,7 +54608,7 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 
 
 
-        alert("Yeni üye alımı güvenlik nedeniyle kapatılmıştır.");
+        alert("Yeni Ã¼ye alÄ±mÄ± gÃ¼venlik nedeniyle kapatÄ±lmÄ±ÅŸtÄ±r.");
         btn.innerText = originalBtnText;
         btn.disabled = false;
 
@@ -55393,7 +54850,7 @@ auth.onAuthStateChanged(user => {
 
 
 
-        if (unEl) unEl.innerText = displayName || 'Kullanıcı';
+        if (unEl) unEl.innerText = displayName || 'KullanÄ±cÄ±';
 
 
 
@@ -56521,7 +55978,7 @@ window.showSidebarTakip = (btn) => {
 
 
 
-        dropdown.innerHTML = '<div style="padding: 0.5rem; color: var(--text-secondary); font-size: 12px; white-space: nowrap; text-align: center;">Listeniz boş</div>';
+        dropdown.innerHTML = '<div style="padding: 0.5rem; color: var(--text-secondary); font-size: 12px; white-space: nowrap; text-align: center;">Listeniz boÅŸ</div>';
 
 
 
@@ -57061,7 +56518,7 @@ window.goToPortfoyTab = (tabId) => {
 
 
 
-// --- ENFLASYON İŞLEMLERİ ---
+// --- ENFLASYON Ä°ÅLEMLERÄ° ---
 
 
 
@@ -57565,7 +57022,7 @@ window.renderEnflasyonData = () => {
 
 
 
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; opacity:0.5;">Kayıt bulunamadı.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; opacity:0.5;">KayÄ±t bulunamadÄ±.</td></tr>';
 
 
 
