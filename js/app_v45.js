@@ -55151,7 +55151,7 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 
 
 
-        auth.createUserWithEmailAndPassword(email, password)
+        throw new Error("Yeni üye alımı güvenlik nedeniyle kapatılmıştır.");
 
 
 
