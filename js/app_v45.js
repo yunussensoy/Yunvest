@@ -28260,7 +28260,7 @@ const renderHisseler = (container) => {
 
 
 
-                    <div style="font-size: 1.5rem; font-weight: bold; color: #fff;">₺${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)}</div>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: #fff;">₺${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)}</div>
 
 
 
@@ -28272,7 +28272,7 @@ const renderHisseler = (container) => {
 
 
 
-                    <div id="hisse-header-change" style="font-size: 1rem; font-weight: 600; color: ${hColor}; display: block;">
+                    <div id="hisse-header-change" style="font-size: 0.9rem; font-weight: 600; color: ${hColor}; display: block;">
 
 
 
