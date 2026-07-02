@@ -445,11 +445,11 @@ tbody tr {
 
 /* Standardize All Tables (Compact) */
 .compact-table { table-layout: auto !important; width: 100%; border-collapse: collapse; }
-.compact-table th, .compact-table td { padding: 0.6rem 0.5rem !important; white-space: nowrap; }
-.compact-table th { font-size: 13px !important; font-weight: 600 !important; color: #ffffff !important; height: 39px; text-align: center; }
+.compact-table th, .compact-table td { padding: 3px 6px !important; white-space: nowrap; }
+.compact-table th { font-size: 13px !important; font-weight: 600 !important; color: #ffffff !important; text-align: center; }
 .compact-table td:first-child { font-size: 13px !important; font-weight: 500 !important; color: #cccccc !important; }
-.compact-table tr { height: 39px !important; }
-.compact-table td { font-size: 13px !important; font-weight: 500 !important; color: #cccccc; height: 34px !important; line-height: 1 !important; text-align: center; }
+.compact-table tr { height: auto !important; }
+.compact-table td { font-size: 13px !important; font-weight: 500 !important; color: #cccccc; line-height: 1.2 !important; text-align: center; }
 
 /* STANDART TABLO YAPISI (User Request) */
 .std-table-header, .table-header {
@@ -459,7 +459,7 @@ tbody tr {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    padding: 8px 5px !important;
+    padding: 4px 6px !important;
     margin: 0 0 1rem 0 !important;
     height: auto !important;
 }
@@ -476,7 +476,7 @@ tbody tr {
     color: #ffffff !important;
     text-align: center !important;
     vertical-align: middle !important;
-    padding: 8px 5px !important;
+    padding: 4px 6px !important;
     background: rgba(0, 0, 0, 0.2) !important;
     border-bottom: 1px solid var(--table-border);
     border-right: 1px solid var(--table-border);
@@ -488,7 +488,7 @@ tbody tr {
     color: #cccccc;
     text-align: center !important;
     vertical-align: middle !important;
-    padding: 8px 5px !important;
+    padding: 4px 6px !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     border-right: 1px solid var(--table-border);
 }
@@ -508,7 +508,7 @@ tbody tr {
     color: #ffffff !important;
     text-align: center !important;
     vertical-align: middle !important;
-    padding: 8px 5px !important;
+    padding: 4px 6px !important;
     background: rgba(0, 0, 0, 0.3) !important;
     border-top: 2px solid var(--surface-border) !important;
 }

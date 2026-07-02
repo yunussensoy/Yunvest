@@ -943,9 +943,14 @@ const renderPortfoy = (container) => {
                         <tbody>
                             <tr>
     <td style="text-align:left;">Nakit</td>
-    <td><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
+    <td><div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
         <span id="nakit-text">${formatCurrency(guncelNakitTutar, 0)}</span>
-        
+        <button id="nakit-edit-btn" class="btn" style="padding:0.1rem 0.3rem; font-size:12px; background:var(--accent-color);" onclick="window.toggleNakitEdit()"><i class="fas fa-edit"></i></button>
+        <form id="inline-nakit-form" style="display:none; margin:0; gap:0.2rem; align-items:center;" onsubmit="window.saveInlineNakit(event, ${guncelNakitTutar})">
+            <input type="number" step="0.01" id="inline-nakit-input" value="${guncelNakitTutar}" style="width: 80px; padding: 2px; font-size: 12px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--surface-border); border-radius:4px; text-align:right;">
+            <button type="submit" class="btn" style="padding:0.1rem 0.3rem; font-size:12px;"><i class="fas fa-check"></i></button>
+            <button type="button" class="btn" style="padding:0.1rem 0.3rem; font-size:12px; background:rgba(255,255,255,0.1);" onclick="window.toggleNakitEdit()"><i class="fas fa-times"></i></button>
+        </form>
     </div></td>
 </tr>
                             <tr><td style="text-align:left;">Hisse Portföyü</td><td>${formatCurrency(hissePortfoyTutar, 0)}</td></tr>
@@ -964,9 +969,14 @@ const renderPortfoy = (container) => {
                             <tr><td style="text-align:left;">Gram Altına Göre Reel Getiri Oranı</td><td class="${portfoyBilgileri.reelGetiriAltin >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriAltin)}</td></tr>
                             <tr>
     <td style="text-align:left;">Hedef Portföy</td>
-    <td><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
+    <td><div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
         <span id="hedef-text">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span>
-        
+        <button id="hedef-edit-btn" class="btn" style="padding:0.1rem 0.3rem; font-size:12px; background:var(--accent-color);" onclick="window.toggleHedefEdit()"><i class="fas fa-edit"></i></button>
+        <form id="inline-hedef-form" style="display:none; margin:0; gap:0.2rem; align-items:center; width:100%; justify-content:flex-end;" onsubmit="window.saveInlineHedef(event)">
+            <input type="number" step="1" id="inline-hedef-input" value="${portfoyBilgileri.hedefPortfoy}" style="width: 100px; padding: 2px; font-size: 12px; background:rgba(0,0,0,0.3); color:#fff; border:1px solid var(--surface-border); border-radius:4px; text-align:right;">
+            <button type="submit" class="btn" style="padding:0.1rem 0.3rem; font-size:12px;"><i class="fas fa-check"></i></button>
+            <button type="button" class="btn" style="padding:0.1rem 0.3rem; font-size:12px; background:rgba(255,255,255,0.1);" onclick="window.toggleHedefEdit()"><i class="fas fa-times"></i></button>
+        </form>
     </div></td>
 </tr>
                             <tr><td style="text-align:left;">Hedefe Ulaşmak İçin Gereken Artış %</td><td>${formatPercent(portfoyBilgileri.hedefArtis, 0)}</td></tr>
@@ -988,7 +998,7 @@ const renderPortfoy = (container) => {
                     <div style="flex: 2.5; overflow-x: auto;">
                         <table>
                             <thead>
-                                <tr><th style="font-size: 14px;">S.N.</th><th>Menkul</th><th>Tür</th><th>Güncel<br>Fiyat</th><th>Adet</th><th>Güncel<br>Maliyet</th><th>Net<br>Maliyet</th><th>Ödenen<br>Tutar</th><th>Güncel<br>Tutar</th><th>Kar/Zarar</th><th>Kar/Zarar <br> %</th><th>Portföy<br>Oranı</th><th>İlk Alım<br>Tarihi</th><th>Geçen<br>Süre</th></tr>
+                                <tr><th>S.N.</th><th>Menkul</th><th>Tür</th><th>Güncel<br>Fiyat</th><th>Adet</th><th>Güncel<br>Maliyet</th><th>Net<br>Maliyet</th><th>Ödenen<br>Tutar</th><th>Güncel<br>Tutar</th><th>Kar/Zarar</th><th>Kar/Zarar%</th><th>Portföy<br>Oranı</th><th>İlk Alım<br>Tarihi</th><th>Geçen<br>Süre</th></tr>
                             </thead>
                             <tbody>
                                 ${portfoyHtml}
@@ -1018,7 +1028,7 @@ const renderPortfoy = (container) => {
                     <div class="table-header">Arşiv</div>
 <table class="dash-table compact-table" style="min-width: 1000px;">
                     <thead>
-                        <tr><th style="font-size: 14px;">S.N.</th><th>Menkul</th><th>Adet</th><th>Alış Fiyatı</th><th>Satış Fiyatı</th><th>Kar / Zarar</th><th>Kar / Zarar %</th><th>İlk Alım Tarihi</th><th>Son Satım Tarihi</th><th>Taşıma Süresi</th></tr>
+                        <tr><th>S.N.</th><th>Menkul</th><th>Adet</th><th>Alış Fiyatı</th><th>Satış Fiyatı</th><th>Kar / Zarar</th><th>Kar / Zarar %</th><th>İlk Alım Tarihi</th><th>Son Satım Tarihi</th><th>Taşıma Süresi</th></tr>
                     </thead>
                     <tbody>
                         ${arsivHtml}
@@ -1182,7 +1192,6 @@ const renderPortfoy = (container) => {
 };
 
 const renderHisseler = (container) => {
-
     // Requires nodeIntegration
     let fsNode, pathNode, shellNode;
     try {
@@ -1196,7 +1205,7 @@ const renderHisseler = (container) => {
     window.currentSelectedHisse = selectedHisse; // sync it back
     const hName = selectedHisse || 'Hisse';
     
-    const validTabs = ['Özet Rapor', 'Raporlar', 'Değerleme', 'Hisse Notları'];
+    const validTabs = ['Özet Rapor', 'Gelir Tablosu', 'Bilanço', 'Nakit Akım Tablosu', 'Raporlar', 'Değerleme', 'Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler', 'Finansal Rapor', 'Faaliyet Raporu', 'Yatırımcı Sunumu', 'Araştırma Raporu', 'Özet Rapor Notları', 'Hisse Notları'];
     let activeTab = window.currentHisseTab || 'Özet Rapor';
     if (!validTabs.includes(activeTab)) {
         activeTab = 'Özet Rapor';
@@ -1288,7 +1297,10 @@ const renderHisseler = (container) => {
             </div>`;
 
         let tabsHtml = makeBtn('Özet Rapor') + 
-                       makeBtn('Raporlar') +
+                       makeDropdown('Finansal Tablolar', ['Bilanço', 'Gelir Tablosu', 'Nakit Akım Tablosu']) +
+                       makeDropdown('Oran Analizi', ['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları']) +
+                       makeBtn('Diğer Kalemler') +
+                       makeDropdown('Raporlar', ['Finansal Rapor', 'Faaliyet Raporu', 'Yatırımcı Sunumu', 'Araştırma Raporu']) +
                        makeBtn('Değerleme') + makeBtn('Hisse Notları');
                        
         let contentHtml = '';
@@ -1304,7 +1316,7 @@ const renderHisseler = (container) => {
                         oninput="window.updateGenelNot('${not.id}', this.value)"
                         placeholder="Notunuzu buraya yazın..."
                     >${not.text}</textarea>
-                    <div style="display:flex; justify-content:flex-end; align-items:center; margin-top: 0.5rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 0.5rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top: 0.5rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 0.5rem;">
                         <div style="display:flex; gap: 4px;">
                             ${colors.map(col => `<div onclick="window.changeGenelNotColor('${not.id}', '${col}')" style="width:15px; height:15px; border-radius:50%; background:${col}; cursor:pointer; border: 1px solid rgba(0,0,0,0.2);"></div>`).join('')}
                         </div>
@@ -1315,7 +1327,7 @@ const renderHisseler = (container) => {
 
             contentHtml = `
                 <div style="padding: 1rem; display: flex; flex-direction: column; height: 100%;">
-                    <div style="display:flex; justify-content:flex-end; align-items:center; margin-bottom: 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0;">
                         <h2 style="color: var(--accent-color);"><i class="fas fa-sticky-note"></i> Genel Piyasa Notları</h2>
                         <button class="btn btn-primary" onclick="window.addGenelNot()" style="padding: 0.5rem 1rem; font-weight:bold; font-size: 1.1rem;"><i class="fas fa-plus"></i> Yeni Not Ekle</button>
                     </div>
@@ -1340,6 +1352,7 @@ const renderHisseler = (container) => {
             const fiyat = parseFloat(State.getFiyat(selectedHisse)) || 0;
             const usdtry = parseFloat(State.getFiyat('USDTRY')) || 32.50;
 
+            try {
             const odenmisSermaye = getVal(sData.bilanco, 'Ödenmiş Sermaye');
             const piyasaDegeri = fiyat * odenmisSermaye;
             const piyasaDegeriUsd = piyasaDegeri / usdtry;
@@ -1435,6 +1448,10 @@ const renderHisseler = (container) => {
                 ['Cari Oran', fmtDec(cariOran)]
             ];
             const tGuncelDynamic = genTable('Güncel Metrikler', ['Metrik', 'Değer'], gRows);
+            } catch(err) {
+                console.error(err);
+                contentHtml = '<div style="padding: 3rem; color: #fff; text-align: center; background: rgba(0,0,0,0.2); border-radius: 12px; margin: 1rem;"><i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--danger-color); margin-bottom: 1rem;"></i><h3 style="margin-bottom: 0.5rem;">Veri Bulunamadı veya Hesaplanamadı</h3><p style="color: var(--text-secondary); margin-bottom: 1rem;">Bu hisseye ait bilanço/gelir tablosu verileri eksik veya hatalı olabilir.</p><p style="font-size: 11px; opacity: 0.5;">Hata: ' + err.message + '</p></div>';
+            }
 
             if (activeTab === hName || activeTab === 'Özet Rapor') {
                 // FINTABLES STYLE SUMMARY DASHBOARD
@@ -1817,7 +1834,7 @@ const renderHisseler = (container) => {
                                     <div style="width:${pctKisa}%; background:#fd79a8;" title="Kısa Vade Yükümlülükler: %${pctKisa}"></div>
                                     <div style="width:${pctUzun}%; background:#636e72;" title="Uzun Vade Yükümlülükler: %${pctUzun}"></div>
                                 </div>
-                                <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 1rem; font-size: 13px; color:#aaa;">
+                                <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 1rem; font-size: 0.75rem; color:#aaa;">
                                     <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#6c5ce7;"></div>Özkaynaklar: %${pctOz}</div>
                                     <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#fd79a8;"></div>Kısa Vade Yük.: %${pctKisa}</div>
                                     <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#636e72;"></div>Uzun Vade Yük.: %${pctUzun}</div>
@@ -1954,157 +1971,20 @@ const renderHisseler = (container) => {
                 window.shouldRenderDashboardCharts = true;
             } else if (['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler'].includes(activeTab)) {
                 contentHtml = `<div style="display:flex; justify-content:center; align-items:center; height:200px; opacity:0.5; font-style:italic;">${activeTab} sayfası henüz yapım aşamasındadır.</div>`;
-            } else if (activeTab === 'Raporlar') {
-                const fsN = require('fs');
-                const pathN = require('path');
-                let reportsDir = pathN.join(process.cwd(), 'Hisseler', selectedHisse);
-                // Fallback to Hisse_Verileri if Hisseler doesn't exist
-                if (!fsN.existsSync(reportsDir)) {
-                    reportsDir = pathN.join(process.cwd(), 'Hisse_Verileri', selectedHisse);
-                }
+            } else if (['Finansal Rapor', 'Faaliyet Raporu', 'Yatırımcı Sunumu', 'Araştırma Raporu'].includes(activeTab)) {
+                contentHtml = `
+                <div style="display:flex; gap: 1rem; padding-top: 0; height: calc(100vh - 250px);">
+                    <div class="dash-card" style="flex:1; margin-bottom: 0; display:flex; flex-direction:column; padding:0; overflow:hidden;" id="rapor-viewer-container">
+                        <div style="flex:1; display:flex; justify-content:center; align-items:center; opacity:0.5; font-style:italic;">Yükleniyor...</div>
+                    </div>
+                </div>
+                `;
                 
-                let files = [];
-                if (fsN.existsSync(reportsDir)) {
-                    files = fsN.readdirSync(reportsDir).filter(f => f.toLowerCase().endsWith('.pdf') || f.toLowerCase().endsWith('.doc') || f.toLowerCase().endsWith('.docx') || f.toLowerCase().endsWith('.xlsx'));
-                }
-                
-                if (files.length === 0) {
-                    contentHtml += `<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
-                        <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                        <p>Bu hisseye ait rapor bulunamadı.</p>
-                    </div>`;
-                } else {
-                    contentHtml += `<div class="dash-card"><div class="dash-title">Mevcut Raporlar</div><ul style="list-style: none; padding: 0;">`;
-                    files.forEach(file => {
-                        let filePath = 'Hisseler/' + selectedHisse + '/' + file;
-                        if (!fsN.existsSync(pathN.join(process.cwd(), 'Hisseler', selectedHisse))) {
-                            filePath = 'Hisse_Verileri/' + selectedHisse + '/' + file;
-                        }
-                        
-                        let icon = 'fa-file-pdf';
-                        if (file.toLowerCase().endsWith('.xlsx')) icon = 'fa-file-excel';
-                        else if (file.toLowerCase().endsWith('.doc') || file.toLowerCase().endsWith('.docx')) icon = 'fa-file-word';
-                        
-                        contentHtml += `<li style="margin-bottom: 0.5rem; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px;">
-                            <a href="${filePath}" target="_blank" style="color: #3498db; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 0.5rem;">
-                                <i class="fas ${icon}"></i> ${file}
-                            </a>
-                        </li>`;
-                    });
-                    contentHtml += `</ul></div>`;
-                }
-            } else if (activeTab === 'Değerleme') {
-                // Initialize default edit modes if not present
-                if (!window.degerlemeEditMode) window.degerlemeEditMode = { '2026': false, '2027': false, '2028': false };
-                window.toggleDegerlemeEdit = (y) => {
-                    window.degerlemeEditMode[y] = !window.degerlemeEditMode[y];
-                    if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
-                };
-
-                // Read saved target price data for this hisse
-                if(!State.data.degerleme) State.data.degerleme = {};
-                if(!State.data.degerleme[selectedHisse]) State.data.degerleme[selectedHisse] = {};
-                const stateData = State.data.degerleme[selectedHisse];
-                const years = ['2026', '2027', '2028'];
-                
-                window.updateDegerlemeInput = (hisse, year, field, value) => {
-                    if (!State.data.degerleme[hisse]) State.data.degerleme[hisse] = {};
-                    if (!State.data.degerleme[hisse][year]) State.data.degerleme[hisse][year] = {};
-                    State.data.degerleme[hisse][year][field] = value;
-                    State.save();
-                    if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
-                };
-
-                let headerHtml = `<tr><th>Kalem</th>`;
-                years.forEach(y => {
-                    const curCurrency = stateData[y]?.currency || 'TRY';
-                    headerHtml += `<th style="font-size: 14px;">
-                        <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
-                            <span>${y}</span>
-                            <i class="fas fa-edit" style="cursor:pointer; color:var(--accent-color);" onclick="window.toggleDegerlemeEdit('${y}')" title="Düzenle"></i>
-                            <select style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:2px 4px; font-size:0.8rem;" onchange="window.updateDegerlemeInput('${selectedHisse}', '${y}', 'currency', this.value)">
-                                <option value="TRY" ${curCurrency === 'TRY' ? 'selected' : ''}>TL</option>
-                                <option value="USD" ${curCurrency === 'USD' ? 'selected' : ''}>USD</option>
-                            </select>
-                        </div>
-                    </th>`;
-                });
-                headerHtml += `</tr>`;
-
-                let html = `<div class="dash-card" style="display:flex; flex-direction:column; height:100%;">
-                    <div class="dash-title">Geleceğe İlişkin Beklentileriniz</div>
-                    <div style="flex:1; overflow-x:auto;">
-                        <table class="dash-table compact-table" style="min-width: 1000px;">
-                            <thead>${headerHtml}</thead>
-                            <tbody>`;
-                
-                const rows = [
-                    { key: 'ciro', label: 'Ciro' },
-                    { key: 'favok_marji', label: 'FAVÖK Marjı (%)' },
-                    { key: 'favok', label: 'FAVÖK', readonly: true, formula: (d) => (d.ciro || 0) * ((d.favok_marji || 0) / 100) },
-                    { key: 'fd_favok', label: 'FD/FAVÖK' },
-                    { key: 'piyasa_degeri', label: 'Piyasa Değeri', readonly: true, formula: (d, fv) => fv * (d.fd_favok || 0) },
-                    { key: 'net_borc', label: 'Net Borç' },
-                    { key: 'odenmis_sermaye', label: 'Ödenmiş Sermaye' },
-                    { key: 'hedef_fiyat', label: 'Hedef Fiyat', readonly: true, isTarget: true, formula: (d, fv, pd) => d.odenmis_sermaye ? (pd - (d.net_borc || 0)) / d.odenmis_sermaye : 0 }
-                ];
-                
-                // Add Kur input row for USD entries
-                let hasUSD = years.some(y => stateData[y]?.currency === 'USD');
-                if (hasUSD) {
-                    rows.splice(1, 0, { key: 'usd_kur', label: 'USD/TL Kuru' });
-                }
-
-                rows.forEach(r => {
-                    html += `<tr><td style="text-align:left; font-weight:bold;">${r.label}</td>`;
-                    years.forEach(y => {
-                        const d = stateData[y] || {};
-                        const editMode = window.degerlemeEditMode[y];
-                        
-                        let val = d[r.key] || '';
-                        let displayVal = val;
-                        
-                        // Calculate read-only fields
-                        let fv = (d.ciro || 0) * ((d.favok_marji || 0) / 100);
-                        if (r.key === 'favok') displayVal = val = fv;
-                        
-                        let pd = fv * (d.fd_favok || 0);
-                        if (r.key === 'piyasa_degeri') displayVal = val = pd;
-                        
-                        if (r.key === 'hedef_fiyat') {
-                            let pd_tl = pd;
-                            let net_borc_tl = d.net_borc || 0;
-                            if (d.currency === 'USD') {
-                                const kur = d.usd_kur || window.dolarKuru || 33;
-                                pd_tl = pd * kur;
-                                net_borc_tl = (d.net_borc || 0) * kur;
-                            }
-                            displayVal = val = d.odenmis_sermaye ? (pd_tl - net_borc_tl) / d.odenmis_sermaye : 0;
-                        }
-                        
-                        if (typeof displayVal === 'number' && displayVal !== 0) {
-                            if (r.key === 'hedef_fiyat') {
-                                displayVal = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(displayVal);
-                            } else if (r.key === 'favok_marji') {
-                                displayVal = displayVal + '%';
-                            } else {
-                                displayVal = new Intl.NumberFormat('tr-TR').format(displayVal);
-                            }
-                        } else if (displayVal === 0 || displayVal === '') {
-                            displayVal = '---';
-                        }
-                        
-                        if (editMode && !r.readonly) {
-                            html += `<td style="text-align: center;"><input type="number" step="any" style="width:100%; background:rgba(255,255,255,0.1); color:#fff; border:1px solid var(--accent-color); padding:4px; text-align:center; border-radius:4px;" value="${val}" onchange="window.updateDegerlemeInput('${selectedHisse}', '${y}', '${r.key}', parseFloat(this.value)||0)"></td>`;
-                        } else {
-                            html += `<td style="text-align: center; ${r.isTarget ? 'font-weight:bold; color:var(--success-color); font-size:1.1rem;' : ''}">${displayVal}</td>`;
-                        }
-                    });
-                    html += `</tr>`;
-                });
-                
-                html += `</tbody></table></div></div>`;
-                contentHtml += html;
+                setTimeout(() => {
+                    if (window.loadRapor) {
+                        window.loadRapor(activeTab, 'pdf');
+                    }
+                }, 100);
             } else if (activeTab === 'Hisse Notları') {
                 let analizler = State.data.analizler || [];
                 // Filter only for the selected hisse
@@ -2230,8 +2110,8 @@ const renderHisseler = (container) => {
                     <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; color: #fff;">${selectedHisse}</h1>
                 </div>
                 <div style="display: flex; align-items: baseline; gap: 0.8rem;">
-                    <div style="font-size: 1.2rem; font-weight: bold; color: #fff;">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)} ₺</div>
-                    <div id="hisse-header-change" style="font-size: 0.9rem; font-weight: 600; color: ${hColor}; display: ${Math.abs(hDegisim) > 0 ? "block" : "none"};">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: #fff;">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)} ₺</div>
+                    <div id="hisse-header-change" style="font-size: 1rem; font-weight: 600; color: ${hColor}; display: ${Math.abs(hDegisim) > 0 ? "block" : "none"};">
                         <i class="fas fa-caret-${isPos ? 'up' : 'down'}"></i> %${Math.abs(hDegisim).toFixed(2)}
                     </div>
                 </div>
@@ -2313,10 +2193,7 @@ if (window.shouldRenderDashboardCharts) {
                               const pinkColor = '#d6336c';
                               
                               const createChart = (id, data, label) => {
-                                  let chartCanvas = document.getElementById(id);
-                                  let existingChart = Chart.getChart(chartCanvas);
-                                  if (existingChart) existingChart.destroy();
-                                  new Chart(chartCanvas.getContext('2d'), {
+                                  new Chart(document.getElementById(id).getContext('2d'), {
                                       type: 'line',
                                       data: {
                                           labels: labels,
@@ -2345,7 +2222,6 @@ if (window.shouldRenderDashboardCharts) {
 
                   const ctxSatislar = document.getElementById('chart-ceyreklik-satislar');
                 if (ctxSatislar) {
-                    let exS = Chart.getChart(ctxSatislar); if (exS) exS.destroy();
                     new Chart(ctxSatislar, {
                         type: 'bar',
                         data: {
@@ -2363,7 +2239,6 @@ if (window.shouldRenderDashboardCharts) {
 
                 const ctxFavok = document.getElementById('chart-ceyreklik-favok');
                 if (ctxFavok) {
-                    let exF = Chart.getChart(ctxFavok); if (exF) exF.destroy();
                     new Chart(ctxFavok, {
                         type: 'bar',
                         data: {
@@ -2381,7 +2256,6 @@ if (window.shouldRenderDashboardCharts) {
 
                 const ctxNetKar = document.getElementById('chart-ceyreklik-netkar');
                 if (ctxNetKar) {
-                    let exN = Chart.getChart(ctxNetKar); if (exN) exN.destroy();
                     new Chart(ctxNetKar, {
                         type: 'bar',
                         data: {
@@ -2763,7 +2637,7 @@ const renderVeriler = (container) => {
     fonSet.forEach(fon => {
         const pFiyat = State.getFiyat(fon);
         fonHtml += `
-            <div style="display:flex; justify-content:flex-end; align-items:center; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem;">
                 <span>${fon}</span>
                 <div style="display:flex; align-items:center; gap: 0.5rem;">
                     <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100px; text-align:right;">
@@ -2776,54 +2650,27 @@ const renderVeriler = (container) => {
     container.innerHTML = `
         <div class="page-section active" style="display: flex; flex-direction: column; gap: 2rem;">
             
-                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <!-- Nakit Düzenleme -->
-                <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;">Mevcut Nakit Tutarı</h3>
-                    <div style="display:flex; gap: 0.5rem;">
-                        <input type="number" step="0.01" id="v-nakit-input" value="${State.data.manuelNakitTutar || 0}" class="form-control" style="width:100%;">
-                        <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.manuelNakitTutar = parseFloat(document.getElementById('v-nakit-input').value) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
-                    </div>
-                </div>
-                <!-- Fon Fiyatları -->
-                <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;">Fon Fiyatları</h3>
-                    <div style="max-height: 150px; overflow-y: auto; padding-right: 0.5rem;">
-                        ${fonHtml || '<p style="color:var(--text-secondary);">Portföyde fon bulunmuyor.</p>'}
-                    </div>
-                </div>
-                <!-- Hedef Portföy -->
-                <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;">Hedef Portföy</h3>
-                    <div style="display:flex; gap: 0.5rem;">
-                        <input type="number" step="1" id="v-hedef-input" value="${hedefPortfoy}" class="form-control" style="width:100%;">
-                        <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Rapor Yükle (Bulut) -->
-            <div class="glass" style="padding: 8px 1rem; margin-top: 1rem;">
-                <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;"><i class="fas fa-cloud-upload-alt"></i> Buluta Rapor Yükle</h3>
-                <div style="display:flex; flex-direction:row; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
-                    <input type="text" id="upload-hisse" placeholder="Hisse Kodu (Örn: THYAO)" class="form-control" style="flex: 1; min-width: 120px; text-transform: uppercase; padding: 0.3rem;">
-                    <select id="upload-type" class="form-control" style="flex: 2; min-width: 150px; appearance: auto; padding: 0.3rem;">
-                        <option value="">-- Rapor Türü Seçin --</option>
-                        <option value="arastirma_raporu.pdf">Araştırma Raporu</option>
-                        <option value="faaliyet_raporu.pdf">Faaliyet Raporu</option>
-                        <option value="finansal_rapor.pdf">Finansal Rapor</option>
-                        <option value="toplanti_notlari.pdf">Toplantı Notları</option>
-                        <option value="yatirimci_sunumu.pdf">Yatırımcı Sunumu</option>
-                        <option value="fiyat_tespit_raporu.pdf">Fiyat Tespit Raporu</option>
-                    </select>
-                    <input type="file" id="upload-file" accept="application/pdf" class="form-control" style="flex: 2; min-width: 180px; padding: 0.3rem; cursor: pointer;">
-                    <button class="btn" style="background: var(--accent-color); flex: 1; min-width: 80px; padding: 0.3rem;" onclick="window.uploadRapor()">Yükle</button>
-                    <div id="upload-status" style="font-size: 13px; font-weight: 500; min-height: 10px; width: 100%;"></div>
-                </div>
-            </div>
-
-            <!-- Enflasyon -->
-            <div class="glass" style="padding: 8px 1rem; margin-top: 1rem;">
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <!-- Hedef Portföy -->
+                <div class="glass" style="flex: 1; padding: 2rem; min-width: 300px;">
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">Hedef Portföy</h3>
+                    <div style="display:flex; gap: 0.5rem;">
+                        <input type="number" step="1" id="v-hedef-input" value="${hedefPortfoy}" class="form-control" style="width:100%;">
+                        <button class="btn" style="background: var(--success-color);" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value) || 0; State.save(); alert('Kaydedildi!');">Kaydet</button>
+                    </div>
+                </div>
+
+                <!-- Fon Fiyatları -->
+                <div class="glass" style="flex: 1; padding: 2rem; min-width: 300px;">
+                    <h3 style="color: var(--accent-color); margin-bottom: 1rem;">Fon Fiyatları</h3>
+                    <div style="max-height: 200px; overflow-y: auto; padding-right: 0.5rem;">
+                        ${fonHtml || '<p style="color:var(--text-secondary);">Portföyde fon bulunmuyor.</p>'}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enflasyon -->
+            <div class="glass" style="padding: 2rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <h3 style="margin-bottom: 0.5rem; color: var(--accent-color);">Aylık Enflasyon Verileri</h3>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleEnfForm()">+</button>
@@ -3405,13 +3252,13 @@ const renderAnasayfa = (container) => {
         rowsHtml += `
             <tr style="cursor: pointer;" onclick="window.goToHisse('${hisse}')">
                 <td style="text-align: center;">${i + 1}</td>
-                <td style="text-align: left; font-weight: bold; color: var(--accent-color); cursor: pointer;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
+                <td style="text-align: left; font-weight: bold; color: var(--accent-color);">${hisse}</td>
                 <td style="text-align: center;">${fmtDec(fiyat)}</td>
                 ${renderCell('2026')}
                 ${renderCell('2027')}
                 ${renderCell('2028')}
                 <td style="text-align: center;" onclick="event.stopPropagation()">
-                    <button class="btn btn-icon" style="color: var(--danger-color); padding: 0.1rem 0.3rem;" onclick="window.removeHisseFromTakip('${hisse}')"><i class="fas fa-trash-alt" style="font-size: 11px;"></i></button>
+                    <button class="btn btn-icon" style="color: var(--danger-color);" onclick="window.removeHisseFromTakip('${hisse}')"><i class="fas fa-trash-alt" style="font-size: 11px;"></i></button>
                 </td>
             </tr>
         `;
@@ -3575,9 +3422,9 @@ window.updateGlobalHisseDropdown = () => {
         let dropdownHtml = '';
         const sortedTakip = [...State.data.takipListesi].sort((a,b) => a.localeCompare(b));
         sortedTakip.forEach(h => {
-            dropdownHtml += `<div class="hisse-menu-item" style="padding: 0.3rem 0.8rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; color: #eee;" onclick="window.openHisseFromDropdown('${h}')">${h}</div>`;
+            dropdownHtml += `<div class="hisse-menu-item" style="padding: 0.3rem 0.8rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.65rem; color: #eee;" onclick="window.openHisseFromDropdown('${h}')">${h}</div>`;
         });
-        dropdownHtml += `<div style="display:flex; justify-content:flex-end; align-items:center; padding: 0.3rem 0.8rem;">
+        dropdownHtml += `<div style="display:flex; justify-content:space-between; align-items:center; padding: 0.3rem 0.8rem;">
             <div style="font-size: 1rem; font-weight:bold; cursor: pointer; color: var(--accent-color);" onclick="document.getElementById('hisse-modal').style.display='flex'; window.hideHisseDropdown(); document.getElementById('modal-hisse-input').focus();">+</div>
             <div style="font-size: 1.5rem; font-weight:bold; cursor: pointer; color: #ff6b6b; margin-top:-4px;" onclick="window.openRemoveModal()">-</div>
         </div>`;
@@ -3704,14 +3551,14 @@ window.fetchTickerData = async () => {
                         const color = change > 0 ? 'var(--success-color)' : (change < 0 ? 'var(--danger-color)' : 'var(--text-secondary)');
                         let displayChange = change.toFixed(2).replace('.', ',');
                         if (change > 0 && !displayChange.startsWith('+')) displayChange = '+' + displayChange;
-                        changeHtml = `<span style="font-size: 13px; font-weight: 400; color: ${color}; margin-left: 0.3rem;">%${displayChange}</span>`;
+                        changeHtml = `<span style="font-size: 0.65rem; font-weight: 400; color: ${color}; margin-left: 0.3rem;">%${displayChange}</span>`;
                     }
 
                     const val = item.data.Selling || item.data.Buying || 0;
                     
                     return `<div style="display: flex; flex-direction: column; align-items: flex-start; min-width: 100px; flex: 1; justify-content: center;">
-                        <span style="color: var(--text-secondary); font-size: 13px; font-weight: 500; margin-bottom: 0.1rem; letter-spacing: 0.5px;">${item.label}</span>
-                        <div style="font-size: 13px; font-weight: 400; color: var(--text-primary);">
+                        <span style="color: var(--text-secondary); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.1rem; letter-spacing: 0.5px;">${item.label}</span>
+                        <div style="font-size: 0.75rem; font-weight: 400; color: var(--text-primary);">
                             ${val} ${changeHtml}
                         </div>
                     </div>`;
@@ -3822,9 +3669,17 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
     if (isLoginMode) {
         auth.signInWithEmailAndPassword(email, password).catch(err => alert(err.message));
     } else {
-        alert("Yeni üye alımı güvenlik nedeniyle kapatılmıştır.");
-                btn.innerText = originalBtnText;
-                btn.disabled = false;
+        auth.createUserWithEmailAndPassword(email, password)
+            .then(cred => {
+                cred.user.updateProfile({ displayName: name }).catch(console.error);
+                return db.collection('users').doc(cred.user.uid).set({
+                    displayName: name,
+                    phone: phone,
+                    email: email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            })
+            .catch(err => alert(err.message));
     }
 });
 
