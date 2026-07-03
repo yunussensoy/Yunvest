@@ -433,7 +433,7 @@ const State = {
     unsubscribe: null,
 
     init(callback) {
-        if(!this.data) this.data = this.load() || {};
+        
         if (!this.data.hisseFiyatlari) this.data.hisseFiyatlari = [];
         if (!this.data.ekstre) this.data.ekstre = [];
         if (!this.data.takipListesi) this.data.takipListesi = [];
@@ -558,7 +558,17 @@ const State = {
         
 }, (error) => {
     console.error("Firebase Snapshot Error (app_data):", error);
-    if (!this.data) this.data = this.load() || {};
+    // Load from localStorage as fallback
+    const localData = localStorage.getItem('borsa_app_data');
+    if (localData) {
+        try {
+            this.data = { ...DEFAULT_STATE, ...JSON.parse(localData) };
+        } catch(e) {
+            this.data = JSON.parse(JSON.stringify(DEFAULT_STATE));
+        }
+    } else {
+        this.data = JSON.parse(JSON.stringify(DEFAULT_STATE));
+    }
     processLoadedData();
     if (callback) callback();
 });
