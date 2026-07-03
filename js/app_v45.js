@@ -429,10 +429,16 @@ const DEFAULT_STATE = {
 };
 
 const State = {
-    data: null,
+    data: {},
     unsubscribe: null,
 
     init(callback) {
+        if(!this.data) this.data = this.load() || {};
+        if (!this.data.hisseFiyatlari) this.data.hisseFiyatlari = [];
+        if (!this.data.ekstre) this.data.ekstre = [];
+        if (!this.data.takipListesi) this.data.takipListesi = [];
+        if (!this.data.analizler) this.data.analizler = [];
+        if (!this.data.hedefFiyatlar) this.data.hedefFiyatlar = {};
         if (this.unsubscribe) this.unsubscribe();
         let isInitialLoad = true;
 
@@ -472,6 +478,7 @@ const State = {
         }
 
         this.unsubscribe = db.collection('app_data').doc(currentUser.uid).onSnapshot((doc) => {
+
             if (doc.exists) {
                 this.data = { ...DEFAULT_STATE, ...doc.data() };
                 
@@ -548,7 +555,13 @@ const State = {
                 callback();
                 isInitialLoad = false;
             }
-        });
+        
+}, (error) => {
+    console.error("Firebase Snapshot Error (app_data):", error);
+    if (!this.data) this.data = this.load() || {};
+    processLoadedData();
+    if (callback) callback();
+});
     },
 
     save() {
@@ -671,8 +684,10 @@ const State = {
 
     updateFiyat(menkul, fiyat, skipSave = false) {
         if (!menkul) return;
+        if (!this.data) this.data = {};
+        if (!this.data.hisseFiyatlari) this.data.hisseFiyatlari = [];
         let m = menkul.trim().toUpperCase();
-        let hf = this.data.hisseFiyatlari.find(h => h.menkul.trim().toUpperCase() === m);
+        let hf = this.data.hisseFiyatlari.find(h => h.menkul && h.menkul.trim().toUpperCase() === m);
         if (hf) {
             hf.fiyat = parseFloat(fiyat);
             hf.tarih = new Date().toISOString();
@@ -755,8 +770,8 @@ window.fetchGuncelFiyatlar = async () => {
 
     try {
         const symbolsSet = new Set();
-        State.data.hisseFiyatlari.forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
-        State.data.ekstre.forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
+        (State.data.hisseFiyatlari || []).forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
+        (State.data.ekstre || []).forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
         const exclude = ['DOLAR', 'GRAM ALTIN', 'NAKIT', 'BIST'];
         
         const symbolsToFetch = Array.from(symbolsSet).filter(m => !exclude.includes(m) && (!tvBasarili || !State.bistStocks.includes(m) || State.getFiyat(m) === 0));
@@ -796,8 +811,8 @@ window.fetchGuncelFiyatlar = async () => {
     // 2.5 Native TEFAS Fetcher (Electron Masaüstü Uygulaması İçin)
     try {
         const symbolsSet = new Set();
-        State.data.hisseFiyatlari.forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
-        State.data.ekstre.forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
+        (State.data.hisseFiyatlari || []).forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
+        (State.data.ekstre || []).forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
         const exclude = ['DOLAR', 'GRAM ALTIN', 'NAKIT', 'BIST'];
         const symbolsToFetch = Array.from(symbolsSet).filter(m => !exclude.includes(m) && State.getFiyat(m) === 0);
 
@@ -827,8 +842,8 @@ window.fetchGuncelFiyatlar = async () => {
     if (gasUrl) {
         try {
             const symbolsSet = new Set();
-            State.data.hisseFiyatlari.forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
-            State.data.ekstre.forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
+            (State.data.hisseFiyatlari || []).forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
+            (State.data.ekstre || []).forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
             const symbolsToFetch = Array.from(symbolsSet).filter(m => m !== 'DOLAR' && m !== 'GRAM ALTIN' && m !== 'NAKIT' && !State.bistStocks.includes(m));
             
             if (symbolsToFetch.length > 0) {
@@ -2231,8 +2246,8 @@ const renderHisseler = (container) => {
                 </div>
                 <div style="display: flex; align-items: baseline; gap: 0.8rem;">
                     <div style="font-size: 1.2rem; font-weight: bold; color: #fff;">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)} ₺</div>
-                    <div id="hisse-header-change" style="font-size: 0.9rem; font-weight: 600; color: ${hColor}; display: ${Math.abs(hDegisim) > 0 ? "block" : "none"};">
-                        <i class="fas fa-caret-${isPos ? 'up' : 'down'}"></i> %${Math.abs(hDegisim).toFixed(2)}
+                    <div id="hisse-header-change" style="font-size: 0.9rem; font-weight: 600; color: ${hColor}; display: flex; align-items: center; gap: 0.3rem;;">
+                        <i class="fas ${hDegisim === 0 ? 'fa-minus' : (isPos ? 'fa-caret-up' : 'fa-caret-down')}"></i> %${Math.abs(hDegisim).toFixed(2)}
                     </div>
                 </div>
             </div>
@@ -2292,7 +2307,20 @@ if (window.shouldRenderDashboardCharts) {
                     maintainAspectRatio: false,
                     plugins: { 
                         legend: { display: false },
-                        tooltip: { enabled: true }
+                        tooltip: { enabled: true },
+                        datalabels: {
+                            display: true,
+                            color: '#fff',
+                            font: { size: 10, weight: 'bold' },
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: (value) => {
+                                if (value === 0 || !value) return '';
+                                if (Math.abs(value) >= 1e9) return (value / 1e9).toFixed(1) + 'Mly';
+                                if (Math.abs(value) >= 1e6) return (value / 1e6).toFixed(1) + 'M';
+                                return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(value);
+                            }
+                        }
                     },
                     scales: { 
                         x: { ticks: { color: '#888', font: {size: 10} }, grid: { display:false } }, 
@@ -2496,7 +2524,7 @@ const renderHisseIslemleri = (container) => {
     const todayStr = new Date().toISOString().split('T')[0];
     
     const fonSet = new Set();
-    State.data.ekstre.forEach(e => {
+    (State.data.ekstre || []).forEach(e => {
         if (e.menkul !== 'NAKIT' && e.menkul.length === 3) fonSet.add(e.menkul);
     });
     let fonDatalistOptions = '';
@@ -2755,7 +2783,7 @@ const renderVeriler = (container) => {
     
     // Fon Set
     const fonSet = new Set();
-    State.data.ekstre.forEach(e => {
+    (State.data.ekstre || []).forEach(e => {
         if (e.menkul !== 'NAKIT' && e.menkul.length === 3) fonSet.add(e.menkul);
     });
     
