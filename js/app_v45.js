@@ -187,17 +187,23 @@ const formatNumber = (val, decimals = 2) => {
     return new Intl.NumberFormat('tr-TR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(val);
 };
 
-const formatCurrency = (val, decimals = 2) => {
-    if (val === null || val === undefined || isNaN(val)) return decimals === 0 ? ' 0' : ' 0,00';
+const formatCurrency = (val, decimals = 2, symbol = '₺') => {
+    if (val === null || val === undefined || isNaN(val)) return decimals === 0 ? (symbol === '€' ? '0'+symbol : symbol+'0') : (symbol === '€' ? '0,00'+symbol : symbol+'0,00');
     const isNegative = val < 0;
     const absVal = Math.abs(val);
     const numStr = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(absVal);
-    return (isNegative ? '-' : '') + ' ' + numStr;
+    return (isNegative ? '-' : '') + (symbol === '€' ? numStr + symbol : symbol + numStr);
 };
 const formatPercent = (val, decimals = 2) => new Intl.NumberFormat('tr-TR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(val * 100) + '%';
 const formatDate = (dateStr) => {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('tr-TR');
+    const d = new Date(dateStr);
+    if(isNaN(d)) return dateStr;
+    const months = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+    const day = d.getDate().toString().padStart(2, '0');
+    const month = months[d.getMonth()];
+    const year = d.getFullYear().toString().slice(2);
+    return `${day} ${month} ${year}`;
 };
 const calcDaysBetween = (date1, date2) => {
     const d1 = new Date(date1);
@@ -429,18 +435,13 @@ const DEFAULT_STATE = {
 };
 
 const State = {
-    data: {},
+    data: null,
     unsubscribe: null,
 
     init(callback) {
-        
-        if (!this.data.hisseFiyatlari) this.data.hisseFiyatlari = [];
-        if (!this.data.ekstre) this.data.ekstre = [];
-        if (!this.data.takipListesi) this.data.takipListesi = [];
-        if (!this.data.analizler) this.data.analizler = [];
-        if (!this.data.hedefFiyatlar) this.data.hedefFiyatlar = {};
         if (this.unsubscribe) this.unsubscribe();
         let isInitialLoad = true;
+        this.data = JSON.parse(JSON.stringify(DEFAULT_STATE));
 
         const processLoadedData = () => {
             if (!this.data.takipListesi) this.data.takipListesi = [];
@@ -478,7 +479,6 @@ const State = {
         }
 
         this.unsubscribe = db.collection('app_data').doc(currentUser.uid).onSnapshot((doc) => {
-
             if (doc.exists) {
                 this.data = { ...DEFAULT_STATE, ...doc.data() };
                 
@@ -555,23 +555,30 @@ const State = {
                 callback();
                 isInitialLoad = false;
             }
-        
-}, (error) => {
-    console.error("Firebase Snapshot Error (app_data):", error);
-    // Load from localStorage as fallback
-    const localData = localStorage.getItem('borsa_app_data');
-    if (localData) {
-        try {
-            this.data = { ...DEFAULT_STATE, ...JSON.parse(localData) };
-        } catch(e) {
-            this.data = JSON.parse(JSON.stringify(DEFAULT_STATE));
-        }
-    } else {
-        this.data = JSON.parse(JSON.stringify(DEFAULT_STATE));
-    }
-    processLoadedData();
-    if (callback) callback();
-});
+        }, (error) => {
+            console.error("Firebase Hatasi:", error);
+            const localData = localStorage.getItem('borsa_app_data');
+            if (localData) {
+                try {
+                    this.data = { ...DEFAULT_STATE, ...JSON.parse(localData) };
+                } catch(e) {
+                    this.data = JSON.parse(JSON.stringify(DEFAULT_STATE));
+                }
+            }
+            if (window.IMPORT_EKSTRE_DATA && window.IMPORT_EKSTRE_DATA.length > 0) {
+                this.data.ekstre = window.IMPORT_EKSTRE_DATA;
+                this.data.takipListesi = Array.from(new Set([...(this.data.takipListesi||[]), ...(window.IMPORT_TAKIP_DATA||[])]));
+                window.IMPORT_EKSTRE_DATA = null;
+                if (window.IMPORT_NAKIT_DATA && window.IMPORT_NAKIT_DATA.length > 0) {
+                    this.data.nakitHareketleri = window.IMPORT_NAKIT_DATA;
+                    window.IMPORT_NAKIT_DATA = null;
+                }
+            }
+            if (callback && isInitialLoad) {
+                callback();
+                isInitialLoad = false;
+            }
+        });
     },
 
     save() {
@@ -589,7 +596,7 @@ const State = {
                 console.error('Backup error', e);
             }
             
-            localStorage.setItem('borsa_app_data', JSON.stringify(this.data));
+            try { localStorage.setItem('borsa_app_data', JSON.stringify(this.data)); } catch(e) { console.warn('Quota exceeded, clearing backups'); for(let i=1; i<=4; i++) localStorage.removeItem('borsa_app_data_backup_'+i); localStorage.setItem('borsa_app_data', JSON.stringify(this.data)); }
 
             // FILE SYSTEM BACKUP (ABSOLUTELY BULLETPROOF)
             try {
@@ -694,10 +701,8 @@ const State = {
 
     updateFiyat(menkul, fiyat, skipSave = false) {
         if (!menkul) return;
-        if (!this.data) this.data = {};
-        if (!this.data.hisseFiyatlari) this.data.hisseFiyatlari = [];
         let m = menkul.trim().toUpperCase();
-        let hf = this.data.hisseFiyatlari.find(h => h.menkul && h.menkul.trim().toUpperCase() === m);
+        let hf = this.data.hisseFiyatlari.find(h => h.menkul.trim().toUpperCase() === m);
         if (hf) {
             hf.fiyat = parseFloat(fiyat);
             hf.tarih = new Date().toISOString();
@@ -780,8 +785,8 @@ window.fetchGuncelFiyatlar = async () => {
 
     try {
         const symbolsSet = new Set();
-        (State.data.hisseFiyatlari || []).forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
-        (State.data.ekstre || []).forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
+        State.data.hisseFiyatlari.forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
+        State.data.ekstre.forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
         const exclude = ['DOLAR', 'GRAM ALTIN', 'NAKIT', 'BIST'];
         
         const symbolsToFetch = Array.from(symbolsSet).filter(m => !exclude.includes(m) && (!tvBasarili || !State.bistStocks.includes(m) || State.getFiyat(m) === 0));
@@ -821,8 +826,8 @@ window.fetchGuncelFiyatlar = async () => {
     // 2.5 Native TEFAS Fetcher (Electron Masaüstü Uygulaması İçin)
     try {
         const symbolsSet = new Set();
-        (State.data.hisseFiyatlari || []).forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
-        (State.data.ekstre || []).forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
+        State.data.hisseFiyatlari.forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
+        State.data.ekstre.forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
         const exclude = ['DOLAR', 'GRAM ALTIN', 'NAKIT', 'BIST'];
         const symbolsToFetch = Array.from(symbolsSet).filter(m => !exclude.includes(m) && State.getFiyat(m) === 0);
 
@@ -852,8 +857,8 @@ window.fetchGuncelFiyatlar = async () => {
     if (gasUrl) {
         try {
             const symbolsSet = new Set();
-            (State.data.hisseFiyatlari || []).forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
-            (State.data.ekstre || []).forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
+            State.data.hisseFiyatlari.forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
+            State.data.ekstre.forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
             const symbolsToFetch = Array.from(symbolsSet).filter(m => m !== 'DOLAR' && m !== 'GRAM ALTIN' && m !== 'NAKIT' && !State.bistStocks.includes(m));
             
             if (symbolsToFetch.length > 0) {
@@ -1535,7 +1540,7 @@ const renderHisseler = (container) => {
                         const vals = getG(item.key);
                         const pct = calcPct(vals.v1, vals.v2);
                         gelirHtml += `<tr>
-                            <td>${item.label}</td>
+                            <td style="text-align:left;">${item.label}</td>
                             <td>${fmtVal(vals.v1)}</td>
                             <td>${fmtVal(vals.v2)}</td>
                             <td style="color: ${pct.color}; font-weight:bold;">${pct.text}</td>
@@ -1607,7 +1612,7 @@ const renderHisseler = (container) => {
                         const vals = getB(item.key);
                         const pct = calcPct(vals.v1, vals.v2);
                         bilancoHtml += `<tr>
-                            <td title="${vals.debug || ''}">${item.label}</td>
+                            <td style="text-align:left;" title="${vals.debug || ''}">${item.label}</td>
                             <td title="${vals.debug || ''}">${fmtVal(vals.v1)}</td>
                             <td>${fmtVal(vals.v2)}</td>
                             <td style="color: ${pct.color}; font-weight:bold;">${pct.text}</td>
@@ -1726,10 +1731,9 @@ const renderHisseler = (container) => {
                     if (chartKaldirac[l] < chartKaldirac[l-1]) borclulukPuan += 3;
                 }
                 
-                // Kaynak Dağılımı (pctOz, pctKisa, pctUzun)
-                const vOzCurrent = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
-                const vKisaCurrent = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam kısa vadeli'));
-                const vUzunCurrent = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam uzun vadeli'));
+                const vOzCurrent = (sData.bilanco && sData.bilanco.rows) ? sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar')) : null;
+                const vKisaCurrent = (sData.bilanco && sData.bilanco.rows) ? sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam kısa vadeli')) : null;
+                const vUzunCurrent = (sData.bilanco && sData.bilanco.rows) ? sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam uzun vadeli')) : null;
                 
                 let pctOz = 0, pctKisa = 0, pctUzun = 0;
                 if (sData.bilanco && sData.bilanco.headers.length > 1) {
@@ -1980,39 +1984,39 @@ const renderHisseler = (container) => {
             } else if (['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler'].includes(activeTab)) {
                 contentHtml = `<div style="display:flex; justify-content:center; align-items:center; height:200px; opacity:0.5; font-style:italic;">${activeTab} sayfası henüz yapım aşamasındadır.</div>`;
             } else if (activeTab === 'Raporlar') {
-                const fsN = require('fs');
-                const pathN = require('path');
-                let reportsDir = pathN.join(process.cwd(), 'Hisseler', selectedHisse);
-                // Fallback to Hisse_Verileri if Hisseler doesn't exist
-                if (!fsN.existsSync(reportsDir)) {
-                    reportsDir = pathN.join(process.cwd(), 'Hisse_Verileri', selectedHisse);
-                }
+                const targetReports = [
+                    { file: 'arastirma_raporu.pdf', name: 'Araştırma Raporu' },
+                    { file: 'faaliyet_raporu.pdf', name: 'Faaliyet Raporu' },
+                    { file: 'finansal_rapor.pdf', name: 'Finansal Rapor' },
+                    { file: 'toplanti_notlari.pdf', name: 'Toplantı Notları' },
+                    { file: 'yatirimci_sunumu.pdf', name: 'Yatırımcı Sunumu' }
+                ];
                 
-                let files = [];
-                if (fsN.existsSync(reportsDir)) {
-                    files = fsN.readdirSync(reportsDir).filter(f => f.toLowerCase().endsWith('.pdf') || f.toLowerCase().endsWith('.doc') || f.toLowerCase().endsWith('.docx') || f.toLowerCase().endsWith('.xlsx'));
-                }
+                let foundReports = [];
+                const availablePdfs = (window.stockReports && window.stockReports[selectedHisse]) ? window.stockReports[selectedHisse] : [];
                 
-                if (files.length === 0) {
+                targetReports.forEach(report => {
+                    if (availablePdfs.map(f => f.toLowerCase()).includes(report.file.toLowerCase())) {
+                        foundReports.push(report);
+                    }
+                });
+                
+                // Alfabetik sıralama (tr-TR ile)
+                foundReports.sort((a, b) => a.name.localeCompare(b.name, 'tr-TR'));
+                
+                if (foundReports.length === 0) {
                     contentHtml += `<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
                         <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
                         <p>Bu hisseye ait rapor bulunamadı.</p>
                     </div>`;
                 } else {
-                    contentHtml += `<div class="dash-card"><div class="dash-title">Mevcut Raporlar</div><ul style="list-style: none; padding: 0;">`;
-                    files.forEach(file => {
-                        let filePath = 'Hisseler/' + selectedHisse + '/' + file;
-                        if (!fsN.existsSync(pathN.join(process.cwd(), 'Hisseler', selectedHisse))) {
-                            filePath = 'Hisse_Verileri/' + selectedHisse + '/' + file;
-                        }
-                        
+                    contentHtml += `<div class="dash-card"><div class="dash-title">Raporlar</div><ul style="list-style: none; padding: 0;">`;
+                    foundReports.forEach(report => {
+                        let filePath = 'Hisseler/' + selectedHisse + '/' + report.file;
                         let icon = 'fa-file-pdf';
-                        if (file.toLowerCase().endsWith('.xlsx')) icon = 'fa-file-excel';
-                        else if (file.toLowerCase().endsWith('.doc') || file.toLowerCase().endsWith('.docx')) icon = 'fa-file-word';
-                        
                         contentHtml += `<li style="margin-bottom: 0.5rem; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px;">
-                            <a href="${filePath}" target="_blank" style="color: #3498db; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 0.5rem;">
-                                <i class="fas ${icon}"></i> ${file}
+                            <a href="${filePath}" target="_blank" style="color: white; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                <i class="fas ${icon}"></i> ${report.name}
                             </a>
                         </li>`;
                     });
@@ -2042,16 +2046,8 @@ const renderHisseler = (container) => {
 
                 let headerHtml = `<tr><th>Kalem</th>`;
                 years.forEach(y => {
-                    const curCurrency = stateData[y]?.currency || 'TRY';
-                    headerHtml += `<th style="font-size: 14px;">
-                        <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem;">
-                            <span>${y}</span>
-                            <i class="fas fa-edit" style="cursor:pointer; color:var(--accent-color);" onclick="window.toggleDegerlemeEdit('${y}')" title="Düzenle"></i>
-                            <select style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:2px 4px; font-size:0.8rem;" onchange="window.updateDegerlemeInput('${selectedHisse}', '${y}', 'currency', this.value)">
-                                <option value="TRY" ${curCurrency === 'TRY' ? 'selected' : ''}>TL</option>
-                                <option value="USD" ${curCurrency === 'USD' ? 'selected' : ''}>USD</option>
-                            </select>
-                        </div>
+                    headerHtml += `<th style="font-size: 14px; text-align:center;">
+                        <div>${y}</div>
                     </th>`;
                 });
                 headerHtml += `</tr>`;
@@ -2063,70 +2059,158 @@ const renderHisseler = (container) => {
                             <thead>${headerHtml}</thead>
                             <tbody>`;
                 
+                // Get Odenmis Sermaye dynamically
+                let odenmisSermaye = 0;
+                const sData = window.stockData && window.stockData[selectedHisse] ? window.stockData[selectedHisse] : null;
+                if (sData && sData.bilanco && sData.bilanco.rows) {
+                    const osRow = sData.bilanco.rows.find(r => r[0] && r[0].toLowerCase().includes('ödenmiş sermaye'));
+                    if (osRow && osRow.length > 1) {
+                        odenmisSermaye = parseFloat(String(osRow[1]).replace(/\./g, '').replace(/,/g, '.')) || 0;
+                    }
+                }
+                const guncelFiyat = parseFloat(State.getFiyat ? State.getFiyat(selectedHisse) : (window.fiyatlar ? window.fiyatlar[selectedHisse] : 0)) || 0;
+                const usdKuru = window.dolarKuru || 33;
+                const eurKuru = window.euroKuru || 35;
+                
                 const rows = [
-                    { key: 'ciro', label: 'Ciro' },
-                    { key: 'favok_marji', label: 'FAVÖK Marjı (%)' },
-                    { key: 'favok', label: 'FAVÖK', readonly: true, formula: (d) => (d.ciro || 0) * ((d.favok_marji || 0) / 100) },
-                    { key: 'fd_favok', label: 'FD/FAVÖK' },
-                    { key: 'piyasa_degeri', label: 'Piyasa Değeri', readonly: true, formula: (d, fv) => fv * (d.fd_favok || 0) },
-                    { key: 'net_borc', label: 'Net Borç' },
-                    { key: 'odenmis_sermaye', label: 'Ödenmiş Sermaye' },
-                    { key: 'hedef_fiyat', label: 'Hedef Fiyat', readonly: true, isTarget: true, formula: (d, fv, pd) => d.odenmis_sermaye ? (pd - (d.net_borc || 0)) / d.odenmis_sermaye : 0 }
+                    { key: 'ciro', label: 'Satış Gelirleri', type: 'currency' },
+                    { key: 'favok_marji', label: 'FAVÖK Marjı', type: 'percent' },
+                    { key: 'net_kar_marji', label: 'Net Kar Marjı', type: 'percent' },
+                    { key: 'favok', label: 'FAVÖK', readonly: true, type: 'currency' },
+                    { key: 'net_kar', label: 'Net Kar', readonly: true, type: 'currency' },
+                    { key: 'ozkaynaklar', label: 'Özkaynaklar', type: 'currency' },
+                    { key: 'fd_favok', label: 'FD/FAVÖK', type: 'decimal' },
+                    { key: 'f_k', label: 'F/K', type: 'decimal' },
+                    { key: 'pd_dd', label: 'PD/DD', type: 'decimal' },
+                    { key: 'hedef_fiyat', label: 'Hedef Fiyat', readonly: true, isTarget: true, type: 'target' },
+                    { key: 'potansiyel', label: 'Potansiyel', readonly: true, type: 'percent_target' }
                 ];
                 
-                // Add Kur input row for USD entries
-                let hasUSD = years.some(y => stateData[y]?.currency === 'USD');
-                if (hasUSD) {
-                    rows.splice(1, 0, { key: 'usd_kur', label: 'USD/TL Kuru' });
-                }
-
                 rows.forEach(r => {
                     html += `<tr><td style="text-align:left; font-weight:bold;">${r.label}</td>`;
                     years.forEach(y => {
                         const d = stateData[y] || {};
                         const editMode = window.degerlemeEditMode[y];
+                        const curCurrency = d.currency || 'TRY';
+                        let currencySymbol = '₺';
+                        if (curCurrency === 'USD') currencySymbol = '$';
+                        if (curCurrency === 'EUR') currencySymbol = '€';
                         
-                        let val = d[r.key] || '';
+                        let val = d[r.key] !== undefined ? d[r.key] : '';
                         let displayVal = val;
                         
-                        // Calculate read-only fields
-                        let fv = (d.ciro || 0) * ((d.favok_marji || 0) / 100);
-                        if (r.key === 'favok') displayVal = val = fv;
+                        const ciro = parseFloat(d.ciro) || 0;
+                        const favokMarji = parseFloat(d.favok_marji) || 0;
+                        const netKarMarji = parseFloat(d.net_kar_marji) || 0;
                         
-                        let pd = fv * (d.fd_favok || 0);
-                        if (r.key === 'piyasa_degeri') displayVal = val = pd;
+                        // Calculate auto fields
+                        let favok = 0;
+                        let net_kar = 0;
+                        let hasFavok = false;
+                        let hasNetKar = false;
                         
-                        if (r.key === 'hedef_fiyat') {
-                            let pd_tl = pd;
-                            let net_borc_tl = d.net_borc || 0;
-                            if (d.currency === 'USD') {
-                                const kur = d.usd_kur || window.dolarKuru || 33;
-                                pd_tl = pd * kur;
-                                net_borc_tl = (d.net_borc || 0) * kur;
-                            }
-                            displayVal = val = d.odenmis_sermaye ? (pd_tl - net_borc_tl) / d.odenmis_sermaye : 0;
+                        if (d.ciro !== undefined && d.ciro !== '' && d.favok_marji !== undefined && d.favok_marji !== '') {
+                            favok = ciro * (favokMarji / 100);
+                            hasFavok = true;
+                        }
+                        if (d.ciro !== undefined && d.ciro !== '' && d.net_kar_marji !== undefined && d.net_kar_marji !== '') {
+                            net_kar = ciro * (netKarMarji / 100);
+                            hasNetKar = true;
                         }
                         
-                        if (typeof displayVal === 'number' && displayVal !== 0) {
-                            if (r.key === 'hedef_fiyat') {
-                                displayVal = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(displayVal);
-                            } else if (r.key === 'favok_marji') {
-                                displayVal = displayVal + '%';
+                        if (r.key === 'favok') {
+                            displayVal = val = hasFavok ? favok : '---';
+                        }
+                        if (r.key === 'net_kar') {
+                            displayVal = val = hasNetKar ? net_kar : '---';
+                        }
+                        
+                        // Calculate PDs
+                        let validPDs = [];
+                        if (hasFavok && d.fd_favok !== undefined && d.fd_favok !== '') {
+                            validPDs.push(favok * (parseFloat(d.fd_favok) || 0));
+                        }
+                        if (hasNetKar && d.f_k !== undefined && d.f_k !== '') {
+                            validPDs.push(net_kar * (parseFloat(d.f_k) || 0));
+                        }
+                        if (d.ozkaynaklar !== undefined && d.ozkaynaklar !== '' && d.pd_dd !== undefined && d.pd_dd !== '') {
+                            validPDs.push((parseFloat(d.ozkaynaklar) || 0) * (parseFloat(d.pd_dd) || 0));
+                        }
+                        
+                        let avgPD = 0;
+                        if (validPDs.length > 0) {
+                            avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
+                        }
+                        
+                        let hedefFiyatTL = 0;
+                        let hasHedef = false;
+                        
+                        if (validPDs.length > 0 && odenmisSermaye > 0) {
+                            let hedefFiyatForeign = avgPD / odenmisSermaye;
+                            if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
+                            else if (curCurrency === 'EUR') hedefFiyatTL = hedefFiyatForeign * eurKuru;
+                            else hedefFiyatTL = hedefFiyatForeign;
+                            hasHedef = true;
+                        }
+                        
+                        if (r.key === 'hedef_fiyat') {
+                            displayVal = val = hasHedef ? hedefFiyatTL : '---';
+                        }
+                        
+                        if (r.key === 'potansiyel') {
+                            if (hasHedef && guncelFiyat > 0) {
+                                displayVal = val = ((hedefFiyatTL - guncelFiyat) / guncelFiyat) * 100;
                             } else {
-                                displayVal = new Intl.NumberFormat('tr-TR').format(displayVal);
+                                displayVal = val = '---';
                             }
-                        } else if (displayVal === 0 || displayVal === '') {
-                            displayVal = '---';
+                        }
+                        
+                        // Formatting logic
+                        if (displayVal !== '---' && displayVal !== '') {
+                            let numVal = parseFloat(displayVal);
+                            if (!isNaN(numVal)) {
+                                if (r.type === 'target') {
+                                    displayVal = '₺' + new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(numVal);
+                                } else if (r.type === 'currency') {
+                                    displayVal = currencySymbol === '€' ? new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(numVal) + '€' : currencySymbol + new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(numVal);
+                                } else if (r.type === 'percent') {
+                                    displayVal = '%' + new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(numVal);
+                                } else if (r.type === 'percent_target') {
+                                    displayVal = '%' + new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(numVal);
+                                } else if (r.type === 'decimal') {
+                                    displayVal = new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(numVal);
+                                }
+                            }
                         }
                         
                         if (editMode && !r.readonly) {
-                            html += `<td style="text-align: center;"><input type="number" step="any" style="width:100%; background:rgba(255,255,255,0.1); color:#fff; border:1px solid var(--accent-color); padding:4px; text-align:center; border-radius:4px;" value="${val}" onchange="window.updateDegerlemeInput('${selectedHisse}', '${y}', '${r.key}', parseFloat(this.value)||0)"></td>`;
+                            html += `<td style="text-align: center;"><input type="number" step="any" style="width:100%; background:rgba(255,255,255,0.1); color:#fff; border:1px solid var(--accent-color); padding:4px; text-align:center; border-radius:4px;" value="${val !== '---' ? val : ''}" onchange="window.updateDegerlemeInput('${selectedHisse}', '${y}', '${r.key}', this.value)"></td>`;
                         } else {
-                            html += `<td style="text-align: center; ${r.isTarget ? 'font-weight:bold; color:var(--success-color); font-size:1.1rem;' : ''}">${displayVal}</td>`;
+                            html += `<td style="text-align: center; ${r.isTarget ? 'font-weight:bold; color:var(--success-color); font-size:1.1rem;' : ''}">${displayVal === '' ? '---' : displayVal}</td>`;
                         }
                     });
                     html += `</tr>`;
                 });
+                
+                // Add actions row at the bottom
+                html += `<tr><td style="text-align:left; font-weight:bold; color:var(--text-secondary);"></td>`;
+                years.forEach(y => {
+                    const d = stateData[y] || {};
+                    const curCurrency = d.currency || 'TRY';
+                    html += `<td style="text-align: center;">
+                        <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem; padding-top: 5px;">
+                            <select style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:2px 4px; font-size:0.8rem;" onchange="window.updateDegerlemeInput('${selectedHisse}', '${y}', 'currency', this.value)">
+                                <option value="TRY" ${curCurrency === 'TRY' ? 'selected' : ''}>₺</option>
+                                <option value="USD" ${curCurrency === 'USD' ? 'selected' : ''}>$</option>
+                                <option value="EUR" ${curCurrency === 'EUR' ? 'selected' : ''}>€</option>
+                            </select>
+                            <i class="fas fa-edit" style="cursor:pointer; color:var(--accent-color);" onclick="window.toggleDegerlemeEdit('${y}')" title="Düzenle"></i>
+                            <i class="fas fa-save" style="cursor:pointer; color:var(--success-color);" onclick="window.toggleDegerlemeEdit('${y}')" title="Kaydet"></i>
+                            <i class="fas fa-trash" style="cursor:pointer; color:var(--danger-color);" onclick="if(confirm('${y} verilerini silmek istediğinize emin misiniz?')){ delete State.data.degerleme['${selectedHisse}']['${y}']; State.save(); if(typeof renderUI === 'function') renderUI(); else if(typeof renderPage === 'function') renderPage(); }" title="Sil"></i>
+                        </div>
+                    </td>`;
+                });
+                html += `</tr>`;
                 
                 html += `</tbody></table></div></div>`;
                 contentHtml += html;
@@ -2243,12 +2327,24 @@ const renderHisseler = (container) => {
             }
         let stockHeaderHtml = '';
         if (selectedHisse) {
+            window.stockChanges = window.stockChanges || {};
             const hFiyat = parseFloat(State.getFiyat(selectedHisse)) || 0;
-            const hKayit = State.data.hisseFiyatlari && State.data.hisseFiyatlari.find(h => h.hisse === selectedHisse);
-            const oKapanis = hKayit && hKayit.onceki_kapanis ? parseFloat(hKayit.onceki_kapanis) : hFiyat;
-            const hDegisim = oKapanis > 0 ? ((hFiyat - oKapanis) / oKapanis) * 100 : 0;
+            let hDegisim = 0;
+            if (window.stockChanges[selectedHisse] !== undefined) {
+                hDegisim = window.stockChanges[selectedHisse];
+            } else {
+                const hKayit = State.data.hisseFiyatlari && State.data.hisseFiyatlari.find(h => h.hisse === selectedHisse);
+                const oKapanis = hKayit && hKayit.onceki_kapanis ? parseFloat(hKayit.onceki_kapanis) : hFiyat;
+                hDegisim = oKapanis > 0 ? ((hFiyat - oKapanis) / oKapanis) * 100 : 0;
+            }
+            
             const isPos = hDegisim >= 0;
             const hColor = isPos ? 'var(--success-color)' : 'var(--danger-color)';
+            
+            let initChangeStr = Math.abs(hDegisim).toFixed(2).replace('.', ',');
+            if (isPos && hDegisim > 0) initChangeStr = '+' + initChangeStr;
+            else if (!isPos) initChangeStr = '-' + initChangeStr;
+
             stockHeaderHtml = `
             <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 1rem 1rem 0 1rem; flex-shrink: 0;">
                 <div>
@@ -2256,42 +2352,12 @@ const renderHisseler = (container) => {
                 </div>
                 <div style="display: flex; align-items: baseline; gap: 0.8rem;">
                     <div style="font-size: 1.2rem; font-weight: bold; color: #fff;">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)} ₺</div>
-                    <div id="hisse-header-change" style="font-size: 0.9rem; font-weight: 600; color: ${hColor}; display: flex; align-items: center; gap: 0.3rem;;">
-                        <i class="fas ${hDegisim === 0 ? 'fa-minus' : (isPos ? 'fa-caret-up' : 'fa-caret-down')}"></i> %${Math.abs(hDegisim).toFixed(2)}
+                    <div id="hisse-header-change" style="font-size: 0.9rem; font-weight: 600; color: ${hColor}; display: block;">
+                        <i class="fas fa-caret-${isPos ? 'up' : 'down'}"></i> %${initChangeStr}
                     </div>
                 </div>
             </div>
-            <script>
-                if ('${selectedHisse}') {
-                    setTimeout(() => {
-                        fetch('https://scanner.tradingview.com/turkey/scan', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'text/plain' },
-                            body: JSON.stringify({ symbols: { tickers: ['BIST:' + '${selectedHisse}'] }, columns: ['close', 'change'] })
-                        }).then(res => res.json()).then(data => {
-                            if (data && data.data && data.data.length > 0) {
-                                const change = data.data[0].d[1];
-                                const changeEl = document.getElementById('hisse-header-change');
-                                const borderEl = document.getElementById('hisse-header-border');
-                                if (changeEl) {
-                                    const isPos = change >= 0;
-                                    const color = isPos ? 'var(--success-color)' : 'var(--danger-color)';
-                                    changeEl.style.color = color;
-                                    changeEl.style.display = 'block';
-                                    let changeStr = Math.abs(change).toFixed(2).replace('.', ',');
-                                    if (isPos && change > 0) changeStr = '+' + changeStr;
-                                    else if (!isPos) changeStr = '-' + changeStr;
-                                    changeEl.innerHTML = '<i class="fas fa-caret-' + (isPos ? 'up' : 'down') + '"></i> %' + changeStr;
-                                    if(borderEl) borderEl.style.borderLeftColor = color;
-                                }
-                            }
-                        }).catch(e => {
-                            const changeEl = document.getElementById('hisse-header-change');
-                            if (changeEl) changeEl.innerHTML = '-';
-                        });
-                    }, 100);
-                }
-            </script>`;
+            `;
         }
 
         container.innerHTML = `
@@ -2303,6 +2369,38 @@ const renderHisseler = (container) => {
                 ${contentHtml}
             </div>
         `;
+
+        if (selectedHisse) {
+            setTimeout(() => {
+                fetch('https://scanner.tradingview.com/turkey/scan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ symbols: { tickers: ['BIST:' + selectedHisse] }, columns: ['close', 'change'] })
+                }).then(res => res.json()).then(data => {
+                    if (data && data.data && data.data.length > 0) {
+                        const change = data.data[0].d[1];
+                        const changeEl = document.getElementById('hisse-header-change');
+                        const borderEl = document.getElementById('hisse-header-border');
+                        if (changeEl) {
+                            window.stockChanges[selectedHisse] = change;
+                            const isPos = change >= 0;
+                            const color = isPos ? 'var(--success-color)' : 'var(--danger-color)';
+                            changeEl.style.color = color;
+                            changeEl.style.display = 'block';
+                            let changeStr = Math.abs(change).toFixed(2).replace('.', ',');
+                            if (isPos && change > 0) changeStr = '+' + changeStr;
+                            else if (!isPos) changeStr = '-' + changeStr;
+                            changeEl.innerHTML = '<i class="fas fa-caret-' + (isPos ? 'up' : 'down') + '"></i> %' + changeStr;
+                            if(borderEl) borderEl.style.borderLeftColor = color;
+                        }
+                    }
+                }).catch(e => {
+                    const changeEl = document.getElementById('hisse-header-change');
+                    if (changeEl) changeEl.innerHTML = '-';
+                });
+            }, 100);
+        }
+
 
 if (window.shouldRenderDashboardCharts) {
             window.shouldRenderDashboardCharts = false;
@@ -2317,20 +2415,7 @@ if (window.shouldRenderDashboardCharts) {
                     maintainAspectRatio: false,
                     plugins: { 
                         legend: { display: false },
-                        tooltip: { enabled: true },
-                        datalabels: {
-                            display: true,
-                            color: '#fff',
-                            font: { size: 10, weight: 'bold' },
-                            anchor: 'end',
-                            align: 'top',
-                            formatter: (value) => {
-                                if (value === 0 || !value) return '';
-                                if (Math.abs(value) >= 1e9) return (value / 1e9).toFixed(1) + 'Mly';
-                                if (Math.abs(value) >= 1e6) return (value / 1e6).toFixed(1) + 'M';
-                                return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(value);
-                            }
-                        }
+                        tooltip: { enabled: true }
                     },
                     scales: { 
                         x: { ticks: { color: '#888', font: {size: 10} }, grid: { display:false } }, 
@@ -2480,340 +2565,340 @@ window.setHisseTab = (tab) => {
 };
 
 
-const renderHisseIslemleri = (container) => {
-    window.currentEditId = window.currentEditId || null;
-
-    const sortedEkstre = [...State.data.ekstre].sort((a, b) => {
-        if (a.menkul === 'NAKİT' && b.menkul !== 'NAKİT') return -1;
-        if (b.menkul === 'NAKİT' && a.menkul !== 'NAKİT') return 1;
-        if (a.menkul !== b.menkul) return a.menkul.localeCompare(b.menkul);
-        return new Date(b.tarih) - new Date(a.tarih);
-    });
-
-    const hisseFonEkstre = sortedEkstre.filter(e => e.menkul !== 'NAKİT');
-
-    const ekstreRows = hisseFonEkstre.map((e, i) => {
-        const isFon = e.menkul.length === 3;
-        const tur = isFon ? 'Fon' : 'Hisse';
-
-        if (e.id === window.currentEditId) {
-            return `<tr style="background: rgba(0,0,0,0.4);">
-                <td>${i + 1}</td>
-                <td><input type="date" id="edit-tarih" class="form-control" style="width:100%; font-size:12px; padding:2px; text-align:right;" value="${e.tarih}"></td>
-                <td>
-                    <select id="edit-tur" class="form-control" style="width:100%; font-size:12px; padding:2px;" onchange="window.updateEditDatalist()">
-                        <option value="Hisse" ${!isFon ? 'selected' : ''}>Hisse</option>
-                        <option value="Fon" ${isFon ? 'selected' : ''}>Fon</option>
-                    </select>
-                </td>
-                <td><input type="text" id="edit-menkul" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.menkul}" list="${isFon ? 'fon-list' : 'bist-hisse-list'}"></td>
-                <td><input type="number" step="0.000001" id="edit-fiyat" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.fiyat}"></td>
-                <td><input type="number" step="0.0001" id="edit-adet" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.adet}"></td>
-                <td><input type="text" id="edit-tutar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}" disabled></td>
-                <td>
-                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveEditEkstre('${e.id}')">Kaydet</button>
-                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.cancelEdit()">İptal</button>
-                </td>
-            </tr>`;
-        }
-        return `<tr>
-            <td>${i + 1}</td>
-            <td style="text-align: right;">${formatDate(e.tarih)}</td>
-            <td style="font-weight:600; color: #fff; text-align:left;">${tur}</td>
-            <td style="font-weight:600; color: #fff; text-align:left;">${e.menkul}</td>
-            <td>${formatCurrency(e.fiyat)}</td>
-            <td class="${e.adet >= 0 ? 'text-success' : 'text-danger'}">${e.adet}</td>
-            <td>${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}</td>
-            <td>
-                <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--warning-color);" onclick="window.setEditEkstre('${e.id}')"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-danger" style="padding: 0.1rem 0.3rem; font-size: 12px; background: transparent;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash"></i></button>
-            </td>
-        </tr>`;
-    }).join('');
-
-    const todayStr = new Date().toISOString().split('T')[0];
-    
-    const fonSet = new Set();
-    (State.data.ekstre || []).forEach(e => {
-        if (e.menkul !== 'NAKIT' && e.menkul.length === 3) fonSet.add(e.menkul);
-    });
-    let fonDatalistOptions = '';
-    fonSet.forEach(fon => {
-        fonDatalistOptions += `<option value="${fon}">`;
-    });
-
-    container.innerHTML = `
-        <datalist id="fon-list">${fonDatalistOptions}</datalist>
-        <div class="page-section active">
-            <div class="table-container glass" style="overflow-x: auto;">
-                <div class="table-header">
-                    <span>Hisse ve Fon Hareketleri</span>
-                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleInlineForm('hisse')">+</button>
-                </div>
-                <table style="table-layout: fixed; width: 100%;">
-                    <thead>
-                        <tr><th style="width: 5%;">S.N.</th><th style="width: 15%; text-align: right;">Tarih</th><th style="width: 8%; text-align: left;">Tür</th><th style="width: 12%; text-align: left;">Menkul</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%;">Tutar</th><th style="width: 18%;">İşlem</th></tr>
-                    </thead>
-                    <tbody id="hisse-tbody">
-                        <tr id="inline-hisse-row" style="display: none; background: rgba(0,0,0,0.4);">
-                            <td>-</td>
-                            <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}"></td>
-                            <td>
-                                <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px;" onchange="window.updateInlineDatalist()">
-                                    <option value="Hisse" selected>Hisse</option>
-                                    <option value="Fon">Fon</option>
-                                </select>
-                            </td>
-                            <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off"></td>
-                            <td><input type="number" step="0.000001" id="i-fiyat" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Fiyat"></td>
-                            <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Adet"></td>
-                            <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" disabled></td>
-                            <td>
-                                <button class="btn" id="i-submit-btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveInlineHisse()">Ekle</button>
-                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.toggleInlineForm('hisse')">İptal</button>
-                            </td>
-                        </tr>
-                        ${ekstreRows}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    // listeners
-    window.updateInlineDatalist = () => {
-        const tur = document.getElementById('i-tur').value;
-        const menkulInput = document.getElementById('i-menkul');
-        menkulInput.value = ''; // clear when switching
-        if (tur === 'Fon') {
-            menkulInput.setAttribute('list', 'fon-list');
-            menkulInput.placeholder = 'Fon (3 Harf)';
-            menkulInput.setAttribute('maxlength', '3');
-        } else {
-            menkulInput.setAttribute('list', 'bist-hisse-list');
-            menkulInput.placeholder = 'Hisse Adı';
-            menkulInput.removeAttribute('maxlength');
-        }
-    };
-
-    window.updateEditDatalist = () => {
-        const tur = document.getElementById('edit-tur').value;
-        const menkulInput = document.getElementById('edit-menkul');
-        if (tur === 'Fon') {
-            menkulInput.setAttribute('list', 'fon-list');
-            menkulInput.setAttribute('maxlength', '3');
-        } else {
-            menkulInput.setAttribute('list', 'bist-hisse-list');
-            menkulInput.removeAttribute('maxlength');
-        }
-    };
-
-    const calcTutar = (fiyatId, adetId, tutarId) => {
-        const f = parseFloat(document.getElementById(fiyatId)?.value) || 0;
-        const a = parseFloat(document.getElementById(adetId)?.value) || 0;
-        const target = document.getElementById(tutarId);
-        if (target) target.value = formatCurrency(f * Math.abs(a), 0);
-    };
-
-    document.getElementById('i-fiyat')?.addEventListener('input', () => calcTutar('i-fiyat', 'i-adet', 'i-tutar'));
-    document.getElementById('i-adet')?.addEventListener('input', () => calcTutar('i-fiyat', 'i-adet', 'i-tutar'));
-
-    if(document.getElementById('edit-fiyat')) {
-        document.getElementById('edit-fiyat').addEventListener('input', () => calcTutar('edit-fiyat', 'edit-adet', 'edit-tutar'));
-        document.getElementById('edit-adet').addEventListener('input', () => calcTutar('edit-fiyat', 'edit-adet', 'edit-tutar'));
-    }
-
-    window.toggleInlineForm = (type) => {
-        const row = document.getElementById(`inline-${type}-row`);
-        row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
-        window.cancelEdit();
-    };
-
-    window.deleteEkstre = (id) => {
-        if(confirm('Bu işlemi silmek istediğinize emin misiniz?')) {
-            State.deleteEkstre(id);
-            if (typeof renderPage === 'function') renderPage();
-        }
-    };
-
-    window.setEditEkstre = (id) => {
-        window.currentEditId = id;
-        if (typeof renderPage === 'function') renderPage();
-    };
-    window.cancelEdit = () => {
-        if(window.currentEditId) {
-            window.currentEditId = null;
-            if (typeof renderPage === 'function') renderPage();
-        }
-    };
-
-    window.saveEditEkstre = (id) => {
-        const menkul = document.getElementById('edit-menkul').value.trim().toUpperCase();
-        if (!menkul) return;
-        const islem = {
-            tarih: document.getElementById('edit-tarih').value,
-            islemTip: parseFloat(document.getElementById('edit-adet').value) < 0 ? 'SATIŞ' : 'ALIŞ',
-            menkul: menkul,
-            fiyat: document.getElementById('edit-fiyat').value,
-            adet: document.getElementById('edit-adet').value
-        };
-        State.updateEkstre(id, islem);
-        window.currentEditId = null;
-        if (typeof renderPage === 'function') renderPage();
-    };
-
-    window.saveInlineHisse = () => {
-        const menkul = document.getElementById('i-menkul').value.trim().toUpperCase();
-        if (!menkul) return;
-        const islem = {
-            tarih: document.getElementById('i-tarih').value,
-            islemTip: parseFloat(document.getElementById('i-adet').value) < 0 ? 'SATIŞ' : 'ALIŞ',
-            menkul: menkul,
-            fiyat: document.getElementById('i-fiyat').value,
-            adet: document.getElementById('i-adet').value
-        };
-        State.addEkstre(islem);
-        if (typeof renderPage === 'function') renderPage();
-    };
-};
-
-const renderNakitIslemleri = (container) => {
-    window.currentNakitEditId = window.currentNakitEditId || null;
-    
-    const nakitHareketleriList = [...(State.data.nakitHareketleri || [])].sort((a,b) => new Date(b.tarih) - new Date(a.tarih));
-    const nakitRows = nakitHareketleriList.map((n, i) => {
-        if (n.id === window.currentNakitEditId) {
-            return `<tr style="background: rgba(0,0,0,0.4);">
-                <td>${i+1}</td>
-                <td><input type="date" id="edit-n-tarih" class="form-control" style="width:100%; font-size:12px; padding:2px; text-align:right;" value="${n.tarih}"></td>
-                <td><input type="number" step="0.01" id="edit-n-tutar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.tutar}"></td>
-                <td><input type="number" step="0.01" id="edit-n-bist" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.bist100 || ''}"></td>
-                <td><input type="number" step="0.01" id="edit-n-dolar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.dolar || ''}"></td>
-                <td><input type="number" step="0.01" id="edit-n-altin" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.gramAltin || ''}"></td>
-                <td>
-                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveEditNakit('${n.id}')">Kaydet</button>
-                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.cancelNakitEdit()">İptal</button>
-                </td>
-            </tr>`;
-        }
-        return `<tr>
-            <td>${i+1}</td><td style="text-align: right;">${formatDate(n.tarih)}</td><td class="${n.tutar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(n.tutar, 0)}</td><td>${formatNumber(n.bist100)}</td><td>${formatNumber(n.dolar)}</td><td>${formatNumber(n.gramAltin)}</td>
-            <td>
-                <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--warning-color);" onclick="window.setEditNakit('${n.id}')"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-danger" style="padding: 0.1rem 0.3rem; font-size: 12px; background: transparent;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash"></i></button>
-            </td>
-        </tr>`;
-    }).join('');
-
-    const todayStr = new Date().toISOString().split('T')[0];
-
-    container.innerHTML = `
-        <div class="page-section active">
-            <div class="table-container glass" style="overflow-x: auto;">
-                <div class="table-header">
-                    <span>Nakit Hareketleri</span>
-                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleInlineForm('nakit')">+</button>
-                </div>
-                <table style="table-layout: fixed; width: 100%;">
-                    <thead>
-                        <tr><th style="width: 5%;">S.N.</th><th style="width: 15%; text-align: right;">Tarih</th><th style="width: 15%;">Tutar</th><th style="width: 15%;">XU100</th><th style="width: 15%;">USDTRY</th><th style="width: 15%;">GRAMALTIN</th><th style="width: 20%;">İşlem</th></tr>
-                    </thead>
-                    <tbody id="nakit-tbody">
-                        <tr id="inline-nakit-row" style="display: none; background: rgba(0,0,0,0.4);">
-                            <td>-</td>
-                            <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}"></td>
-                            <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar"></td>
-                            <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="XU100"></td>
-                            <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Dolar"></td>
-                            <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN"></td>
-                            <td>
-                                <button class="btn" id="n-submit-btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveInlineNakitEntry()">Ekle</button>
-                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.toggleInlineForm('nakit')">İptal</button>
-                            </td>
-                        </tr>
-                        ${nakitRows}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-
-    window.toggleInlineForm = (type) => {
-        const row = document.getElementById(`inline-${type}-row`);
-        if(row) {
-            row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
-        }
-        window.cancelNakitEdit();
-    };
-
-    window.deleteNakit = (id) => {
-        if(confirm('Bu nakit hareketini silmek istediğinize emin misiniz?')) {
-            State.deleteNakitHareket(id);
-            if (typeof renderPage === 'function') renderPage();
-        }
-    };
-    window.setEditNakit = (id) => {
-        window.currentNakitEditId = id;
-        if (typeof renderPage === 'function') renderPage();
-    };
-    window.cancelNakitEdit = () => {
-        if(window.currentNakitEditId) {
-            window.currentNakitEditId = null;
-            if (typeof renderPage === 'function') renderPage();
-        }
-    };
-    window.saveEditNakit = (id) => {
-        const islem = {
-            tarih: document.getElementById('edit-n-tarih').value,
-            tutar: parseFloat(document.getElementById('edit-n-tutar').value) || 0,
-            bist100: parseFloat(document.getElementById('edit-n-bist').value) || 0,
-            dolar: parseFloat(document.getElementById('edit-n-dolar').value) || 0,
-            gramAltin: parseFloat(document.getElementById('edit-n-altin').value) || 0
-        };
-        State.updateNakitHareket(id, islem);
-        window.currentNakitEditId = null;
-        if (typeof renderPage === 'function') renderPage();
-    };
-    window.saveInlineNakitEntry = () => {
-        const islem = {
-            tarih: document.getElementById('n-tarih').value,
-            tutar: parseFloat(document.getElementById('n-tutar').value) || 0,
-            bist100: parseFloat(document.getElementById('n-bist').value) || 0,
-            dolar: parseFloat(document.getElementById('n-dolar').value) || 0,
-            gramAltin: parseFloat(document.getElementById('n-altin').value) || 0
-        };
-        State.addNakitHareket(islem);
-        if (typeof renderPage === 'function') renderPage();
-    };
-};
-
-const renderVeriler = (container) => {
-    // We will place Enflasyon Form, Hedef Portföy input, and Fon Fiyatlari input here.
-    const hedefPortfoy = State.data.hedefPortfoyTL || 0;
-    
-    // Fon Set
-    const fonSet = new Set();
-    (State.data.ekstre || []).forEach(e => {
-        if (e.menkul !== 'NAKIT' && e.menkul.length === 3) fonSet.add(e.menkul);
-    });
-    
-    let fonHtml = '';
-    fonSet.forEach(fon => {
-        const pFiyat = State.getFiyat(fon);
-        fonHtml += `
-            <div style="display:flex; justify-content:flex-end; align-items:center; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem;">
-                <span>${fon}</span>
-                <div style="display:flex; align-items:center; gap: 0.5rem;">
-                    <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100px; text-align:right;">
-                    <button class="btn" style="padding: 0.2rem 0.5rem; background: var(--accent-color);" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value); alert('Güncellendi!');"><i class="fas fa-check"></i></button>
-                </div>
-            </div>
-        `;
-    });
-
-    container.innerHTML = `
-        <div class="page-section active" style="display: flex; flex-direction: column; gap: 2rem;">
-            
+const renderHisseIslemleri = (container) => {
+    window.currentEditId = window.currentEditId || null;
+
+    const sortedEkstre = [...State.data.ekstre].sort((a, b) => {
+        if (a.menkul === 'NAKİT' && b.menkul !== 'NAKİT') return -1;
+        if (b.menkul === 'NAKİT' && a.menkul !== 'NAKİT') return 1;
+        if (a.menkul !== b.menkul) return a.menkul.localeCompare(b.menkul);
+        return new Date(b.tarih) - new Date(a.tarih);
+    });
+
+    const hisseFonEkstre = sortedEkstre.filter(e => e.menkul !== 'NAKİT');
+
+    const ekstreRows = hisseFonEkstre.map((e, i) => {
+        const isFon = e.menkul.length === 3;
+        const tur = isFon ? 'Fon' : 'Hisse';
+
+        if (e.id === window.currentEditId) {
+            return `<tr style="background: rgba(0,0,0,0.4);">
+                <td>${i + 1}</td>
+                <td><input type="date" id="edit-tarih" class="form-control" style="width:100%; font-size:12px; padding:2px; text-align:right;" value="${e.tarih}"></td>
+                <td>
+                    <select id="edit-tur" class="form-control" style="width:100%; font-size:12px; padding:2px;" onchange="window.updateEditDatalist()">
+                        <option value="Hisse" ${!isFon ? 'selected' : ''}>Hisse</option>
+                        <option value="Fon" ${isFon ? 'selected' : ''}>Fon</option>
+                    </select>
+                </td>
+                <td><input type="text" id="edit-menkul" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.menkul}" list="${isFon ? 'fon-list' : 'bist-hisse-list'}"></td>
+                <td><input type="number" step="0.000001" id="edit-fiyat" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.fiyat}"></td>
+                <td><input type="number" step="0.0001" id="edit-adet" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.adet}"></td>
+                <td><input type="text" id="edit-tutar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}" disabled></td>
+                <td>
+                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveEditEkstre('${e.id}')">Kaydet</button>
+                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.cancelEdit()">İptal</button>
+                </td>
+            </tr>`;
+        }
+        return `<tr>
+            <td>${i + 1}</td>
+            <td style="text-align: right;">${formatDate(e.tarih)}</td>
+            <td style="font-weight:600; color: #fff; text-align:left;">${tur}</td>
+            <td style="font-weight:600; color: #fff; text-align:left;">${e.menkul}</td>
+            <td>${formatCurrency(e.fiyat)}</td>
+            <td class="${e.adet >= 0 ? 'text-success' : 'text-danger'}">${e.adet}</td>
+            <td>${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}</td>
+            <td>
+                <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--warning-color);" onclick="window.setEditEkstre('${e.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger" style="padding: 0.1rem 0.3rem; font-size: 12px; background: transparent;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>`;
+    }).join('');
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    
+    const fonSet = new Set();
+    State.data.ekstre.forEach(e => {
+        if (e.menkul !== 'NAKIT' && e.menkul.length === 3) fonSet.add(e.menkul);
+    });
+    let fonDatalistOptions = '';
+    fonSet.forEach(fon => {
+        fonDatalistOptions += `<option value="${fon}">`;
+    });
+
+    container.innerHTML = `
+        <datalist id="fon-list">${fonDatalistOptions}</datalist>
+        <div class="page-section active">
+            <div class="table-container glass" style="overflow-x: auto;">
+                <div class="table-header">
+                    <span>Hisse ve Fon Hareketleri</span>
+                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleInlineForm('hisse')">+</button>
+                </div>
+                <table style="table-layout: fixed; width: 100%;">
+                    <thead>
+                        <tr><th style="width: 5%;">S.N.</th><th style="width: 15%; text-align: right;">Tarih</th><th style="width: 8%; text-align: left;">Tür</th><th style="width: 12%; text-align: left;">Menkul</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%;">Tutar</th><th style="width: 18%;">İşlem</th></tr>
+                    </thead>
+                    <tbody id="hisse-tbody">
+                        <tr id="inline-hisse-row" style="display: none; background: rgba(0,0,0,0.4);">
+                            <td>-</td>
+                            <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}"></td>
+                            <td>
+                                <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px;" onchange="window.updateInlineDatalist()">
+                                    <option value="Hisse" selected>Hisse</option>
+                                    <option value="Fon">Fon</option>
+                                </select>
+                            </td>
+                            <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off"></td>
+                            <td><input type="number" step="0.000001" id="i-fiyat" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Fiyat"></td>
+                            <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Adet"></td>
+                            <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" disabled></td>
+                            <td>
+                                <button class="btn" id="i-submit-btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveInlineHisse()">Ekle</button>
+                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.toggleInlineForm('hisse')">İptal</button>
+                            </td>
+                        </tr>
+                        ${ekstreRows}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    // listeners
+    window.updateInlineDatalist = () => {
+        const tur = document.getElementById('i-tur').value;
+        const menkulInput = document.getElementById('i-menkul');
+        menkulInput.value = ''; // clear when switching
+        if (tur === 'Fon') {
+            menkulInput.setAttribute('list', 'fon-list');
+            menkulInput.placeholder = 'Fon (3 Harf)';
+            menkulInput.setAttribute('maxlength', '3');
+        } else {
+            menkulInput.setAttribute('list', 'bist-hisse-list');
+            menkulInput.placeholder = 'Hisse Adı';
+            menkulInput.removeAttribute('maxlength');
+        }
+    };
+
+    window.updateEditDatalist = () => {
+        const tur = document.getElementById('edit-tur').value;
+        const menkulInput = document.getElementById('edit-menkul');
+        if (tur === 'Fon') {
+            menkulInput.setAttribute('list', 'fon-list');
+            menkulInput.setAttribute('maxlength', '3');
+        } else {
+            menkulInput.setAttribute('list', 'bist-hisse-list');
+            menkulInput.removeAttribute('maxlength');
+        }
+    };
+
+    const calcTutar = (fiyatId, adetId, tutarId) => {
+        const f = parseFloat(document.getElementById(fiyatId)?.value) || 0;
+        const a = parseFloat(document.getElementById(adetId)?.value) || 0;
+        const target = document.getElementById(tutarId);
+        if (target) target.value = formatCurrency(f * Math.abs(a), 0);
+    };
+
+    document.getElementById('i-fiyat')?.addEventListener('input', () => calcTutar('i-fiyat', 'i-adet', 'i-tutar'));
+    document.getElementById('i-adet')?.addEventListener('input', () => calcTutar('i-fiyat', 'i-adet', 'i-tutar'));
+
+    if(document.getElementById('edit-fiyat')) {
+        document.getElementById('edit-fiyat').addEventListener('input', () => calcTutar('edit-fiyat', 'edit-adet', 'edit-tutar'));
+        document.getElementById('edit-adet').addEventListener('input', () => calcTutar('edit-fiyat', 'edit-adet', 'edit-tutar'));
+    }
+
+    window.toggleInlineForm = (type) => {
+        const row = document.getElementById(`inline-${type}-row`);
+        row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+        window.cancelEdit();
+    };
+
+    window.deleteEkstre = (id) => {
+        if(confirm('Bu işlemi silmek istediğinize emin misiniz?')) {
+            State.deleteEkstre(id);
+            if (typeof renderPage === 'function') renderPage();
+        }
+    };
+
+    window.setEditEkstre = (id) => {
+        window.currentEditId = id;
+        if (typeof renderPage === 'function') renderPage();
+    };
+    window.cancelEdit = () => {
+        if(window.currentEditId) {
+            window.currentEditId = null;
+            if (typeof renderPage === 'function') renderPage();
+        }
+    };
+
+    window.saveEditEkstre = (id) => {
+        const menkul = document.getElementById('edit-menkul').value.trim().toUpperCase();
+        if (!menkul) return;
+        const islem = {
+            tarih: document.getElementById('edit-tarih').value,
+            islemTip: parseFloat(document.getElementById('edit-adet').value) < 0 ? 'SATIŞ' : 'ALIŞ',
+            menkul: menkul,
+            fiyat: document.getElementById('edit-fiyat').value,
+            adet: document.getElementById('edit-adet').value
+        };
+        State.updateEkstre(id, islem);
+        window.currentEditId = null;
+        if (typeof renderPage === 'function') renderPage();
+    };
+
+    window.saveInlineHisse = () => {
+        const menkul = document.getElementById('i-menkul').value.trim().toUpperCase();
+        if (!menkul) return;
+        const islem = {
+            tarih: document.getElementById('i-tarih').value,
+            islemTip: parseFloat(document.getElementById('i-adet').value) < 0 ? 'SATIŞ' : 'ALIŞ',
+            menkul: menkul,
+            fiyat: document.getElementById('i-fiyat').value,
+            adet: document.getElementById('i-adet').value
+        };
+        State.addEkstre(islem);
+        if (typeof renderPage === 'function') renderPage();
+    };
+};
+
+const renderNakitIslemleri = (container) => {
+    window.currentNakitEditId = window.currentNakitEditId || null;
+    
+    const nakitHareketleriList = [...(State.data.nakitHareketleri || [])].sort((a,b) => new Date(b.tarih) - new Date(a.tarih));
+    const nakitRows = nakitHareketleriList.map((n, i) => {
+        if (n.id === window.currentNakitEditId) {
+            return `<tr style="background: rgba(0,0,0,0.4);">
+                <td>${i+1}</td>
+                <td><input type="date" id="edit-n-tarih" class="form-control" style="width:100%; font-size:12px; padding:2px; text-align:right;" value="${n.tarih}"></td>
+                <td><input type="number" step="0.01" id="edit-n-tutar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.tutar}"></td>
+                <td><input type="number" step="0.01" id="edit-n-bist" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.bist100 || ''}"></td>
+                <td><input type="number" step="0.01" id="edit-n-dolar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.dolar || ''}"></td>
+                <td><input type="number" step="0.01" id="edit-n-altin" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.gramAltin || ''}"></td>
+                <td>
+                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveEditNakit('${n.id}')">Kaydet</button>
+                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.cancelNakitEdit()">İptal</button>
+                </td>
+            </tr>`;
+        }
+        return `<tr>
+            <td>${i+1}</td><td style="text-align: right;">${formatDate(n.tarih)}</td><td class="${n.tutar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(n.tutar, 0)}</td><td>${formatNumber(n.bist100)}</td><td>${formatNumber(n.dolar)}</td><td>${formatNumber(n.gramAltin)}</td>
+            <td>
+                <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--warning-color);" onclick="window.setEditNakit('${n.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger" style="padding: 0.1rem 0.3rem; font-size: 12px; background: transparent;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>`;
+    }).join('');
+
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    container.innerHTML = `
+        <div class="page-section active">
+            <div class="table-container glass" style="overflow-x: auto;">
+                <div class="table-header">
+                    <span>Nakit Hareketleri</span>
+                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleInlineForm('nakit')">+</button>
+                </div>
+                <table style="table-layout: fixed; width: 100%;">
+                    <thead>
+                        <tr><th style="width: 5%;">S.N.</th><th style="width: 15%; text-align: right;">Tarih</th><th style="width: 15%;">Tutar</th><th style="width: 15%;">XU100</th><th style="width: 15%;">USDTRY</th><th style="width: 15%;">GRAMALTIN</th><th style="width: 20%;">İşlem</th></tr>
+                    </thead>
+                    <tbody id="nakit-tbody">
+                        <tr id="inline-nakit-row" style="display: none; background: rgba(0,0,0,0.4);">
+                            <td>-</td>
+                            <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}"></td>
+                            <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar"></td>
+                            <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="XU100"></td>
+                            <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Dolar"></td>
+                            <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN"></td>
+                            <td>
+                                <button class="btn" id="n-submit-btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveInlineNakitEntry()">Ekle</button>
+                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.toggleInlineForm('nakit')">İptal</button>
+                            </td>
+                        </tr>
+                        ${nakitRows}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    window.toggleInlineForm = (type) => {
+        const row = document.getElementById(`inline-${type}-row`);
+        if(row) {
+            row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+        }
+        window.cancelNakitEdit();
+    };
+
+    window.deleteNakit = (id) => {
+        if(confirm('Bu nakit hareketini silmek istediğinize emin misiniz?')) {
+            State.deleteNakitHareket(id);
+            if (typeof renderPage === 'function') renderPage();
+        }
+    };
+    window.setEditNakit = (id) => {
+        window.currentNakitEditId = id;
+        if (typeof renderPage === 'function') renderPage();
+    };
+    window.cancelNakitEdit = () => {
+        if(window.currentNakitEditId) {
+            window.currentNakitEditId = null;
+            if (typeof renderPage === 'function') renderPage();
+        }
+    };
+    window.saveEditNakit = (id) => {
+        const islem = {
+            tarih: document.getElementById('edit-n-tarih').value,
+            tutar: parseFloat(document.getElementById('edit-n-tutar').value) || 0,
+            bist100: parseFloat(document.getElementById('edit-n-bist').value) || 0,
+            dolar: parseFloat(document.getElementById('edit-n-dolar').value) || 0,
+            gramAltin: parseFloat(document.getElementById('edit-n-altin').value) || 0
+        };
+        State.updateNakitHareket(id, islem);
+        window.currentNakitEditId = null;
+        if (typeof renderPage === 'function') renderPage();
+    };
+    window.saveInlineNakitEntry = () => {
+        const islem = {
+            tarih: document.getElementById('n-tarih').value,
+            tutar: parseFloat(document.getElementById('n-tutar').value) || 0,
+            bist100: parseFloat(document.getElementById('n-bist').value) || 0,
+            dolar: parseFloat(document.getElementById('n-dolar').value) || 0,
+            gramAltin: parseFloat(document.getElementById('n-altin').value) || 0
+        };
+        State.addNakitHareket(islem);
+        if (typeof renderPage === 'function') renderPage();
+    };
+};
+
+const renderVeriler = (container) => {
+    // We will place Enflasyon Form, Hedef Portföy input, and Fon Fiyatlari input here.
+    const hedefPortfoy = State.data.hedefPortfoyTL || 0;
+    
+    // Fon Set
+    const fonSet = new Set();
+    State.data.ekstre.forEach(e => {
+        if (e.menkul !== 'NAKIT' && e.menkul.length === 3) fonSet.add(e.menkul);
+    });
+    
+    let fonHtml = '';
+    fonSet.forEach(fon => {
+        const pFiyat = State.getFiyat(fon);
+        fonHtml += `
+            <div style="display:flex; justify-content:flex-end; align-items:center; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem;">
+                <span>${fon}</span>
+                <div style="display:flex; align-items:center; gap: 0.5rem;">
+                    <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100px; text-align:right;">
+                    <button class="btn" style="padding: 0.2rem 0.5rem; background: var(--accent-color);" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value); alert('Güncellendi!');"><i class="fas fa-check"></i></button>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = `
+        <div class="page-section active" style="display: flex; flex-direction: column; gap: 2rem;">
+            
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <!-- Nakit Düzenleme -->
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
@@ -2861,55 +2946,55 @@ const renderVeriler = (container) => {
             </div>
 
             <!-- Enflasyon -->
-            <div class="glass" style="padding: 8px 1rem; margin-top: 1rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="margin-bottom: 0.5rem; color: var(--accent-color);">Aylık Enflasyon Verileri</h3>
-                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleEnfForm()">+</button>
-                </div>
-                
-                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
-                    <table style="width: 100%;">
-                        <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 10;">
-                            <tr>
-                                <th style="text-align:center;">Dönem (Yıl-Ay)</th>
-                                <th style="text-align:right;">Aylık Enflasyon (%)</th>
-                                <th style="text-align:right;">Kümülatif Enflasyon (%)</th>
-                                <th style="text-align:center; width: 80px;">İşlem</th>
-                            </tr>
-                        </thead>
-                        <tbody id="enf-form-tbody">
-                            <tr id="enf-form-row" style="display:none; background: rgba(255,255,255,0.05);">
-                                <td style="text-align:center;">
-                                    <input type="month" id="i-enf-tarih" class="form-control" style="padding:2px 5px; font-size:12px; height:auto; width:100%;" required>
-                                </td>
-                                <td style="text-align:right;">
-                                    <input type="number" id="i-enf-oran" class="form-control" step="0.01" style="padding:2px 5px; font-size:12px; height:auto; width:100%; text-align:right;" required>
-                                </td>
-                                <td style="text-align:right; color: var(--text-secondary);">-</td>
-                                <td style="text-align:center;">
-                                    <div style="display:flex; gap:0.2rem; justify-content:center;">
-                                        <button class="btn" style="padding:0.2rem; background:var(--accent-color);" onclick="window.addEnflasyon(event)" title="Kaydet"><i class="fas fa-check"></i></button>
-                                        <button class="btn btn-danger" style="padding:0.2rem;" onclick="window.toggleEnfForm()" title="İptal"><i class="fas fa-times"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                        <tbody id="enf-data-tbody">
-                            <!-- JS ile doldurulacak -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-    `;
-
-    setTimeout(() => {
-        if (typeof window.renderEnflasyonData === 'function') {
-            window.renderEnflasyonData();
-        }
-    }, 50);
-};
+            <div class="glass" style="padding: 8px 1rem; margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin-bottom: 0.5rem; color: var(--accent-color);">Aylık Enflasyon Verileri</h3>
+                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleEnfForm()">+</button>
+                </div>
+                
+                <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+                    <table style="width: 100%;">
+                        <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 10;">
+                            <tr>
+                                <th style="text-align:center;">Dönem (Yıl-Ay)</th>
+                                <th style="text-align:right;">Aylık Enflasyon (%)</th>
+                                <th style="text-align:right;">Kümülatif Enflasyon (%)</th>
+                                <th style="text-align:center; width: 80px;">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="enf-form-tbody">
+                            <tr id="enf-form-row" style="display:none; background: rgba(255,255,255,0.05);">
+                                <td style="text-align:center;">
+                                    <input type="month" id="i-enf-tarih" class="form-control" style="padding:2px 5px; font-size:12px; height:auto; width:100%;" required>
+                                </td>
+                                <td style="text-align:right;">
+                                    <input type="number" id="i-enf-oran" class="form-control" step="0.01" style="padding:2px 5px; font-size:12px; height:auto; width:100%; text-align:right;" required>
+                                </td>
+                                <td style="text-align:right; color: var(--text-secondary);">-</td>
+                                <td style="text-align:center;">
+                                    <div style="display:flex; gap:0.2rem; justify-content:center;">
+                                        <button class="btn" style="padding:0.2rem; background:var(--accent-color);" onclick="window.addEnflasyon(event)" title="Kaydet"><i class="fas fa-check"></i></button>
+                                        <button class="btn btn-danger" style="padding:0.2rem;" onclick="window.toggleEnfForm()" title="İptal"><i class="fas fa-times"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tbody id="enf-data-tbody">
+                            <!-- JS ile doldurulacak -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    `;
+
+    setTimeout(() => {
+        if (typeof window.renderEnflasyonData === 'function') {
+            window.renderEnflasyonData();
+        }
+    }, 50);
+};
 
 window.toggleInlineAnaliz = () => {
     const row = document.getElementById('inline-analiz-row');
@@ -3241,103 +3326,103 @@ const renderAnalizler = (container) => {
 };
 
 
-const renderAyarlar = (container) => {
-    container.innerHTML = `
-        <div class="page-section active">
-            <h2 style="margin-bottom:1rem;"><i class="fas fa-user-cog"></i> Hesap Ayarları</h2>
-            <div class="glass" style="padding: 2rem; max-width: 500px; margin: 0 auto;">
-                <form id="profile-form" style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div>
-                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">E-posta (Değiştirilemez)</label>
-                        <input type="email" id="profile-email" class="form-control" disabled value="${currentUser.email}">
-                    </div>
-                    <div>
-                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">Adı Soyadı</label>
-                        <input type="text" id="profile-name" class="form-control" value="${currentUser.displayName || ''}" required>
-                    </div>
-                    <div>
-                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">Telefon No</label>
-                        <input type="tel" id="profile-phone" class="form-control">
-                    </div>
-                    <button type="submit" class="btn" style="background: var(--accent-color); margin-top: 1rem;">Profili Kaydet</button>
-                </form>
-
-                <div style="height: 1px; background: var(--surface-border); margin: 2rem 0;"></div>
-
-                <form id="password-form" style="display: flex; flex-direction: column; gap: 1rem;">
-                    <h3 style="margin-bottom: 0.5rem; color: var(--text-primary); font-size: 1.1rem;">Parola Güncelleme</h3>
-                    <div>
-                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">Yeni Parola</label>
-                        <input type="password" id="profile-new-password" class="form-control" required minlength="6">
-                    </div>
-                    <button type="submit" class="btn btn-danger" style="margin-top: 0.5rem;">Parolayı Güncelle</button>
-                </form>
-            </div>
-        </div>
-    `;
-
-    db.collection('users').doc(currentUser.uid).get().then(doc => {
-        if(doc.exists && doc.data().phone) {
-            document.getElementById('profile-phone').value = doc.data().phone;
-        }
-    });
-
-    document.getElementById('profile-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const newName = document.getElementById('profile-name').value;
-        const newPhone = document.getElementById('profile-phone').value;
-        currentUser.updateProfile({ displayName: newName }).then(() => {
-            const unEl = document.getElementById('user-name');
-            if(unEl) unEl.innerText = newName;
-            return db.collection('users').doc(currentUser.uid).set({ phone: newPhone, displayName: newName }, { merge: true });
-        }).then(() => {
-            alert('Profil güncellendi!');
-        }).catch(err => alert(err.message));
-    });
-
-    document.getElementById('password-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const newPass = document.getElementById('profile-new-password').value;
-        currentUser.updatePassword(newPass).then(() => {
-            alert('Parola başarıyla güncellendi!');
-            document.getElementById('password-form').reset();
-        }).catch(err => alert(err.message));
-    });
-};
-
-const renderHedef = (container) => {
-    let rowsHtml = '';
-    
-    if (State.data.hedefFiyatlar) {
-        let sn = 1;
-        const fmtDec = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(val);
-        const fmtPct = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(val * 100) + '%';
-        
-        for (const hisse of Object.keys(State.data.hedefFiyatlar).sort()) {
-            const hData = State.data.hedefFiyatlar[hisse];
-            if (!hData['2026'] && !hData['2027'] && !hData['2028']) continue;
-            
-            const guncelFiyat = parseFloat(State.getFiyat(hisse)) || 0;
-            
-            const renderCell = (year) => {
-                if (!hData[year]) return `<td>-</td><td>-</td>`;
-                const color = hData[year].potansiyel > 0 ? '#2ecc71' : '#e74c3c';
-                return `<td>${fmtDec(hData[year].hedefFiyat)}</td><td style="color:${color}; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
-            };
-
-            rowsHtml += `<tr>
-                <td>${sn++}</td>
-                <td style="text-align: left; font-weight:bold; cursor:pointer; color:var(--accent-color); text-decoration:underline;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
-                <td>${fmtDec(guncelFiyat)}</td>
-                ${renderCell('2026')}
-                ${renderCell('2027')}
-                ${renderCell('2028')}
-            </tr>`;
-        }
-    }
-
-    if (!rowsHtml) {
-        rowsHtml = `<tr><td colspan="9" style="text-align:center; padding:2rem; opacity:0.5;">Henüz hiçbir hisse için Hedef Fiyat hesaplaması (Değerleme girişi) yapılmamış.</td></tr>`;
+const renderAyarlar = (container) => {
+    container.innerHTML = `
+        <div class="page-section active">
+            <h2 style="margin-bottom:1rem;"><i class="fas fa-user-cog"></i> Hesap Ayarları</h2>
+            <div class="glass" style="padding: 2rem; max-width: 500px; margin: 0 auto;">
+                <form id="profile-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div>
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">E-posta (Değiştirilemez)</label>
+                        <input type="email" id="profile-email" class="form-control" disabled value="${currentUser.email}">
+                    </div>
+                    <div>
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">Adı Soyadı</label>
+                        <input type="text" id="profile-name" class="form-control" value="${currentUser.displayName || ''}" required>
+                    </div>
+                    <div>
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">Telefon No</label>
+                        <input type="tel" id="profile-phone" class="form-control">
+                    </div>
+                    <button type="submit" class="btn" style="background: var(--accent-color); margin-top: 1rem;">Profili Kaydet</button>
+                </form>
+                <div style="height: 1px; background: var(--surface-border); margin: 2rem 0;"></div>
+
+                <form id="password-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <h3 style="margin-bottom: 0.5rem; color: var(--text-primary); font-size: 1.1rem;">Parola Güncelleme</h3>
+                    <div>
+                        <label style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.3rem; display: block;">Yeni Parola</label>
+                        <input type="password" id="profile-new-password" class="form-control" required minlength="6">
+                    </div>
+                    <button type="submit" class="btn btn-danger" style="margin-top: 0.5rem;">Parolayı Güncelle</button>
+                </form>
+            </div>
+        </div>
+    `;
+
+    db.collection('users').doc(currentUser.uid).get().then(doc => {
+        if(doc.exists && doc.data().phone) {
+            document.getElementById('profile-phone').value = doc.data().phone;
+        }
+    });
+
+    document.getElementById('profile-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newName = document.getElementById('profile-name').value;
+        const newPhone = document.getElementById('profile-phone').value;
+        currentUser.updateProfile({ displayName: newName }).then(() => {
+            const unEl = document.getElementById('user-name');
+            if(unEl) unEl.innerText = newName;
+            return db.collection('users').doc(currentUser.uid).set({ phone: newPhone, displayName: newName }, { merge: true });
+        }).then(() => {
+            alert('Profil güncellendi!');
+        }).catch(err => alert(err.message));
+    });
+
+    document.getElementById('password-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const newPass = document.getElementById('profile-new-password').value;
+        currentUser.updatePassword(newPass).then(() => {
+            alert('Parola başarıyla güncellendi!');
+            document.getElementById('password-form').reset();
+        }).catch(err => alert(err.message));
+    });
+};
+
+const renderHedef = (container) => {
+    if (window.recalculateHedefFiyatlar) window.recalculateHedefFiyatlar();
+    let rowsHtml = '';
+    
+    if (State.data.hedefFiyatlar) {
+        let sn = 1;
+        const fmtDec = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(val);
+        const fmtPct = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(val * 100) + '%';
+        
+        for (const hisse of Object.keys(State.data.hedefFiyatlar).sort()) {
+            const hData = State.data.hedefFiyatlar[hisse];
+            if (!hData['2026'] && !hData['2027'] && !hData['2028']) continue;
+            
+            const guncelFiyat = parseFloat(State.getFiyat(hisse)) || 0;
+            
+            const renderCell = (year) => {
+                if (!hData[year]) return `<td>-</td><td>-</td>`;
+                const color = hData[year].potansiyel > 0 ? '#2ecc71' : '#e74c3c';
+                return `<td>${fmtDec(hData[year].hedefFiyat)}</td><td style="color:${color}; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
+            };
+
+            rowsHtml += `<tr>
+                <td>${sn++}</td>
+                <td style="text-align: left; font-weight:bold; cursor:pointer; color:var(--accent-color); text-decoration:underline;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
+                <td>${fmtDec(guncelFiyat)}</td>
+                ${renderCell('2026')}
+                ${renderCell('2027')}
+                ${renderCell('2028')}
+            </tr>`;
+        }
+    }
+
+    if (!rowsHtml) {
+        rowsHtml = `<tr><td colspan="9" style="text-align:center; padding:2rem; opacity:0.5;">Henüz hiçbir hisse için Hedef Fiyat hesaplaması (Değerleme girişi) yapılmamış.</td></tr>`;
     }
 
 
@@ -3415,6 +3500,7 @@ window.removeHisseFromTakip = (hisseKodu) => {
 };
 
 const renderAnasayfa = (container) => {
+    if (window.recalculateHedefFiyatlar) window.recalculateHedefFiyatlar();
     let takipList = State.data.takipListesi || [];
     
     // Sort alphabetically
@@ -3464,7 +3550,7 @@ const renderAnasayfa = (container) => {
 
             <!-- Takip Listesi Tablosu -->
             <div class="glass" style="flex: 1; overflow-y: auto; padding: 1rem;">
-                <div class="table-header" style="font-size:1.2rem; display:flex; align-items:center; gap:0.5rem;"><i class="fas fa-list" style="color:var(--accent-color);"></i> Takip Listesi</div>
+                <div class="table-header" style="font-size:1.2rem; display:flex; align-items:center; gap:0.5rem;">Takip Listesi</div>
                 <div style="overflow-x: auto;">
                     <table class="dash-table compact-table" style="text-align: center;">
                         <thead>
@@ -3713,7 +3799,8 @@ window.fetchTickerData = async () => {
                 
                 if (usd && ons) {
                     const graPrice = (ons.d[0] * usd.d[0]) / 31.1035;
-                    tData['gram-altin'] = { Selling: graPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), Change: null };
+                    const graChange = ((1 + ons.d[1]/100) * (1 + usd.d[1]/100) - 1) * 100;
+                    tData['gram-altin'] = { Selling: graPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), Change: graChange };
                 }
             }
         } catch(e) { console.error(e); }
@@ -4020,4 +4107,107 @@ window.goToPortfoyTab = (tabId) => {
 
 
 
+
+
+
+window.recalculateHedefFiyatlar = () => {
+    if (!State.data.degerleme) return;
+    if (!State.data.hedefFiyatlar) State.data.hedefFiyatlar = {};
+    
+    const getVal = (sheet, rowName) => {
+        if (!sheet || !sheet.rows) return 0;
+        const searchStr = rowName.toLowerCase().replace(/[öçşğıü]/g, '');
+        const row = sheet.rows.find(r => {
+            if (!r[0]) return false;
+            const t = r[0].toLowerCase().replace(/[öçşğıü]/g, '');
+            return t.includes(searchStr);
+        });
+        if (!row) return 0;
+        const v = row[1];
+        if (typeof v === 'number') return v;
+        if (typeof v === 'string') {
+            const p = parseFloat(v.replace(/\./g, '').replace(/,/g, '.'));
+            return isNaN(p) ? 0 : p;
+        }
+        return 0;
+    };
+
+    for (const hisse of Object.keys(State.data.degerleme)) {
+        if (window.parseExcelData && (!window.stockData || !window.stockData[hisse] || !window.stockData[hisse].bilanco)) {
+            try { window.parseExcelData(hisse); } catch(e) {}
+        }
+        const sData = (window.stockData && window.stockData[hisse]) ? window.stockData[hisse] : null;
+        if (!sData) continue;
+
+        let finansalBorclarTotal = 0;
+        let nakitTotal = 0;
+        if (sData.bilanco && sData.bilanco.rows) {
+            sData.bilanco.rows.forEach(r => {
+                if (!r[0]) return;
+                const rName = r[0].toLocaleLowerCase('tr-TR');
+                if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
+                    const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                    finansalBorclarTotal += val;
+                }
+                if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
+                    const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                    nakitTotal += val;
+                }
+            });
+        }
+        const netBorc = finansalBorclarTotal - nakitTotal;
+        const odenmisSermaye = getVal(sData.bilanco, 'Ödenmiş Sermaye');
+        const guncelFiyat = parseFloat(State.getFiyat(hisse)) || 0;
+        const usdtry = parseFloat(State.getFiyat('USDTRY')) || 32.50;
+        const eurKuru = window.euroKuru || 35.00;
+        const usdKuru = window.dolarKuru || 32.50;
+
+        if (!State.data.hedefFiyatlar[hisse]) State.data.hedefFiyatlar[hisse] = {};
+
+        const years = ['2026', '2027', '2028'];
+        years.forEach(y => {
+            const d = State.data.degerleme[hisse][y];
+            if (!d) return;
+            const pNum = (val) => (val === undefined || val === null || val === '') ? null : parseFloat(val);
+            const curCurrency = d.currency || 'TRY';
+            
+            let ySatis = pNum(d['ciro']);
+            let yFavokMarji = pNum(d['favok_marji']);
+            let yNetKarMarji = pNum(d['net_kar_marji']);
+            let yFdFavok = pNum(d['fd_favok']);
+            let yFk = pNum(d['fk']);
+            let yPdDd = pNum(d['pddd']);
+            let yOzkaynak = pNum(d['ozkaynaklar']);
+            
+            let favok = (ySatis !== null && yFavokMarji !== null) ? ySatis * (yFavokMarji/100) : null;
+            let netKar = (ySatis !== null && yNetKarMarji !== null) ? ySatis * (yNetKarMarji/100) : null;
+            
+            let pd1 = (favok !== null && yFdFavok !== null) ? (favok * yFdFavok) - netBorc : null;
+            let pd2 = (netKar !== null && yFk !== null) ? (netKar * yFk) : null;
+            let pd3 = (yOzkaynak !== null && yPdDd !== null) ? (yOzkaynak * yPdDd) : null;
+            
+            let validPDs = [];
+            if (pd1 !== null) validPDs.push(pd1);
+            if (pd2 !== null) validPDs.push(pd2);
+            if (pd3 !== null) validPDs.push(pd3);
+            
+            if (validPDs.length > 0 && odenmisSermaye > 0) {
+                let avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
+                let hedefFiyatForeign = avgPD / odenmisSermaye;
+                let hedefFiyatTL = 0;
+                if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
+                else if (curCurrency === 'EUR') hedefFiyatTL = hedefFiyatForeign * eurKuru;
+                else hedefFiyatTL = hedefFiyatForeign;
+                
+                let potansiyel = 0;
+                if (guncelFiyat > 0) {
+                    potansiyel = (hedefFiyatTL - guncelFiyat) / guncelFiyat;
+                }
+                State.data.hedefFiyatlar[hisse][y] = { hedefFiyat: hedefFiyatTL, potansiyel: potansiyel };
+            } else {
+                delete State.data.hedefFiyatlar[hisse][y];
+            }
+        });
+    }
+};
 
