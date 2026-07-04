@@ -1817,20 +1817,20 @@ const renderHisseler = (container) => {
                             <table class="dash-table compact-table" style="flex: 1;">
                                 <tbody>
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                        <td >F/K</td>
+                                        <td style="text-align: left !important;">F/K</td>
                                         <td style=" text-align: right;">${fmtDec(fk)}</td>
                                     </tr>
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                        <td >FD/FAVÖK</td>
+                                        <td style="text-align: left !important;">FD/FAVÖK</td>
                                         <td style=" text-align: right;">${fmtDec(fdFavok)}</td>
                                     </tr>
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                        <td >PD/DD</td>
+                                        <td style="text-align: left !important;">PD/DD</td>
                                         <td style=" text-align: right;">${fmtDec(pdDd)}</td>
                                     </tr>
                                     
                                     <tr>
-                                        <td >Net Borç / FAVÖK</td>
+                                        <td style="text-align: left !important;">Net Borç / FAVÖK</td>
                                         <td style=" text-align: right;">${fmtDec(netBorcFavok)}</td>
                                     </tr>
                                 </tbody>
@@ -1860,19 +1860,19 @@ const renderHisseler = (container) => {
                             <table class="dash-table compact-table" style="flex: 1;">
                                 <tbody>
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                        <td >Hisse Başına Kar</td>
+                                        <td style="text-align: left !important;">Hisse Başına Kar</td>
                                         <td style=" text-align: right;">${fmtDec(hbk)}</td>
                                     </tr>
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                        <td >Ödenmiş Sermaye</td>
+                                        <td style="text-align: left !important;">Ödenmiş Sermaye</td>
                                         <td style=" text-align: right;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(odenmisSermaye)}</td>
                                     </tr>
                                     <tr>
-                                        <td >Piyasa Değeri</td>
+                                        <td style="text-align: left !important;">Piyasa Değeri</td>
                                         <td style=" text-align: right;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeri)}</td>
                                     </tr>
                                     <tr>
-                                        <td >Piyasa Değeri $</td>
+                                        <td style="text-align: left !important;">Piyasa Değeri $</td>
                                         <td style=" text-align: right;">$${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeriUsd)}</td>
                                     </tr>
                                 </tbody>
@@ -2247,8 +2247,8 @@ const renderHisseler = (container) => {
                                 <th style="font-size:13px; font-weight:bold; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">S.N.</th>
                                 <th style="font-size:13px; font-weight:bold; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Tarih</th>
                                 <th style="font-size:13px; font-weight:bold; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Analist</th>
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Link</th>
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle;">Notlar</th>
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle; width:250px; max-width:250px;">Link</th>
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle;">Notlar</th>
                                 <th style="font-size:13px; font-weight:bold; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">İşlem</th>
                             </tr>
                         </thead>
@@ -2280,12 +2280,12 @@ const renderHisseler = (container) => {
                         const tarihStr = a.tarih ? a.tarih.split('-').reverse().join('.') : '-';
                         tableHtml += `
                             <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:right !important; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${tarihStr}</td>
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${a.borsaci || 'Anonim'}</td>
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${linkHtml}</td>
-                                <td style="font-size:11px; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top; white-space:pre-wrap;">${a.notText || '-'}</td>
-                                <td style="padding:8px 5px; text-align:center !important; vertical-align:top; width:1%; white-space:nowrap;">
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:right !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${tarihStr}</td>
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${a.borsaci || 'Anonim'}</td>
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px;"><div style="width:100%; max-width:250px; white-space:normal; overflow-wrap:break-word; word-break:break-word;">${linkHtml}</div></td>
+                                <td style="font-size:11px; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
+                                <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
                                     <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
                                     <button class="btn btn-icon" style="color: var(--danger-color); padding: 4px !important; font-size: 14px;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash"></i></button>
                                 </td>
