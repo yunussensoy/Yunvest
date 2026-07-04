@@ -2220,64 +2220,49 @@ const renderHisseler = (container) => {
                 analizler = analizler.filter(a => (a.hisse || '').toUpperCase() === selectedHisse.toUpperCase());
                 analizler = window.sortAnalizler([...analizler]);
 
-                function getMediaEmbedHtml(url) {
-                    if (!url) return '';
-                    const ytMatch = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
-                    if (ytMatch && ytMatch[2].length === 11) {
-                        const videoId = ytMatch[2];
-                        return `<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                                    <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" 
-                                            src="https://www.youtube.com/embed/${videoId}" 
-                                            frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
-                                    </iframe>
-                                </div>`;
-                    }
-                    const twMatch = url.match(/^https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/(?:#!\/)?(\w+)\/status(es)?\/(\d+)/);
-                    if (twMatch) {
-                        return `<div class="glass" style="padding: 1rem; border-radius: 8px; border-left: 4px solid #1DA1F2; display: flex; align-items: center; gap: 1rem;">
-                                    <i class="fab fa-twitter" style="color: #1DA1F2; font-size: 32px;"></i>
-                                    <div>
-                                        <div style="font-weight: bold; margin-bottom: 0.3rem;">X (Twitter) Bağlantısı</div>
-                                        <a href="${url}" target="_blank" style="color: var(--accent-color); text-decoration: none;">Gönderiyi Görüntüle <i class="fas fa-external-link-alt"></i></a>
-                                    </div>
-                                </div>`;
-                    }
-                    return `<div class="glass" style="padding: 1rem; border-radius: 8px; border-left: 4px solid var(--text-secondary); display: flex; align-items: center; gap: 1rem;">
-                                <i class="fas fa-link" style="color: var(--text-secondary); font-size: 32px;"></i>
-                                <div>
-                                    <div style="font-weight: bold; margin-bottom: 0.3rem;">Dış Bağlantı</div>
-                                    <a href="${url}" target="_blank" style="color: var(--accent-color); text-decoration: none;">Bağlantıya Git <i class="fas fa-external-link-alt"></i></a>
-                                </div>
-                            </div>`;
-                }
-
-                let cardRows = analizler.map(a => {
-                    const leftSideHtml = a.baglanti ? `<div style="flex: 1; min-width: 300px; max-width: 500px;">${getMediaEmbedHtml(a.baglanti)}</div>` : '';
-                    return `
-                        <div class="glass" style="display: flex; gap: 2rem; padding: 1.5rem; border-radius: 12px; flex-wrap: wrap; margin-bottom: 1rem; border-left: 4px solid var(--accent-color);">
-                            ${leftSideHtml}
-                            <div style="flex: 2; min-width: 300px; display: flex; flex-direction: column;">
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.8rem; margin-bottom: 1rem;">
-                                    <div>
-                                        <div style="font-size: 1.1rem; color: var(--text-secondary); margin-top: 0.3rem;"><i class="fas fa-user" style="color: var(--accent-color);"></i> ${a.borsaci || 'Anonim'}</div>
-                                    </div>
-                                    <div style="text-align: right;">
-                                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem;"><i class="fas fa-calendar-alt"></i> ${a.tarih ? a.tarih.split('-').reverse().join('.') : ''}</div>
-                                        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
-                                            <button class="btn btn-icon" style="color: var(--warning-color); padding: 6px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
-                                            <button class="btn btn-icon" style="color: var(--danger-color); padding: 6px !important; font-size: 14px;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash"></i></button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div style="font-size: 1.05rem; line-height: 1.6; color: #e0e0e0; white-space: pre-wrap; flex-grow: 1;">${a.notText || '<span style="opacity:0.5; font-style:italic;">Özet not eklenmemiş.</span>'}</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
+                let tableHtml = `
+                <div class="dash-card" style="padding:0; overflow:hidden;">
+                    <div style="overflow-x:auto;">
+                    <table class="dash-table compact-table" style="width:100%; min-width:800px; border-collapse:collapse;">
+                        <thead>
+                            <tr style="border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2);">
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle;">S.N.</th>
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle;">Tarih</th>
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle;">Analist</th>
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle;">Link</th>
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle;">Notlar</th>
+                                <th style="padding:8px 5px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
                 
                 if (analizler.length === 0) {
-                    cardRows = `<div style="text-align: center; padding: 3rem; opacity: 0.5; font-size: 1.1rem;">Henüz eklenmiş bir analiz bulunmuyor.</div>`;
+                    tableHtml += `<tr><td colspan="6" style="text-align: center; padding: 2rem; opacity: 0.5;">Henüz eklenmiş bir analiz bulunmuyor.</td></tr>`;
+                } else {
+                    let sn = 1;
+                    analizler.forEach(a => {
+                        let linkHtml = '-';
+                        if (a.baglanti) {
+                            linkHtml = `<a href="${a.baglanti}" target="_blank" style="color:var(--accent-color); text-decoration:none;"><i class="fas fa-external-link-alt"></i> Git</a>`;
+                        }
+                        const tarihStr = a.tarih ? a.tarih.split('-').reverse().join('.') : '-';
+                        tableHtml += `
+                            <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top;">${sn++}</td>
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top; white-space:nowrap;">${tarihStr}</td>
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top;">${a.borsaci || 'Anonim'}</td>
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top;">${linkHtml}</td>
+                                <td style="font-size:11px; color:var(--text-secondary); text-align:left; padding:8px 5px; vertical-align:top; white-space:pre-wrap;">${a.notText || '-'}</td>
+                                <td style="padding:8px 5px; text-align:center; vertical-align:top; white-space:nowrap;">
+                                    <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-icon" style="color: var(--danger-color); padding: 4px !important; font-size: 14px;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        `;
+                    });
                 }
+                tableHtml += `</tbody></table></div></div>`;
 
                 const today = new Date().toISOString().split('T')[0];
 
@@ -2320,7 +2305,7 @@ const renderHisseler = (container) => {
 
                     <!-- Kartların Listelendiği Alan -->
                     <div style="flex: 1; overflow-y: auto; padding-right: 0.5rem;">
-                        ${cardRows}
+                        ${tableHtml}
                     </div>
                 </div>
                 `;
