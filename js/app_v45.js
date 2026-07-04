@@ -2226,12 +2226,12 @@ const renderHisseler = (container) => {
                     <table class="dash-table compact-table" style="width:100%; min-width:800px; border-collapse:collapse;">
                         <thead>
                             <tr style="border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2);">
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle;">S.N.</th>
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle;">Tarih</th>
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle;">Analist</th>
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle;">Link</th>
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle;">Notlar</th>
-                                <th style="padding:8px 5px;"></th>
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">S.N.</th>
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Tarih</th>
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Analist</th>
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Link</th>
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:left; padding:8px 5px; vertical-align:middle;">Notlar</th>
+                                <th style="padding:8px 5px; width:1%; white-space:nowrap;"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2249,12 +2249,12 @@ const renderHisseler = (container) => {
                         const tarihStr = a.tarih ? a.tarih.split('-').reverse().join('.') : '-';
                         tableHtml += `
                             <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top;">${sn++}</td>
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top; white-space:nowrap;">${tarihStr}</td>
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top;">${a.borsaci || 'Anonim'}</td>
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top;">${linkHtml}</td>
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${sn++}</td>
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${tarihStr}</td>
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${a.borsaci || 'Anonim'}</td>
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${linkHtml}</td>
                                 <td style="font-size:11px; color:var(--text-secondary); text-align:left; padding:8px 5px; vertical-align:top; white-space:pre-wrap;">${a.notText || '-'}</td>
-                                <td style="padding:8px 5px; text-align:center; vertical-align:top; white-space:nowrap;">
+                                <td style="padding:8px 5px; text-align:center; vertical-align:top; width:1%; white-space:nowrap;">
                                     <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
                                     <button class="btn btn-icon" style="color: var(--danger-color); padding: 4px !important; font-size: 14px;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash"></i></button>
                                 </td>
@@ -2984,8 +2984,9 @@ const renderVeriler = (container) => {
 window.toggleInlineAnaliz = () => {
     const row = document.getElementById('inline-analiz-row');
     if(row) {
-        row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
-        if (row.style.display === 'table-row') {
+        const displayType = row.tagName.toUpperCase() === 'TR' ? 'table-row' : 'flex';
+        row.style.display = row.style.display === 'none' ? displayType : 'none';
+        if (row.style.display !== 'none') {
             document.getElementById('analiz-borsaci').focus();
         }
     }
@@ -3067,7 +3068,7 @@ window.addAnaliz = () => {
         // Ensure inline row stays visible after renderPage
         setTimeout(() => {
             const row = document.getElementById('inline-analiz-row');
-            if (row) row.style.display = 'table-row';
+            if (row) row.style.display = row.tagName.toUpperCase() === 'TR' ? 'table-row' : 'flex';
         }, 50);
 
     } catch (e) {
@@ -3086,7 +3087,7 @@ window.editAnaliz = (id) => {
     
     setTimeout(() => {
         const row = document.getElementById('inline-analiz-row');
-        if(row) row.style.display = 'table-row';
+        if(row) row.style.display = row.tagName.toUpperCase() === 'TR' ? 'table-row' : 'flex';
         
         const tEl = document.getElementById('analiz-tarih');
         if(tEl) tEl.value = analiz.tarih;
