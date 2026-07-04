@@ -1,272 +1,0 @@
-2026-06-20T15:41:43Z | bu projeyi antigravity de yaptım sen le devam edebilir miyiz
-2026-06-20T15:42:50Z | bu projede hisselere tıkladığımda hisselerin s ayfasına faha önce griyordu şimdi girmiyor
-2026-06-20T15:48:14Z | hisse sayfalarına giremiyorum bunu çözebileecek misin
-2026-06-20T15:50:30Z | Continue
-2026-06-20T16:08:41Z | yine çalışmıyor hisse linkleri
-2026-06-20T16:16:12Z | denedim hiç bir tepki vermiyor
-2026-06-20T16:50:31Z | Continue
-2026-06-20T16:58:16Z | yine aynı şekilde hata veriyor.
-2026-06-20T17:05:53Z | o zaman tablo oluşturalım. tablonun sütun başlıkları S.N., Tarih, Analist, Bağlantı, İşlem, Notlar olsun. Bağlantı kısmında videonun başlığı olsun, ve tıklayınca linki açsın. İşlem sütununda düzenle ve sil simgeleri olsun. Notlar sütununda videoyla ilgili notlar girebileyim.
-2026-06-20T17:05:53Z | o zaman tablo oluşturalım. tablonun sütun başlıkları S.N., Tarih, Analist, Bağlantı, İşlem, Notlar olsun. Bağlantı kısmında videonun başlığı olsun, ve tıklayınca linki açsın. İşlem sütununda düzenle ve sil simgeleri olsun. Notlar sütununda videoyla ilgili notlar girebileyim.
-2026-06-20T17:22:36Z | Yeni Not Ekle yazsını biraz küçültelim. düenle simgesi çalışmıyor. sile bastığımda temaya uygun bir silme mesajı gelsin.
-2026-06-20T17:32:18Z | başlık Analiz/Not Ekle değil Analiz Ekle olacak. Analizi ekliyorum kaydet deyince analzin kaydolup bu pencerenin kapanması laızm ama kapanmıyor.
-2026-06-20T17:35:52Z | Deüeleme sayfası bomboş çıkıyor oradakiler gitti mi
-2026-06-20T17:36:28Z | değeleme
-2026-06-20T17:40:12Z | Değerleme sayfasında zaten tablo vardı. mesela takip listesindenki ardyz nin hedef fiyatı oradan geiyor. o tabloyu bul.
-2026-06-20T17:53:13Z | hisse sayfasında hissenin yazdığı bandı en üste getirelim en üsttte gereksiz boşluk var. hisse fiyatının ynaında en sonki yüzdelik değişimi kırmızı yeşil veya beyaz şekilde yazıyordu o gitmiş.
-2026-06-20T18:01:52Z | şu an haftasonu olduğu iiçin borsa açık değil orası en son borasnın açık olduğu günü yani cuma gününü baz alması gerekiyo böyle yanlış olur. hisse bandı daha da yukarı gidecek daha boşluk var ykarda.
-2026-06-21T00:09:17Z | şu an haftasonu olduğu iiçin borsa açık değil orası en son borasnın açık olduğu günü yani cuma gününü baz alması gerekiyo böyle yanlış olur. hisse bandı daha da yukarı gidecek daha boşluk var ykarda.
-2026-06-21T00:13:45Z | bantkenarlardan sağa sola yapışmasın özet gelir tabosu ile sağdan ve soldan aynı hizda olsu
-2026-06-21T00:15:43Z | ardyz cuma günü mesela %0,61 düştü ama %0 görünüyor
-2026-06-21T00:21:40Z | yine 0 görünüyor bugün pazar. en son cuma günü borsa açıktı. o günkü değişimi baz alması lazım;
-2026-06-21T00:26:13Z | Hisse Notları sayfasında yeni not eklle butonu öyle üstte olmasın tablonun sütun başlığı satırında en sağda + işareti olsun yeter
-2026-06-21T00:33:02Z | takip listesi tablosunda satır yükseklikleri ne kadar
-2026-06-21T00:37:33Z | hisse notları sayfasındaki tabloda sütun başlıklarının ve ve altındaki verilerin yazı tipi, yazı rengi, yazı ı boyutu, satır yükseklikleri, padding değerleri neyse takip listesi tablosunda da aynısını yapalım
-2026-06-21T00:42:37Z | Verileri de beyaz değil gri yapalım. s.n. 1 den itibaren satır yüksekliklerini birz daralt
-2026-06-21T00:45:03Z | özet rapor tablosundaki yazıların boyutu ne kadar
-2026-06-21T00:46:30Z | bütün yazılar bu boyutta değil takip listesi tablosundaki yazıları da bu boyuta getir.
-2026-06-21T00:48:22Z | takip listesi başlığının boyutu ne kadar
-2026-06-21T00:52:29Z | şimdi tablolarımız şunlardan oluşuyorya tablolarımızda bir tablo başlığı satırı var, bir sütun başıklarının olduğu satır var, bir de verilerin olduğu satırlar var. tablo başlkıları her tabloda yok. bütün tablolarımızda tablo başlıkları yazıları 18 px boyutunda, mavi olsun. bütün sütun başlıkları satırı yazıları 15 px boyutunda beyaz olsun. bütün veri satıları 15 px boyutunda gri olsun.
-2026-06-21T01:00:35Z | Sütun başlıkları ve verilerin olduğu satrılardaki yazıların boyutunu 14 px e çekelim. sadece hisse notları sayfasında notar sütunu verilerinin yazı boyutunu 12 px yapalım ve orada metin yazdıkça satırdan taşarsa bir alt satıra kaydıralım.
-2026-06-21T01:05:19Z | Takip listesi tablosunda verilerin olduğu satır yüksekliklerini bira daha küçült
-2026-06-21T01:07:32Z | verierin ve sütun başlıklarının olduğu satırların yazı boyutunu 14 px ten 13 px e düşür.
-2026-06-21T01:08:55Z | soldaki menülerin yazı boyutu ne kadar
-2026-06-21T01:09:28Z | onları 18 px yap
-2026-06-21T01:11:09Z | logo ve yunvest yazılarının boyutunu 2 px artır
-2026-06-21T01:12:49Z | 25 px e çıkar. sol ana mneüyü 17 px e düşür. hisse sayfasındaki üst menülerin yazı boyutunu 1 px artır.
-2026-06-21T01:17:33Z | Bütün  tablolardaki stüun başlılarını ortala. takip listesi t ablosunda hisseleri mavi yapma aynı diğer yazılar gibi gri yap, satırın tamamına tılanması sadece hissenin olduğu hücreye tıklayınca hissenin sayfasına gitsin.
-2026-06-21T01:22:29Z | hisse notları sayfasında bağlnatı sütununun altındaki verilerde de metin kaydır olsun yani satıdan taştığında bir alt satıra geçsin. tüm stun bvaşlıkarı ortalanmamış mesela hisse notları tablosunda notlar sütun başlığı ortalı eğil. tüm stüun başlıkları ve tablo başlıklarını ortala
-2026-06-21T04:35:08Z | zöet gelir tablosu ve özet bilanço tablolarında sütun başlıları satılrı ortalı değil.
-2026-06-21T04:37:20Z | 2026/3, 2025/3, % başlıkları ortalanmadı
-2026-06-21T04:41:46Z | TCKRC hissesinden gidelim. Rapolar menüsünde Finansal Rapora tıkladığımda Finansal_Rapor klasöründeki TCKRC PDF ini bu sitenin içinde değil, taraycının yandaki sekmesimnde açacak, diğerlerini de aynı şekilde.
-2026-06-21T04:46:36Z | TCKRC nin Hisse_Verileri klasörü Finansal_Rapor klasöründe TCKRC adlı pdf var, ama açmadı.
-2026-06-21T05:03:07Z | yine açılmadı. başka bir değiştireceğimiz yer de Değerleme sayfası burada bu şekilde giriş kutuları olmayacak normal tablo şekline olacak. 3 sütunun da Sütun baaşlığının sağında düzenle simgesi ve para birimi seçme açılır kutus olacak. dzenle simgesini seçip para birimini seçtiğimizde o sütunda verileri manuel olarak değiştirilebilen hücreler düzenlenebilir hale gelecek. Düzenlenebilecek hücreler şu ana input box olan hücrelerdir. diğer hücrelerin nasıl hesaplandığı kayıtlıdır herhade.
-2026-06-21T05:03:07Z | yine açılmadı. başka bir değiştireceğimiz yer de Değerleme sayfası burada bu şekilde giriş kutuları olmayacak normal tablo şekline olacak. 3 sütunun da Sütun baaşlığının sağında düzenle simgesi ve para birimi seçme açılır kutus olacak. dzenle simgesini seçip para birimini seçtiğimizde o sütunda verileri manuel olarak değiştirilebilen hücreler düzenlenebilir hale gelecek. Düzenlenebilecek hücreler şu ana input box olan hücrelerdir. diğer hücrelerin nasıl hesaplandığı kayıtlıdır herhade.
-2026-06-21T05:05:25Z | eklemek istediğim başka bir kur € var
-2026-06-21T05:17:40Z | yıl yaazan sütunların altındaki veriler sağa hizalı olsun. hangi para birim seçiliiyse hedef fiyat harciinde verisi olan hücrede o para biriminin simgesi olacak örnek ₺3000.000, $3.000.000.000 veya €3.000.000 şeklinde. yazacak. açılır kutuda para birimlerinin simgesi olacak TL değil ₺ şeklinde. açılır kutu beyaz değil temaya uygun oalcka. veri entera bastığımda düzenlenilir moddan çıkıp okuma moduna geçeceğiz.
-2026-06-21T05:26:59Z | başlıkta bir de kaydet simgesi olacak. sıralaması para birimi, düzenle, kaydet şeklinde olacak. bu sümgeler sütunda sağa hizalanacak, yıllar ortalı kalacak. Hedef Fiyat da ₺ simgesi olacak. hedef fiyat her zaman tl olarak gösterileceği için, para birimini $ veya € seçtiysem bunar güncel kurlarla çarpılıp hedef fiyat ₺ ye dönüştürelecek.
-2026-06-21T06:13:54Z | Hedef fiyat yanlış hesaplanıyor bu sayfanın açıklama metnini yeniden gönderiyorum buna göre yeniden düzenleyelim. Satır başlıkları: Satış Gelirleri, FAVÖK Marjı, Net Kar Marjı, FAVÖK, Net Kar, Özkaynaklar, FD/FAVÖK, F/K, PD/DD, Hedef Fiyat, Potansiyel. Para birimi, Düzenle, Kaydet, Sil simgeleri en üst satırda olacak. Sütun başlıkları bunların altındaki satırlarda olacak.  Manuel girilecek hücreler: Satış Gelirleri, FAVÖK Marjı, Net Kar Marjı, Özkaynaklar, FD/FAVÖK, F/K, PD/DD FAVÖK, Net Kar, Hedef Fiyat ve Potansiyel de formüller olacak otomatik gelecek.  FAVÖK = Satış Gelirleri*FAVÖK Marjı. Satış Geliri ve FAVÖK Marjı girildiyse hesaplanıp gelecek, aksi takdirde --- olacak. Net Kar = Satış Gelirleri*Net Kar Marjı. Satış Geliri ve Net Kar Marjı girildiyse hesaplanıp gösterilecek aksi takdirde --- kalacak. Piyasa Değeri hesaplamasının şu üç formülünü kullanacağız: 1.	Formül 1 Piyasa Değeri = FAVÖK*(FD/FAVÖK) Firma Değeri=Piyasa Değeri + Net Borç 2.	Formül 2 Piyasa Değeri = Net Kar * (F/K) 3.	Formül 3 Piyasa Değeri = Özkaynaklar * (PD/DD) Hedef Fiyat=Piyasa Değeri/Ödenmiş Sermaye Potansiyel=(Hedef Fiyat – Güncel Fiyat)/Güncel Fiyat*100 Biz Hedef Fiyat bulurken üç farklı yoldan gelen Piyasa Değerlerinin ortalamasını alıp bu ortalama Piyasa Değerini Ödenmiş sermayeye böleceğiz. Ancak bunlardan herhangi birinden piyasa değeri gelmiyorsa onu ortalamaya hiç dahil etmeyeceğiz.  FAVÖK ten gelen piyasa değerinin ortalamaya dahil edilmesi için öncelikle satış gelirleri ve favök marjının girilmiş olması gerekiyor. Bunların ikisi de girildiyse favök vardır sonrasında da FD/FAVÖK manuel olarak girildiyse buradan bir piyasa değeri gelir ve ortalamaya dahil edilir. Gelmediyse hiç dahil edilmeyecek, 0 olarak dahil etme hatasını yapmayalım. Net Kar dan gelen piyasa değerinin ortalamaya dahil edilmesi için öncelikle satış gelirleri ve net kar marjının girilmiş olması gerekiyor. Bunların ikisi de girildiyse net kar vardır sonrasında da F/K manuel olarak girildiyse buradan bir piyasa değeri gelir ve ortalamaya dahil edilir. Gelmediyse hiç dahil edilmeyecek, 0 olarak dahil etme hatasını yapmayalım. Özkaynaklardan gelen piyasa değerinin ortalamaya dahil edilmesi için Özkaynaklar ve PD/DD nin manuel olarak girilmiş olması gerekiyor. Bunlardan ikisi de girildiyse buradan bir piyasa değeri gelir ve ortalamaya dahil edilir. Gelmediyse hiç dahil edilmeyecek, 0 olarak dahil etme hatasını yapmayalım. Bu üçünden en az bir piyasa değeri geldiyse Hedef Fiyat Potansiyel gösterilecek. Üçünden de piyasa değeri gelmediyse Hedef fiyat ve potansiyel --- olarak gösterilecek. Hedef Fiyat her zaman ₺ olarak hesaplanacak ve ₺ simgesi ile gösterilecek. Örnek ₺145 Para birimi ₺ seçildiyse Satış Gelirleri, FAVÖK, Net Kar, Özkaynaklar, Hedef Fiyat da ₺ olacak. Para birimi € seçildiyse Satış Gelirleri, FAVÖK, Net Kar, Özkaynaklar da € olacak, Hedef Fiyat güncel € kuru ile çarpılıp ₺ olarak gösterilecek. Para birimi $ seçildiyse Satış Gelirleri, FAVÖK, Net Kar, Özkaynaklar da $ olacak, Hedef Fiyat güncel $ kuru ile çarpılıp ₺ olarak gösterilecek.
-2026-06-21T06:13:54Z | Hedef fiyat yanlış hesaplanıyor bu sayfanın açıklama metnini yeniden gönderiyorum buna göre yeniden düzenleyelim. Satır başlıkları: Satış Gelirleri, FAVÖK Marjı, Net Kar Marjı, FAVÖK, Net Kar, Özkaynaklar, FD/FAVÖK, F/K, PD/DD, Hedef Fiyat, Potansiyel. Para birimi, Düzenle, Kaydet, Sil simgeleri en üst satırda olacak. Sütun başlıkları bunların altındaki satırlarda olacak.  Manuel girilecek hücreler: Satış Gelirleri, FAVÖK Marjı, Net Kar Marjı, Özkaynaklar, FD/FAVÖK, F/K, PD/DD FAVÖK, Net Kar, Hedef Fiyat ve Potansiyel de formüller olacak otomatik gelecek.  FAVÖK = Satış Gelirleri*FAVÖK Marjı. Satış Geliri ve FAVÖK Marjı girildiyse hesaplanıp gelecek, aksi takdirde --- olacak. Net Kar = Satış Gelirleri*Net Kar Marjı. Satış Geliri ve Net Kar Marjı girildiyse hesaplanıp gösterilecek aksi takdirde --- kalacak. Piyasa Değeri hesaplamasının şu üç formülünü kullanacağız: 1.	Formül 1 Piyasa Değeri = FAVÖK*(FD/FAVÖK) Firma Değeri=Piyasa Değeri + Net Borç 2.	Formül 2 Piyasa Değeri = Net Kar * (F/K) 3.	Formül 3 Piyasa Değeri = Özkaynaklar * (PD/DD) Hedef Fiyat=Piyasa Değeri/Ödenmiş Sermaye Potansiyel=(Hedef Fiyat – Güncel Fiyat)/Güncel Fiyat*100 Biz Hedef Fiyat bulurken üç farklı yoldan gelen Piyasa Değerlerinin ortalamasını alıp bu ortalama Piyasa Değerini Ödenmiş sermayeye böleceğiz. Ancak bunlardan herhangi birinden piyasa değeri gelmiyorsa onu ortalamaya hiç dahil etmeyeceğiz.  FAVÖK ten gelen piyasa değerinin ortalamaya dahil edilmesi için öncelikle satış gelirleri ve favök marjının girilmiş olması gerekiyor. Bunların ikisi de girildiyse favök vardır sonrasında da FD/FAVÖK manuel olarak girildiyse buradan bir piyasa değeri gelir ve ortalamaya dahil edilir. Gelmediyse hiç dahil edilmeyecek, 0 olarak dahil etme hatasını yapmayalım. Net Kar dan gelen piyasa değerinin ortalamaya dahil edilmesi için öncelikle satış gelirleri ve net kar marjının girilmiş olması gerekiyor. Bunların ikisi de girildiyse net kar vardır sonrasında da F/K manuel olarak girildiyse buradan bir piyasa değeri gelir ve ortalamaya dahil edilir. Gelmediyse hiç dahil edilmeyecek, 0 olarak dahil etme hatasını yapmayalım. Özkaynaklardan gelen piyasa değerinin ortalamaya dahil edilmesi için Özkaynaklar ve PD/DD nin manuel olarak girilmiş olması gerekiyor. Bunlardan ikisi de girildiyse buradan bir piyasa değeri gelir ve ortalamaya dahil edilir. Gelmediyse hiç dahil edilmeyecek, 0 olarak dahil etme hatasını yapmayalım. Bu üçünden en az bir piyasa değeri geldiyse Hedef Fiyat Potansiyel gösterilecek. Üçünden de piyasa değeri gelmediyse Hedef fiyat ve potansiyel --- olarak gösterilecek. Hedef Fiyat her zaman ₺ olarak hesaplanacak ve ₺ simgesi ile gösterilecek. Örnek ₺145 Para birimi ₺ seçildiyse Satış Gelirleri, FAVÖK, Net Kar, Özkaynaklar, Hedef Fiyat da ₺ olacak. Para birimi € seçildiyse Satış Gelirleri, FAVÖK, Net Kar, Özkaynaklar da € olacak, Hedef Fiyat güncel € kuru ile çarpılıp ₺ olarak gösterilecek. Para birimi $ seçildiyse Satış Gelirleri, FAVÖK, Net Kar, Özkaynaklar da $ olacak, Hedef Fiyat güncel $ kuru ile çarpılıp ₺ olarak gösterilecek.
-2026-06-21T06:24:35Z | FAVÖK, Net Kar, HEdef Fiyat, Potansiyelde de veri yokken --- olacak. TCKRC de verileri giriyorum mesela sadece favök üzerinden hedef fiyat buluyorum sende 349 çıkıyor exceldde hesaplıyorum 353 çıkıyor. Ödenmiş sermayeyi mi yablış alıyorsun. ÖDenmiş sermaye hissenin bilançosunda bilanço sayfasında mesela tckrc ninki ₺170.000.000
-2026-06-21T06:26:53Z | pardon ben exceli yanlış yapmışım net borcu da dahil edeceğiz tabiki eski haline dönelim
-2026-06-21T06:30:20Z | Geleceğe ilişkin beklentileriniz tablosunu biraz üstündeki yatay menü tablosuna biraz yaklaştıralım. ve bu tablnun satır yüksekliklerini 1 px kadar düşürelim.
-2026-06-21T06:45:45Z | TCKRC de hesaplama yapıyorum. $ çeirdiğimde benim excelde farklı hesaplama çııyor. örnek 10 milyar dolar ciro olunca. favök marjı 30 girince 3 milyar dolar  favök oluyor. fd/favök 20 girince 60 milyar dolar piyasa değeri oluyor. burada tl ye çeviriyoruz. 60 milyar dolar * 46,42 = 2.785.200.000.000 ₺ olyor, buradan 668.494.726 ₺ net borç rakamını çıkınca 2.784.531.505.274 ₺ piyasa değeri oluyor bunu 170.000.000 ₺ piyasa değerine bölünce  16.379.60 ₺ hisse fiyatı çıkıyor.16.378.24 çıkarıyorsun sen.
-2026-06-21T06:48:11Z | en şu an kuru kaç alıyorsun nerden alıyorsun
-2026-06-21T06:51:03Z | mesela 10 milyar $ ciro varken 16378,24 tl hedef fiyat çıkıyor. € ya çevirince daha yüksek hedef fiyat çıkması gerekirken 12701,95 tel hedef fiyat çıkıyor burada hata yok mu
-2026-06-21T06:53:34Z | yine 12701,95 ₺ geliyor
-2026-06-21T06:58:31Z | takip listesinde link olan hücreleri yani hsse adlarını eski maviye çevirelim.
-2026-06-21T07:00:40Z | değişmeddi
-2026-06-21T07:01:47Z | takip listesi tablosunda yazılar kaç px ti
-2026-06-21T07:03:07Z | S.N. ile başlayan satırı yanı sütun başlıkları satırını 14 px yapalım.
-2026-06-21T07:05:24Z | takip listesbaşlığı kaç px. bir de satırların padding değeri kaç
-2026-06-21T07:06:29Z | ana başlığı 18 px yapalım.
-2026-06-21T07:09:16Z | Hisse notları tablosunda da sütun başlıklarını 14 px yapalım.
-2026-06-21T07:14:37Z | hisse notları tablosu işlemin yanında olan + nın yanına bir + daha ekleyelim. bu da hisse ile ilgili kendi notlarımı ekelme metin kutusu açılsın.
-2026-06-21T07:21:05Z | analist sütununun verilerinde insan simgesi varya onu kaldıralım verileri sola hizalayalım. kişil notum 1. satırda olsun her zaman. Analist te Yunus Şensoy yazsın. Tarih ve bağlantı boş olsun.
-2026-06-21T07:24:49Z | Kişisel not da analist ve tarih boş olacak. video linklerinin olduğu hürlere ok işareti koyuyuorsunya onları kaldır.
-2026-06-21T07:25:49Z | Pardon analist de Yunus Şensoy yazacak.
-2026-06-21T07:32:12Z | mavi renkli analiz simgesini kaldıralım. yeşil renkli simgenin analiz ekle penceresinde Kişisel analiz seçeneği olsun bunun seçersem sadece özel notlar bölmüü kalsın. buraya notlarımız yadaığımda bu not 1. satıra eklensin. analist sütununda kullanıcının adı soyadı neyse o yazsın şu an kullanıcının adı Yunus Şensoy olduğu için bu yazacak.
-2026-06-21T07:37:25Z | sisteme giriş yapmadı
-2026-06-21T07:41:30Z | veri satırlarındaki verileri dikeyde üste hizala satır genişledikçe altta kalıyor.
-2026-06-21T07:44:36Z | bir de analz düzenleme simgesine tıkladığımda iptal dediğimde analiz siliniyor. iptal dediğimde hiç bir değişiklik yapmadan iptal etmeden iptal etmesi lazım.
-2026-06-21T08:25:27Z | Hisse Notları sayfasında tarihleri  2 Nis 26 şeklinde yaz.
-2026-06-21T08:28:26Z | bu tarihler ortalı değil sola hizala
-2026-06-21T09:12:08Z | düzenleme penceresine girip kaydet dedğiğimde yeni bir tane daha oluşturuyor
-2026-06-21T09:28:31Z | tablo sayfanın sonuna kadar gitmeden dikey kaydırma çubuğu oluşuyor.
-2026-06-21T09:38:54Z | Eklemede sadece özel not seçeneğini kaldıralım bu zaten her hissenin hisse not sayfaasında ilk satırda varsayılan olarak olsun. yandaki düzenleme simgesiyle de bunu düzenleyebileyim.
-2026-06-23T20:50:13Z | resimdeki logonun Y ve Ş harfleri temadaki mavi renk olacak şekilde değiştirip projedeki logoyu yein logoyla değiştirelim
-2026-06-25T18:07:00Z | Takip Listesi Başlıklı tabloda sütun başlıkları ve altındaki verileri dikey olarak üst hizalı yapmışsın dikey olarak orta hizalı yap.
-2026-06-25T18:09:16Z | özet rapor sayfasındaki tabloları da dikey olarak üst hizalı yapmışsın onları da dikey olarak orta hizalı yap.
-2026-06-25T18:13:50Z | Aynı sayfada Çeyrekilk Satışlar, Çeyreklik FAVÖK, Çeyreklik Net kar altındaki grafik tabloların başlıkları da dikey olarak alt hizalı olmuş orta olsun onlar da
-2026-06-25T18:17:11Z | dikey olarak ortaladın da yatay da neden sola çektin yatayda da ortalı olsun.
-2026-06-25T18:27:09Z | Çeyreklik Satışlar grafik tablodan itibaren başlayan tabloların başlıklarının satır yükseklikler gereksiz fazla onu düzeltelim.
-2026-06-27T10:40:53Z | Varlıklarım tablosunda Kar/Zarar% sütununu Kar/Zarar % şeklinde yaz. % aşağı satıra insin, sütun bira daralsın, tabloda oluşan yatay kadırma çubuğu kaybolsun.
-2026-06-27T10:55:39Z | varlıklarım tagblosundaki hisse adlarına tıklayınca da hisse sayfalarına gitsin.
-2026-06-27T11:14:58Z | YŞ yazan logo kötü oldu onu eski sadece Y yazan haline getirelim.
-2026-06-27T11:47:14Z | projedeki TL oaln rakamların hepsinin başına ₺ simgesi koy, örneğin rakam 40.000 ise ₺40.000 şeklinde yaz.
-2026-06-27T20:50:38Z | Y logosu böyle değildi kare içerisinde rengi aynı temadaki mavi gibiydi
-2026-06-27T21:11:40Z | çerçeve daha küçük olacak Y harifinin büyüklüğü Yunvest teki Y akdar olacak.
-2026-06-27T21:14:31Z | mevi çerçeveyi biraz geçişli yap ışık vuruyormuş gibi
-2026-06-27T21:37:24Z | çerçeve j-ksı--ısmını biraz daha kğçğltelim
-2026-06-28T05:59:13Z | ben bu programı farklı bilgisayarlarda kullanacağım kullanıcı olarak aynı verilerime farklı bilgisayarlardan erişebilmem lazım. bunun için aslında site şeklinde değil de bilgisayara kurulabilir şekilde olsa daha uygun değil mi
-2026-06-28T06:01:15Z | yok neyse bu şekilde kalsın
-2026-06-28T06:02:48Z | hedef takip listesindeki hisseleri önce 2028 hedef fiyat sonrna 2027 hedef fiyat sonra 2026 hedef fiyata göre sıralayalım
-2026-06-28T06:09:17Z | sıralama olmadı. öncelikle 2026 hedef fiyatına göre sıralanacak, sonra 2027, sonra 2028 hedef fiyata göre sıralanacak.
-2026-06-28T06:13:29Z | yok sıralama eskisi gibi devam ediyor
-2026-06-28T06:35:42Z | GUBRF nin 2026/3 bilançosu açıklanmış yeni excel dosyasını klasöre kopyaladım. sitede jala son bilanç o olarak 2025/12 yi gösteriyor. attığım dosyadaki son bilanço neyse en son bilanço olarak onu alacak.
-2026-06-28T07:48:16Z | Verileri alma olarak şöyle bir değişiklik yapacağız. ana dizinde Hisseler adında klasör olacak. bu klasörün içerisinde takip listesine eklediğim hissenin adında bir klasör oluşacak. bu klasörün içinde de Bilanço için bilanco.xlsx, Finansal rapor için finansal_rapor.pdf, Faaliyet raporu için faaliyet_raporu.pdf, yatırımcı sunumu için yatirimci_sunumu.pdf, Araştırm raporu için arastirma_raporu.pdf adında dosya olacak. Raporlar menüsü için belirttiğim dosya varsa tarayıcıda yeni sekme açılacak.
-2026-06-28T07:48:16Z | Verileri alma olarak şöyle bir değişiklik yapacağız. ana dizinde Hisseler adında klasör olacak. bu klasörün içerisinde takip listesine eklediğim hissenin adında bir klasör oluşacak. bu klasörün içinde de Bilanço için bilanco.xlsx, Finansal rapor için finansal_rapor.pdf, Faaliyet raporu için faaliyet_raporu.pdf, yatırımcı sunumu için yatirimci_sunumu.pdf, Araştırm raporu için arastirma_raporu.pdf adında dosya olacak. Raporlar menüsü için belirttiğim dosya varsa tarayıcıda yeni sekme açılacak.
-2026-06-28T07:55:20Z | Hisse_Verileri klasöründeki dosyaları taşımamız gereken yerlere taşıyacağız ve Hisse_Verileri klasörünü kaldıracağız.
-2026-06-28T18:33:05Z | raporlar başlığı altındaki raporlar açılmıyor
-2026-06-28T18:39:18Z | gene açılmadı. Raporlar başlığı altındaki raporlara tıkladığımda sayfa içerisinde değişiklik olmayacak sadece yeni sekmede rapor varsa açılacak.
-2026-06-28T19:15:03Z | Varlıklarım tablosundaki hisselerle link ekledikten sonra yazı tipi büyüttün kaydırma çubuğu oluştu. link ekli metinlerin boyutu da diğer metinlerin bıyutu kadar olsun.
-2026-06-28T19:19:32Z | aşağıdaki toplam satırı da kalın olmasın yine yatay kaydıra çubuğu var
-2026-06-28T19:21:09Z | İlk alıım tarihin de yılların son iki hanesini yaz yani 28.06.26 şeklinde yaz.
-2026-06-28T20:55:59Z | POrtföy Bilgileri tablosunda NAkit ve Hedef portföy satırlarındaki düzenle işareti kalksın Nakit ve Hedef Portföyü Veri Girişi Sayfasında düzenleyeyim.
-2026-06-28T20:59:36Z | Veri Girişi sayfasına Nakit düzenleme sayfasını t ablosunu eklememişsin
-2026-06-28T21:03:11Z | Takip Listesi tablosunda sütun başlıkları tablosunun altındaki veri satırlarında metinler kalın herhalde kalınsa normal yapalım sütun başlıklıarı kalın olcak veriler normal olacak.
-2026-06-28T21:06:19Z | takip listesi tablosunda ana başlık, sütun başlıkları, ve veri satırlarının kalın mı normal mi ve boyutlarını yaz
-2026-06-28T21:11:32Z | Geleceğe İlişkin Beklentileriniz tablosunun başlığını Geleceğe  İlişkin Beklentiler olarak değiştirelim. bu tabloda da ana başlığı 18 px normal, sütun başlıklarını 14 px kalın, veri satırlarını 14 px normal yapalım. Para birimi seçme ve diğer simgelerin olduğu bölümü tablonun dışında hücrelerin üstüne ekleyelim.
-2026-06-28T21:15:50Z | para birimi seçme ve diğer simgelerin tablonun en altına tablonun dışına koy. ana başlığı kalın yap.
-2026-06-28T21:18:55Z | en alttaki düzenleme bölümlerine yılları yazma. Hisse Notları tablosudaki veri satırlarıı hariç diğer tüm tablolarda dikey hizalamayı ortala. bazılarında üst olmu. sadece hisse notları tablosunda veri satırlarında dikey hizalama üst olacak.
-2026-06-28T21:23:08Z | en alt satırdaki simgeler neden sağa siğer sütunlara kaymış. 2026 nın simgeleri 2026 nın som simgesi 2026 sütun sınırlarında kalsın.
-2026-06-28T21:25:06Z | o verileri ortalama sağa yasla
-2026-06-28T21:55:19Z | varlıklarım tablosunda hisselerin altı çizili olmasın.
-2026-06-28T21:57:52Z | arşiv tablosunda hisselerdeki linki kaldır.
-2026-06-28T21:59:41Z | arşiv tablosundaki tarihleri 21 Mar 26 şeklinde yaz.
-2026-06-28T22:01:10Z | Hisse ve Fon Hareketleri tablosunda da veri satırları gri renk olacak
-2026-06-28T22:03:09Z | aynı tabload simgelerden kaydet mavi sil kırmızı diğer tabloladaki gib olacka. bu tabloda da tarihler 21 Mar 2026 şeklinde olacak.
-2026-06-28T22:05:05Z | bu tabloda sütun başlıkarını da veri satırlarını da ortala
-2026-06-28T22:06:06Z | Arşiv tablosunda ve varlıklarım tablosunda toplam satırlarını beyaz renk yap
-2026-06-28T22:07:51Z | Toplam satırları yani en alttaki satırlar mavi renk olarak kaldı beyaz olmadı
-2026-06-28T22:09:22Z | varlıklarım tablosundaki link olan menkul adlarını da beyaz renk yap.
-2026-06-28T22:10:52Z | Varlıklarım tablosunun tüm biçimlendirme özelliklerini yaz.
-2026-06-28T22:15:04Z | Takip Listesi tablosunun da süutn başlıkları 13 px kalın, veri satırları 13 px normal olsun.
-2026-06-28T22:17:09Z | Portföy Bilgileri tablosunun da ana başlık 18 px kalın, veri satırları 13 px normal olsun ve gri olsun.
-2026-06-28T22:19:17Z | arşiv tablosununun padding değerleri varlıklarım tablosunun padding değeğrleri ile aynı olun.
-2026-06-28T22:21:08Z | Hise ve on hareketleri tablosunun padding değerleri de varlıklarım tablou ile aynı olun.
-2026-06-28T22:22:55Z | Nakit hareketleri ve takip listesi tablosunun padding değerleri de varlıklarım tablosu ile aynı olun.
-2026-06-28T22:25:18Z | takip listesi tblsundaki padding değerleri biraz fazla gibi
-2026-06-28T22:26:30Z | Takip Listesi tablosundaki hisse adlarını da beyaz renk yap
-2026-06-28T22:27:27Z | nakit harketleri tablosununun da sütun başlıkları ve veri satırarını yatayda da ortala
-2026-06-28T22:29:17Z | najit haretketleri tablosuna da diğer tablolardaki gibi TOPLAM satırı ekle tutarın toplamı yazsın.
-2026-06-28T22:30:03Z | bu tabloda tarihleri ortalamamışsın
-2026-06-28T22:31:02Z | Toplam satırındaki tutarı da ortala
-2026-06-28T22:33:41Z | Çeyreklik satışlar ve yanlarındaki iki grafiklerin üzerinde gri renkl rakamlar var onlar olmasın.
-2026-06-28T22:34:56Z | HİSSE Notları tablosundaki kaydet simgeleri de yeşil renkli olsun.
-2026-06-28T22:36:49Z | ayı tabloda bağlantı sütunundaki linkli metinler mavi değil beyaz renkli olsun.
-2026-06-28T22:38:34Z | bu tablodaki kaydet simgeleri mavi olacak.
-2026-06-29T10:18:28Z | Aylık enflasyon verilerinde mayıs ayına kadar girmiştim ne oldu onlar
-2026-06-29T10:38:41Z | sisteme giriş yapmadı
-2026-06-29T10:43:00Z | enflasyon verilerindeki simgeler de sitedeki diğer tablolardaki gibi olsun.
-2026-06-29T17:25:09Z | Takip Listesi başlığının önündeki simgeyi sil ve tüm biçimlendirmelerini yaz.
-2026-06-29T17:31:51Z | hayır ana menüdeki takip listesinden bahsetmemiştim ben onu eski haline simgeyi koy tekrar. takip listesi tablosundan bahsetmiştim ben. onun önündeki simgeyi sil ve biçimlendrmelerini yaz.
-2026-06-29T17:35:38Z | takip listesi tablosunun tamamının biçimlendirmelerini yaz. sütun başlıkları ve veri satırları da dahil
-2026-06-29T18:12:59Z | şimdi tek tek şu tablonun şurasını şöyle yap demekel uğraşmayı bırakalım. Tüm tablolara tek bir stil tanımlayalım. değiştireceğimiz stil olursa hepsini aryrı ayrı değiştirmekle uğraşmayalım hem de tüm tablolar standart olsun. Tüm Tablolar Biçimlendirme kurallarımız aşağıdakiler gibi olacak, yazmadığım biçimlendirmeler esksi gibi kalsın arka plan rengi gibi. Özel olarak farklı olacak biçimlendirmeleri de aşağıda belirttim, anlaşılmayan bir şey varsa değiştirmeden önce sor. •	Tarih verileri şu şekilde: 29 Haz 26 •	Para birimi olan rakamların önünde simgeleri olacak: ₺500.000, $500.000, 500.000€ gibi. •	Kaydet simgeleri yeşil, sil simgeleri kırmızı, düzenle simgeleri mavi. •	Ana başlık: 18 px, kalın, mavi, yatay ve dikey hizalama orta, üst-alt boşluklar: 3 px, sağ-sol boşluklar 5 px •	Sütun başlıkları satırı: 13 px, kalın, beyaz, yatay ve dikey hizalama orta, üst-alt boşluklar: 3 px, sağ-sol boşluklar 5 px •	Veri satırları: 13 px, standart, gri, yatay ve dikey hizalama orta, üst alt boşluklar: 3 px, sağ-sol boşluklar: 5 px •	Toplam satırları 13 px, kalın, beyaz, yatay ve dikey hizalama orta, üst-alt boşluklar 3 px, sağ-sol boşluklar 5 px.  Özel biçimlendirmesi olacaklar (Bu tablolarda belirtilenler haricindekiler diğer tablolarla aynı olacak.) Hisse Notları sayfasındaki tablo •	Veri satırları: dikey hizalama üst, Notlar sütunu metin 11 px Özet Gelir Tablosu ve Özet Bilanço •	İlk sütunları sola yatayda sola hizalı
-2026-06-29T18:12:59Z | şimdi tek tek şu tablonun şurasını şöyle yap demekel uğraşmayı bırakalım. Tüm tablolara tek bir stil tanımlayalım. değiştireceğimiz stil olursa hepsini aryrı ayrı değiştirmekle uğraşmayalım hem de tüm tablolar standart olsun. Tüm Tablolar Biçimlendirme kurallarımız aşağıdakiler gibi olacak, yazmadığım biçimlendirmeler esksi gibi kalsın arka plan rengi gibi. Özel olarak farklı olacak biçimlendirmeleri de aşağıda belirttim, anlaşılmayan bir şey varsa değiştirmeden önce sor. •	Tarih verileri şu şekilde: 29 Haz 26 •	Para birimi olan rakamların önünde simgeleri olacak: ₺500.000, $500.000, 500.000€ gibi. •	Kaydet simgeleri yeşil, sil simgeleri kırmızı, düzenle simgeleri mavi. •	Ana başlık: 18 px, kalın, mavi, yatay ve dikey hizalama orta, üst-alt boşluklar: 3 px, sağ-sol boşluklar 5 px •	Sütun başlıkları satırı: 13 px, kalın, beyaz, yatay ve dikey hizalama orta, üst-alt boşluklar: 3 px, sağ-sol boşluklar 5 px •	Veri satırları: 13 px, standart, gri, yatay ve dikey hizalama orta, üst alt boşluklar: 3 px, sağ-sol boşluklar: 5 px •	Toplam satırları 13 px, kalın, beyaz, yatay ve dikey hizalama orta, üst-alt boşluklar 3 px, sağ-sol boşluklar 5 px.  Özel biçimlendirmesi olacaklar (Bu tablolarda belirtilenler haricindekiler diğer tablolarla aynı olacak.) Hisse Notları sayfasındaki tablo •	Veri satırları: dikey hizalama üst, Notlar sütunu metin 11 px Özet Gelir Tablosu ve Özet Bilanço •	İlk sütunları sola yatayda sola hizalı
-2026-06-29T18:19:24Z | 
-2026-06-29T18:30:19Z | özel olarak değiştirilecekleri yenilerini ekleyeceğiz. Takip Listesi tablosunda Potansiyel sütunlarında pozitif olanlar yeşil, negatif olanları kırmızı ve hisseler beyaz olacak. Özet Gelir tablosunda veri satıtlarından ilk sütunu sola yalayacaktın bunu bir önceki mesajda yazmıştım yapmamışsın. Geleceğe ilişkin beklentiler tablosunda ilk sütun sola hizalı olacak. Hisse notları sayfasındaki tabloda, veri satırlarından Notlar sütununu sola hizala, Bağlantı sütunun sola hizala.
-2026-06-29T18:43:57Z | Özet gelir tablosunun ilk sütunu sola yaslanmamış. Portföy Bilgileri tablosundaki sağdaki ve soldaki iki tablonun da ilk sütunları sola ikinci sütunları sağa yaslı olacak. veri satırlarında link olan sütunlar beyaz renk olsun. Tüm tablolarim üst alt boşlukları 5 px yapmıştık onu 8 px yapalım. Hisse ve Fon Hareketileri tablosunda tarihlerin bazıları  29 Haz 26 şeklinde bazıları 29 Haz 2026 şeklinde onların hepsini 29 Haz 26 şeklinde yapalım. tablolarda satıların üzerilerine gelince ışıklandırma fazla. oralardaki ışıklandırma menülerin üzerine geldiğimizde olan ışıklandırma gibi olsun faklı olmasın.
-2026-06-29T19:06:33Z | Özet gelir tablosunun ilk sütunu yine sola yaslanmadı. beyaz ışık miktarını ana menüdeki gibi yap aynı. Hisse Notları tablosunun notlar sütununu 10 px ten 11 pxe çıkar.
-2026-06-29T19:12:29Z | ışıklandırma kuralını kaldırmamışsın aynısı gibi devam ediyor. Veri girişi sayfasındaki tablolarda altta ve üstte kocaman boşluklar var onları da  diğer tablolarımız gibi yap. Mvcut Nakit Tutarı da Kaydet yazmayacak Kaydett dimgesi olacak. Aylık enflasyon verileri tablosunun işlme sütıunundaki sil simgesi tablonun genelindeki gibi olsun aynı
-2026-06-29T19:17:52Z | Varlıklarım tablosunda Kar/Zarar ve Kar/Zarar % altındaki satırlarda pozitifse yeşil, negatife kırmızı biçimlendirmesini yapalım.
-2026-06-29T19:21:22Z | Takip listesi tablosunda hisselerin adında link olduğu için beyaz yapacaktık. ya onu beyaz yapmamışız ya da hepis beyaz olmuş hepsi aynı gibi görünüyor.
-2026-06-29T19:25:03Z | link olan hücreleri beyaz yap kalın yapma üzerine gelince de altı çizli olsun. her tablo için tek tek söylemeyim, hepsini ap.
-2026-06-29T19:27:13Z | Fon Fiyatları tablosuna  da kaydet simgesi koyacaksın
-2026-06-29T19:32:11Z | Brüt kar marjı ve sonraki grafik tablolarında noktalraın üzerilernde rakamlar yazıyor onlar yazmıyordu
-2026-06-29T19:55:06Z | Raporlar menüsünün alt menülerini kaldıralım. Raporlar menüsü sayfasında olan raporların listesi sunulsun ve onlara tıklayınca tarayıcıda yeni sekmede açılsın. örneğin ardyz nin klasöründe faaliyet_raporu, finansal_rapor ve toplantı_notlari var. Ardyz nin raporlar sayfasında sırayla alt alta maddeler halinde Faaliyet Raporu, Finansal Rapor Toplantı Notları yazacak. bunlara tıklayınca ilgili raporlar açılacak.
-2026-06-29T19:55:06Z | Raporlar menüsünün alt menülerini kaldıralım. Raporlar menüsü sayfasında olan raporların listesi sunulsun ve onlara tıklayınca tarayıcıda yeni sekmede açılsın. örneğin ardyz nin klasöründe faaliyet_raporu, finansal_rapor ve toplantı_notlari var. Ardyz nin raporlar sayfasında sırayla alt alta maddeler halinde Faaliyet Raporu, Finansal Rapor Toplantı Notları yazacak. bunlara tıklayınca ilgili raporlar açılacak.
-2026-06-29T19:57:56Z | 
-2026-06-29T19:58:03Z | 
-2026-06-29T20:00:50Z | ardyz de dikkat işareti Veri bulunamadı yazıyor rapor olmasına rağmen.
-2026-06-29T20:07:40Z | Raporlar yklenirken bir hata olutu: require is not defined
-2026-06-29T20:15:25Z | türkçe karakterler görünmüyor. not yazısı yazmasın. metin boyutları portalin gneline uyumlu olarak 13 px olsn. başlık 18 pax olsun.
-2026-06-29T20:17:53Z | olan pdf ler alfabetşk olarak listelenecekti. yatırımcı sunumu olmamasına rağmen o da listeleniyor.
-2026-06-29T20:20:43Z | masaüstü uygulamasında değil de tarayıcıda çalıştırıyorum ben tarayıcı da dinamik olmuyor mu
-2026-06-29T20:25:15Z | bat dosyasına da tıklamayacağım o zaman bütün adlar listelenecek, olanlar açılacak olmayanlar açılmayacak. Listelecenecekler Araştırma Raporu, Faaliyet Raporu, Finansal Rapor, Toplantı Notları, Yatırımcı Sunumu
-2026-06-30T14:30:38Z | bu projede gereksiz dosyalar varsa silelim, bouyutu küçülsün, artık web üzerinden çalıştıracağız
-2026-06-30T14:30:38Z | bu projede gereksiz dosyalar varsa silelim, bouyutu küçülsün, artık web üzerinden çalıştıracağız
-2026-06-30T19:48:52Z | bu programı artık webde yayınlayalım nasıl yapacağız.
-2026-06-30T19:52:40Z | github hiç kullanmadım daha önce hangisi daha profesyonel olur
-2026-06-30T20:01:26Z | bu aşamadayım
-2026-06-30T20:07:36Z | yüklendi galiba
-2026-06-30T20:15:40Z | bu aşamadayım
-2026-06-30T20:17:25Z | dosyanın adını sen index.html olarak değiştir.
-2026-06-30T20:20:08Z | şimdi vercelde ne yapacağım
-2026-06-30T20:27:14Z | https://yunvest-rp75.vercel.app  site adresi bu olmuş galiba
-2026-06-30T20:28:49Z | kullanııc adımı ve şifremi girdim hiçbir tepki vermiyor
-2026-06-30T20:37:01Z | 
-2026-06-30T20:39:33Z | 
-2026-06-30T20:39:46Z | KAYIT OLMAYA ÇALIŞINCA DA BÖYLE DİYOR
-2026-06-30T20:43:49Z | nasıl yükleyeveğim
-2026-06-30T20:47:06Z | E posta adresi zaten kayıtlı diyor. giriş yapma ekranına giriyorum eposta ve şifremi giriyorum hiç tepki vermiyor.
-2026-06-30T21:03:50Z | aynı projeden iki tane farklı adla oluştu birisini nasıl sileceğim
-2026-06-30T21:14:33Z | hisse sayfasındaki Finansal TAblolar, Oran Anlizi ve Diğer Kalemler menülerini kaldıralım.
-2026-06-30T21:17:46Z | Raporlar sayfasında Hissenin hangi raporları varsa onlar görünsün sadece
-2026-06-30T21:21:23Z | ARDYZ nin raporları var ancak rapor bulunamadı yazıyor.
-2026-06-30T21:25:12Z | şimdi artık yeni rapor eklersem veya silersem burada listeenen raporlar otomatik olarka değişecek mi.
-2026-06-30T21:26:14Z | bu komutu çalıştırmak profesyonelce değil daha profesyonel bir şey yapmamı gerekiyor
-2026-06-30T21:34:36Z | o zaman hem 2. hem 3. seçenekleri yapalım. kendi bilgisayarımda siteyi kullandığım zaman dosyaları locale atabilirim. 3. seçenek de başka bilgisayardaysam pdf veya exceli site üzerinden yüklerim. site üzerinden yükleme Veri Girişi sayfasında olsun.
-2026-06-30T21:34:36Z | o zaman hem 2. hem 3. seçenekleri yapalım. kendi bilgisayarımda siteyi kullandığım zaman dosyaları locale atabilirim. 3. seçenek de başka bilgisayardaysam pdf veya exceli site üzerinden yüklerim. site üzerinden yükleme Veri Girişi sayfasında olsun.
-2026-06-30T21:37:41Z | 
-2026-06-30T21:37:43Z | 
-2026-06-30T21:37:45Z | 
-2026-06-30T21:37:50Z | 
-2026-06-30T21:42:10Z | tamam
-2026-06-30T21:42:49Z | 
-2026-06-30T21:42:50Z | 
-2026-06-30T21:43:04Z | tamam devam edelim
-2026-07-01T16:25:42Z | ilk giriş tablosunda kullanıcı adı ve şife varken metin kutulatının rni neden beyaza dönüyor
-2026-07-01T16:28:59Z | başka bigisayar da nakit giriş çıkış hisse alışş satış gibi internet üzerinden veri girdiğim zaman local sitenin kayıtlı olduğu bilgsayaradaki siteye veriler nasıl kaydolacak
-2026-07-01T17:08:26Z | böyle site temasına uymayan, tarayıcının kendi uygulamalarını tamamen kaldıralım herşey site temasına uygun olsun.
-2026-07-01T17:13:01Z | bu değişiklikleri nasıl uygulayacaktık webdeki steiye
-2026-07-01T17:16:41Z | github desktop tan güncellemeyi yaptım ama site üzerinde değişiklik olmamış. gene tarayıcı sil mesajı vardı. localdeki sitemi açayım dedim orda da sisteme giriş yapmadı.
-2026-07-01T17:23:55Z | localde değişiklik olmuş, güncelleme yaptım ama webdekinde gene tarayıcı mesajı çıktı
-2026-07-01T17:28:46Z | yine olmadı aynı webde tarayıcının kendi mesajı çıkıyor
-2026-07-01T17:38:28Z | deploymenft failed  last uptadet
-2026-07-01T17:38:39Z | 12 m ago
-2026-07-01T17:42:09Z | tamam şimdi oldu. Sol alttaki açılır pencerenin üstüne gelmeden kayboluyor.
-2026-07-01T17:47:21Z | hala tarayıcıya ait uygulamalar çıkıyor. oraya tıklayınca böyle beyaz pencerede hisselerin tamamı çıkmayacak. hisse adını girdikçe uygun hisseler teeya uygun açılır pnecerede gelecek.
-2026-07-01T17:53:53Z | aynı bunun gibi olsun hisse altındaki açılır pencere. yani boşken hiç bir şey çıkmasın a yı yazdığımda a ile başlayanlar açılsın içinde a geçenler değil.
-2026-07-01T17:57:58Z | aynı sayfada tür altındak açılır pencerede (hisse veya fon seçilen) temaya uygun değil ve fon seçtiğimde yanındaki menkul kısmında altta açılır pencerede hisseler çıkıyor hiç bir şey çıkmayacak.
-2026-07-01T18:04:22Z | fonun altındak açılır pencerede beyaz, hisse ve fon da beyaz renk yazıyor gene olmadı. siyah arka planda beyaz şeklinde olması lazım. fon seçtiğimde menkule gedliğimde açılna pencerede yine tarayıcının açılır penceresi çıkıyor beyaz renk açılıyor fon adlarını bilmediğin için hiç açılır pencere çıkmasın.
-2026-07-01T20:48:00Z | Raporlara girince buluttan raporlar y
-2026-07-01T20:48:16Z | raporlara girilnce buluttan raporlar y
-2026-07-01T20:48:48Z | rapolrara girince buluttnan raporlar yükleniyor yazıyor o saçma olmuş
-2026-07-01T20:54:05Z | localdekinde denemek için TCKRC yatırımcı sunumu nu sildim tckrc raporlara girdim yatırımcı sunumu yazmaması gerekirken yazıyor hala
-2026-07-01T20:58:25Z | buluttan da sildim tckrcnin yatırımcı sunumunu yeniledim görünmeye devam etti tıklayınca dosyanıza erişilemedi yazdı
-2026-07-01T21:02:38Z | buluttan sildim orada görünmeye devam etti. yani yerelden sildim buluta güncelleme yaptım. buluttanda silinmiş oldu. webde f5 yaptıktan sonra tckrc nin raporlar sayfasına girdiğimde yatırımcı sunumu yazsıı duuyordu tıkladığımda dosyaya erişilmedi dedi
-2026-07-01T21:09:18Z | 3 tane dosya var görünüyor bu dosyalardan ikisi bulutta yok ama var görünüyor burda. bulutta silindiği zaman site üzerinden bu dosyalar görünmemesi gerekmiyor mu
-2026-07-01T21:12:23Z | herhangi bir işlem yapmadan dosya silinince göstermesin, eklenince de göstersin öyle olmuyor mu
-2026-07-01T21:18:06Z | compile excel js nAIL Çlıştırılıyor
-2026-07-01T21:19:20Z | hayır kodları sen düzenliyorsun vscode kullanmıyorum
-2026-07-01T21:22:28Z | yine bir dosya ekledim yine çalıştır komutu
-2026-07-01T21:33:56Z | yerelde tckrc nin faaliyet raporu, yatırımcı sunumu ve finansal raporu var. webde de bunlar var görünüyor tıkladğımda dosya yok diyor. github da güncelleme de yok.
-2026-07-01T21:38:09Z | ben bu gihubı çözemedim yunussensoy.com alan adı alsam oradan yapsak nasıl olur
-2026-07-01T21:40:10Z | ücretli yapmak iin alan adı ve hosting mi almam gerekiyor ne kadar ücreti
-2026-07-01T21:42:24Z | biraz daha burada deneme yapıp sonra ücretli ssiteme geçceğim ancak vercelin ingilizce olması bnei zorluyor
-2026-07-01T21:47:28Z | deploymentte hata var sanırım error yazıyor
-2026-07-01T21:49:54Z | hata bu
-2026-07-01T21:53:15Z | ine aynı hata var vercelde
-2026-07-01T21:57:49Z | raporlar sayfasının başlığı TCKRC Raporlar değil sadece Raporlar olsun. bir de yukarıdaki hisse bandındaki yazının boyutunu bir tık küçült ve tavana sıfırlama tabloyu tablonun üst çizgisiyle tavan arasında çok küçük bir boşluk olsun.
-2026-07-01T22:05:20Z | Rapolar sayfasında hala raporlar sisteme yüklenirken bir hata oluştu yazıyor
-2026-07-01T22:09:09Z | Rapolar sayfasının başlığında TCKRC Raporlar yazmayacak sadece Raporlar yazacak
-2026-07-01T22:15:53Z | Veri Giriş sayfasında Buluta Rapor Yükle tablosunun yerinde Fon Fiyatları olacak.
-2026-07-01T22:19:51Z | hiç bri değişiklik olmamış da zaten fon fiyatları tablosu varya alta almışsın yani üstte Mevcut Nakit Tutarı, Fon Fiyatları, Hedef Portöy tabloları olacak. Buluta Rapor Yükle yi bunların altına al.
-2026-07-01T22:26:17Z | BULUTA RAPOR yükle tablosunun kutularını alt alta değilde yanyana daha küçük yer kaplasın
-2026-07-01T22:29:47Z | ver girişi sayfasındaki tabloların altlarında üstlerinde neden o kadar boş alan var. o boşlukları baya bir azaltalım. hem kötü görünüyor hem de sayfa gereksiz aşağı doğru büyüyor
-2026-07-01T22:31:02Z | hala boşluk çok fazla
-2026-07-01T22:41:01Z | sisteme giriş yapmadı
-2026-07-01T22:46:44Z | enflasyon tablosunu silmişsin
-2026-07-02T08:18:57Z | web de Aksenin raporuna girdiğimde bu şekilde görünüyor. rapor yoksa eğer üstteki yazıda "Bu hisseye ait rapor bulunmuyor." yazsın sadece. Alttaki hata mesajı çıkmasın.
-2026-07-02T08:26:44Z | sisteme giriş yapılamadı. başka bir değişiklik de sayfayı yer işaretleri sekmesine eklediğimde Y logosu görünsün.
-2026-07-02T08:35:48Z | Bu hisseye ait rapor bulunamadı. yazsın
-2026-07-02T08:39:33Z | logo yanlış. Yunvest yazısının solundaki Y yazan logomuz. eski beğenmedim logoyu favicon olarak koymuşsun onu sil tamamen
-2026-07-02T08:49:15Z | fintables logosunu geçişleri göstemek amacıyla yükledim. benim y logosunun mavisi açık olmuş biraz. mavi renk aynı Yunvest de ki mavi renk ile aynı olsun. üzerine ışık vruma efekti değil de fintables logosu gibi deseneli geçişler yapalım. yani fintables logosouna benzeyecek. benimkinde Y yazacak. ve hakim mavi renk Yunvset mavi renk olacak.
-2026-07-02T08:52:19Z | bi değişiklik olmadı yeni logoyu uyguladın mı
-2026-07-02T12:32:04Z | sayfa açıkken bir süre sonra yetersiz bellek uyarsıı veriyor, neden böyle bir uyarı veriyor
-2026-07-02T12:44:14Z | hisse sayfasının başında hisse adı yazıyorya o hisse adı yazsının büyüklüğü YUNVest yazsıının büyüklüğü ile aynı olsun
-2026-07-02T13:36:10Z | daha büyütmeyeceksin zaten büyük küçlteceksin YUNVest yazsıı daha küçük.
-2026-07-02T13:41:48Z | bu siteye şu anda başka birisi üye olup benim sayfama girebilir, nasıl güvenli hale gtirelim.
-2026-07-02T13:44:46Z | şu anda yine sayfa çötü dedi.
-2026-07-02T14:00:57Z | hisse sayfasındaki üstte yazan örneğin AKSEN yazısı küçülmüş ama hise fiyatı küçülmemşiş. o da aynı boyutta olacak. yüzdelik sayı da bunlardan küçük olacak
-2026-07-02T14:06:18Z | Yukarıdaki xu100 le başlayan bilgilerin olduğu satırda metin boyutları 13 px değilse 13 px olsun.
-2026-07-02T14:11:06Z | Veri Girişi sayfasındaki tablolar üstte Mevcut Nakit Tutarı, Fon Fiyatları, Hedef Portföy olacak. Bulut rapor yükle tablosu bunların altında olacak.  u tablo dikey değil kutuları yatayda sırlanacak. en altta aylık enflasyon verileri tablosu aolacak. yalnız tabloların altlarında ve üstlerinde çok fazla boşluklar var bu boşlukları minimuma indirelim.
-2026-07-02T14:18:24Z | Türkçe karakterler görünmüyor, gene yetersiz bellek dedi. veri girişi sayfasındaki tabloların örneğin nakit tutarını girdiğim metin kutusunun altında ve üstünde çok fazla boşluklar var. bu iç boşluk değerleinin altta ve üstte 8 px e düşür.
-2026-07-02T14:25:10Z | sisteme girmiyor
-2026-07-02T14:33:53Z | şimdi de hisselerin sayfasına girmiyor ve takip listesi tablosunun ayaralarını bozmuşsun boşluk miiktarları artmış.
-2026-07-02T16:49:52Z | sadece ana menü kalmış diğer yerler bomboş ne oldu
-2026-07-02T16:55:13Z | takip listesi tablosu boşlukları artmış eski halie getir
-2026-07-02T16:57:21Z | şimdi daha da arttı
-2026-07-02T17:00:53Z | tablolaın boşluk ayarlarını ayrı ayrı ayralamayalım bütün tabloları bir css ile ayarlamıştık ne oldu
-2026-07-02T17:03:45Z | Hisse işlemleri tablosunun boşlukları iyi takip listesininki fazla nasıl tek bir css yaptın
-2026-07-02T17:06:53Z | takip listesi gene aynı diğerlerinden fazla boşluk
-2026-07-02T17:09:35Z | şimdi de sisteme girmedi diğer tabloları da bozmuşsun baktım da çok eski hallerine döndürmüşsün hepsini istediğim hale döndürmemi kaç gün sürer
-2026-07-02T17:48:29Z | hisse sayfakarına girilmiyor. ts,p l,d
-2026-07-02T17:51:39Z | hisse sayfalarına girilmiyor, portföy bilgileri tablosuna düzenleme simgeleri gelmiş
-2026-07-02T17:55:49Z | gene hisse sayfalarına girilmiyor onları da hep sildin galiba senin yapacağın işin
-2026-07-02T18:02:11Z | 
-2026-07-02T18:06:22Z | herşey çok eski hallerine dönmüş bu proje ne oldu böyle
-2026-07-02T18:12:05Z | tek tek günlerce düenlemiş olduğumuz yerler bozulmuş eski hallerine dönmüş
-2026-07-02T21:41:38Z | benim sana bunları yaptırmam bile günler alıyor. yaz yaz yaz çoğu şey istediğim gibi yapamıyorsun tekrar yaz yaz yaz. bu kadar şeyi tekrar yapmamız sanırım 1 ay sürer. bütün projenin kodlarını kendim yazsaydım daha kısa sürerdi
-2026-07-02T21:53:24Z | hadi yap bakalım.
