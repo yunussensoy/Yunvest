@@ -545,8 +545,17 @@ select.form-control option {
     color: var(--text-primary);
 }
 
-/* Fix all select dropdowns */
 select option {
   background-color: #1f2128 !important;
   color: #ffffff !important;
+}
+
+/* Hide number input spinners */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] {
+    -moz-appearance: textfield; /* Firefox */
 }

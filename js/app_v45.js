@@ -1528,10 +1528,10 @@ const renderHisseler = (container) => {
                     gelirHtml = `<table class="dash-table compact-table">
                         <thead>
                             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <th style="text-align:left;">Özet Gelir Tablosu</th>
-                                <th style="text-align:right;">${p1}</th>
-                                <th style="text-align:right;">${p2}</th>
-                                <th style="text-align:right;">%</th>
+                                <th style="text-align:left !important;">Özet Gelir Tablosu</th>
+                                <th style="text-align:right !important;">${p1}</th>
+                                <th style="text-align:right !important;">${p2}</th>
+                                <th style="text-align:right !important;">%</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -1540,10 +1540,10 @@ const renderHisseler = (container) => {
                         const vals = getG(item.key);
                         const pct = calcPct(vals.v1, vals.v2);
                         gelirHtml += `<tr>
-                            <td style="text-align:left;">${item.label}</td>
-                            <td>${fmtVal(vals.v1)}</td>
-                            <td>${fmtVal(vals.v2)}</td>
-                            <td style="color: ${pct.color}; font-weight:bold;">${pct.text}</td>
+                            <td style="text-align:left !important;">${item.label}</td>
+                            <td style="text-align:right !important;">${fmtVal(vals.v1)}</td>
+                            <td style="text-align:right !important;">${fmtVal(vals.v2)}</td>
+                            <td style="color: ${pct.color}; font-weight:bold; text-align:right !important;">${pct.text}</td>
                         </tr>`;
                     });
                     gelirHtml += `</tbody></table>`;
@@ -1600,10 +1600,10 @@ const renderHisseler = (container) => {
                     bilancoHtml = `<table class="dash-table compact-table">
                         <thead>
                             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <th style="text-align:left;">Özet Bilanço</th>
-                                <th style="text-align:right;">${bp1}</th>
-                                <th style="text-align:right;">${bp2}</th>
-                                <th style="text-align:right;">%</th>
+                                <th style="text-align:left !important;">Özet Bilanço</th>
+                                <th style="text-align:right !important;">${bp1}</th>
+                                <th style="text-align:right !important;">${bp2}</th>
+                                <th style="text-align:right !important;">%</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -1612,10 +1612,10 @@ const renderHisseler = (container) => {
                         const vals = getB(item.key);
                         const pct = calcPct(vals.v1, vals.v2);
                         bilancoHtml += `<tr>
-                            <td style="text-align:left;" title="${vals.debug || ''}">${item.label}</td>
-                            <td title="${vals.debug || ''}">${fmtVal(vals.v1)}</td>
-                            <td>${fmtVal(vals.v2)}</td>
-                            <td style="color: ${pct.color}; font-weight:bold;">${pct.text}</td>
+                            <td style="text-align:left !important;" title="${vals.debug || ''}">${item.label}</td>
+                            <td style="text-align:right !important;" title="${vals.debug || ''}">${fmtVal(vals.v1)}</td>
+                            <td style="text-align:right !important;">${fmtVal(vals.v2)}</td>
+                            <td style="color: ${pct.color}; font-weight:bold; text-align:right !important;">${pct.text}</td>
                         </tr>`;
                     });
                     bilancoHtml += `</tbody></table>`;
@@ -2087,7 +2087,7 @@ const renderHisseler = (container) => {
                 ];
                 
                 rows.forEach(r => {
-                    html += `<tr><td style="text-align:left; font-weight:bold;">${r.label}</td>`;
+                    html += `<tr><td style="text-align:left !important; font-weight:bold;">${r.label}</td>`;
                     years.forEach(y => {
                         const d = stateData[y] || {};
                         const editMode = window.degerlemeEditMode[y];
@@ -2157,9 +2157,14 @@ const renderHisseler = (container) => {
                             displayVal = val = hasHedef ? hedefFiyatTL : '---';
                         }
                         
+                        let potansiyelNum = 0;
+                        if (hasHedef && guncelFiyat > 0) {
+                            potansiyelNum = ((hedefFiyatTL - guncelFiyat) / guncelFiyat) * 100;
+                        }
+
                         if (r.key === 'potansiyel') {
                             if (hasHedef && guncelFiyat > 0) {
-                                displayVal = val = ((hedefFiyatTL - guncelFiyat) / guncelFiyat) * 100;
+                                displayVal = val = potansiyelNum;
                             } else {
                                 displayVal = val = '---';
                             }
@@ -2183,10 +2188,19 @@ const renderHisseler = (container) => {
                             }
                         }
                         
+                        let extraStyle = '';
+                        if (r.isTarget && hasHedef) {
+                            extraStyle = potansiyelNum > 0 ? 'color: #2ecc71 !important; font-weight: bold; font-size:1.1rem;' : 'color: #e74c3c !important; font-weight: bold; font-size:1.1rem;';
+                        }
+                        if (r.key === 'potansiyel' && val !== '---') {
+                            extraStyle = val > 0 ? 'color: #2ecc71 !important; font-weight: bold;' : 'color: #e74c3c !important; font-weight: bold;';
+                            if (val > 0 && !displayVal.startsWith('+')) displayVal = '+' + displayVal;
+                        }
+                        
                         if (editMode && !r.readonly) {
-                            html += `<td style="text-align: center;"><input type="number" step="any" style="width:100%; background:rgba(255,255,255,0.1); color:#fff; border:1px solid var(--accent-color); padding:4px; text-align:center; border-radius:4px;" value="${val !== '---' ? val : ''}" onchange="window.updateDegerlemeInput('${selectedHisse}', '${y}', '${r.key}', this.value)"></td>`;
+                            html += `<td style="text-align: right !important;"><input type="number" step="any" style="width:100%; background:rgba(255,255,255,0.1); color:#fff; border:1px solid var(--accent-color); padding:4px; text-align:right; border-radius:4px;" value="${val !== '---' ? val : ''}" onchange="window.updateDegerlemeInput('${selectedHisse}', '${y}', '${r.key}', this.value)"></td>`;
                         } else {
-                            html += `<td style="text-align: center; ${r.isTarget ? 'font-weight:bold; color:var(--success-color); font-size:1.1rem;' : ''}">${displayVal === '' ? '---' : displayVal}</td>`;
+                            html += `<td style="text-align: right !important; ${extraStyle}">${displayVal === '' ? '---' : displayVal}</td>`;
                         }
                     });
                     html += `</tr>`;
@@ -3415,7 +3429,7 @@ const renderHedef = (container) => {
     if (State.data.hedefFiyatlar) {
         let sn = 1;
         const fmtDec = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(val);
-        const fmtPct = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(val * 100) + '%';
+        const fmtPct = (val) => (val > 0 ? '+' : '') + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(val * 100) + '%';
         
         for (const hisse of Object.keys(State.data.hedefFiyatlar).sort()) {
             const hData = State.data.hedefFiyatlar[hisse];
@@ -3426,7 +3440,7 @@ const renderHedef = (container) => {
             const renderCell = (year) => {
                 if (!hData[year]) return `<td>-</td><td>-</td>`;
                 const color = hData[year].potansiyel > 0 ? '#2ecc71' : '#e74c3c';
-                return `<td>${fmtDec(hData[year].hedefFiyat)}</td><td style="color:${color}; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
+                return `<td>${fmtDec(hData[year].hedefFiyat)}</td><td style="color:${color} !important; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
             };
 
             rowsHtml += `<tr>
@@ -3526,7 +3540,7 @@ const renderAnasayfa = (container) => {
     takipList = [...takipList].sort((a, b) => a.localeCompare(b));
 
     const fmtDec = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(val);
-    const fmtPct = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(val * 100) + '%';
+    const fmtPct = (val) => (val > 0 ? '+' : '') + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(val * 100) + '%';
     
     let rowsHtml = '';
     takipList.forEach((hisse, i) => {
@@ -3542,7 +3556,7 @@ const renderAnasayfa = (container) => {
         const renderCell = (year) => {
             if (!hData || !hData[year]) return `<td style="text-align: center;">-</td><td style="text-align: center;">-</td>`;
             const color = hData[year].potansiyel > 0 ? '#2ecc71' : '#e74c3c';
-            return `<td style="text-align: center;">${fmtDec(hData[year].hedefFiyat)}</td><td style="text-align: center; color:${color}; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
+            return `<td style="text-align: center; color:${color} !important; font-weight:bold;">${fmtDec(hData[year].hedefFiyat)}</td><td style="text-align: center; color:${color} !important; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
         };
         
         rowsHtml += `
