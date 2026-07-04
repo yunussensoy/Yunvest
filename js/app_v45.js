@@ -2244,7 +2244,20 @@ const renderHisseler = (container) => {
                     analizler.forEach(a => {
                         let linkHtml = '-';
                         if (a.baglanti) {
-                            linkHtml = `<a href="${a.baglanti}" target="_blank" style="color:var(--accent-color); text-decoration:none;"><i class="fas fa-external-link-alt"></i> Git</a>`;
+                            let text = 'Dış Bağlantı';
+                            let icon = 'fas fa-external-link-alt';
+                            if (a.baslik) {
+                                text = a.baslik;
+                            } else if (a.baglanti.includes('youtube.com') || a.baglanti.includes('youtu.be')) {
+                                text = 'YouTube Linki';
+                                icon = 'fab fa-youtube';
+                            } else if (a.baglanti.includes('twitter.com') || a.baglanti.includes('x.com')) {
+                                text = 'X (Twitter) Linki';
+                                icon = 'fab fa-twitter';
+                            }
+                            linkHtml = `<a href="${a.baglanti}" target="_blank" style="color:var(--accent-color); text-decoration:none;"><i class="${icon}"></i> ${text}</a>`;
+                        } else if (a.baslik) {
+                            linkHtml = `<span style="color:var(--text-secondary);">${a.baslik}</span>`;
                         }
                         const tarihStr = a.tarih ? a.tarih.split('-').reverse().join('.') : '-';
                         tableHtml += `
@@ -2287,9 +2300,14 @@ const renderHisseler = (container) => {
                             </div>
                             <!-- Gizli Hisse Inputu: Zaten secili hissedeyiz, ondan sabit kalacak -->
                             <input type="hidden" id="analiz-hisse" value="${selectedHisse}">
+                            <input type="hidden" id="analiz-hisse" value="${selectedHisse}">
                             
-                            <div style="flex: 2; min-width: 250px;">
-                                <label style="font-size: 0.8rem; color: var(--text-secondary);">Bağlantı (YouTube, X, vs.)</label>
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="font-size: 0.8rem; color: var(--text-secondary);">Başlık (Opsiyonel)</label>
+                                <input type="text" id="analiz-baslik" class="form-control" style="width:100%;" placeholder="Videonun Başlığı">
+                            </div>
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="font-size: 0.8rem; color: var(--text-secondary);">Bağlantı Linki</label>
                                 <input type="text" id="analiz-baglanti" class="form-control" style="width:100%;" placeholder="https://youtube.com/...">
                             </div>
                         </div>
@@ -3021,6 +3039,8 @@ window.addAnaliz = () => {
         const tarih = tarihEl.value;
         const borsaci = borsaciEl.value.trim();
         const hisse = hisseEl.value.trim().toUpperCase();
+        const baslikEl = document.getElementById('analiz-baslik');
+        const baslik = baslikEl ? baslikEl.value.trim() : '';
         const baglanti = baglantiEl ? baglantiEl.value.trim() : '';
         const notText = notTextEl ? notTextEl.value.trim() : '';
         
@@ -3035,6 +3055,7 @@ window.addAnaliz = () => {
             tarih,
             borsaci,
             hisse,
+            baslik,
             baglanti,
             notText,
             id: Date.now()
@@ -3065,11 +3086,11 @@ window.addAnaliz = () => {
         
         renderPage();
         
-        // Ensure inline row stays visible after renderPage
-        setTimeout(() => {
-            const row = document.getElementById('inline-analiz-row');
-            if (row) row.style.display = row.tagName.toUpperCase() === 'TR' ? 'table-row' : 'flex';
-        }, 50);
+        // Ensure inline row is hidden after save (by not forcing it open)
+        const row = document.getElementById('inline-analiz-row');
+        if (row && row.style.display !== 'none') {
+            if (typeof window.toggleInlineAnaliz === 'function') window.toggleInlineAnaliz();
+        }
 
     } catch (e) {
         alert('Hata oluştu: ' + e.message);
@@ -3095,6 +3116,8 @@ window.editAnaliz = (id) => {
         if(bEl) bEl.value = analiz.borsaci;
         const hEl = document.getElementById('analiz-hisse');
         if(hEl) hEl.value = analiz.hisse;
+        const bslEl = document.getElementById('analiz-baslik');
+        if(bslEl) bslEl.value = analiz.baslik || '';
         const lEl = document.getElementById('analiz-baglanti');
         if(lEl) lEl.value = analiz.baglanti || '';
         const nEl = document.getElementById('analiz-not');
