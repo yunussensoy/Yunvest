@@ -3099,10 +3099,10 @@ window.addAnaliz = () => {
 };
 
 window.editAnaliz = (id) => {
-    const analiz = State.data.analizler.find(a => a.id === id);
+    const analiz = State.data.analizler.find(a => String(a.id) === String(id));
     if (!analiz) return;
     
-    State.data.analizler = State.data.analizler.filter(a => a.id !== id);
+    State.data.analizler = State.data.analizler.filter(a => String(a.id) !== String(id));
     State.save();
     renderPage();
     
@@ -3129,7 +3129,7 @@ window.editAnaliz = (id) => {
 
 window.deleteAnaliz = (id) => {
     if (!confirm('Bu analizi silmek istediğinize emin misiniz?')) return;
-    State.data.analizler = State.data.analizler.filter(a => a.id !== id);
+    State.data.analizler = State.data.analizler.filter(a => String(a.id) !== String(id));
     State.save();
     renderPage();
 };
