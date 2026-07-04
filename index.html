@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css?v=1783078999999">
+    <link rel="stylesheet" href="css/styles.css?v=1783079999999">
 </head>
 <body>
     <div id="auth-container" class="app-container" style="justify-content: center; align-items: center;">
@@ -37,6 +37,8 @@
     </div>
 
     <div id="app" class="app-container" style="display: none; flex-direction: row; height: 100vh; overflow: hidden;">
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" onclick="window.toggleSidebar()"></div>
     <!-- Primary Sidebar -->
     <aside id="primary-sidebar" class="glass-sidebar expanded">
         <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
@@ -274,6 +276,6 @@ window.showAnalizEkleModal = function(hisse) {
     <script src="js/excel_parser_v2.js"></script>
     <script src="js/import_data.js"></script>
     <script src="js/custom_autocomplete.js?v=1"></script>
-    <script src="js/app_v45.js?v=1783078999999"></script>
+    <script src="js/app_v45.js?v=1783079999999"></script>
 </body>
 </html>

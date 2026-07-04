@@ -3925,7 +3925,15 @@ window.goToAyarlar = () => {
 
 window.toggleSidebar = () => {
     const sidebar = document.getElementById('primary-sidebar');
-    if (sidebar) sidebar.classList.toggle('collapsed');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (sidebar) {
+        if (window.innerWidth <= 768) {
+            sidebar.classList.toggle('show-mobile');
+            if (overlay) overlay.classList.toggle('show-mobile');
+        } else {
+            sidebar.classList.toggle('collapsed');
+        }
+    }
 };
 
 window.openSecondarySidebar = (title) => {
@@ -4099,6 +4107,12 @@ const initApp = () => {
             navButtons.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentPage = target;
+            if (window.innerWidth <= 768) {
+                const sidebar = document.getElementById('primary-sidebar');
+                const overlay = document.querySelector('.sidebar-overlay');
+                if (sidebar) sidebar.classList.remove('show-mobile');
+                if (overlay) overlay.classList.remove('show-mobile');
+            }
             renderPage();
         });
     });
