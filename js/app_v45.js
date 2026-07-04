@@ -2652,7 +2652,7 @@ const renderHisseIslemleri = (container) => {
                     <span>Hisse ve Fon Hareketleri</span>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleInlineForm('hisse')">+</button>
                 </div>
-                <table style="table-layout: fixed; width: 100%;">
+                <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
                     <thead>
                         <tr><th style="width: 5%;">S.N.</th><th style="width: 15%; text-align: right;">Tarih</th><th style="width: 8%; text-align: left;">Tür</th><th style="width: 12%; text-align: left;">Menkul</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%;">Tutar</th><th style="width: 18%;">İşlem</th></tr>
                     </thead>
@@ -2816,7 +2816,7 @@ const renderNakitIslemleri = (container) => {
                     <span>Nakit Hareketleri</span>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleInlineForm('nakit')">+</button>
                 </div>
-                <table style="table-layout: fixed; width: 100%;">
+                <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
                     <thead>
                         <tr><th style="width: 5%;">S.N.</th><th style="width: 15%; text-align: right;">Tarih</th><th style="width: 15%;">Tutar</th><th style="width: 15%;">XU100</th><th style="width: 15%;">USDTRY</th><th style="width: 15%;">GRAMALTIN</th><th style="width: 20%;">İşlem</th></tr>
                     </thead>
@@ -2903,10 +2903,10 @@ const renderVeriler = (container) => {
     fonSet.forEach(fon => {
         const pFiyat = State.getFiyat(fon);
         fonHtml += `
-            <div style="display:flex; justify-content:flex-end; align-items:center; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem;">
-                <span>${fon}</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem;">
+                <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">${fon}</span>
                 <div style="display:flex; align-items:center; gap: 0.5rem;">
-                    <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100px; text-align:right;">
+                    <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100px; text-align:right; font-size: 13px; color: var(--text-secondary);">
                     <button class="btn" style="padding: 0.2rem 0.5rem; background: var(--accent-color);" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value); alert('Güncellendi!');"><i class="fas fa-check"></i></button>
                 </div>
             </div>
@@ -2919,24 +2919,24 @@ const renderVeriler = (container) => {
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <!-- Nakit Düzenleme -->
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;">Mevcut Nakit Tutarı</h3>
+                    <div style="font-size: 13px; font-weight: bold; color: #ffffff; text-align: left; margin-bottom: 0.5rem;">Mevcut Nakit Tutarı</div>
                     <div style="display:flex; gap: 0.5rem;">
-                        <input type="number" step="0.01" id="v-nakit-input" value="${State.data.manuelNakitTutar || 0}" class="form-control" style="width:100%;">
+                        <input type="number" step="0.01" id="v-nakit-input" value="${State.data.manuelNakitTutar || 0}" class="form-control" style="width:100%; font-size: 13px; color: var(--text-secondary);">
                         <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.manuelNakitTutar = parseFloat(document.getElementById('v-nakit-input').value) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
                     </div>
                 </div>
                 <!-- Fon Fiyatları -->
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;">Fon Fiyatları</h3>
+                    <div style="font-size: 13px; font-weight: bold; color: #ffffff; text-align: left; margin-bottom: 0.5rem;">Fon Fiyatları</div>
                     <div style="max-height: 150px; overflow-y: auto; padding-right: 0.5rem;">
                         ${fonHtml || '<p style="color:var(--text-secondary);">Portföyde fon bulunmuyor.</p>'}
                     </div>
                 </div>
                 <!-- Hedef Portföy -->
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;">Hedef Portföy</h3>
+                    <div style="font-size: 13px; font-weight: bold; color: #ffffff; text-align: left; margin-bottom: 0.5rem;">Hedef Portföy</div>
                     <div style="display:flex; gap: 0.5rem;">
-                        <input type="number" step="1" id="v-hedef-input" value="${hedefPortfoy}" class="form-control" style="width:100%;">
+                        <input type="number" step="1" id="v-hedef-input" value="${hedefPortfoy}" class="form-control" style="width:100%; font-size: 13px; color: var(--text-secondary);">
                         <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
                     </div>
                 </div>
@@ -2944,10 +2944,10 @@ const renderVeriler = (container) => {
 
             <!-- Rapor Yükle (Bulut) -->
             <div class="glass" style="padding: 8px 1rem; margin-top: 1rem;">
-                <h3 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1rem;"><i class="fas fa-cloud-upload-alt"></i> Buluta Rapor Yükle</h3>
+                <div style="font-size: 13px; font-weight: bold; color: #ffffff; text-align: left; margin-bottom: 0.5rem;"><i class="fas fa-cloud-upload-alt" style="margin-right: 0.5rem;"></i> Buluta Rapor Yükle</div>
                 <div style="display:flex; flex-direction:row; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
-                    <input type="text" id="upload-hisse" placeholder="Hisse Kodu (Örn: THYAO)" class="form-control" style="flex: 1; min-width: 120px; text-transform: uppercase; padding: 0.3rem;">
-                    <select id="upload-type" class="form-control" style="flex: 2; min-width: 150px; appearance: auto; padding: 0.3rem;">
+                    <input type="text" id="upload-hisse" placeholder="Hisse Kodu (Örn: THYAO)" class="form-control" style="flex: 1; min-width: 120px; text-transform: uppercase; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);">
+                    <select id="upload-type" class="form-control" style="flex: 2; min-width: 150px; appearance: auto; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);">
                         <option value="">-- Rapor Türü Seçin --</option>
                         <option value="arastirma_raporu.pdf">Araştırma Raporu</option>
                         <option value="faaliyet_raporu.pdf">Faaliyet Raporu</option>
@@ -2956,8 +2956,29 @@ const renderVeriler = (container) => {
                         <option value="yatirimci_sunumu.pdf">Yatırımcı Sunumu</option>
                         <option value="fiyat_tespit_raporu.pdf">Fiyat Tespit Raporu</option>
                     </select>
-                    <input type="file" id="upload-file" accept="application/pdf" class="form-control" style="flex: 2; min-width: 180px; padding: 0.3rem; cursor: pointer;">
-                    <button class="btn" style="background: var(--accent-color); flex: 1; min-width: 80px; padding: 0.3rem;" onclick="window.uploadRapor()">Yükle</button>
+                    <style>
+                        #upload-file::file-selector-button,
+                        #upload-file::-webkit-file-upload-button {
+                            background: var(--accent-color);
+                            color: #fff;
+                            border: none;
+                            padding: 6px 12px;
+                            border-radius: 6px;
+                            cursor: pointer;
+                            font-weight: 600;
+                            margin-right: 10px;
+                            font-size: 13px !important;
+                            font-family: 'Inter', sans-serif !important;
+                            transition: var(--transition);
+                        }
+                        #upload-file::file-selector-button:hover,
+                        #upload-file::-webkit-file-upload-button:hover {
+                            background: rgba(79, 172, 254, 0.8);
+                            transform: translateY(-1px);
+                        }
+                    </style>
+                    <input type="file" id="upload-file" accept="application/pdf" class="form-control" style="flex: 2; min-width: 180px; padding: 0.3rem; cursor: pointer; font-size: 13px !important; font-family: 'Inter', sans-serif !important;">
+                    <button class="btn" style="background: var(--accent-color); flex: 1; min-width: 80px; padding: 0.3rem; font-size: 13px !important; font-family: 'Inter', sans-serif !important;" onclick="window.uploadRapor()">Yükle</button>
                     <div id="upload-status" style="font-size: 13px; font-weight: 500; min-height: 10px; width: 100%;"></div>
                 </div>
             </div>
@@ -2965,12 +2986,12 @@ const renderVeriler = (container) => {
             <!-- Enflasyon -->
             <div class="glass" style="padding: 8px 1rem; margin-top: 1rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="margin-bottom: 0.5rem; color: var(--accent-color);">Aylık Enflasyon Verileri</h3>
+                    <div style="font-size: 13px; font-weight: bold; color: #ffffff; text-align: left;">Aylık Enflasyon Verileri</div>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleEnfForm()">+</button>
                 </div>
                 
                 <div class="table-container" style="max-height: 400px; overflow-y: auto;">
-                    <table style="width: 100%;">
+                    <table class="dash-table compact-table" style="width: 100%;">
                         <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 10;">
                             <tr>
                                 <th style="text-align:center;">Dönem (Yıl-Ay)</th>
@@ -3011,6 +3032,94 @@ const renderVeriler = (container) => {
             window.renderEnflasyonData();
         }
     }, 50);
+};
+
+window.toggleEnfForm = () => {
+    const row = document.getElementById('enf-form-row');
+    if (row) {
+        row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+        if (row.style.display !== 'none') {
+            const today = new Date();
+            const y = today.getFullYear();
+            const m = String(today.getMonth() + 1).padStart(2, '0');
+            document.getElementById('i-enf-tarih').value = `${y}-${m}`;
+            document.getElementById('i-enf-oran').value = '';
+            document.getElementById('i-enf-oran').focus();
+        }
+    }
+};
+
+window.renderEnflasyonData = () => {
+    const tbody = document.getElementById('enf-data-tbody');
+    if (!tbody) return;
+    
+    let html = '';
+    const list = State.data.enflasyonListesi || [];
+    
+    if (list.length === 0) {
+        html = `<tr><td colspan="4" style="text-align:center; padding:1rem; opacity:0.5;">Henüz enflasyon verisi eklenmemiş.</td></tr>`;
+    } else {
+        const sorted = [...list].sort((a,b) => b.tarih.localeCompare(a.tarih));
+        
+        let cumulative = 1;
+        const ascSorted = [...list].sort((a,b) => a.tarih.localeCompare(b.tarih));
+        const cumMap = {};
+        ascSorted.forEach(item => {
+            cumulative *= (1 + (parseFloat(item.oran) / 100));
+            cumMap[item.tarih] = (cumulative - 1) * 100;
+        });
+
+        sorted.forEach(item => {
+            const pct = parseFloat(item.oran);
+            const color = pct >= 0 ? 'var(--danger-color)' : 'var(--success-color)';
+            const cumColor = cumMap[item.tarih] >= 0 ? 'var(--danger-color)' : 'var(--success-color)';
+            html += `<tr>
+                <td style="text-align:center;">${item.tarih}</td>
+                <td style="text-align:right; color:${color}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', {maximumFractionDigits:2}).format(pct)}%</td>
+                <td style="text-align:right; color:${cumColor}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', {maximumFractionDigits:2}).format(cumMap[item.tarih])}%</td>
+                <td style="text-align:center;">
+                    <button class="btn btn-danger" style="padding: 0.1rem 0.3rem; font-size: 12px; background: transparent;" onclick="window.deleteEnflasyon('${item.id}')" title="Sil"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+        });
+    }
+    tbody.innerHTML = html;
+};
+
+window.addEnflasyon = (e) => {
+    if (e) e.preventDefault();
+    const tarih = document.getElementById('i-enf-tarih').value;
+    const oranStr = document.getElementById('i-enf-oran').value;
+    
+    if (!tarih || !oranStr) {
+        alert('Lütfen tarih ve oran giriniz.');
+        return;
+    }
+    
+    if (!State.data.enflasyonListesi) State.data.enflasyonListesi = [];
+    
+    const existingIdx = State.data.enflasyonListesi.findIndex(x => x.tarih === tarih);
+    if (existingIdx !== -1) {
+        State.data.enflasyonListesi[existingIdx].oran = oranStr;
+    } else {
+        State.data.enflasyonListesi.push({
+            id: 'enf_' + Date.now(),
+            tarih: tarih,
+            oran: oranStr
+        });
+    }
+    
+    State.save();
+    window.toggleEnfForm();
+    if(typeof renderPage === 'function') renderPage();
+};
+
+window.deleteEnflasyon = (id) => {
+    if(confirm('Bu enflasyon verisini silmek istediğinize emin misiniz?')) {
+        State.data.enflasyonListesi = (State.data.enflasyonListesi || []).filter(x => x.id !== id);
+        State.save();
+        if(typeof renderPage === 'function') renderPage();
+    }
 };
 
 window.toggleInlineAnaliz = () => {
