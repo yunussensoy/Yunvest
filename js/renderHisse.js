@@ -272,11 +272,18 @@ const renderHisseler = (container) => {
                     return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(val);
                 };
                 
-                const calcPct = (current, previous) => {
+                const calcPct = (current, previous, options = {}) => {
                     if (!current || !previous || previous === 0) return { text: 'N/A', color: 'gray' };
                     const pct = ((current - previous) / Math.abs(previous)) * 100;
-                    const color = pct >= 0 ? '#2ecc71' : '#e74c3c';
-                    return { text: '% ' + Math.abs(pct).toFixed(0), color: color };
+                    const isNegative = pct < 0;
+                    
+                    let color = isNegative ? '#e74c3c' : '#2ecc71';
+                    if (options.reverseColor) {
+                        color = isNegative ? '#2ecc71' : '#e74c3c';
+                    }
+                    
+                    const text = isNegative ? `% -${Math.abs(pct).toFixed(0)}` : `% ${Math.abs(pct).toFixed(0)}`;
+                    return { text: text, color: color };
                 };
 
                 let gelirHtml = '';
@@ -326,10 +333,10 @@ const renderHisseler = (container) => {
                     gelirHtml = `<table class="dash-table compact-table">
                         <thead>
                             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <th style="text-align:left;">Özet Gelir Tablosu</th>
-                                <th style="text-align:right;">${p1}</th>
-                                <th style="text-align:right;">${p2}</th>
-                                <th style="text-align:right;">%</th>
+                                <th style="text-align:left !important;">Özet Gelir Tablosu</th>
+                                <th style="text-align:center !important;">${p1}</th>
+                                <th style="text-align:center !important;">${p2}</th>
+                                <th style="text-align:center !important;">%</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -338,10 +345,10 @@ const renderHisseler = (container) => {
                         const vals = getG(item.key);
                         const pct = calcPct(vals.v1, vals.v2);
                         gelirHtml += `<tr>
-                            <td>${item.label}</td>
-                            <td>${fmtVal(vals.v1)}</td>
-                            <td>${fmtVal(vals.v2)}</td>
-                            <td style="color: ${pct.color}; font-weight:bold;">${pct.text}</td>
+                            <td style="text-align:left !important;">${item.label}</td>
+                            <td style="text-align:right !important;">${fmtVal(vals.v1)}</td>
+                            <td style="text-align:right !important;">${fmtVal(vals.v2)}</td>
+                            <td style="color: ${pct.color} !important; font-weight:bold; text-align:right !important;">${pct.text}</td>
                         </tr>`;
                     });
                     gelirHtml += `</tbody></table>`;
@@ -390,30 +397,30 @@ const renderHisseler = (container) => {
                         { label: 'Dönen Varlıklar', key: 'toplam dönen varlıklar' },
                         { label: 'Duran Varlıklar', key: 'toplam duran varlıklar' },
                         { label: 'Toplam Varlıklar', key: 'toplam varlıklar' },
-                        { label: 'Finansal Borçlar', key: 'finansal borçlar' },
-                        { label: 'Net Borç', key: 'net borç' },
+                        { label: 'Finansal Borçlar', key: 'finansal borçlar', reverseColor: true },
+                        { label: 'Net Borç', key: 'net borç', reverseColor: true },
                         { label: 'Özkaynaklar', key: 'ana ortaklığa ait özkaynaklar' }
                     ];
 
                     bilancoHtml = `<table class="dash-table compact-table">
                         <thead>
                             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <th style="text-align:left;">Özet Bilanço</th>
-                                <th style="text-align:right;">${bp1}</th>
-                                <th style="text-align:right;">${bp2}</th>
-                                <th style="text-align:right;">%</th>
+                                <th style="text-align:left !important;">Özet Bilanço</th>
+                                <th style="text-align:center !important;">${bp1}</th>
+                                <th style="text-align:center !important;">${bp2}</th>
+                                <th style="text-align:center !important;">%</th>
                             </tr>
                         </thead>
                         <tbody>`;
                     
                     bItems.forEach(item => {
                         const vals = getB(item.key);
-                        const pct = calcPct(vals.v1, vals.v2);
+                        const pct = calcPct(vals.v1, vals.v2, { reverseColor: item.reverseColor });
                         bilancoHtml += `<tr>
-                            <td title="${vals.debug || ''}">${item.label}</td>
-                            <td title="${vals.debug || ''}">${fmtVal(vals.v1)}</td>
-                            <td>${fmtVal(vals.v2)}</td>
-                            <td style="color: ${pct.color}; font-weight:bold;">${pct.text}</td>
+                            <td style="text-align:left !important;" title="${vals.debug || ''}">${item.label}</td>
+                            <td style="text-align:right !important;" title="${vals.debug || ''}">${fmtVal(vals.v1)}</td>
+                            <td style="text-align:right !important;">${fmtVal(vals.v2)}</td>
+                            <td style="color: ${pct.color} !important; font-weight:bold; text-align:right !important;">${pct.text}</td>
                         </tr>`;
                     });
                     bilancoHtml += `</tbody></table>`;

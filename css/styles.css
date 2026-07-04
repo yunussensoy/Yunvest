@@ -447,7 +447,7 @@ tbody tr {
     justify-content: center !important;
     align-items: center !important;
     padding: 3px 5px !important;
-    margin: 0 0 1rem 0 !important;
+    margin: 0 0 0.2rem 0 !important;
     height: auto !important;
     border: none !important;
     letter-spacing: normal !important;
@@ -456,7 +456,7 @@ tbody tr {
 table, .std-table, .dash-table, .compact-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 5px;
+    margin-top: 2px;
     table-layout: auto !important;
 }
 
@@ -466,7 +466,7 @@ table th, .std-table th, .dash-table th, .compact-table th {
     color: #ffffff !important;
     text-align: center !important;
     vertical-align: middle !important;
-    padding: 8px 5px !important;
+    padding: 4px 5px !important;
     background: rgba(0, 0, 0, 0.2) !important;
     border-bottom: 1px solid var(--table-border) !important;
     border-right: 1px solid var(--table-border) !important;

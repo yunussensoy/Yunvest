@@ -1,0 +1,21 @@
+{
+  "name": "YUNVest Portföy",
+  "short_name": "YUNVest",
+  "description": "Portföy ve Hisse Değerleme Uygulaması",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b0c10",
+  "theme_color": "#4facfe",
+  "icons": [
+    {
+      "src": "img/ys_logo_blue.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "img/ys_logo_blue.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

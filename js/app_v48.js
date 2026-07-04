@@ -1474,11 +1474,18 @@ const renderHisseler = (container) => {
                     return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(val);
                 };
                 
-                const calcPct = (current, previous) => {
+                const calcPct = (current, previous, options = {}) => {
                     if (!current || !previous || previous === 0) return { text: 'N/A', color: 'gray' };
                     const pct = ((current - previous) / Math.abs(previous)) * 100;
-                    const color = pct >= 0 ? '#2ecc71' : '#e74c3c';
-                    return { text: '% ' + Math.abs(pct).toFixed(0), color: color };
+                    const isNegative = pct < 0;
+                    
+                    let color = isNegative ? '#e74c3c' : '#2ecc71';
+                    if (options.reverseColor) {
+                        color = isNegative ? '#2ecc71' : '#e74c3c';
+                    }
+                    
+                    const text = isNegative ? `% -${Math.abs(pct).toFixed(0)}` : `% ${Math.abs(pct).toFixed(0)}`;
+                    return { text: text, color: color };
                 };
 
                 let gelirHtml = '';
@@ -1529,9 +1536,9 @@ const renderHisseler = (container) => {
                         <thead>
                             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
                                 <th style="text-align:left !important;">Özet Gelir Tablosu</th>
-                                <th style="text-align:right !important;">${p1}</th>
-                                <th style="text-align:right !important;">${p2}</th>
-                                <th style="text-align:right !important;">%</th>
+                                <th style="text-align:center !important;">${p1}</th>
+                                <th style="text-align:center !important;">${p2}</th>
+                                <th style="text-align:center !important;">%</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -1543,7 +1550,7 @@ const renderHisseler = (container) => {
                             <td style="text-align:left !important;">${item.label}</td>
                             <td style="text-align:right !important;">${fmtVal(vals.v1)}</td>
                             <td style="text-align:right !important;">${fmtVal(vals.v2)}</td>
-                            <td style="color: ${pct.color}; font-weight:bold; text-align:right !important;">${pct.text}</td>
+                            <td style="color: ${pct.color} !important; font-weight:bold; text-align:right !important;">${pct.text}</td>
                         </tr>`;
                     });
                     gelirHtml += `</tbody></table>`;
@@ -1592,8 +1599,8 @@ const renderHisseler = (container) => {
                         { label: 'Dönen Varlıklar', key: 'toplam dönen varlıklar' },
                         { label: 'Duran Varlıklar', key: 'toplam duran varlıklar' },
                         { label: 'Toplam Varlıklar', key: 'toplam varlıklar' },
-                        { label: 'Finansal Borçlar', key: 'finansal borçlar' },
-                        { label: 'Net Borç', key: 'net borç' },
+                        { label: 'Finansal Borçlar', key: 'finansal borçlar', reverseColor: true },
+                        { label: 'Net Borç', key: 'net borç', reverseColor: true },
                         { label: 'Özkaynaklar', key: 'ana ortaklığa ait özkaynaklar' }
                     ];
 
@@ -1601,21 +1608,21 @@ const renderHisseler = (container) => {
                         <thead>
                             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
                                 <th style="text-align:left !important;">Özet Bilanço</th>
-                                <th style="text-align:right !important;">${bp1}</th>
-                                <th style="text-align:right !important;">${bp2}</th>
-                                <th style="text-align:right !important;">%</th>
+                                <th style="text-align:center !important;">${bp1}</th>
+                                <th style="text-align:center !important;">${bp2}</th>
+                                <th style="text-align:center !important;">%</th>
                             </tr>
                         </thead>
                         <tbody>`;
                     
                     bItems.forEach(item => {
                         const vals = getB(item.key);
-                        const pct = calcPct(vals.v1, vals.v2);
+                        const pct = calcPct(vals.v1, vals.v2, { reverseColor: item.reverseColor });
                         bilancoHtml += `<tr>
                             <td style="text-align:left !important;" title="${vals.debug || ''}">${item.label}</td>
                             <td style="text-align:right !important;" title="${vals.debug || ''}">${fmtVal(vals.v1)}</td>
                             <td style="text-align:right !important;">${fmtVal(vals.v2)}</td>
-                            <td style="color: ${pct.color}; font-weight:bold; text-align:right !important;">${pct.text}</td>
+                            <td style="color: ${pct.color} !important; font-weight:bold; text-align:right !important;">${pct.text}</td>
                         </tr>`;
                     });
                     bilancoHtml += `</tbody></table>`;
@@ -1818,20 +1825,20 @@ const renderHisseler = (container) => {
                                 <tbody>
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                         <td style="text-align: left !important;">F/K</td>
-                                        <td style=" text-align: right;">${fmtDec(fk)}</td>
+                                        <td style="text-align: right !important;">${fmtDec(fk)}</td>
                                     </tr>
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                         <td style="text-align: left !important;">FD/FAVÖK</td>
-                                        <td style=" text-align: right;">${fmtDec(fdFavok)}</td>
+                                        <td style="text-align: right !important;">${fmtDec(fdFavok)}</td>
                                     </tr>
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                         <td style="text-align: left !important;">PD/DD</td>
-                                        <td style=" text-align: right;">${fmtDec(pdDd)}</td>
+                                        <td style="text-align: right !important;">${fmtDec(pdDd)}</td>
                                     </tr>
                                     
                                     <tr>
                                         <td style="text-align: left !important;">Net Borç / FAVÖK</td>
-                                        <td style=" text-align: right;">${fmtDec(netBorcFavok)}</td>
+                                        <td style="text-align: right !important;">${fmtDec(netBorcFavok)}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1861,19 +1868,19 @@ const renderHisseler = (container) => {
                                 <tbody>
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                         <td style="text-align: left !important;">Hisse Başına Kar</td>
-                                        <td style=" text-align: right;">${fmtDec(hbk)}</td>
+                                        <td style="text-align: right !important;">${fmtDec(hbk)}</td>
                                     </tr>
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                                         <td style="text-align: left !important;">Ödenmiş Sermaye</td>
-                                        <td style=" text-align: right;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(odenmisSermaye)}</td>
+                                        <td style="text-align: right !important;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(odenmisSermaye)}</td>
                                     </tr>
                                     <tr>
                                         <td style="text-align: left !important;">Piyasa Değeri</td>
-                                        <td style=" text-align: right;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeri)}</td>
+                                        <td style="text-align: right !important;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeri)}</td>
                                     </tr>
                                     <tr>
                                         <td style="text-align: left !important;">Piyasa Değeri $</td>
-                                        <td style=" text-align: right;">$${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeriUsd)}</td>
+                                        <td style="text-align: right !important;">$${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeriUsd)}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -2068,6 +2075,24 @@ const renderHisseler = (container) => {
                         odenmisSermaye = parseFloat(String(osRow[1]).replace(/\./g, '').replace(/,/g, '.')) || 0;
                     }
                 }
+                let netBorc = 0;
+                if (sData && sData.bilanco && sData.bilanco.rows) {
+                    let finansalBorclarTotal = 0;
+                    let nakitTotal = 0;
+                    sData.bilanco.rows.forEach(r => {
+                        if (!r[0]) return;
+                        const rName = r[0].toLocaleLowerCase('tr-TR');
+                        if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
+                            const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                            finansalBorclarTotal += val;
+                        }
+                        if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
+                            const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                            nakitTotal += val;
+                        }
+                    });
+                    netBorc = finansalBorclarTotal - nakitTotal;
+                }
                 const guncelFiyat = parseFloat(State.getFiyat ? State.getFiyat(selectedHisse) : (window.fiyatlar ? window.fiyatlar[selectedHisse] : 0)) || 0;
                 const usdKuru = window.dolarKuru || 33;
                 const eurKuru = window.euroKuru || 35;
@@ -2128,7 +2153,7 @@ const renderHisseler = (container) => {
                         // Calculate PDs
                         let validPDs = [];
                         if (hasFavok && d.fd_favok !== undefined && d.fd_favok !== '') {
-                            validPDs.push(favok * (parseFloat(d.fd_favok) || 0));
+                            validPDs.push((favok * (parseFloat(d.fd_favok) || 0)) - netBorc);
                         }
                         if (hasNetKar && d.f_k !== undefined && d.f_k !== '') {
                             validPDs.push(net_kar * (parseFloat(d.f_k) || 0));
@@ -2179,9 +2204,11 @@ const renderHisseler = (container) => {
                                 } else if (r.type === 'currency') {
                                     displayVal = currencySymbol === '€' ? new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(numVal) + '€' : currencySymbol + new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(numVal);
                                 } else if (r.type === 'percent') {
-                                    displayVal = '%' + new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(numVal);
+                                    let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(Math.abs(numVal));
+                                    displayVal = numVal < 0 ? '%-' + formatted : '%' + formatted;
                                 } else if (r.type === 'percent_target') {
-                                    displayVal = '%' + new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(numVal);
+                                    let formatted = new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(Math.abs(numVal));
+                                    displayVal = numVal < 0 ? '%-' + formatted : '%' + formatted;
                                 } else if (r.type === 'decimal') {
                                     displayVal = new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(numVal);
                                 }
@@ -2194,7 +2221,6 @@ const renderHisseler = (container) => {
                         }
                         if (r.key === 'potansiyel' && val !== '---') {
                             extraStyle = val > 0 ? 'color: #2ecc71 !important; font-weight: bold;' : 'color: #e74c3c !important; font-weight: bold;';
-                            if (val > 0 && !displayVal.startsWith('+')) displayVal = '+' + displayVal;
                         }
                         
                         if (editMode && !r.readonly) {
@@ -2298,7 +2324,7 @@ const renderHisseler = (container) => {
                 const today = new Date().toISOString().split('T')[0];
 
                 contentHtml = `
-                <div style="display:flex; flex-direction:column; gap: 1rem; padding-top: 0; height: calc(100vh - 250px);">
+                <div style="display:flex; flex-direction:column; gap: 1rem; padding-top: 0; min-height: calc(100vh - 250px);">
                     
                     <!-- Yeni Not Ekleme Formu (Gizli) -->
                     <div id="inline-analiz-row" class="glass" style="display: none; flex-direction: column; gap: 1rem; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--accent-color);">
@@ -2336,7 +2362,7 @@ const renderHisseler = (container) => {
                     </div>
 
                     <!-- Kartların Listelendiği Alan -->
-                    <div style="flex: 1; overflow-y: auto; padding-right: 0.5rem;">
+                    <div style="flex: 1; padding-right: 0.5rem;">
                         ${tableHtml}
                     </div>
                 </div>
@@ -3129,6 +3155,8 @@ window.toggleInlineAnaliz = () => {
         row.style.display = row.style.display === 'none' ? displayType : 'none';
         if (row.style.display !== 'none') {
             document.getElementById('analiz-borsaci').focus();
+        } else {
+            window.currentEditingAnalizId = null;
         }
     }
 };
@@ -3174,15 +3202,23 @@ window.addAnaliz = () => {
         
         if (!State.data.analizler) State.data.analizler = [];
         
-        State.data.analizler.push({
-            tarih,
-            borsaci,
-            hisse,
-            baslik,
-            baglanti,
-            notText,
-            id: Date.now()
-        });
+        if (window.currentEditingAnalizId) {
+            const index = State.data.analizler.findIndex(a => String(a.id) === String(window.currentEditingAnalizId));
+            if (index !== -1) {
+                State.data.analizler[index] = { ...State.data.analizler[index], tarih, borsaci, hisse, baslik, baglanti, notText };
+            }
+            window.currentEditingAnalizId = null;
+        } else {
+            State.data.analizler.push({
+                tarih,
+                borsaci,
+                hisse,
+                baslik,
+                baglanti,
+                notText,
+                id: Date.now()
+            });
+        }
         
         State.data.analizler = window.sortAnalizler(State.data.analizler);
         
@@ -3225,9 +3261,7 @@ window.editAnaliz = (id) => {
     const analiz = State.data.analizler.find(a => String(a.id) === String(id));
     if (!analiz) return;
     
-    State.data.analizler = State.data.analizler.filter(a => String(a.id) !== String(id));
-    State.save();
-    renderPage();
+    window.currentEditingAnalizId = id;
     
     setTimeout(() => {
         const row = document.getElementById('inline-analiz-row');
@@ -3387,7 +3421,7 @@ const renderAnalizler = (container) => {
         return `
             <tr>
                 <td style="text-align: right; white-space: nowrap; width: 100px; color: var(--text-secondary);">${a.tarih ? a.tarih.split('-').reverse().join('.') : ''}</td>
-                <td style="text-align: left; white-space: nowrap; width: 140px; padding-left: 10px; color: var(--text-secondary);">${(a.borsaci||'').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu, '').trim()}</td>
+                <td style="text-align: left; word-break: break-word; width: 140px; padding-left: 10px; color: var(--text-secondary);">${(a.borsaci||'').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu, '').trim()}</td>
                 <td style="text-align: left; font-weight: bold; white-space: nowrap; width: 100px; padding-left: 10px;">${a.hisse}</td>
                 <td style="text-align: left; white-space: nowrap; width: 100px; padding-left: 10px;">${linkHtml}</td>
                 <td style="text-align: left; word-break: break-word; width: 100%;">${a.notText || ''}</td>
@@ -3409,9 +3443,9 @@ const renderAnalizler = (container) => {
     
     container.innerHTML = `
         
-        <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; max-width: 1200px; margin: 0 auto; padding: 0 1rem; padding-top: 0.5rem; height: 100%;">
+        <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; max-width: 1200px; margin: 0 auto; padding: 0 1rem; padding-top: 0.5rem; min-height: 100%;">
             
-            <div class="table-container glass" style="flex: 1; overflow-y: auto;">
+            <div class="table-container glass" style="flex: 1;">
                 <div class="table-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.5rem; border-bottom: 1px solid var(--surface-border); margin-bottom: 0.5rem;">
                     <span>Takip Edilen Analizler</span>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleInlineAnaliz()">+</button>
@@ -3538,7 +3572,7 @@ const renderHedef = (container) => {
     if (State.data.hedefFiyatlar) {
         let sn = 1;
         const fmtDec = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(val);
-        const fmtPct = (val) => (val > 0 ? '+' : '') + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(val * 100) + '%';
+        const fmtPct = (val) => { let num = val * 100; let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(Math.abs(num)); return num < 0 ? '%-' + formatted : '%' + formatted; };
         
         for (const hisse of Object.keys(State.data.hedefFiyatlar).sort()) {
             const hData = State.data.hedefFiyatlar[hisse];
@@ -3643,13 +3677,34 @@ window.removeHisseFromTakip = (hisseKodu) => {
 
 const renderAnasayfa = (container) => {
     if (window.recalculateHedefFiyatlar) window.recalculateHedefFiyatlar();
-    let takipList = State.data.takipListesi || [];
+    let takipList = State.data.takipListesi ? [...State.data.takipListesi] : [];
     
-    // Sort alphabetically
-    takipList = [...takipList].sort((a, b) => a.localeCompare(b));
+    // Sort by Potansiyel (2026 > 2027 > 2028 > alphabetical)
+    takipList.sort((a, b) => {
+        const getPot = (hisse, year) => {
+            if (State.data.hedefFiyatlar && State.data.hedefFiyatlar[hisse] && State.data.hedefFiyatlar[hisse][year]) {
+                return State.data.hedefFiyatlar[hisse][year].potansiyel !== undefined ? State.data.hedefFiyatlar[hisse][year].potansiyel : -Infinity;
+            }
+            return -Infinity;
+        };
+
+        const pot26A = getPot(a, '2026');
+        const pot26B = getPot(b, '2026');
+        if (pot26B !== pot26A) return pot26B - pot26A;
+
+        const pot27A = getPot(a, '2027');
+        const pot27B = getPot(b, '2027');
+        if (pot27B !== pot27A) return pot27B - pot27A;
+
+        const pot28A = getPot(a, '2028');
+        const pot28B = getPot(b, '2028');
+        if (pot28B !== pot28A) return pot28B - pot28A;
+
+        return a.localeCompare(b);
+    });
 
     const fmtDec = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(val);
-    const fmtPct = (val) => (val > 0 ? '+' : '') + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(val * 100) + '%';
+    const fmtPct = (val) => { let num = val * 100; let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(Math.abs(num)); return num < 0 ? '%-' + formatted : '%' + formatted; };
     
     let rowsHtml = '';
     takipList.forEach((hisse, i) => {
