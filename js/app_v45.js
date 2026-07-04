@@ -1308,10 +1308,10 @@ const renderHisseler = (container) => {
             'Bilanço': 'fas fa-balance-scale'
         };
 
-        const makeBtn = (t) => `<button class="nav-btn ${activeTab === t ? 'active' : ''}" style="margin:0; font-size:0.85rem; font-weight:600; padding:0.4rem 0.8rem; white-space:nowrap;" onclick="window.setHisseTab('${t}')"><i class="${tabIcons[t] || 'fas fa-file'}" style="margin-right:4px;"></i>${t}</button>`;
+        const makeBtn = (t) => `<button class="nav-btn ${activeTab === t ? 'active' : ''}" style="margin:0; font-size:14px; font-weight:bold; padding:0.4rem 0.8rem; white-space:nowrap;" onclick="window.setHisseTab('${t}')"><i class="${tabIcons[t] || 'fas fa-file'}" style="margin-right:4px;"></i>${t}</button>`;
         const makeDropdown = (title, items) => `
             <div class="nav-dropdown">
-                <button class="nav-btn ${items.includes(activeTab) ? 'active' : ''}" style="margin:0; font-size:0.85rem; font-weight:600; padding:0.4rem 0.8rem; white-space:nowrap;"><i class="fas fa-caret-down" style="margin-right:4px;"></i>${title}</button>
+                <button class="nav-btn ${items.includes(activeTab) ? 'active' : ''}" style="margin:0; font-size:14px; font-weight:bold; padding:0.4rem 0.8rem; white-space:nowrap;"><i class="fas fa-caret-down" style="margin-right:4px;"></i>${title}</button>
                 <div class="nav-dropdown-content">
                     ${items.map(t => `<a onclick="window.setHisseTab('${t}')">${t}</a>`).join('')}
                 </div>
@@ -2015,7 +2015,7 @@ const renderHisseler = (container) => {
                         let filePath = 'Hisseler/' + selectedHisse + '/' + report.file;
                         let icon = 'fa-file-pdf';
                         contentHtml += `<li style="margin-bottom: 0.5rem; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px;">
-                            <a href="${filePath}" target="_blank" style="color: white; text-decoration: none; font-weight: bold; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                            <a href="${filePath}" target="_blank" style="color: white; text-decoration: none; font-weight: normal; font-size: 13px; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
                                 <i class="fas ${icon}"></i> ${report.name}
                             </a>
                         </li>`;
@@ -2245,7 +2245,7 @@ const renderHisseler = (container) => {
                         <thead>
                             <tr style="border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2);">
                                 <th style="font-size:13px; font-weight:bold; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">S.N.</th>
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:right !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Tarih</th>
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Tarih</th>
                                 <th style="font-size:13px; font-weight:bold; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Analist</th>
                                 <th style="font-size:13px; font-weight:bold; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Link</th>
                                 <th style="font-size:13px; font-weight:bold; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle;">Notlar</th>
@@ -2363,7 +2363,7 @@ const renderHisseler = (container) => {
             else if (!isPos) initChangeStr = '-' + initChangeStr;
 
             stockHeaderHtml = `
-            <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 1rem 1rem 0 1rem; flex-shrink: 0;">
+            <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 0 1rem 0 1rem; flex-shrink: 0;">
                 <div>
                     <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; color: #fff;">${selectedHisse}</h1>
                 </div>
@@ -2965,9 +2965,9 @@ const renderVeriler = (container) => {
                             padding: 6px 12px;
                             border-radius: 6px;
                             cursor: pointer;
-                            font-weight: 600;
+                            font-weight: 500;
                             margin-right: 10px;
-                            font-size: 13px !important;
+                            font-size: 12px !important;
                             font-family: 'Inter', sans-serif !important;
                             transition: var(--transition);
                         }
@@ -2977,8 +2977,8 @@ const renderVeriler = (container) => {
                             transform: translateY(-1px);
                         }
                     </style>
-                    <input type="file" id="upload-file" accept="application/pdf" class="form-control" style="flex: 2; min-width: 180px; padding: 0.3rem; cursor: pointer; font-size: 13px !important; font-family: 'Inter', sans-serif !important;">
-                    <button class="btn" style="background: var(--accent-color); flex: 1; min-width: 80px; padding: 0.3rem; font-size: 13px !important; font-family: 'Inter', sans-serif !important;" onclick="window.uploadRapor()">Yükle</button>
+                    <input type="file" id="upload-file" accept="application/pdf" class="form-control" style="flex: 2; min-width: 180px; padding: 0.3rem; cursor: pointer; font-size: 12px !important; font-family: 'Inter', sans-serif !important;">
+                    <button class="btn" style="background: var(--accent-color); flex: 0 0 auto; padding: 0.3rem 1.2rem; font-size: 12px !important; font-weight: 500 !important; font-family: 'Inter', sans-serif !important; white-space: nowrap;" onclick="window.uploadRapor()">Yükle</button>
                     <div id="upload-status" style="font-size: 13px; font-weight: 500; min-height: 10px; width: 100%;"></div>
                 </div>
             </div>
