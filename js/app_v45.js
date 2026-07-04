@@ -2230,8 +2230,8 @@ const renderHisseler = (container) => {
                                 <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Tarih</th>
                                 <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Analist</th>
                                 <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Link</th>
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:left; padding:8px 5px; vertical-align:middle;">Notlar</th>
-                                <th style="padding:8px 5px; width:1%; white-space:nowrap;"></th>
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle;">Notlar</th>
+                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">İşlem</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2263,9 +2263,9 @@ const renderHisseler = (container) => {
                         tableHtml += `
                             <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
                                 <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${tarihStr}</td>
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${a.borsaci || 'Anonim'}</td>
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:center; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${linkHtml}</td>
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:right; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${tarihStr}</td>
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:left; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${a.borsaci || 'Anonim'}</td>
+                                <td style="font-size:13px; color:var(--text-secondary); text-align:left; padding:8px 5px; vertical-align:top; width:1%; white-space:nowrap;">${linkHtml}</td>
                                 <td style="font-size:11px; color:var(--text-secondary); text-align:left; padding:8px 5px; vertical-align:top; white-space:pre-wrap;">${a.notText || '-'}</td>
                                 <td style="padding:8px 5px; text-align:center; vertical-align:top; width:1%; white-space:nowrap;">
                                     <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
