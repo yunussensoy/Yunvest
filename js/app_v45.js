@@ -3356,6 +3356,16 @@ const renderAyarlar = (container) => {
                     </div>
                     <button type="submit" class="btn btn-danger" style="margin-top: 0.5rem;">Parolayı Güncelle</button>
                 </form>
+                
+                <div style="height: 1px; background: var(--surface-border); margin: 2rem 0;"></div>
+                
+                <h3 style="margin-bottom: 0.5rem; color: var(--text-primary); font-size: 1.1rem;">Veri Yönetimi</h3>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem;">Yerel ve web (tarayıcı) verilerinizi kaybetmeden birleştirmek için verilerinizi indirebilir ve diğer tarafa aktarabilirsiniz.</p>
+                <div style="display: flex; gap: 1rem;">
+                    <button type="button" class="btn" style="background: var(--success-color); flex:1; justify-content:center;" onclick="window.exportData()"><i class="fas fa-download"></i> Dışa Aktar</button>
+                    <button type="button" class="btn" style="background: var(--accent-color); flex:1; justify-content:center;" onclick="document.getElementById('import-file-input').click()"><i class="fas fa-upload"></i> İçe Aktar (Birleştir)</button>
+                    <input type="file" id="import-file-input" style="display: none;" accept=".json" onchange="window.importData(event)">
+                </div>
             </div>
         </div>
     `;
@@ -3609,6 +3619,67 @@ window.confirmAddHisse = () => {
 
 
 
+
+window.exportData = () => {
+    const dataStr = JSON.stringify(State.data);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Yunvest_Yedek_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+};
+
+window.importData = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        try {
+            const importedData = JSON.parse(ev.target.result);
+            if (!importedData || typeof importedData !== 'object') throw new Error("Geçersiz veri");
+            
+            if (confirm("Bu işlem dosyadan yüklediğiniz verileri mevcut verilerinizle BİRLEŞTİRECEK (Nakit hareketleri, hisse notları vb. kaybolmayacak). Onaylıyor musunuz?")) {
+                const mergeData = (target, source) => {
+                    for (const key of Object.keys(source)) {
+                        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+                            if (!target[key]) target[key] = {};
+                            mergeData(target[key], source[key]);
+                        } else if (Array.isArray(source[key])) {
+                            if (!target[key]) target[key] = [];
+                            const combined = [...target[key], ...source[key]];
+                            const unique = [];
+                            const seen = new Set();
+                            for (const item of combined) {
+                                const str = JSON.stringify(item);
+                                if (!seen.has(str)) {
+                                    seen.add(str);
+                                    unique.push(item);
+                                }
+                            }
+                            target[key] = unique;
+                        } else {
+                            if (source[key] !== undefined && source[key] !== null && source[key] !== '') {
+                                target[key] = source[key];
+                            }
+                        }
+                    }
+                    return target;
+                };
+
+                State.data = mergeData(State.data || {}, importedData);
+                State.save();
+                alert("Veriler başarıyla birleştirildi!");
+                if (typeof renderPage === 'function') renderPage();
+            }
+        } catch (err) {
+            alert("Dosya okunamadı: " + err.message);
+        }
+        e.target.value = '';
+    };
+    reader.readAsText(file);
+};
 
 let notSaveTimeout;
 window.saveHisseNotu = (hisse, not) => {
