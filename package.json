@@ -1,9 +1,14 @@
 {
   "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/cli": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
     "jsdom": "^29.1.1",
     "xlsx": "^0.18.5"
   },
   "scripts": {
+    "build-web": "node build.js",
+    "sync": "npm run build-web && npx cap sync",
     "compile": "echo 'No compilation needed'",
     "build": "echo 'Build complete'"
   }
