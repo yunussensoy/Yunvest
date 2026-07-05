@@ -2464,7 +2464,8 @@ if (window.shouldRenderDashboardCharts) {
                     maintainAspectRatio: false,
                     plugins: { 
                         legend: { display: false },
-                        tooltip: { enabled: true }
+                        tooltip: { enabled: true },
+                        datalabels: { display: false }
                     },
                     scales: { 
                         x: { ticks: { color: '#888', font: {size: 10} }, grid: { display:false } }, 
@@ -2476,7 +2477,7 @@ if (window.shouldRenderDashboardCharts) {
                           if (document.getElementById('chart-bkm')) {
                               const commonOpts = {
                                   responsive: true, maintainAspectRatio: false,
-                                  plugins: { legend: { display: false } },
+                                  plugins: { legend: { display: false }, datalabels: { display: false } },
                                   scales: {
                                       x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
                                       y: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255,255,255,0.05)' } }

@@ -504,19 +504,26 @@ window.showAnalizEkleModal = function(hisse) {
 
     <!-- Register Service Worker for PWA -->
     <script>
-        if ('serviceWorker' in navigator) {
-            // Capacitor (Android/iOS) uygulamalarında SW önbelleklemesi bazen güncellemeleri engeller.
-            if (window.Capacitor && window.Capacitor.isNative) {
-                // Hide Arsiv button on Native
-                const arsivBtn = document.getElementById('nav-btn-arsiv');
-                if (arsivBtn) arsivBtn.style.display = 'none';
+        if (window.Capacitor && window.Capacitor.isNative) {
+            // Native Android App
+            const arsivBtn = document.getElementById('nav-btn-arsiv');
+            if (arsivBtn) arsivBtn.style.display = 'none';
+            
+            let link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'css/mobile.css';
+            document.head.appendChild(link);
 
+            if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(function(registrations) {
                     for(let registration of registrations) {
                         registration.unregister();
                     }
                 });
-            } else {
+            }
+        } else {
+            // Web / PC
+            if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                     navigator.serviceWorker.register('sw.js')
                         .then(reg => console.log('Service Worker registered', reg))
