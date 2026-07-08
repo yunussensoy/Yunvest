@@ -282784,6 +282784,7 @@ window.stockReports = {
   "TNZTP": [],
   "YATAS": [],
   "YEOTK": [
+    "a1_capital_arastirma_notu.pdf",
     "arastirma_raporu.pdf",
     "faaliyet_raporu.pdf",
     "finansal_rapor.pdf",

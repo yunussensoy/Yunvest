@@ -951,7 +951,7 @@ const renderPortfoy = (container) => {
             <td style="text-align: right !important;"></td>
             <td style="text-align: right !important;"></td>
             <td style="text-align: right !important;"></td>
-            <td style="text-align: right !important;">${formatCurrency(nakitItemForTable.guncelTutar, 0)}</td>
+            <td style="text-align: right !important;"></td>
             <td style="text-align: right !important;">${formatCurrency(nakitItemForTable.guncelTutar, 0)}</td>
             <td style="text-align: right !important;"></td>
             <td style="text-align: right !important;"></td>
