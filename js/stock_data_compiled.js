@@ -282788,5 +282788,8 @@ window.stockReports = {
     "yatirimci_sunumu.pdf"
   ],
   "YUNSA": [],
-  "YYLGD": []
+  "YYLGD": [
+    "faaliyet_raporu.pdf",
+    "finansal_rapor.pdf"
+  ]
 };

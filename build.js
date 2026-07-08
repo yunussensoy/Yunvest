@@ -9,6 +9,10 @@ if (fs.existsSync(wwwDir)) {
 }
 fs.mkdirSync(wwwDir);
 
+// Run the script to automatically update the reports lists
+console.log('Updating stock reports...');
+require('child_process').execSync('node update_reports.js', { stdio: 'inherit' });
+
 const itemsToCopy = [
     'index.html',
     'manifest.json',
