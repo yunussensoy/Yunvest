@@ -12,7 +12,8 @@ const DEFAULT_STATE = {
     ],
     nakitHareketleri: [],
     enflasyon: [],
-    takipListesi: []
+    takipListesi: [],
+    portfoyGecmisi: []
 };
 
 export const State = {
@@ -23,6 +24,7 @@ export const State = {
         if (stored) {
             this.data = JSON.parse(stored);
             if (!this.data.takipListesi) this.data.takipListesi = [];
+            if (!this.data.portfoyGecmisi) this.data.portfoyGecmisi = [];
         } else {
             this.data = JSON.parse(JSON.stringify(DEFAULT_STATE));
             this.save();

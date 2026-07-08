@@ -430,7 +430,8 @@ const DEFAULT_STATE = {
         { menkul: 'GRAM ALTIN', fiyat: 2450 }
     ],
     hedefFiyatlar: {},
-    analizler: []
+    analizler: [],
+    portfoyGecmisi: []
 };
 
 const State = {
@@ -445,6 +446,7 @@ const State = {
         const processLoadedData = () => {
             if (!this.data.takipListesi) this.data.takipListesi = [];
             if (!this.data.analizler) this.data.analizler = [];
+            if (!this.data.portfoyGecmisi) this.data.portfoyGecmisi = [];
             if (!this.data.hedefFiyatlar || Array.isArray(this.data.hedefFiyatlar)) this.data.hedefFiyatlar = {};
             if (this.data.ekstre) {
                 this.data.ekstre.forEach(e => {
@@ -1026,6 +1028,13 @@ const renderPortfoy = (container) => {
                     </div>
                 </div>
             </div>
+            
+            <div class="table-container glass" style="margin-bottom: 0;">
+                <div class="table-header">Günlük Portföy Değişimi</div>
+                <div style="width: 100%; height: 250px; position: relative; padding: 1rem;">
+                    <canvas id="chart-portfoy-gecmisi"></canvas>
+                </div>
+            </div>
 
             </div>
             </div>
@@ -1223,6 +1232,164 @@ const renderPortfoy = (container) => {
                                 if (sum === 0 || value === 0) return '';
                                 let pct = (value * 100 / sum).toFixed(0);
                                 return pct < 3 ? '' : pct + '%'; // 3%'ten kucukse yazma kalabalik olmasin
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- GÜNLÜK PORTFÖY KAYDI VE ÇİZGİ GRAFİĞİ ---
+        const now = new Date();
+        const timeInMins = now.getHours() * 60 + now.getMinutes();
+        
+        let targetDate = null;
+        if (timeInMins >= (18 * 60 + 30)) {
+            // Bugün 18:30 sonrası
+            targetDate = new Date(now);
+        } else if (timeInMins <= (9 * 60)) {
+            // Ertesi gün sabah 09:00'a kadar (Dünün kapanışını kaydet)
+            targetDate = new Date(now);
+            targetDate.setDate(targetDate.getDate() - 1);
+        }
+
+        if (!State.data.portfoyGecmisi) State.data.portfoyGecmisi = [];
+        
+        // Hedeflenen kapanış günü için kayıt
+        if (targetDate) {
+            const yyyyMmDd = targetDate.getFullYear() + '-' + String(targetDate.getMonth() + 1).padStart(2, '0') + '-' + String(targetDate.getDate()).padStart(2, '0');
+            const targetRecord = State.data.portfoyGecmisi.find(r => r.tarih === yyyyMmDd);
+            if (!targetRecord) {
+                State.data.portfoyGecmisi.push({
+                    tarih: yyyyMmDd,
+                    tutar: portfoyBilgileri.toplamPortfoy,
+                    anapara: portfoyBilgileri.anapara
+                });
+                State.save();
+            } else {
+                if (targetRecord.tutar !== portfoyBilgileri.toplamPortfoy || targetRecord.anapara !== portfoyBilgileri.anapara) {
+                    targetRecord.tutar = portfoyBilgileri.toplamPortfoy;
+                    targetRecord.anapara = portfoyBilgileri.anapara;
+                    State.save();
+                }
+            }
+        }
+        
+        const ctxPortfoyGecmisi = document.getElementById('chart-portfoy-gecmisi');
+        if (ctxPortfoyGecmisi) {
+            let historyData = [...State.data.portfoyGecmisi];
+            historyData.sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
+            
+            // Aradaki boş günleri doldur
+            if (historyData.length > 0) {
+                const filledData = [];
+                let curr = new Date(historyData[0].tarih);
+                const lastRecordDate = new Date(historyData[historyData.length - 1].tarih);
+                let lastKnownVal = historyData[0].tutar;
+                let lastKnownAnapara = historyData[0].anapara !== undefined ? historyData[0].anapara : historyData[0].tutar;
+                
+                while (curr <= lastRecordDate) {
+                    const dStr = curr.getFullYear() + '-' + String(curr.getMonth() + 1).padStart(2, '0') + '-' + String(curr.getDate()).padStart(2, '0');
+                    const existing = historyData.find(r => r.tarih === dStr);
+                    if (existing) {
+                        lastKnownVal = existing.tutar;
+                        lastKnownAnapara = existing.anapara !== undefined ? existing.anapara : existing.tutar;
+                    }
+                    filledData.push({ tarih: dStr, tutar: lastKnownVal, anapara: lastKnownAnapara, isAnlik: false });
+                    curr.setDate(curr.getDate() + 1);
+                }
+                historyData = filledData;
+            }
+            
+            // Anlık (Güncel) durumu ekle (09:00 - 18:30 arası piyasa açıkken veya kayıt yapılmamışken)
+            if (timeInMins > (9 * 60) && timeInMins < (18 * 60 + 30)) {
+                const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+                if (!historyData.find(r => r.tarih === todayStr)) {
+                    historyData.push({
+                        tarih: todayStr,
+                        tutar: portfoyBilgileri.toplamPortfoy,
+                        anapara: portfoyBilgileri.anapara,
+                        isAnlik: true
+                    });
+                }
+            }
+            
+            if (historyData.length > 30) historyData = historyData.slice(historyData.length - 30);
+            
+            const labels = historyData.map(d => {
+                const parts = d.tarih.split('-');
+                return d.isAnlik ? 'Güncel' : `${parts[2]}.${parts[1]}`;
+            });
+            const data = historyData.map(d => d.tutar);
+            const dataAnapara = historyData.map(d => d.anapara !== undefined ? d.anapara : d.tutar);
+            
+            if (window.chartPortfoyGecmisiInstance) {
+                window.chartPortfoyGecmisiInstance.destroy();
+            }
+            
+            window.chartPortfoyGecmisiInstance = new Chart(ctxPortfoyGecmisi, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Portföy',
+                            data: data,
+                            borderColor: '#2ecc71',
+                            backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#2ecc71',
+                            pointRadius: 4,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Anapara',
+                            data: dataAnapara,
+                            borderColor: '#f39c12',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointBackgroundColor: '#f39c12',
+                            pointRadius: 0,
+                            fill: false,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: { display: true, labels: { color: '#aaa', font: { size: 10 }, boxWidth: 12 } },
+                        datalabels: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.dataset.label + ': ₺' + context.parsed.y.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#aaa', font: { size: 10 } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#aaa', 
+                                font: { size: 10 },
+                                callback: function(value) {
+                                    if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+                                    if (value >= 1000) return (value / 1000).toFixed(0) + 'K';
+                                    return value;
+                                }
                             }
                         }
                     }
