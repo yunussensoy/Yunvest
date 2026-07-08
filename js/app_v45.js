@@ -968,40 +968,55 @@ const renderPortfoy = (container) => {
             <div id="portfoy-bilgiler" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
                 <div class="table-container glass" style="margin-bottom: 0;">
                     <div class="table-header">Portföy Bilgileri</div>
-                <div class="flex-row" style="align-items: center; gap: 1rem;">
-                    <table class="dash-table compact-table" style="flex: 1; border-right: 1px solid rgba(255, 255, 255, 0.03);">
-                        <tbody>
-                            <tr>
-    <td style="text-align:left;">Nakit</td>
-    <td><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
-        <span id="nakit-text">${formatCurrency(guncelNakitTutar, 0)}</span>
-        
-    </div></td>
-</tr>
-                            <tr><td style="text-align:left;">Hisse Portföyü</td><td>${formatCurrency(hissePortfoyTutar, 0)}</td></tr>
-                            <tr><td style="text-align:left;">Fon Portföyü</td><td>${formatCurrency(fonPortfoyTutar, 0)}</td></tr>
-                            <tr><td style="text-align:left;">Toplam Portföy</td><td>${formatCurrency(portfoyBilgileri.toplamPortfoy, 0)}</td></tr>
-                            <tr><td style="text-align:left;">Anapara</td><td>${formatCurrency(portfoyBilgileri.anapara, 0)}</td></tr>
-                            <tr><td style="text-align:left;">Kar</td><td class="${portfoyBilgileri.kar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(portfoyBilgileri.kar, 0)}</td></tr>
-                        </tbody>
-                    </table>
-                    <table class="dash-table compact-table" style="flex: 1;">
-                        <tbody>
-                            <tr><td style="text-align:left;">Nominal Getiri Oranı</td><td class="${portfoyBilgileri.nominalGetiri >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.nominalGetiri)}</td></tr>
-                            <tr><td style="text-align:left;">Reel Getiri Oranı (Enflasyon)</td><td class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td></tr>
-                            <tr><td style="text-align:left;">BIST 100'e Göre Reel Getiri Oranı</td><td class="${portfoyBilgileri.reelGetiriBist >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriBist)}</td></tr>
-                            <tr><td style="text-align:left;">Dolar Kuruna Göre Reel Getiri Oranı</td><td class="${portfoyBilgileri.reelGetiriDolar >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriDolar)}</td></tr>
-                            <tr><td style="text-align:left;">Gram Altına Göre Reel Getiri Oranı</td><td class="${portfoyBilgileri.reelGetiriAltin >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriAltin)}</td></tr>
-                            <tr>
-    <td style="text-align:left;">Hedef Portföy</td>
-    <td><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
-        <span id="hedef-text">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span>
-        
-    </div></td>
-</tr>
-                            <tr><td style="text-align:left;">Hedefe Ulaşmak İçin Gereken Artış %</td><td>${formatPercent(portfoyBilgileri.hedefArtis, 0)}</td></tr>
-                        </tbody>
-                    </table>
+                <div class="flex-row" style="align-items: flex-start; gap: 1rem;">
+                    <div style="flex: 2; overflow-x: auto;">
+                        <table class="dash-table compact-table" style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td style="text-align:left; width:25%;">Nakit</td>
+                                    <td style="width:25%; border-right: 1px solid rgba(255, 255, 255, 0.03);"><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;"><span id="nakit-text">${formatCurrency(guncelNakitTutar, 0)}</span></div></td>
+                                    <td style="text-align:left; width:25%; padding-left: 1rem;">Nominal Getiri Oranı</td>
+                                    <td style="width:25%;" class="${portfoyBilgileri.nominalGetiri >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.nominalGetiri)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Hisse Portföyü</td>
+                                    <td style="border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(hissePortfoyTutar, 0)}</td>
+                                    <td style="text-align:left; padding-left: 1rem;">Reel Getiri Oranı (Enflasyon)</td>
+                                    <td class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Fon Portföyü</td>
+                                    <td style="border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(fonPortfoyTutar, 0)}</td>
+                                    <td style="text-align:left; padding-left: 1rem;">BIST 100'e Göre Reel Getiri Oranı</td>
+                                    <td class="${portfoyBilgileri.reelGetiriBist >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriBist)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Toplam Portföy</td>
+                                    <td style="border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.toplamPortfoy, 0)}</td>
+                                    <td style="text-align:left; padding-left: 1rem;">Dolar Kuruna Göre Reel Getiri Oranı</td>
+                                    <td class="${portfoyBilgileri.reelGetiriDolar >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriDolar)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Anapara</td>
+                                    <td style="border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.anapara, 0)}</td>
+                                    <td style="text-align:left; padding-left: 1rem;">Gram Altına Göre Reel Getiri Oranı</td>
+                                    <td class="${portfoyBilgileri.reelGetiriAltin >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriAltin)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Kar</td>
+                                    <td style="border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.kar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(portfoyBilgileri.kar, 0)}</td>
+                                    <td style="text-align:left; padding-left: 1rem;">Hedef Portföy</td>
+                                    <td><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;"><span id="hedef-text">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span></div></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">&nbsp;</td>
+                                    <td style="border-right: 1px solid rgba(255, 255, 255, 0.03);">&nbsp;</td>
+                                    <td style="text-align:left; padding-left: 1rem;">Hedefe Ulaşmak İçin Gereken Artış %</td>
+                                    <td>${formatPercent(portfoyBilgileri.hedefArtis, 0)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                     <div style="width: 180px; height: 180px; display: flex; justify-content: center; align-items: center; padding-left: 1rem;">
                         <canvas id="chart-ozet"></canvas>
                     </div>
