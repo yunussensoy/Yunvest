@@ -894,7 +894,14 @@ const renderPortfoy = (container) => {
     
     const filteredPortfoy = portfoyList.filter(p => !p.isNakit);
 
-    const portfoyHtml = filteredPortfoy.map((p, i) => {
+    filteredPortfoy.sort((a, b) => {
+        const aTur = a.menkul.length === 3 ? 1 : 0;
+        const bTur = b.menkul.length === 3 ? 1 : 0;
+        if (aTur !== bTur) return aTur - bTur;
+        return b.guncelTutar - a.guncelTutar;
+    });
+
+    let portfoyHtml = filteredPortfoy.map((p, i) => {
         totalOdenen += p.odenenTutar;
         totalKar += p.kar;
         totalGuncel += p.guncelTutar;
@@ -930,6 +937,29 @@ const renderPortfoy = (container) => {
             <td style="text-align: right !important;">${p.gecenSure}</td>
         </tr>`;
     }).join('');
+
+    const nakitItemForTable = portfoyList.find(p => p.isNakit);
+    if (nakitItemForTable && nakitItemForTable.guncelTutar > 0) {
+        totalGuncel += nakitItemForTable.guncelTutar;
+        totalOdenen += nakitItemForTable.guncelTutar;
+        
+        portfoyHtml += `<tr>
+            <td style="text-align: center !important;">${filteredPortfoy.length + 1}</td>
+            <td style="text-align: left !important; font-weight: 300 !important;">Nakit</td>
+            <td style="text-align: left !important;">Nakit</td>
+            <td style="text-align: right !important;"></td>
+            <td style="text-align: right !important;"></td>
+            <td style="text-align: right !important;"></td>
+            <td style="text-align: right !important;"></td>
+            <td style="text-align: right !important;">${formatCurrency(nakitItemForTable.guncelTutar, 0)}</td>
+            <td style="text-align: right !important;">${formatCurrency(nakitItemForTable.guncelTutar, 0)}</td>
+            <td style="text-align: right !important;"></td>
+            <td style="text-align: right !important;"></td>
+            <td style="text-align: right !important;">${formatPercent(nakitItemForTable.portfoyOrani, 0)}</td>
+            <td style="text-align: right !important;"></td>
+            <td style="text-align: right !important;"></td>
+        </tr>`;
+    }
 
     let arsivKarTotal = 0;
     const arsivHtml = arsivList.map((a, i) => {

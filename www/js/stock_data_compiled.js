@@ -282762,7 +282762,9 @@ window.stockReports = {
   ],
   "INDES": [],
   "KARSN": [],
-  "KBORU": [],
+  "KBORU": [
+    "toplanti_notlari.pdf"
+  ],
   "KMPUR": [],
   "KRSTL": [],
   "ONCSM": [],
