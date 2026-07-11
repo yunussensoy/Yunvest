@@ -617,7 +617,11 @@ const State = {
             if (isUserDataChange) {
                 this.data.dataUpdated = Date.now();
             }
-            this.data.lastUpdated = Date.now();
+            // HACK: Eski web versiyonunun (cache'te kalmış eski kodun) veriyi ezmesini önlemek için
+            // lastUpdated değerini suni olarak çok yüksek (yıl 2030) yapıyoruz.
+            // Böylece eski kod her halükarda Firebase verisini kendi verisinden daha "yeni" sanıp kabul edecek.
+            this.data.lastUpdated = Date.now() + (1000 * 60 * 60 * 24 * 365 * 10); 
+            
             // ROLLING BACKUP SYSTEM
             try {
                 for (let i = 4; i >= 1; i--) {
