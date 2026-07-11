@@ -1061,6 +1061,17 @@ const renderPortfoy = (container) => {
             
             <div class="table-container glass" style="margin-bottom: 0;">
                 <div class="table-header">Günlük Portföy Değişimi</div>
+                <div style="padding: 0 1rem; margin-top: 0.5rem;">
+                    <div id="portfoy-chart-filters" style="display:flex; gap:0.5rem; font-size:13px; color:#fff;">
+                        <span class="chart-filter" data-range="1H" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('1H')">1H</span>
+                        <span class="chart-filter" data-range="1A" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('1A')">1A</span>
+                        <span class="chart-filter" data-range="6A" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('6A')">6A</span>
+                        <span class="chart-filter" data-range="YBK" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('YBK')">YBK</span>
+                        <span class="chart-filter" data-range="1Y" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('1Y')">1Y</span>
+                        <span class="chart-filter" data-range="5Y" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('5Y')">5Y</span>
+                        <span class="chart-filter" data-range="MAX" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('MAX')">Maks.</span>
+                    </div>
+                </div>
                 <div style="width: 100%; height: 250px; position: relative; padding: 1rem;">
                     <canvas id="chart-portfoy-gecmisi"></canvas>
                 </div>
@@ -1176,6 +1187,18 @@ const renderPortfoy = (container) => {
         if (typeof renderPage === "function") renderPage();
     };
 
+    window.setPortfoyChartRange = (range) => {
+        window.portfoyChartRange = range;
+        const activeTabBtn = document.querySelector('.portfoy-tab-btn[style*="var(--accent-color)"]');
+        const activeTabId = activeTabBtn ? activeTabBtn.getAttribute('data-tab') : 'bilgiler';
+        if (typeof renderPage === "function") {
+            renderPage();
+            if (typeof window.switchPortfoyTab === "function") {
+                window.switchPortfoyTab(activeTabId);
+            }
+        }
+    };
+
     if (window.Chart) {
         if (window.ChartDataLabels) Chart.register(ChartDataLabels);
 
@@ -1272,15 +1295,25 @@ const renderPortfoy = (container) => {
         // --- GÜNLÜK PORTFÖY KAYDI VE ÇİZGİ GRAFİĞİ ---
         const now = new Date();
         const timeInMins = now.getHours() * 60 + now.getMinutes();
+        const dayOfWeek = now.getDay();
+        const isBefore0950 = timeInMins <= (9 * 60 + 50);
+        const isAfter1830 = timeInMins >= (18 * 60 + 30);
         
         let targetDate = null;
-        if (timeInMins >= (18 * 60 + 30)) {
-            // Bugün 18:30 sonrası
-            targetDate = new Date(now);
-        } else if (timeInMins <= (9 * 60)) {
-            // Ertesi gün sabah 09:00'a kadar (Dünün kapanışını kaydet)
+        if (dayOfWeek === 6) { // Cumartesi -> Cuma
             targetDate = new Date(now);
             targetDate.setDate(targetDate.getDate() - 1);
+        } else if (dayOfWeek === 0) { // Pazar -> Cuma
+            targetDate = new Date(now);
+            targetDate.setDate(targetDate.getDate() - 2);
+        } else if (dayOfWeek === 1 && isBefore0950) { // Pazartesi 09:50 öncesi -> Cuma
+            targetDate = new Date(now);
+            targetDate.setDate(targetDate.getDate() - 3);
+        } else if (dayOfWeek >= 2 && dayOfWeek <= 5 && isBefore0950) { // Salı-Cuma 09:50 öncesi -> Dün
+            targetDate = new Date(now);
+            targetDate.setDate(targetDate.getDate() - 1);
+        } else if (isAfter1830) { // Hafta içi 18:30 sonrası -> Bugün
+            targetDate = new Date(now);
         }
 
         if (!State.data.portfoyGecmisi) State.data.portfoyGecmisi = [];
@@ -1331,8 +1364,8 @@ const renderPortfoy = (container) => {
                 historyData = filledData;
             }
             
-            // Anlık (Güncel) durumu ekle (09:00 - 18:30 arası piyasa açıkken veya kayıt yapılmamışken)
-            if (timeInMins > (9 * 60) && timeInMins < (18 * 60 + 30)) {
+            // Anlık (Güncel) durumu ekle (Hafta içi piyasa açıkken)
+            if (dayOfWeek >= 1 && dayOfWeek <= 5 && !isBefore0950 && !isAfter1830) {
                 const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
                 if (!historyData.find(r => r.tarih === todayStr)) {
                     historyData.push({
@@ -1344,7 +1377,36 @@ const renderPortfoy = (container) => {
                 }
             }
             
-            if (historyData.length > 30) historyData = historyData.slice(historyData.length - 30);
+            const currentRange = window.portfoyChartRange || '1A';
+            
+            // Highlight active filter
+            setTimeout(() => {
+                document.querySelectorAll('.chart-filter').forEach(el => {
+                    el.style.background = 'transparent';
+                    el.style.fontWeight = 'normal';
+                    if (el.dataset.range === currentRange) {
+                        el.style.background = 'rgba(255,255,255,0.1)';
+                        el.style.fontWeight = 'bold';
+                    }
+                });
+            }, 0);
+
+            // Filter logic
+            if (historyData.length > 0) {
+                const lastDate = new Date(historyData[historyData.length - 1].tarih);
+                let cutoffDate = new Date(lastDate);
+                
+                switch(currentRange) {
+                    case '1H': cutoffDate.setDate(cutoffDate.getDate() - 7); break;
+                    case '1A': cutoffDate.setMonth(cutoffDate.getMonth() - 1); break;
+                    case '6A': cutoffDate.setMonth(cutoffDate.getMonth() - 6); break;
+                    case 'YBK': cutoffDate = new Date(lastDate.getFullYear(), 0, 1); break;
+                    case '1Y': cutoffDate.setFullYear(cutoffDate.getFullYear() - 1); break;
+                    case '5Y': cutoffDate.setFullYear(cutoffDate.getFullYear() - 5); break;
+                    case 'MAX': cutoffDate = new Date(0); break;
+                }
+                historyData = historyData.filter(d => new Date(d.tarih) >= cutoffDate);
+            }
             
             const labels = historyData.map(d => {
                 const parts = d.tarih.split('-');
@@ -1366,12 +1428,13 @@ const renderPortfoy = (container) => {
                             label: 'Portföy',
                             data: data,
                             borderColor: '#2ecc71',
-                            backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                            backgroundColor: 'transparent',
                             borderWidth: 2,
                             pointBackgroundColor: '#2ecc71',
-                            pointRadius: 4,
-                            fill: true,
-                            tension: 0.4
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            fill: false,
+                            tension: 0
                         },
                         {
                             label: 'Anapara',
@@ -1379,11 +1442,11 @@ const renderPortfoy = (container) => {
                             borderColor: '#f39c12',
                             backgroundColor: 'transparent',
                             borderWidth: 2,
-                            borderDash: [5, 5],
                             pointBackgroundColor: '#f39c12',
                             pointRadius: 0,
+                            pointHoverRadius: 6,
                             fill: false,
-                            tension: 0.4
+                            tension: 0
                         }
                     ]
                 },
@@ -1416,7 +1479,7 @@ const renderPortfoy = (container) => {
                                 color: '#aaa', 
                                 font: { size: 10 },
                                 callback: function(value) {
-                                    if (value >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+                                    if (value >= 1000000) return (value / 1000000).toFixed(2) + 'M';
                                     if (value >= 1000) return (value / 1000).toFixed(0) + 'K';
                                     return value;
                                 }
