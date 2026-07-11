@@ -505,7 +505,10 @@ const State = {
                         const localEkstreLen = parsedLocal.ekstre ? parsedLocal.ekstre.length : 0;
                         const fbEkstreLen = this.data.ekstre ? this.data.ekstre.length : 0;
                         
-                        const useLocal = (parsedLocal.lastUpdated && this.data.lastUpdated && parsedLocal.lastUpdated > this.data.lastUpdated) || (!this.data.lastUpdated && localEkstreLen > fbEkstreLen);
+                        const localDataTs = parsedLocal.dataUpdated || parsedLocal.lastUpdated || 0;
+                        const fbDataTs = this.data.dataUpdated || this.data.lastUpdated || 0;
+                        
+                        const useLocal = (localDataTs > fbDataTs) || (!fbDataTs && localEkstreLen > fbEkstreLen);
 
                         if (useLocal) {
                             this.data = { ...this.data, ...parsedLocal };
@@ -554,8 +557,10 @@ const State = {
                 this.syncHisseFolders();
                 this.save();
             }
-            if (callback && isInitialLoad) {
+            if (callback) {
                 callback();
+            }
+            if (isInitialLoad) {
                 isInitialLoad = false;
             }
         }, (error) => {
@@ -584,8 +589,11 @@ const State = {
         });
     },
 
-    save() {
+    save(skipFirebase = false, isUserDataChange = true) {
         if (this.data) {
+            if (isUserDataChange) {
+                this.data.dataUpdated = Date.now();
+            }
             this.data.lastUpdated = Date.now();
             // ROLLING BACKUP SYSTEM
             try {
@@ -613,6 +621,7 @@ const State = {
                 console.error("FS backup error:", fsErr);
             }
         }
+        if (skipFirebase) return;
         if (!currentUser || !this.data) return;
         db.collection('app_data').doc(currentUser.uid).set(this.data);
     },
@@ -700,12 +709,12 @@ const State = {
             tutar: tutar
         });
         
-        this.save();
+        this.save(false, true);
     },
 
     deleteEkstre(id) {
         this.data.ekstre = this.data.ekstre.filter(e => e.id !== id);
-        this.save();
+        this.save(false, true);
     },
 
     updateEkstre(id, islem) {
@@ -723,7 +732,7 @@ const State = {
                 fiyat: parseFloat(islem.fiyat),
                 tutar: tutar
             };
-            this.save();
+            this.save(false, true);
         }
     },
 
@@ -732,17 +741,17 @@ const State = {
             id: Date.now().toString(),
             ...islem
         });
-        this.save();
+        this.save(false, true);
     },
     deleteNakitHareket(id) {
         this.data.nakitHareketleri = this.data.nakitHareketleri.filter(n => n.id !== id);
-        this.save();
+        this.save(false, true);
     },
     updateNakitHareket(id, islem) {
         const index = this.data.nakitHareketleri.findIndex(n => n.id === id);
         if (index > -1) {
             this.data.nakitHareketleri[index] = { ...this.data.nakitHareketleri[index], ...islem };
-            this.save();
+            this.save(false, true);
         }
     },
 
@@ -764,7 +773,7 @@ const State = {
         } else {
             this.data.hisseFiyatlari.push({ menkul: m, fiyat: parseFloat(fiyat), tarih: new Date().toISOString() });
         }
-        if (!skipSave) this.save();
+        if (!skipSave) this.save(true, false);
     }
 };
 
@@ -932,7 +941,7 @@ window.fetchGuncelFiyatlar = async () => {
     }
 
     ensureDatalist();
-    State.save();
+    State.save(true, false);
     if (typeof renderPage === 'function' && (currentPage === 'giris' || currentPage === 'hedef' || currentPage === 'gorunum')) {
         renderPage();
     }
