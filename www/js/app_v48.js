@@ -499,6 +499,24 @@ const State = {
                 
                 if (!rescuedStr) rescuedStr = localStorage.getItem('borsa_app_data');
 
+                // ACİL KURTARMA: Eğer veriler silindiyse, en dolu yedeği bul
+                if (this.data && (!this.data.ekstre || this.data.ekstre.length === 0)) {
+                    let maxLen = 0;
+                    for (let i = 1; i <= 4; i++) {
+                        try {
+                            const bStr = localStorage.getItem('borsa_app_data_backup_' + i);
+                            if (bStr) {
+                                const bData = JSON.parse(bStr);
+                                const len = bData.ekstre ? bData.ekstre.length : 0;
+                                if (len > maxLen) {
+                                    maxLen = len;
+                                    rescuedStr = bStr;
+                                }
+                            }
+                        } catch(e) {}
+                    }
+                }
+
                 if (rescuedStr) {
                     try {
                         const parsedLocal = JSON.parse(rescuedStr);
@@ -508,7 +526,9 @@ const State = {
                         const localDataTs = parsedLocal.dataUpdated || parsedLocal.lastUpdated || 0;
                         const fbDataTs = this.data.dataUpdated || this.data.lastUpdated || 0;
                         
-                        const useLocal = (localDataTs > fbDataTs) || (!fbDataTs && localEkstreLen > fbEkstreLen);
+                        // KURTARMA ŞARTI: Firebase tamamen boşsa (ekstre yok) ve yerelde ekstre varsa DİREKT KURTAR.
+                        // Veya yerel zaman damgası daha yeniyse kurtar.
+                        const useLocal = (localDataTs > fbDataTs) || (fbEkstreLen === 0 && localEkstreLen > 0);
 
                         if (useLocal) {
                             this.data = { ...this.data, ...parsedLocal };
@@ -557,8 +577,11 @@ const State = {
                 this.syncHisseFolders();
                 this.save();
             }
-            if (callback) {
+            if (callback && isInitialLoad) {
                 callback();
+            } else if (!isInitialLoad && typeof renderPage === 'function') {
+                // Sadece veriler güncellendiğinde sayfayı yeniden çiz, tüm uygulamayı (ticker vs.) baştan başlatma!
+                renderPage();
             }
             if (isInitialLoad) {
                 isInitialLoad = false;
