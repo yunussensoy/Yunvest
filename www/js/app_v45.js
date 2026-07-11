@@ -1999,20 +1999,33 @@ const renderHisseler = (container) => {
             } else if (['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler'].includes(activeTab)) {
                 contentHtml = `<div style="display:flex; justify-content:center; align-items:center; height:200px; opacity:0.5; font-style:italic;">${activeTab} sayfası henüz yapım aşamasındadır.</div>`;
             } else if (activeTab === 'Raporlar') {
-                const targetReports = [
-                    { file: 'arastirma_raporu.pdf', name: 'Araştırma Raporu' },
-                    { file: 'faaliyet_raporu.pdf', name: 'Faaliyet Raporu' },
-                    { file: 'finansal_rapor.pdf', name: 'Finansal Rapor' },
-                    { file: 'toplanti_notlari.pdf', name: 'Toplantı Notları' },
-                    { file: 'yatirimci_sunumu.pdf', name: 'Yatırımcı Sunumu' }
-                ];
-                
                 let foundReports = [];
                 const availablePdfs = (window.stockReports && window.stockReports[selectedHisse]) ? window.stockReports[selectedHisse] : [];
                 
-                targetReports.forEach(report => {
-                    if (availablePdfs.map(f => f.toLowerCase()).includes(report.file.toLowerCase())) {
-                        foundReports.push(report);
+                availablePdfs.forEach(file => {
+                    const lowerFile = file.toLowerCase();
+                    if (lowerFile === 'arastirma_raporu.pdf') {
+                        foundReports.push({ file: file, name: 'Araştırma Raporu' });
+                    } else if (lowerFile.startsWith('arastirma_raporu_') && lowerFile.endsWith('.pdf')) {
+                        let suffix = lowerFile.substring('arastirma_raporu_'.length, lowerFile.length - 4);
+                        suffix = suffix.split('_').map(word => {
+                            const trMap = {
+                                'yatirim': 'Yatırım', 'degerler': 'Değerler', 'is': 'İş', 'unlu': 'Ünlü',
+                                'yapi': 'Yapı', 'vakif': 'Vakıf', 'araci': 'Aracı', 'info': 'İnfo', 'teb': 'TEB', 'qnb': 'QNB'
+                            };
+                            return trMap[word.toLowerCase()] || (word.charAt(0).toUpperCase() + word.slice(1));
+                        }).join(' ');
+                        foundReports.push({ file: file, name: 'Araştırma Raporu (' + suffix + ')' });
+                    } else if (lowerFile === 'faaliyet_raporu.pdf') {
+                        foundReports.push({ file: file, name: 'Faaliyet Raporu' });
+                    } else if (lowerFile === 'finansal_rapor.pdf') {
+                        foundReports.push({ file: file, name: 'Finansal Rapor' });
+                    } else if (lowerFile === 'toplanti_notlari.pdf') {
+                        foundReports.push({ file: file, name: 'Toplantı Notları' });
+                    } else if (lowerFile === 'yatirimci_sunumu.pdf') {
+                        foundReports.push({ file: file, name: 'Yatırımcı Sunumu' });
+                    } else if (lowerFile === 'fiyat_tespit_raporu.pdf') {
+                        foundReports.push({ file: file, name: 'Fiyat Tespit Raporu' });
                     }
                 });
                 
@@ -3561,7 +3574,7 @@ const renderAnasayfa = (container) => {
         };
         
         rowsHtml += `
-            <tr style="cursor: pointer;" onclick="window.goToHisse('${hisse}')">
+            <tr>
                 <td style="text-align: center;">${i + 1}</td>
                 <td style="text-align: left; font-weight: bold; color: var(--accent-color); cursor: pointer;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
                 <td style="text-align: center;">${fmtDec(fiyat)}</td>

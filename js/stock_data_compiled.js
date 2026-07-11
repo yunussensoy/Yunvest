@@ -282736,13 +282736,13 @@ window.stockData = {
 window.stockReports = {
   "AKSEN": [],
   "ARDYZ": [
-    "arastirma_raporu.pdf",
+    "arastirma_raporu_sai.pdf",
     "faaliyet_raporu.pdf",
     "finansal_rapor.pdf",
     "toplanti_notlari.pdf"
   ],
   "ASTOR": [
-    "arastirma_raporu.pdf"
+    "arastirma_raporu_tacirler_yatirim.pdf"
   ],
   "BETAE": [
     "fiyat_tespit_raporu.pdf"
@@ -282750,42 +282750,46 @@ window.stockReports = {
   "BRSAN": [],
   "DESA": [],
   "EBEBK": [],
-  "EUPWR": [],
+  "EUPWR": [
+    "arastirma_raporu_ak_yatirim.pdf"
+  ],
   "FONET": [],
+  "GLYHO": [],
   "GRSEL": [],
   "GUBRF": [
     "faaliyet_raporu.pdf",
     "yatirimci_sunumu.pdf"
   ],
   "HRKET": [
-    "arastirma_raporu.pdf"
+    "arastirma_raporu_bulls_yatirim.pdf"
   ],
   "INDES": [],
   "KARSN": [],
   "KBORU": [
-    "toplanti_notlari.pdf"
+    "arastirma_raporu_a1_capital.pdf"
   ],
-  "KMPUR": [],
-  "KRSTL": [],
+  "KRONT": [],
+  "MPARK": [],
+  "NTGAZ": [],
   "ONCSM": [],
-  "ORGE": [],
+  "PCILT": [],
   "RGYAS": [
-    "arastirma_raporu.pdf"
+    "arastirma_raporu_philip_capital.pdf"
   ],
   "SMRTG": [
-    "arastirma_raporu.pdf"
+    "arastirma_raporu_bulls_yatirim.pdf"
   ],
   "TCKRC": [
     "faaliyet_raporu.pdf",
     "finansal_rapor.pdf",
     "yatirimci_sunumu.pdf"
   ],
-  "THYAO": [],
-  "TNZTP": [],
+  "TRCAS": [],
+  "TUPRS": [],
   "YATAS": [],
   "YEOTK": [
-    "a1_capital_arastirma_notu.pdf",
-    "arastirma_raporu.pdf",
+    "arastirma_raporu_a1.pdf",
+    "arastirma_raporu_bulls.pdf",
     "faaliyet_raporu.pdf",
     "finansal_rapor.pdf",
     "yatirimci_sunumu.pdf"

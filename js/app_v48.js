@@ -475,6 +475,7 @@ const State = {
                 this.data = JSON.parse(JSON.stringify(DEFAULT_STATE));
             }
             processLoadedData();
+            this.syncHisseFolders();
             if (callback) callback();
             return;
         }
@@ -550,6 +551,7 @@ const State = {
                 }
                 
                 processLoadedData();
+                this.syncHisseFolders();
                 this.save();
             }
             if (callback && isInitialLoad) {
@@ -622,12 +624,64 @@ const State = {
         if (!this.data.takipListesi.includes(menkul)) {
             this.data.takipListesi.push(menkul);
             this.save();
+            this.syncHisseFolders();
         }
     },
     removeTakip(menkul) {
         if (!this.data.takipListesi) this.data.takipListesi = [];
         this.data.takipListesi = this.data.takipListesi.filter(m => m !== menkul);
         this.save();
+        this.syncHisseFolders();
+    },
+
+    syncHisseFolders() {
+        try {
+            if (typeof require === 'undefined' || typeof __dirname === 'undefined') return;
+            const fs = require('fs');
+            const path = require('path');
+            
+            let appRoot = __dirname;
+            if (appRoot.endsWith('js') || appRoot.endsWith('js\\') || appRoot.endsWith('js/')) {
+                appRoot = path.join(appRoot, '..');
+            }
+            if (appRoot.endsWith('www') || appRoot.endsWith('www\\') || appRoot.endsWith('www/')) {
+                appRoot = path.join(appRoot, '..');
+            }
+
+            const targetDirs = [
+                path.join(appRoot, 'Hisseler'),
+                path.join(appRoot, 'www', 'Hisseler')
+            ];
+
+            const activeTakip = this.data.takipListesi || [];
+
+            targetDirs.forEach(hisselerDir => {
+                if (!fs.existsSync(hisselerDir)) {
+                    try { fs.mkdirSync(hisselerDir, { recursive: true }); } catch(e) {}
+                }
+                
+                if (fs.existsSync(hisselerDir)) {
+                    activeTakip.forEach(menkul => {
+                        const folderPath = path.join(hisselerDir, menkul);
+                        if (!fs.existsSync(folderPath)) {
+                            try { fs.mkdirSync(folderPath); } catch(e) {}
+                        }
+                    });
+                    
+                    const existingFolders = fs.readdirSync(hisselerDir);
+                    existingFolders.forEach(folder => {
+                        const folderPath = path.join(hisselerDir, folder);
+                        if (fs.statSync(folderPath).isDirectory()) {
+                            if (!activeTakip.includes(folder)) {
+                                try { fs.rmSync(folderPath, { recursive: true, force: true }); } catch(e) {}
+                            }
+                        }
+                    });
+                }
+            });
+        } catch (e) {
+            console.log("Klasör senkronizasyonu bu ortamda desteklenmiyor:", e);
+        }
     },
 
     addEkstre(islem) {
@@ -964,9 +1018,11 @@ const renderPortfoy = (container) => {
     let arsivKarTotal = 0;
     const arsivHtml = arsivList.map((a, i) => {
         arsivKarTotal += a.kar;
+        const guncelFiyat = State.getFiyat(a.menkul);
         return `<tr>
             <td style="text-align: center !important;">${i+1}</td>
             <td style="text-align: left !important;">${a.menkul}</td>
+            <td style="text-align: right !important;">${formatCurrency(guncelFiyat)}</td>
             <td style="text-align: right !important;">${a.adet}</td>
             <td style="text-align: right !important;">${formatCurrency(a.alisFiyati)}</td>
             <td style="text-align: right !important;">${formatCurrency(a.satisFiyati)}</td>
@@ -1118,14 +1174,14 @@ const renderPortfoy = (container) => {
                     <div class="table-header">Arşiv</div>
 <table class="dash-table compact-table" style="min-width: 1000px;">
                     <thead>
-                        <tr><th style="font-size: 14px;">S.N.</th><th>Menkul</th><th>Adet</th><th>Alış Fiyatı</th><th>Satış Fiyatı</th><th>Kar / Zarar</th><th>Kar / Zarar %</th><th>İlk Alım Tarihi</th><th>Son Satım Tarihi</th><th>Taşıma Süresi</th></tr>
+                        <tr><th style="font-size: 14px;">S.N.</th><th>Menkul</th><th>Güncel<br>Fiyat</th><th>Adet</th><th>Alış Fiyatı</th><th>Satış Fiyatı</th><th>Kar / Zarar</th><th>Kar / Zarar %</th><th>İlk Alım Tarihi</th><th>Son Satım Tarihi</th><th>Taşıma Süresi</th></tr>
                     </thead>
                     <tbody>
                         ${arsivHtml}
                         <tr class="total-row">
                             <td style="text-align: center !important;"></td>
                             <td style="text-align: left !important;">TOPLAM</td>
-                            <td colspan="3" style="text-align: right !important;"></td>
+                            <td colspan="4" style="text-align: right !important;"></td>
                             <td class="${arsivKarTotal >= 0 ? 'text-success' : 'text-danger'}" style="text-align: right !important;">${formatCurrency(arsivKarTotal, 0)}</td>
                             <td colspan="4" style="text-align: right !important;"></td>
                         </tr>
@@ -2272,20 +2328,33 @@ const renderHisseler = (container) => {
             } else if (['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler'].includes(activeTab)) {
                 contentHtml = `<div style="display:flex; justify-content:center; align-items:center; height:200px; opacity:0.5; font-style:italic;">${activeTab} sayfası henüz yapım aşamasındadır.</div>`;
             } else if (activeTab === 'Raporlar') {
-                const targetReports = [
-                    { file: 'arastirma_raporu.pdf', name: 'Araştırma Raporu' },
-                    { file: 'faaliyet_raporu.pdf', name: 'Faaliyet Raporu' },
-                    { file: 'finansal_rapor.pdf', name: 'Finansal Rapor' },
-                    { file: 'toplanti_notlari.pdf', name: 'Toplantı Notları' },
-                    { file: 'yatirimci_sunumu.pdf', name: 'Yatırımcı Sunumu' }
-                ];
-                
                 let foundReports = [];
                 const availablePdfs = (window.stockReports && window.stockReports[selectedHisse]) ? window.stockReports[selectedHisse] : [];
                 
-                targetReports.forEach(report => {
-                    if (availablePdfs.map(f => f.toLowerCase()).includes(report.file.toLowerCase())) {
-                        foundReports.push(report);
+                availablePdfs.forEach(file => {
+                    const lowerFile = file.toLowerCase();
+                    if (lowerFile === 'arastirma_raporu.pdf') {
+                        foundReports.push({ file: file, name: 'Araştırma Raporu' });
+                    } else if (lowerFile.startsWith('arastirma_raporu_') && lowerFile.endsWith('.pdf')) {
+                        let suffix = lowerFile.substring('arastirma_raporu_'.length, lowerFile.length - 4);
+                        suffix = suffix.split('_').map(word => {
+                            const trMap = {
+                                'yatirim': 'Yatırım', 'degerler': 'Değerler', 'is': 'İş', 'unlu': 'Ünlü',
+                                'yapi': 'Yapı', 'vakif': 'Vakıf', 'araci': 'Aracı', 'info': 'İnfo', 'teb': 'TEB', 'qnb': 'QNB'
+                            };
+                            return trMap[word.toLowerCase()] || (word.charAt(0).toUpperCase() + word.slice(1));
+                        }).join(' ');
+                        foundReports.push({ file: file, name: 'Araştırma Raporu (' + suffix + ')' });
+                    } else if (lowerFile === 'faaliyet_raporu.pdf') {
+                        foundReports.push({ file: file, name: 'Faaliyet Raporu' });
+                    } else if (lowerFile === 'finansal_rapor.pdf') {
+                        foundReports.push({ file: file, name: 'Finansal Rapor' });
+                    } else if (lowerFile === 'toplanti_notlari.pdf') {
+                        foundReports.push({ file: file, name: 'Toplantı Notları' });
+                    } else if (lowerFile === 'yatirimci_sunumu.pdf') {
+                        foundReports.push({ file: file, name: 'Yatırımcı Sunumu' });
+                    } else if (lowerFile === 'fiyat_tespit_raporu.pdf') {
+                        foundReports.push({ file: file, name: 'Fiyat Tespit Raporu' });
                     }
                 });
                 
@@ -4009,7 +4078,7 @@ const renderAnasayfa = (container) => {
         };
         
         rowsHtml += `
-            <tr style="cursor: pointer;" onclick="window.goToHisse('${hisse}')">
+            <tr>
                 <td style="text-align: center;">${i + 1}</td>
                 <td style="text-align: left; font-weight: bold; color: var(--accent-color); cursor: pointer;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
                 <td style="text-align: center;">${fmtDec(fiyat)}</td>

@@ -29,6 +29,7 @@ export const State = {
             this.data = JSON.parse(JSON.stringify(DEFAULT_STATE));
             this.save();
         }
+        this.syncHisseFolders();
     },
 
     save() {
@@ -41,11 +42,49 @@ export const State = {
         if (!this.data.takipListesi.includes(menkul)) {
             this.data.takipListesi.push(menkul);
             this.save();
+            this.syncHisseFolders();
         }
     },
     removeTakip(menkul) {
         this.data.takipListesi = this.data.takipListesi.filter(m => m !== menkul);
         this.save();
+        this.syncHisseFolders();
+    },
+    
+    syncHisseFolders() {
+        try {
+            if (typeof require === 'undefined' || typeof __dirname === 'undefined') return;
+            const fs = require('fs');
+            const path = require('path');
+            
+            let appRoot = __dirname;
+            if (appRoot.endsWith('js') || appRoot.endsWith('js\\') || appRoot.endsWith('js/')) {
+                appRoot = path.join(appRoot, '..');
+            }
+            const hisselerDir = path.join(appRoot, 'Hisseler');
+            if (!fs.existsSync(hisselerDir)) fs.mkdirSync(hisselerDir);
+
+            const activeTakip = this.data.takipListesi || [];
+            
+            activeTakip.forEach(menkul => {
+                const folderPath = path.join(hisselerDir, menkul);
+                if (!fs.existsSync(folderPath)) {
+                    fs.mkdirSync(folderPath);
+                }
+            });
+            
+            const existingFolders = fs.readdirSync(hisselerDir);
+            existingFolders.forEach(folder => {
+                const folderPath = path.join(hisselerDir, folder);
+                if (fs.statSync(folderPath).isDirectory()) {
+                    if (!activeTakip.includes(folder)) {
+                        fs.rmSync(folderPath, { recursive: true, force: true });
+                    }
+                }
+            });
+        } catch (e) {
+            console.log("Klasör senkronizasyonu bu ortamda desteklenmiyor:", e);
+        }
     },
     // EKSTRE işlemleri
     addEkstre(islem) {
