@@ -853,8 +853,7 @@ window.fetchGuncelFiyatlar = async () => {
                 const targetUrl = `https://query2.finance.yahoo.com/v8/finance/chart/${yfSym}.IS?interval=1d`;
                 const proxies = [
                     `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
-                    `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-                    `https://api.codetabs.com/v1/proxy/?quest=${targetUrl}`
+                    `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
                 ];
                 
                 for (const proxy of proxies) {
