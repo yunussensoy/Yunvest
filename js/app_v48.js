@@ -4207,7 +4207,27 @@ window.exportData = () => {
     URL.revokeObjectURL(url);
 };
 
-window.importData = (e) => {
+window.forceSyncToWeb = () => {
+    if (!currentUser) {
+        alert("Web'e eşitlemek için giriş yapmalısınız!");
+        return;
+    }
+    if (!State.data || !State.data.ekstre || State.data.ekstre.length === 0) {
+        alert("Eşitlenecek yerel veri bulunamadı!");
+        return;
+    }
+    if (confirm("Bu işlem bilgisayarınızdaki TÜM verileri zorla Web'e yükleyecek. Emin misiniz?")) {
+        State.data.dataUpdated = Date.now();
+        State.data.lastUpdated = Date.now() + (1000 * 60 * 60 * 24 * 365 * 10);
+        db.collection('app_data').doc(currentUser.uid).set(State.data).then(() => {
+            alert("Verileriniz başarıyla Web'e yüklendi! Artık telefonunuzdan veya webden görebilirsiniz.");
+        }).catch(err => {
+            alert("Hata oluştu: " + err.message);
+        });
+    }
+};
+
+window.importData = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
