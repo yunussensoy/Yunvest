@@ -4580,7 +4580,14 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 });
 
 document.getElementById('logout-btn').addEventListener('click', () => {
-    auth.signOut();
+    localStorage.removeItem('borsa_app_data');
+    for (let i = 1; i <= 4; i++) {
+        localStorage.removeItem('borsa_app_data_backup_' + i);
+    }
+    localStorage.removeItem('borsa_state');
+    auth.signOut().then(() => {
+        window.location.reload();
+    });
 });
 
 // Auth Listener
