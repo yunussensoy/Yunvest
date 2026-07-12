@@ -4094,6 +4094,16 @@ const renderAnasayfa = (container) => {
 
     const fmtDec = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(val);
     const fmtPct = (val) => { let num = val * 100; let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(Math.abs(num)); return num < 0 ? '%-' + formatted : '%' + formatted; };
+    const fmtNum = (val) => {
+        if (val === 0 || isNaN(val) || !val) return '-';
+        if (val >= 1000000000) return (val / 1000000000).toFixed(2) + ' Mlr';
+        if (val >= 1000000) return (val / 1000000).toFixed(2) + ' M';
+        return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(val));
+    };
+    const fmtMet = (val) => {
+        if (val === 0 || isNaN(val) || !val || !isFinite(val)) return '-';
+        return fmtDec(val);
+    };
     
     let rowsHtml = '';
     takipList.forEach((hisse, i) => {
@@ -4105,6 +4115,85 @@ const renderAnasayfa = (container) => {
             fiyat = State.getFiyat(hisse);
         }
         
+        if (window.parseExcelData && (!window.stockData || !window.stockData[hisse] || !window.stockData[hisse].bilanco)) {
+            try { window.parseExcelData(hisse); } catch(e) {}
+        }
+        
+        let piyasaDegeri = 0, fdFavok = 0, fk = 0, pdDd = 0;
+        const sData = (window.stockData && window.stockData[hisse]) ? window.stockData[hisse] : null;
+        
+        if (sData) {
+            const getVal = (sheet, rowName) => {
+                if (!sheet || !sheet.rows) return 0;
+                const searchStr = rowName.toLowerCase().replace(/[öçşğıü]/g, '');
+                const row = sheet.rows.find(r => {
+                    if (!r[0]) return false;
+                    const t = r[0].toLowerCase().replace(/[öçşğıü]/g, '');
+                    return t.includes(searchStr);
+                });
+                if (!row) return 0;
+                const v = row[1];
+                if (typeof v === 'number') return v;
+                if (typeof v === 'string') {
+                    const p = parseFloat(v.replace(/\./g, '').replace(/,/g, '.'));
+                    return isNaN(p) ? 0 : p;
+                }
+                return 0;
+            };
+
+            const odenmisSermaye = getVal(sData.bilanco, 'Ödenmiş Sermaye');
+            piyasaDegeri = fiyat * odenmisSermaye;
+
+            let finansalBorclarTotal = 0;
+            let nakitTotal = 0;
+            if (sData.bilanco && sData.bilanco.rows) {
+                sData.bilanco.rows.forEach(r => {
+                    if (!r[0]) return;
+                    const rName = r[0].toLocaleLowerCase('tr-TR');
+                    if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
+                        const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                        finansalBorclarTotal += val;
+                    }
+                    if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
+                        const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                        nakitTotal += val;
+                    }
+                });
+            }
+            const netBorc = finansalBorclarTotal - nakitTotal;
+            const firmaDegeri = piyasaDegeri + netBorc;
+
+            let favok = 0;
+            if (sData.gelirYillik && sData.gelirYillik.rows) {
+                const fR = sData.gelirYillik.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
+                if (fR) {
+                    favok = typeof fR[1] === 'number' ? fR[1] : parseFloat((fR[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                }
+            }
+            if (favok === 0) favok = getVal(sData.gelirYillik, 'FAVÖK');
+            fdFavok = favok !== 0 ? (firmaDegeri / favok) : 0;
+
+            let yilliklandirilmisNetKar = 0;
+            if (sData.gelirYillik && sData.gelirYillik.rows) {
+                const nR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                if (nR) {
+                    yilliklandirilmisNetKar = typeof nR[1] === 'number' ? nR[1] : parseFloat((nR[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                }
+            }
+            if (yilliklandirilmisNetKar === 0) yilliklandirilmisNetKar = getVal(sData.gelirYillik, 'Net Dönem Karı');
+            fk = yilliklandirilmisNetKar !== 0 ? (piyasaDegeri / yilliklandirilmisNetKar) : 0;
+
+            let anaOrtaklikOzkaynaklar = 0;
+            if (sData.bilanco && sData.bilanco.rows) {
+                const aoRow = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
+                if (aoRow) {
+                    anaOrtaklikOzkaynaklar = typeof aoRow[1] === 'number' ? aoRow[1] : parseFloat((aoRow[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                }
+            }
+            if (anaOrtaklikOzkaynaklar === 0) anaOrtaklikOzkaynaklar = getVal(sData.bilanco, 'Özkaynaklar');
+            pdDd = anaOrtaklikOzkaynaklar !== 0 ? (piyasaDegeri / anaOrtaklikOzkaynaklar) : 0;
+        }
+
         const hData = State.data.hedefFiyatlar && State.data.hedefFiyatlar[hisse] ? State.data.hedefFiyatlar[hisse] : null;
         const renderCell = (year) => {
             if (!hData || !hData[year]) return `<td style="text-align: center;">-</td><td style="text-align: center;">-</td>`;
@@ -4117,6 +4206,10 @@ const renderAnasayfa = (container) => {
                 <td style="text-align: center;">${i + 1}</td>
                 <td style="text-align: left; font-weight: bold; color: var(--accent-color); cursor: pointer;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
                 <td style="text-align: center;">${fmtDec(fiyat)}</td>
+                <td style="text-align: center;">${fmtNum(piyasaDegeri)}</td>
+                <td style="text-align: center;">${fmtMet(fdFavok)}</td>
+                <td style="text-align: center;">${fmtMet(fk)}</td>
+                <td style="text-align: center;">${fmtMet(pdDd)}</td>
                 ${renderCell('2026')}
                 ${renderCell('2027')}
                 ${renderCell('2028')}
@@ -4144,6 +4237,10 @@ const renderAnasayfa = (container) => {
                                 <th style="text-align: center;">S.N</th>
                                 <th style="text-align: center;">Hisse</th>
                                 <th style="text-align: center;">Fiyat</th>
+                                <th style="text-align: center;">Piyasa Değeri</th>
+                                <th style="text-align: center;">FD/FAVÖK</th>
+                                <th style="text-align: center;">F/K</th>
+                                <th style="text-align: center;">PD/DD</th>
                                 <th style="text-align: center;">2026<br>Hedef Fiyat</th>
                                 <th style="text-align: center;">2026<br>Potansiyel</th>
                                 <th style="text-align: center;">2027<br>Hedef Fiyat</th>
