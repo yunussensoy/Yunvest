@@ -2416,7 +2416,7 @@ const renderHisseler = (container) => {
                 }
             } else if (activeTab === 'Değerleme') {
                 // Initialize default edit modes if not present
-                if (!window.degerlemeEditMode) window.degerlemeEditMode = { '2026': false, '2027': false, '2028': false };
+                if (!window.degerlemeEditMode) window.degerlemeEditMode = { '2026': false, '2027': false, '2028': false, '2029': false, '2030': false };
                 window.toggleDegerlemeEdit = (y) => {
                     window.degerlemeEditMode[y] = !window.degerlemeEditMode[y];
                     if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
@@ -2426,7 +2426,7 @@ const renderHisseler = (container) => {
                 if(!State.data.degerleme) State.data.degerleme = {};
                 if(!State.data.degerleme[selectedHisse]) State.data.degerleme[selectedHisse] = {};
                 const stateData = State.data.degerleme[selectedHisse];
-                const years = ['2026', '2027', '2028'];
+                const years = ['2026', '2027', '2028', '2029', '2030'];
                 
                 window.updateDegerlemeInput = (hisse, year, field, value) => {
                     if (!State.data.degerleme[hisse]) State.data.degerleme[hisse] = {};
@@ -3965,23 +3965,25 @@ const renderHedef = (container) => {
         
         for (const hisse of Object.keys(State.data.hedefFiyatlar).sort()) {
             const hData = State.data.hedefFiyatlar[hisse];
-            if (!hData['2026'] && !hData['2027'] && !hData['2028']) continue;
+            if (!hData['2026'] && !hData['2027'] && !hData['2028'] && !hData['2029'] && !hData['2030']) continue;
             
             const guncelFiyat = parseFloat(State.getFiyat(hisse)) || 0;
             
             const renderCell = (year) => {
-                if (!hData[year]) return `<td>-</td><td>-</td>`;
+                if (!hData[year]) return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
                 const color = hData[year].potansiyel > 0 ? '#2ecc71' : '#e74c3c';
-                return `<td>${fmtDec(hData[year].hedefFiyat)}</td><td style="color:${color} !important; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
+                return `<td style="text-align: right !important;">${fmtDec(hData[year].hedefFiyat)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
             };
 
             rowsHtml += `<tr>
-                <td>${sn++}</td>
-                <td style="text-align: left; font-weight:bold; cursor:pointer; color:var(--accent-color); text-decoration:underline;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
-                <td>${fmtDec(guncelFiyat)}</td>
+                <td style="text-align: center !important;">${sn++}</td>
+                <td style="text-align: left !important; font-weight:bold; cursor:pointer; color:var(--accent-color); text-decoration:underline;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
+                <td style="text-align: right !important;">${fmtDec(guncelFiyat)}</td>
                 ${renderCell('2026')}
                 ${renderCell('2027')}
                 ${renderCell('2028')}
+                ${renderCell('2029')}
+                ${renderCell('2030')}
             </tr>`;
         }
     }
@@ -4001,12 +4003,16 @@ const renderHedef = (container) => {
                             <th>S.N.</th>
                             <th>Hisse</th>
                             <th>Güncel Fiyat</th>
-                            <th>2026<br>Hedef Fiyat</th>
-                            <th>2026<br>Potansiyel</th>
-                            <th>2027<br>Hedef Fiyat</th>
-                            <th>2027<br>Potansiyel</th>
-                            <th>2028<br>Hedef Fiyat</th>
-                            <th>2028<br>Potansiyel</th>
+                            <th>2026<br>H. F.</th>
+                            <th>2026<br>Pot.</th>
+                            <th>2027<br>H. F.</th>
+                            <th>2027<br>Pot.</th>
+                            <th>2028<br>H. F.</th>
+                            <th>2028<br>Pot.</th>
+                            <th>2029<br>H. F.</th>
+                            <th>2029<br>Pot.</th>
+                            <th>2030<br>H. F.</th>
+                            <th>2030<br>Pot.</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -4088,6 +4094,14 @@ const renderAnasayfa = (container) => {
         const pot28A = getPot(a, '2028');
         const pot28B = getPot(b, '2028');
         if (pot28B !== pot28A) return pot28B - pot28A;
+
+        const pot29A = getPot(a, '2029');
+        const pot29B = getPot(b, '2029');
+        if (pot29B !== pot29A) return pot29B - pot29A;
+
+        const pot30A = getPot(a, '2030');
+        const pot30B = getPot(b, '2030');
+        if (pot30B !== pot30A) return pot30B - pot30A;
 
         return a.localeCompare(b);
     });
@@ -4196,24 +4210,26 @@ const renderAnasayfa = (container) => {
 
         const hData = State.data.hedefFiyatlar && State.data.hedefFiyatlar[hisse] ? State.data.hedefFiyatlar[hisse] : null;
         const renderCell = (year) => {
-            if (!hData || !hData[year]) return `<td style="text-align: center;">-</td><td style="text-align: center;">-</td>`;
+            if (!hData || !hData[year]) return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
             const color = hData[year].potansiyel > 0 ? '#2ecc71' : '#e74c3c';
-            return `<td style="text-align: center; color:${color} !important; font-weight:bold;">${fmtDec(hData[year].hedefFiyat)}</td><td style="text-align: center; color:${color} !important; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
+            return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtDec(hData[year].hedefFiyat)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
         };
         
         rowsHtml += `
             <tr>
-                <td style="text-align: center;">${i + 1}</td>
-                <td style="text-align: left; font-weight: bold; color: var(--accent-color); cursor: pointer;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
-                <td style="text-align: center;">${fmtDec(fiyat)}</td>
-                <td style="text-align: center;">${fmtNum(piyasaDegeri)}</td>
-                <td style="text-align: center;">${fmtMet(fdFavok)}</td>
-                <td style="text-align: center;">${fmtMet(fk)}</td>
-                <td style="text-align: center;">${fmtMet(pdDd)}</td>
+                <td style="text-align: center !important;">${i + 1}</td>
+                <td style="text-align: left !important; font-weight: bold; color: var(--accent-color); cursor: pointer;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
+                <td style="text-align: right !important;">${fmtDec(fiyat)}</td>
+                <td style="text-align: right !important;">${fmtNum(piyasaDegeri)}</td>
+                <td style="text-align: right !important;">${fmtMet(fdFavok)}</td>
+                <td style="text-align: right !important;">${fmtMet(fk)}</td>
+                <td style="text-align: right !important;">${fmtMet(pdDd)}</td>
                 ${renderCell('2026')}
                 ${renderCell('2027')}
                 ${renderCell('2028')}
-                <td style="text-align: center;" onclick="event.stopPropagation()">
+                ${renderCell('2029')}
+                ${renderCell('2030')}
+                <td style="text-align: center !important;" onclick="event.stopPropagation()">
                     <button class="btn btn-icon" style="color: var(--danger-color); padding: 0.1rem 0.3rem;" onclick="window.removeHisseFromTakip('${hisse}')"><i class="fas fa-trash-alt" style="font-size: 11px;"></i></button>
                 </td>
             </tr>
@@ -4241,12 +4257,16 @@ const renderAnasayfa = (container) => {
                                 <th style="text-align: center;">FD/FAVÖK</th>
                                 <th style="text-align: center;">F/K</th>
                                 <th style="text-align: center;">PD/DD</th>
-                                <th style="text-align: center;">2026<br>Hedef Fiyat</th>
-                                <th style="text-align: center;">2026<br>Potansiyel</th>
-                                <th style="text-align: center;">2027<br>Hedef Fiyat</th>
-                                <th style="text-align: center;">2027<br>Potansiyel</th>
-                                <th style="text-align: center;">2028<br>Hedef Fiyat</th>
-                                <th style="text-align: center;">2028<br>Potansiyel</th>
+                                <th style="text-align: center;">2026<br>H. F.</th>
+                                <th style="text-align: center;">2026<br>Pot.</th>
+                                <th style="text-align: center;">2027<br>H. F.</th>
+                                <th style="text-align: center;">2027<br>Pot.</th>
+                                <th style="text-align: center;">2028<br>H. F.</th>
+                                <th style="text-align: center;">2028<br>Pot.</th>
+                                <th style="text-align: center;">2029<br>H. F.</th>
+                                <th style="text-align: center;">2029<br>Pot.</th>
+                                <th style="text-align: center;">2030<br>H. F.</th>
+                                <th style="text-align: center;">2030<br>Pot.</th>
                                 <th style="text-align: center;">İşlem</th>
                             </tr>
                         </thead>
@@ -4949,7 +4969,7 @@ window.recalculateHedefFiyatlar = () => {
 
         if (!State.data.hedefFiyatlar[hisse]) State.data.hedefFiyatlar[hisse] = {};
 
-        const years = ['2026', '2027', '2028'];
+        const years = ['2026', '2027', '2028', '2029', '2030'];
         years.forEach(y => {
             const d = State.data.degerleme[hisse][y];
             if (!d) return;
