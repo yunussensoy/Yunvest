@@ -2275,15 +2275,13 @@ const renderHisseler = (container) => {
                     analizler.forEach(a => {
                         let linkHtml = '-';
                         if (a.baglanti) {
-                            let text = 'Dış Bağlantı';
+                            let text = a.baslik || 'Dış Bağlantı';
                             let icon = 'fas fa-external-link-alt';
-                            if (a.baslik) {
-                                text = a.baslik;
-                            } else if (a.baglanti.includes('youtube.com') || a.baglanti.includes('youtu.be')) {
-                                text = 'YouTube Linki';
+                            if (a.baglanti.includes('youtube.com') || a.baglanti.includes('youtu.be')) {
+                                text = a.baslik || 'YouTube Linki';
                                 icon = 'fab fa-youtube';
                             } else if (a.baglanti.includes('twitter.com') || a.baglanti.includes('x.com')) {
-                                text = 'X (Twitter) Linki';
+                                text = a.baslik || 'X (Twitter) Linki';
                                 icon = 'fab fa-twitter';
                             }
                             linkHtml = `<a href="${a.baglanti}" target="_blank" style="color:var(--accent-color); text-decoration:none;"><i class="${icon}"></i> ${text}</a>`;
