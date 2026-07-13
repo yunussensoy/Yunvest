@@ -79,13 +79,7 @@
                 <div class="dropdown-content glass" style="display: none; position: absolute; bottom: 100%; left: 0; min-width: 180px; z-index: 1000; flex-direction: column; padding: 0.5rem; border-radius: var(--border-radius); box-shadow: 0 -4px 15px rgba(0,0,0,0.5);">
                     <button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; display: flex; align-items: center; font-size: 14px; padding: 0.8rem 1rem;" onclick="if(window.goToAyarlar) window.goToAyarlar(); else document.querySelector('.nav-btn[data-target=\'ayarlar\']').click()"><span><i class="fas fa-cog" style="width: 20px;"></i> Hesap Ayarları</span></button>
                     
-                    <div class="theme-menu-wrapper" style="position: relative;" onmouseover="this.querySelector('.theme-submenu').style.display='flex'" onmouseleave="this.querySelector('.theme-submenu').style.display='none'">
-                        <button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; padding: 0.8rem 1rem;"><span><i class="fas fa-palette" style="width: 20px;"></i> Tema</span> <i class="fas fa-chevron-right" style="font-size: 0.7em;"></i></button>
-                        <div class="theme-submenu glass" style="display: none; position: absolute; left: 100%; top: -10px; min-width: 150px; flex-direction: column; padding: 0.5rem; border-radius: var(--border-radius); box-shadow: 4px 4px 15px rgba(0,0,0,0.5);">
-                            <button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; font-size: 14px; padding: 0.8rem 1rem;" onclick="window.setTheme('light')"><i class="fas fa-sun" style="width: 20px;"></i> Açık</button>
-                            <button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; font-size: 14px; padding: 0.8rem 1rem;" onclick="window.setTheme('dark')"><i class="fas fa-moon" style="width: 20px;"></i> Koyu</button>
-                        </div>
-                    </div>
+                    
 
                     <div style="height: 1px; background: var(--surface-border); margin: 0.5rem 0;"></div>
                     <button id="logout-btn" class="nav-btn" style="color: var(--danger-color); text-align: left; width: 100%; border-radius: 4px; font-size: 14px; padding: 0.8rem 1rem;"><i class="fas fa-sign-out-alt" style="width: 20px;"></i> Çıkış</button>
@@ -298,13 +292,7 @@ window.showAnalizEkleModal = function(hisse) {
             errDiv.style.zIndex = '9999';
                     <button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; display: flex; align-items: center; font-size: 14px; padding: 0.8rem 1rem;" onclick="if(window.goToAyarlar) window.goToAyarlar(); else document.querySelector('.nav-btn[data-target=\'ayarlar\']').click()"><span><i class="fas fa-cog" style="width: 20px;"></i> Hesap Ayarları</span></button>
                     
-                    <div class="theme-menu-wrapper" style="position: relative;" onmouseover="this.querySelector('.theme-submenu').style.display='flex'" onmouseleave="this.querySelector('.theme-submenu').style.display='none'">
-                        <button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; padding: 0.8rem 1rem;"><span><i class="fas fa-palette" style="width: 20px;"></i> Tema</span> <i class="fas fa-chevron-right" style="font-size: 0.7em;"></i></button>
-                        <div class="theme-submenu glass" style="display: none; position: absolute; left: 100%; top: -10px; min-width: 150px; flex-direction: column; padding: 0.5rem; border-radius: var(--border-radius); box-shadow: 4px 4px 15px rgba(0,0,0,0.5);">
-                            <button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; font-size: 14px; padding: 0.8rem 1rem;" onclick="window.setTheme('light')"><i class="fas fa-sun" style="width: 20px;"></i> Açık</button>
-                            <button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; font-size: 14px; padding: 0.8rem 1rem;" onclick="window.setTheme('dark')"><i class="fas fa-moon" style="width: 20px;"></i> Koyu</button>
-                        </div>
-                    </div>
+                    
 
                     <div style="height: 1px; background: var(--surface-border); margin: 0.5rem 0;"></div>
                     <button id="logout-btn" class="nav-btn" style="color: var(--danger-color); text-align: left; width: 100%; border-radius: 4px; font-size: 14px; padding: 0.8rem 1rem;"><i class="fas fa-sign-out-alt" style="width: 20px;"></i> Çıkış</button>

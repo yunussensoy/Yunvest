@@ -1618,11 +1618,11 @@ const renderPortfoy = (container) => {
                     },
                     scales: {
                         x: {
-                            grid: { color: 'var(--surface-border)' },
+                            grid: { color: 'rgba(128,128,128,0.2)' },
                             ticks: { color: '#aaa', font: { size: 10 } }
                         },
                         y: {
-                            grid: { color: 'var(--surface-border)' },
+                            grid: { color: 'rgba(128,128,128,0.2)' },
                             ticks: { 
                                 color: '#aaa', 
                                 font: { size: 10 },
@@ -2913,8 +2913,8 @@ if (window.shouldRenderDashboardCharts) {
                                   responsive: true, maintainAspectRatio: false,
                                   plugins: { legend: { display: false }, datalabels: { display: false } },
                                   scales: {
-                                      x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'var(--surface-border)' } },
-                                      y: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'var(--surface-border)' } }
+                                      x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(128,128,128,0.2)' } },
+                                      y: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(128,128,128,0.2)' } }
                                   }
                               };
                               const pinkColor = '#d6336c';
