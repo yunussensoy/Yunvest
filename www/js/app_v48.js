@@ -46,13 +46,13 @@ const toTitleCase = (str) => {
 const genFintablesBilanco = (title, headers, rows) => {
     const docIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; vertical-align:middle; color:#888;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
     const leftArrow = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; color:#555;"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
-    const rightArrow = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; color:#fff;"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+    const rightArrow = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; color:var(--text-primary);"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
 
     let html = `<div style="background:#111216; border-radius:12px; border:1px solid rgba(255,255,255,0.05); overflow:hidden; font-family:var(--font-family);">
         <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse; color:#fff; font-size:13px; text-align:right;">
+            <table style="width:100%; border-collapse:collapse; color:var(--text-primary); font-size:13px; text-align:right;">
                 <thead>
-                    <tr style="background:#111216; border-bottom:1px solid rgba(255,255,255,0.05);">
+                    <tr style="background:#111216; border-bottom:1px solid var(--table-border);">
                         <th style="text-align:left; padding:16px; font-size:15px; font-weight:700;  white-space:nowrap;">Bilanço Kalemleri</th>`;
     
     headers.forEach((h, i) => {
@@ -1204,7 +1204,7 @@ const renderPortfoy = (container) => {
             <div class="table-container glass" style="margin-bottom: 0;">
                 <div class="table-header">Günlük Portföy Değişimi</div>
                 <div style="padding: 0 1rem; margin-top: 0.5rem;">
-                    <div id="portfoy-chart-filters" style="display:flex; gap:0.5rem; font-size:13px; color:#fff;">
+                    <div id="portfoy-chart-filters" style="display:flex; gap:0.5rem; font-size:13px; color:var(--text-primary);">
                         <span class="chart-filter" data-range="1H" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('1H')">1H</span>
                         <span class="chart-filter" data-range="1A" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('1A')">1A</span>
                         <span class="chart-filter" data-range="6A" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('6A')">6A</span>
@@ -1618,11 +1618,11 @@ const renderPortfoy = (container) => {
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            grid: { color: 'var(--surface-border)' },
                             ticks: { color: '#aaa', font: { size: 10 } }
                         },
                         y: {
-                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            grid: { color: 'var(--surface-border)' },
                             ticks: { 
                                 color: '#aaa', 
                                 font: { size: 10 },
@@ -1670,7 +1670,7 @@ const renderHisseler = (container) => {
                     <div style="font-size: 3rem; margin-bottom: 1rem; color: #2b579a;">📄</div>
                     <h3 style="color: var(--text-primary); margin-bottom: 1rem;">${hisseAdi} - Notlar</h3>
                     <p style="color: var(--text-secondary); margin-bottom: 0;">Word dosyası bilgisayarınıza / uygulamanıza yönlendirildi.</p>
-                    <a href="${filePath}" target="_blank" style="display: inline-block; padding: 0.8rem 2rem; background: #2b579a; color: #fff; text-decoration: none; border-radius: var(--border-radius); font-weight: bold; transition: all 0.3s ease;">
+                    <a href="${filePath}" target="_blank" style="display: inline-block; padding: 0.8rem 2rem; background: #2b579a; color: var(--text-primary); text-decoration: none; border-radius: var(--border-radius); font-weight: bold; transition: all 0.3s ease;">
                         Eğer açılmadıysa buraya tıklayın
                     </a>
                     <iframe src="${filePath}" style="display:none;"></iframe>
@@ -1963,7 +1963,7 @@ const renderHisseler = (container) => {
 
                     gelirHtml = `<table class="dash-table compact-table">
                         <thead>
-                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <tr style="border-bottom: 1px solid var(--table-border);">
                                 <th style="text-align:left !important;">Özet Gelir Tablosu</th>
                                 <th style="text-align:center !important;">${p1}</th>
                                 <th style="text-align:center !important;">${p2}</th>
@@ -2035,7 +2035,7 @@ const renderHisseler = (container) => {
 
                     bilancoHtml = `<table class="dash-table compact-table">
                         <thead>
-                            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <tr style="border-bottom: 1px solid var(--table-border);">
                                 <th style="text-align:left !important;">Özet Bilanço</th>
                                 <th style="text-align:center !important;">${bp1}</th>
                                 <th style="text-align:center !important;">${bp2}</th>
@@ -2203,18 +2203,18 @@ const renderHisseler = (container) => {
                 <style>
                 .compact-table { table-layout: auto !important; width: 100%; border-collapse: collapse; }
                 .compact-table th, .compact-table td { padding: 0.6rem 0.5rem !important; white-space: nowrap; }
-                .compact-table th { font-size: 0.85rem !important; font-weight: 600 !important; color: #ffffff !important; height: 39px; }
+                .compact-table th { font-size: 0.85rem !important; font-weight: 600 !important; color: var(--text-primary)fff !important; height: 39px; }
                 .compact-table td:first-child { font-size: 0.85rem !important; font-weight: 500 !important; color: #cccccc !important; }
                 .compact-table tr { height: 39px !important; }
                 .compact-table td { font-size: 0.85rem !important; font-weight: 500 !important; color: #cccccc; height: 34px !important; line-height: 1 !important; }
                 /* nav-btn override removed to protect main sidebar */
                 .nav-dropdown-content a { font-size: 0.85rem !important; font-weight: 600 !important; }
-                .dash-title { font-size: 0.85rem !important; font-weight: 600 !important; color: #ffffff !important; }
+                .dash-title { font-size: 0.85rem !important; font-weight: 600 !important; color: var(--text-primary)fff !important; }
                 .compact-card { padding: 1.2rem !important; }
                 .gauge-container { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 80px; height: 50px; }
                 .gauge-bg { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid rgba(255,255,255,0.1); border-bottom: none; box-sizing: border-box; }
                 .gauge-fill { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid #2ecc71; border-bottom: none; box-sizing: border-box; transform-origin: bottom center; transform: rotate(0deg); transition: transform 1s; }
-                .gauge-text { position: absolute; bottom: 0; font-size: 1.1rem; font-weight: 700; color: #fff; line-height: 1; }
+                .gauge-text { position: absolute; bottom: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
                 .gauge-label { font-size: 0.7rem; color: #aaa; margin-top: 4px; text-align: center; }
                 </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
@@ -2252,15 +2252,15 @@ const renderHisseler = (container) => {
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;">Çarpanlar</div>
                             <table class="dash-table compact-table" style="flex: 1;">
                                 <tbody>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <tr style="border-bottom: 1px solid var(--table-border);">
                                         <td style="text-align: left !important;">F/K</td>
                                         <td style="text-align: right !important;">${fmtDec(fk)}</td>
                                     </tr>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <tr style="border-bottom: 1px solid var(--table-border);">
                                         <td style="text-align: left !important;">FD/FAVÖK</td>
                                         <td style="text-align: right !important;">${fmtDec(fdFavok)}</td>
                                     </tr>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <tr style="border-bottom: 1px solid var(--table-border);">
                                         <td style="text-align: left !important;">PD/DD</td>
                                         <td style="text-align: right !important;">${fmtDec(pdDd)}</td>
                                     </tr>
@@ -2295,11 +2295,11 @@ const renderHisseler = (container) => {
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;">Şirket Detayları</div>
                             <table class="dash-table compact-table" style="flex: 1;">
                                 <tbody>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <tr style="border-bottom: 1px solid var(--table-border);">
                                         <td style="text-align: left !important;">Hisse Başına Kar</td>
                                         <td style="text-align: right !important;">${fmtDec(hbk)}</td>
                                     </tr>
-                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <tr style="border-bottom: 1px solid var(--table-border);">
                                         <td style="text-align: left !important;">Ödenmiş Sermaye</td>
                                         <td style="text-align: right !important;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(odenmisSermaye)}</td>
                                     </tr>
@@ -2463,8 +2463,8 @@ const renderHisseler = (container) => {
                     foundReports.forEach(report => {
                         let filePath = 'Hisseler/' + selectedHisse + '/' + report.file;
                         let icon = 'fa-file-pdf';
-                        contentHtml += `<li style="margin-bottom: 0.5rem; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 4px;">
-                            <a href="${filePath}" target="_blank" style="color: white; text-decoration: none; font-weight: normal; font-size: 13px; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                        contentHtml += `<li style="margin-bottom: 0.5rem; padding: 0.5rem; background: var(--overlay-bg); border-radius: 4px;">
+                            <a href="${filePath}" target="_blank" style="color: var(--text-primary); text-decoration: none; font-weight: normal; font-size: 13px; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
                                 <i class="fas ${icon}"></i> ${report.name}
                             </a>
                         </li>`;
@@ -2666,7 +2666,7 @@ const renderHisseler = (container) => {
                         }
                         
                         if (editMode && !r.readonly) {
-                            html += `<td style="text-align: right !important;"><input type="number" step="any" style="width:100%; background:rgba(255,255,255,0.1); color:#fff; border:1px solid var(--accent-color); padding:4px; text-align:right; border-radius:4px;" value="${val !== '---' ? val : ''}" onchange="window.updateDegerlemeInput('${selectedHisse}', '${y}', '${r.key}', this.value)"></td>`;
+                            html += `<td style="text-align: right !important;"><input type="number" step="any" style="width:100%; background:var(--input-bg); color:var(--text-primary); border:1px solid var(--accent-color); padding:4px; text-align:right; border-radius:4px;" value="${val !== '---' ? val : ''}" onchange="window.updateDegerlemeInput('${selectedHisse}', '${y}', '${r.key}', this.value)"></td>`;
                         } else {
                             html += `<td style="text-align: right !important; ${extraStyle}">${displayVal === '' ? '---' : displayVal}</td>`;
                         }
@@ -2681,7 +2681,7 @@ const renderHisseler = (container) => {
                     const curCurrency = d.currency || 'TRY';
                     html += `<td style="text-align: center;">
                         <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem; padding-top: 5px;">
-                            <select style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:4px; padding:2px 4px; font-size:0.8rem;" onchange="window.updateDegerlemeInput('${selectedHisse}', '${y}', 'currency', this.value)">
+                            <select style="background:var(--input-bg); color:var(--text-primary); border:1px solid var(--surface-border); border-radius:4px; padding:2px 4px; font-size:0.8rem;" onchange="window.updateDegerlemeInput('${selectedHisse}', '${y}', 'currency', this.value)">
                                 <option value="TRY" ${curCurrency === 'TRY' ? 'selected' : ''}>₺</option>
                                 <option value="USD" ${curCurrency === 'USD' ? 'selected' : ''}>$</option>
                                 <option value="EUR" ${curCurrency === 'EUR' ? 'selected' : ''}>€</option>
@@ -2704,20 +2704,20 @@ const renderHisseler = (container) => {
 
                 let tableHtml = `
                 <div class="dash-card" style="padding:0; overflow:hidden;">
-                    <div style="display: flex; align-items: center; justify-content: center; padding: 3px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); position: relative;">
+                    <div style="display: flex; align-items: center; justify-content: center; padding: 3px 5px; border-bottom: 1px solid var(--table-border); position: relative;">
                         <div style="font-size: 18px; font-weight: bold; color: var(--accent-color); text-align: center;">Hisse Notları</div>
                         <button class="btn" style="background: var(--success-color); padding: 4px 10px; font-size: 14px; position: absolute; right: 5px;" onclick="window.toggleInlineAnaliz()" title="Yeni Not Ekle"><i class="fas fa-plus"></i></button>
                     </div>
                     <div style="overflow-x:auto;">
                     <table class="dash-table compact-table" style="width:100%; min-width:800px; border-collapse:collapse;">
                         <thead>
-                            <tr style="border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2);">
-                                <th style="font-size:12px; font-weight:normal; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">S.N.</th>
-                                <th style="font-size:12px; font-weight:normal; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Tarih</th>
-                                <th style="font-size:12px; font-weight:normal; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Analist</th>
-                                <th style="font-size:12px; font-weight:normal; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle; width:250px; max-width:250px;">Link</th>
-                                <th style="font-size:12px; font-weight:normal; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle;">Notlar</th>
-                                <th style="font-size:12px; font-weight:normal; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">İşlem</th>
+                            <tr style="border-bottom:1px solid var(--table-border); background:var(--table-header-bg);">
+                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">S.N.</th>
+                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Tarih</th>
+                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Analist</th>
+                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle; width:250px; max-width:250px;">Link</th>
+                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle;">Notlar</th>
+                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">İşlem</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2745,7 +2745,7 @@ const renderHisseler = (container) => {
                         }
                         const tarihStr = a.tarih ? a.tarih.split('-').reverse().join('.') : '-';
                         tableHtml += `
-                            <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
+                            <tr style="border-bottom:1px solid var(--table-border);">
                                 <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
                                 <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:right !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${tarihStr}</td>
                                 <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${a.borsaci || 'Anonim'}</td>
@@ -2768,7 +2768,7 @@ const renderHisseler = (container) => {
                     
                     <!-- Yeni Not Ekleme Formu (Gizli) -->
                     <div id="inline-analiz-row" class="glass" style="display: none; flex-direction: column; gap: 1rem; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--accent-color);">
-                        <div style="font-weight: bold; font-size: 1.1rem; color: #fff; margin-bottom: 0.5rem;">Analiz / Not Ekle</div>
+                        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-primary); margin-bottom: 0.5rem;">Analiz / Not Ekle</div>
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                             <div style="flex: 1; min-width: 150px;">
                                 <label style="font-size: 0.8rem; color: var(--text-secondary);">Tarih</label>
@@ -2831,10 +2831,10 @@ const renderHisseler = (container) => {
             stockHeaderHtml = `
             <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 0 1rem 0 1rem; flex-shrink: 0;">
                 <div>
-                    <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; color: #fff;">${selectedHisse}</h1>
+                    <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; color: var(--text-primary);">${selectedHisse}</h1>
                 </div>
                 <div style="display: flex; align-items: baseline; gap: 0.8rem;">
-                    <div style="font-size: 1.2rem; font-weight: bold; color: #fff;">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)} ₺</div>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: var(--text-primary);">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)} ₺</div>
                     <div id="hisse-header-change" style="font-size: 0.9rem; font-weight: 600; color: ${hColor}; display: block;">
                         <i class="fas fa-caret-${isPos ? 'up' : 'down'}"></i> %${initChangeStr}
                     </div>
@@ -2845,7 +2845,7 @@ const renderHisseler = (container) => {
 
         container.innerHTML = `
             ${stockHeaderHtml}
-            <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); flex-wrap: wrap; align-items: center; background: rgba(0,0,0,0.1);">
+            <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--table-border); flex-wrap: wrap; align-items: center; background: var(--overlay-bg);">
                 ${tabsHtml}
             </div>
             <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0 1rem; padding-top: 0.5rem; flex: 1; overflow-y: auto;">
@@ -2913,8 +2913,8 @@ if (window.shouldRenderDashboardCharts) {
                                   responsive: true, maintainAspectRatio: false,
                                   plugins: { legend: { display: false }, datalabels: { display: false } },
                                   scales: {
-                                      x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                                      y: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                                      x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'var(--surface-border)' } },
+                                      y: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'var(--surface-border)' } }
                                   }
                               };
                               const pinkColor = '#d6336c';
@@ -3168,15 +3168,15 @@ const renderHisseIslemleri = (container) => {
                 <td><input type="text" id="edit-tutar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}" disabled></td>
                 <td>
                     <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveEditEkstre('${e.id}')">Kaydet</button>
-                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.cancelEdit()">İptal</button>
+                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--input-bg);" onclick="window.cancelEdit()">İptal</button>
                 </td>
             </tr>`;
         }
         return `<tr>
             <td>${i + 1}</td>
             <td style="text-align: right;">${formatDate(e.tarih)}</td>
-            <td style="font-weight:600; color: #fff; text-align:left;">${tur}</td>
-            <td style="font-weight:600; color: #fff; text-align:left;">${e.menkul}</td>
+            <td style="font-weight:600; color: var(--text-primary); text-align:left;">${tur}</td>
+            <td style="font-weight:600; color: var(--text-primary); text-align:left;">${e.menkul}</td>
             <td>${formatCurrency(e.fiyat)}</td>
             <td class="${e.adet >= 0 ? 'text-success' : 'text-danger'}">${e.adet}</td>
             <td>${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}</td>
@@ -3226,7 +3226,7 @@ const renderHisseIslemleri = (container) => {
                             <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" disabled></td>
                             <td>
                                 <button class="btn" id="i-submit-btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveInlineHisse()">Ekle</button>
-                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.toggleInlineForm('hisse')">İptal</button>
+                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--input-bg);" onclick="window.toggleInlineForm('hisse')">İptal</button>
                             </td>
                         </tr>
                         ${ekstreRows}
@@ -3365,7 +3365,7 @@ const renderNakitIslemleri = (container) => {
                 <td><input type="number" step="0.01" id="edit-n-altin" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.gramAltin || ''}"></td>
                 <td>
                     <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveEditNakit('${n.id}')">Kaydet</button>
-                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.cancelNakitEdit()">İptal</button>
+                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--input-bg);" onclick="window.cancelNakitEdit()">İptal</button>
                 </td>
             </tr>`;
         }
@@ -3401,7 +3401,7 @@ const renderNakitIslemleri = (container) => {
                             <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN"></td>
                             <td>
                                 <button class="btn" id="n-submit-btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveInlineNakitEntry()">Ekle</button>
-                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: rgba(255,255,255,0.1);" onclick="window.toggleInlineForm('nakit')">İptal</button>
+                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--input-bg);" onclick="window.toggleInlineForm('nakit')">İptal</button>
                             </td>
                         </tr>
                         ${nakitRows}
@@ -3490,7 +3490,7 @@ const renderVeriler = (container) => {
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <!-- Nakit Düzenleme -->
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <div style="font-size: 14px; font-weight: bold; color: #ffffff; text-align: left; margin-bottom: 0.5rem;">Mevcut Nakit Tutarı</div>
+                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary)fff; text-align: left; margin-bottom: 0.5rem;">Mevcut Nakit Tutarı</div>
                     <div style="display:flex; gap: 0.5rem;">
                         <input type="number" step="0.01" id="v-nakit-input" value="${State.data.manuelNakitTutar || 0}" class="form-control" style="width:100%; font-size: 13px; color: var(--text-secondary);">
                         <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.manuelNakitTutar = parseFloat(document.getElementById('v-nakit-input').value) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
@@ -3498,14 +3498,14 @@ const renderVeriler = (container) => {
                 </div>
                 <!-- Fon Fiyatları -->
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <div style="font-size: 14px; font-weight: bold; color: #ffffff; text-align: left; margin-bottom: 0.5rem;">Fon Fiyatları</div>
+                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary)fff; text-align: left; margin-bottom: 0.5rem;">Fon Fiyatları</div>
                     <div style="max-height: 150px; overflow-y: auto; padding-right: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
                         ${fonHtml || '<p style="color:var(--text-secondary); margin: 0;">Portföyde fon bulunmuyor.</p>'}
                     </div>
                 </div>
                 <!-- Hedef Portföy -->
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <div style="font-size: 14px; font-weight: bold; color: #ffffff; text-align: left; margin-bottom: 0.5rem;">Hedef Portföy</div>
+                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary)fff; text-align: left; margin-bottom: 0.5rem;">Hedef Portföy</div>
                     <div style="display:flex; gap: 0.5rem;">
                         <input type="number" step="1" id="v-hedef-input" value="${hedefPortfoy}" class="form-control" style="width:100%; font-size: 13px; color: var(--text-secondary);">
                         <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
@@ -3515,7 +3515,7 @@ const renderVeriler = (container) => {
 
             <!-- Rapor Yükle (Bulut) -->
             <div class="glass" style="padding: 8px 1rem; margin-top: 1rem; position: relative; z-index: 99;">
-                <div style="font-size: 14px; font-weight: bold; color: #ffffff; text-align: left; margin-bottom: 0.5rem;"><i class="fas fa-cloud-upload-alt" style="margin-right: 0.5rem;"></i> Buluta Rapor Yükle</div>
+                <div style="font-size: 14px; font-weight: bold; color: var(--text-primary)fff; text-align: left; margin-bottom: 0.5rem;"><i class="fas fa-cloud-upload-alt" style="margin-right: 0.5rem;"></i> Buluta Rapor Yükle</div>
                 <div style="display:flex; flex-direction:row; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
                     <div style="flex: 1; min-width: 120px;">
                         <input type="text" id="upload-hisse" placeholder="Hisse Kodu (Örn: THYAO)" class="form-control" style="width: 100%; text-transform: uppercase; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);">
@@ -3533,7 +3533,7 @@ const renderVeriler = (container) => {
                         #upload-file::file-selector-button,
                         #upload-file::-webkit-file-upload-button {
                             background: var(--accent-color);
-                            color: #fff;
+                            color: var(--text-primary);
                             border: none;
                             padding: 6px 12px;
                             border-radius: 6px;
@@ -3559,7 +3559,7 @@ const renderVeriler = (container) => {
             <!-- Enflasyon -->
             <div class="glass" style="padding: 8px 1rem; margin-top: 1rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0;">
-                    <div style="font-size: 14px; font-weight: bold; color: #ffffff; text-align: left;">Aylık Enflasyon Verileri</div>
+                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary)fff; text-align: left;">Aylık Enflasyon Verileri</div>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleEnfForm()">+</button>
                 </div>
                 
@@ -3574,7 +3574,7 @@ const renderVeriler = (container) => {
                             </tr>
                         </thead>
                         <tbody id="enf-form-tbody">
-                            <tr id="enf-form-row" style="display:none; background: rgba(255,255,255,0.05);">
+                            <tr id="enf-form-row" style="display:none; background: var(--overlay-bg);">
                                 <td style="text-align:center;">
                                     <input type="month" id="i-enf-tarih" class="form-control" style="padding:2px 5px; font-size:12px; height:auto; width:100%;" required>
                                 </td>
@@ -4002,12 +4002,12 @@ const renderAnalizler = (container) => {
                     <table class="dash-table" style="table-layout: fixed; width: 100%;">
                         <thead>
                             <tr>
-                                <th style="text-align: center; color: white; width: 100px; white-space: nowrap;">Tarih</th>
-                                <th style="text-align: center; color: white; width: 140px; white-space: nowrap;">Analist</th>
-                                <th style="text-align: center; color: white; width: 100px; white-space: nowrap;">Hisse</th>
-                                <th style="text-align: center; color: white; width: 100px; white-space: nowrap;">Bağlantı</th>
-                                <th style="text-align: left; color: white; width: 100%;">Not</th>
-                                <th style="text-align: center; color: white; width: 90px; white-space: nowrap;">İşlem</th>
+                                <th style="text-align: center; color: var(--text-primary); width: 100px; white-space: nowrap;">Tarih</th>
+                                <th style="text-align: center; color: var(--text-primary); width: 140px; white-space: nowrap;">Analist</th>
+                                <th style="text-align: center; color: var(--text-primary); width: 100px; white-space: nowrap;">Hisse</th>
+                                <th style="text-align: center; color: var(--text-primary); width: 100px; white-space: nowrap;">Bağlantı</th>
+                                <th style="text-align: left; color: var(--text-primary); width: 100%;">Not</th>
+                                <th style="text-align: center; color: var(--text-primary); width: 90px; white-space: nowrap;">İşlem</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -4672,7 +4672,7 @@ window.updateGlobalHisseDropdown = () => {
         let dropdownHtml = '';
         const sortedTakip = [...State.data.takipListesi].sort((a,b) => a.localeCompare(b));
         sortedTakip.forEach(h => {
-            dropdownHtml += `<div class="hisse-menu-item" style="padding: 0.3rem 0.8rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; color: #eee;" onclick="window.openHisseFromDropdown('${h}')">${h}</div>`;
+            dropdownHtml += `<div class="hisse-menu-item" style="padding: 0.3rem 0.8rem; cursor: pointer; border-bottom: 1px solid var(--table-border); font-size: 13px; color: #eee;" onclick="window.openHisseFromDropdown('${h}')">${h}</div>`;
         });
         dropdownHtml += `<div style="display:flex; justify-content:flex-end; align-items:center; padding: 0.3rem 0.8rem;">
             <div style="font-size: 1rem; font-weight:bold; cursor: pointer; color: var(--accent-color);" onclick="document.getElementById('hisse-modal').style.display='flex'; window.hideHisseDropdown(); document.getElementById('modal-hisse-input').focus();">+</div>

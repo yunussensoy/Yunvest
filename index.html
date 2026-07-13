@@ -23,8 +23,8 @@
     <div id="auth-container" class="app-container" style="justify-content: center; align-items: center;">
         <div class="glass" style="padding: 3rem; width: 400px; text-align: center;">
             <div class="logo" style="margin-bottom: 2rem; margin-right: 0; font-size: 2rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                <div style="background: linear-gradient(90deg, transparent 50%, rgba(0,0,0,0.1) 50%), linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.15) 50%), var(--accent-color); color: #fff; width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.6rem; box-shadow: 0 4px 15px rgba(0,0,0,0.4); flex-shrink: 0; font-family: 'Inter', sans-serif;">Y</div>
-                <div style="display:flex; flex-direction:column; align-items:flex-start; line-height:1;"><span style="font-weight: 700; color: var(--accent-color); letter-spacing: 1px; font-size: 1.8rem;">YUN<span style="font-weight: 300; color: #fff;">Vest</span></span><span style="font-size: 0.8rem; color: var(--text-secondary); letter-spacing: 2px;">PORTFÖY</span></div>
+                <div style="background: linear-gradient(90deg, transparent 50%, rgba(0,0,0,0.1) 50%), linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.15) 50%), var(--accent-color); color: var(--btn-text); width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.6rem; box-shadow: 0 4px 15px rgba(0,0,0,0.4); flex-shrink: 0; font-family: 'Inter', sans-serif;">Y</div>
+                <div style="display:flex; flex-direction:column; align-items:flex-start; line-height:1;"><span style="font-weight: 700; color: var(--accent-color); letter-spacing: 1px; font-size: 1.8rem;">YUN<span style="font-weight: 300; color: var(--btn-text);">Vest</span></span><span style="font-size: 0.8rem; color: var(--text-secondary); letter-spacing: 2px;">PORTFÖY</span></div>
             </div>
             <h3 style="margin-bottom: 1.5rem;" id="auth-title">Giriş Yap</h3>
             <form id="auth-form" style="display: flex; flex-direction: column; gap: 1rem;">
@@ -46,10 +46,10 @@
     <div class="sidebar-overlay" onclick="window.toggleSidebar()"></div>
     <!-- Primary Sidebar -->
     <aside id="primary-sidebar" class="glass-sidebar expanded">
-        <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-bottom: 1px solid var(--surface-border);">
             <div class="logo" style="cursor: pointer; margin:0; display: flex; align-items: center; gap: 0.5rem;" onclick="if(window.goToAnasayfa) window.goToAnasayfa()">
-                <div style="background: linear-gradient(90deg, transparent 50%, rgba(0,0,0,0.1) 50%), linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.15) 50%), var(--accent-color); color: #fff; width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.3); flex-shrink: 0; font-family: 'Inter', sans-serif;">Y</div>
-                <span class="nav-text" style="font-weight: 700; font-size: 1.2rem; color: var(--accent-color);">YUN<span style="font-weight: 300; color: #fff;">Vest</span></span>
+                <div style="background: linear-gradient(90deg, transparent 50%, rgba(0,0,0,0.1) 50%), linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.15) 50%), var(--accent-color); color: var(--btn-text); width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.3); flex-shrink: 0; font-family: 'Inter', sans-serif;">Y</div>
+                <span class="nav-text" style="font-weight: 700; font-size: 1.2rem; color: var(--accent-color);">YUN<span style="font-weight: 300; color: var(--btn-text);">Vest</span></span>
             </div>
             <button id="sidebar-toggle" class="btn" style="padding: 0.3rem 0.5rem; background: transparent; color: var(--text-secondary);" onclick="window.toggleSidebar()"><i class="fas fa-window-maximize"></i></button>
         </div>
@@ -73,7 +73,7 @@
             <button class="nav-btn" data-target="veriler"><i class="fas fa-database"></i> <span class="nav-text">Veri Girişi</span></button>
         </nav>
         <!-- User Profile -->
-        <div style="margin-top: auto; padding: 1rem; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div style="margin-top: auto; padding: 1rem; border-top: 1px solid var(--surface-border);">
             <div class="nav-dropdown" style="position: relative; display: block; width: 100%;" onmouseover="this.querySelector('.dropdown-content').style.display='flex'" onmouseleave="this.querySelector('.dropdown-content').style.display='none'">
                 <button id="user-name-btn" class="nav-btn" style="color: var(--text-secondary); font-weight: 600; font-size: 14px; width: 100%; justify-content: flex-start; padding: 0.5rem;"><i class="fas fa-user-circle" style="width: 20px; font-size: 16px;"></i> <span id="user-name" class="nav-text">Kullanıcı</span> <i class="fas fa-chevron-up nav-text" style="font-size: 0.7em; margin-left: auto;"></i></button>
                 <div class="dropdown-content glass" style="display: none; position: absolute; bottom: 100%; left: 0; min-width: 180px; z-index: 1000; flex-direction: column; padding: 0.5rem; border-radius: var(--border-radius); box-shadow: 0 -4px 15px rgba(0,0,0,0.5);">
@@ -95,8 +95,8 @@
     </aside>
 
     <!-- Secondary Sidebar -->
-    <aside id="secondary-sidebar" class="glass-sidebar secondary-sidebar expanded" style="display: none; border-left: 1px solid rgba(255,255,255,0.02);">
-        <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+    <aside id="secondary-sidebar" class="glass-sidebar secondary-sidebar expanded" style="display: none; border-left: 1px solid var(--table-row-bg);">
+        <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-bottom: 1px solid var(--surface-border);">
             <h3 id="secondary-sidebar-title" style="margin: 0; color: var(--accent-color); font-weight: 700; font-size: 1.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Hisse Detay</h3>
             <button class="btn" style="padding: 0.3rem 0.5rem; background: transparent; color: var(--danger-color);" onclick="window.closeSecondarySidebar()"><i class="fas fa-times"></i></button>
         </div>
@@ -111,7 +111,7 @@
 
     <div class="main-wrapper" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative;">
         <!-- Topbar -->
-        <div class="top-bar glass" style="display: flex; justify-content: space-between; padding: 0.5rem 1rem; align-items: center; border-radius: 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 1rem; position: relative; z-index: 9999; width: 100%;">
+        <div class="top-bar glass" style="display: flex; justify-content: space-between; padding: 0.5rem 1rem; align-items: center; border-radius: 0; border-bottom: 1px solid var(--surface-border); gap: 1rem; position: relative; z-index: 9999; width: 100%;">
             
             <!-- Ticker Bar Wrapper -->
             <div id="ticker-wrapper" style="flex: 1; overflow: hidden; margin-left: 0.5rem;">
@@ -121,10 +121,10 @@
             </div>
 
             <!-- Search Box -->
-            <div style="position: relative; display: flex; gap: 0.5rem; align-items: center; background: rgba(255,255,255,0.05); padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-left: auto; margin-right: 1rem;">
+            <div style="position: relative; display: flex; gap: 0.5rem; align-items: center; background: var(--surface-border); padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid var(--overlay-bg); margin-left: auto; margin-right: 1rem;">
                 <i class="fas fa-search" style="color: var(--text-secondary); font-size: 12px;"></i>
-                <input type="text" id="anasayfa-arama-input" placeholder="Hisse (Örn: THYAO)" autocomplete="off" style="background: transparent; border: none; color: #fff; width: 130px; font-size: 12px; outline: none; text-transform: uppercase;" onkeydown="if(event.key==='Enter') { window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none'; }">
-                <button style="background: var(--success-color); border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer;" onclick="window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none';"><i class="fas fa-plus" style="font-size: 12px;"></i></button>
+                <input type="text" id="anasayfa-arama-input" placeholder="Hisse (Örn: THYAO)" autocomplete="off" style="background: transparent; border: none; color: var(--btn-text); width: 130px; font-size: 12px; outline: none; text-transform: uppercase;" onkeydown="if(event.key==='Enter') { window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none'; }">
+                <button style="background: var(--success-color); border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--btn-text); cursor: pointer;" onclick="window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none';"><i class="fas fa-plus" style="font-size: 12px;"></i></button>
                 
                 <!-- Custom Autocomplete Dropdown -->
                 <div id="search-autocomplete-list" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; max-height: 250px; overflow-y: auto; flex-direction: column; padding: 0.5rem 0; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); margin-top: 5px; z-index: 2000; background: var(--surface-color); border: 1px solid var(--surface-border);">
@@ -170,11 +170,11 @@
     <div id="hisse-remove-modal" class="app-container" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000;">
         <div class="glass" style="padding: 2rem; width: 350px; text-align: center; border-radius: var(--border-radius);">
             <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Takipten Çıkar</h3>
-            <select id="modal-remove-select" class="form-control" style="width: 100%; margin-bottom: 1.5rem; text-transform: uppercase; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--surface-border); padding: 0.8rem; border-radius: var(--border-radius);">
+            <select id="modal-remove-select" class="form-control" style="width: 100%; margin-bottom: 1.5rem; text-transform: uppercase; background: var(--surface-border); color: var(--btn-text); border: 1px solid var(--surface-border); padding: 0.8rem; border-radius: var(--border-radius);">
             </select>
             <div style="display: flex; gap: 1rem; justify-content: center;">
                 <button class="btn" style="flex: 1; background: var(--danger-color);" onclick="window.confirmRemoveHisse()">Çıkar</button>
-                <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1);" onclick="document.getElementById('hisse-remove-modal').style.display = 'none'">İptal</button>
+                <button class="btn" style="flex: 1; background: var(--overlay-bg);" onclick="document.getElementById('hisse-remove-modal').style.display = 'none'">İptal</button>
             </div>
         </div>
     </div>
@@ -186,7 +186,7 @@
             <input type="text" id="modal-hisse-input" class="form-control" placeholder="Hisse Kodu (Örn: THYAO)" list="bist-hisse-list" autocomplete="off" style="width: 100%; margin-bottom: 1.5rem; text-transform: uppercase;" onkeydown="if(event.key === 'Enter') window.confirmAddHisse();">
             <div style="display: flex; gap: 1rem; justify-content: center;">
                 <button class="btn" style="flex: 1; background: var(--accent-color);" onclick="window.confirmAddHisse()">Ekle</button>
-                <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1);" onclick="document.getElementById('hisse-modal').style.display = 'none'">İptal</button>
+                <button class="btn" style="flex: 1; background: var(--overlay-bg);" onclick="document.getElementById('hisse-modal').style.display = 'none'">İptal</button>
             </div>
         </div>
     </div>
@@ -200,7 +200,7 @@
             </select>
             <div style="display: flex; gap: 1rem; justify-content: center;">
                 <button class="btn" style="flex: 1; background: #ff6b6b;" onclick="window.confirmRemoveHisse()">Sil</button>
-                <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1);" onclick="document.getElementById('hisse-sil-modal').style.display = 'none'">İptal</button>
+                <button class="btn" style="flex: 1; background: var(--overlay-bg);" onclick="document.getElementById('hisse-sil-modal').style.display = 'none'">İptal</button>
             </div>
         </div>
     </div>
@@ -256,25 +256,25 @@ window.showAnalizEkleModal = function(hisse) {
     
     <!-- Theme Compatible Alert Modal -->
     <div id="theme-alert-modal" class="app-container" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000;">
-        <div class="glass" style="padding: 2rem; width: 350px; text-align: center; border-radius: var(--border-radius); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div class="glass" style="padding: 2rem; width: 350px; text-align: center; border-radius: var(--border-radius); border: 1px solid var(--overlay-bg); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             <div style="font-size: 3rem; color: var(--accent-color); margin-bottom: 1rem;"><i class="fas fa-info-circle"></i></div>
             <h3 style="margin-bottom: 1rem; color: var(--text-primary); font-weight: 600;">Bilgi</h3>
             <p id="theme-alert-message" style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 13px; line-height: 1.5;"></p>
             <div style="display: flex; justify-content: center;">
-                <button class="btn" style="width: 100%; background: var(--accent-color); color: #fff;" onclick="document.getElementById('theme-alert-modal').style.display='none';">Tamam</button>
+                <button class="btn" style="width: 100%; background: var(--accent-color); color: var(--btn-text);" onclick="document.getElementById('theme-alert-modal').style.display='none';">Tamam</button>
             </div>
         </div>
     </div>
 
     <!-- Theme Compatible Confirm Modal -->
     <div id="theme-confirm-modal" class="app-container" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999;">
-        <div class="glass" style="padding: 2rem; width: 350px; text-align: center; border-radius: var(--border-radius); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div class="glass" style="padding: 2rem; width: 350px; text-align: center; border-radius: var(--border-radius); border: 1px solid var(--overlay-bg); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             <div style="font-size: 3rem; color: var(--danger-color); margin-bottom: 1rem;"><i class="fas fa-exclamation-circle"></i></div>
             <h3 style="margin-bottom: 1rem; color: var(--text-primary); font-weight: 600;">Emin misiniz?</h3>
             <p id="theme-confirm-message" style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 12px; line-height: 1.5;"></p>
             <div style="display: flex; gap: 1rem; justify-content: center;">
-                <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1); color: var(--text-primary);" onclick="document.getElementById('theme-confirm-modal').style.display='none';">İptal</button>
-                <button class="btn" style="flex: 1; background: var(--danger-color); color: #fff;" onclick="document.getElementById('theme-confirm-modal').style.display='none'; if(window.themeConfirmAction) window.themeConfirmAction();">Evet, Sil</button>
+                <button class="btn" style="flex: 1; background: var(--overlay-bg); color: var(--text-primary);" onclick="document.getElementById('theme-confirm-modal').style.display='none';">İptal</button>
+                <button class="btn" style="flex: 1; background: var(--danger-color); color: var(--btn-text);" onclick="document.getElementById('theme-confirm-modal').style.display='none'; if(window.themeConfirmAction) window.themeConfirmAction();">Evet, Sil</button>
             </div>
         </div>
     </div>
@@ -314,8 +314,8 @@ window.showAnalizEkleModal = function(hisse) {
     </aside>
 
     <!-- Secondary Sidebar -->
-    <aside id="secondary-sidebar" class="glass-sidebar secondary-sidebar expanded" style="display: none; border-left: 1px solid rgba(255,255,255,0.02);">
-        <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+    <aside id="secondary-sidebar" class="glass-sidebar secondary-sidebar expanded" style="display: none; border-left: 1px solid var(--table-row-bg);">
+        <div class="sidebar-header" style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-bottom: 1px solid var(--surface-border);">
             <h3 id="secondary-sidebar-title" style="margin: 0; color: var(--accent-color); font-weight: 700; font-size: 1.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Hisse Detay</h3>
             <button class="btn" style="padding: 0.3rem 0.5rem; background: transparent; color: var(--danger-color);" onclick="window.closeSecondarySidebar()"><i class="fas fa-times"></i></button>
         </div>
@@ -330,7 +330,7 @@ window.showAnalizEkleModal = function(hisse) {
 
     <div class="main-wrapper" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative;">
         <!-- Topbar -->
-        <div class="top-bar glass" style="display: flex; justify-content: space-between; padding: 0.5rem 1rem; align-items: center; border-radius: 0; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 1rem; position: relative; z-index: 9999; width: 100%;">
+        <div class="top-bar glass" style="display: flex; justify-content: space-between; padding: 0.5rem 1rem; align-items: center; border-radius: 0; border-bottom: 1px solid var(--surface-border); gap: 1rem; position: relative; z-index: 9999; width: 100%;">
             
             <!-- Ticker Bar Wrapper -->
             <div id="ticker-wrapper" style="flex: 1; overflow: hidden; margin-left: 0.5rem;">
@@ -340,10 +340,10 @@ window.showAnalizEkleModal = function(hisse) {
             </div>
 
             <!-- Search Box -->
-            <div style="position: relative; display: flex; gap: 0.5rem; align-items: center; background: rgba(255,255,255,0.05); padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); margin-left: auto; margin-right: 1rem;">
+            <div style="position: relative; display: flex; gap: 0.5rem; align-items: center; background: var(--surface-border); padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid var(--overlay-bg); margin-left: auto; margin-right: 1rem;">
                 <i class="fas fa-search" style="color: var(--text-secondary); font-size: 12px;"></i>
-                <input type="text" id="anasayfa-arama-input" placeholder="Hisse (Örn: THYAO)" autocomplete="off" style="background: transparent; border: none; color: #fff; width: 130px; font-size: 12px; outline: none; text-transform: uppercase;" onkeydown="if(event.key==='Enter') { window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none'; }">
-                <button style="background: var(--success-color); border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: #fff; cursor: pointer;" onclick="window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none';"><i class="fas fa-plus" style="font-size: 12px;"></i></button>
+                <input type="text" id="anasayfa-arama-input" placeholder="Hisse (Örn: THYAO)" autocomplete="off" style="background: transparent; border: none; color: var(--btn-text); width: 130px; font-size: 12px; outline: none; text-transform: uppercase;" onkeydown="if(event.key==='Enter') { window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none'; }">
+                <button style="background: var(--success-color); border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--btn-text); cursor: pointer;" onclick="window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none';"><i class="fas fa-plus" style="font-size: 12px;"></i></button>
                 
                 <!-- Custom Autocomplete Dropdown -->
                 <div id="search-autocomplete-list" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; max-height: 250px; overflow-y: auto; flex-direction: column; padding: 0.5rem 0; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); margin-top: 5px; z-index: 2000; background: var(--surface-color); border: 1px solid var(--surface-border);">
@@ -365,11 +365,11 @@ window.showAnalizEkleModal = function(hisse) {
     <div id="hisse-remove-modal" class="app-container" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000;">
         <div class="glass" style="padding: 2rem; width: 350px; text-align: center; border-radius: var(--border-radius);">
             <h3 style="margin-bottom: 1.5rem; color: var(--text-primary);">Takipten Çıkar</h3>
-            <select id="modal-remove-select" class="form-control" style="width: 100%; margin-bottom: 1.5rem; text-transform: uppercase; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid var(--surface-border); padding: 0.8rem; border-radius: var(--border-radius);">
+            <select id="modal-remove-select" class="form-control" style="width: 100%; margin-bottom: 1.5rem; text-transform: uppercase; background: var(--surface-border); color: var(--btn-text); border: 1px solid var(--surface-border); padding: 0.8rem; border-radius: var(--border-radius);">
             </select>
             <div style="display: flex; gap: 1rem; justify-content: center;">
                 <button class="btn" style="flex: 1; background: var(--danger-color);" onclick="window.confirmRemoveHisse()">Çıkar</button>
-                <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1);" onclick="document.getElementById('hisse-remove-modal').style.display = 'none'">İptal</button>
+                <button class="btn" style="flex: 1; background: var(--overlay-bg);" onclick="document.getElementById('hisse-remove-modal').style.display = 'none'">İptal</button>
             </div>
         </div>
     </div>
@@ -381,7 +381,7 @@ window.showAnalizEkleModal = function(hisse) {
             <input type="text" id="modal-hisse-input" class="form-control" placeholder="Hisse Kodu (Örn: THYAO)" list="bist-hisse-list" autocomplete="off" style="width: 100%; margin-bottom: 1.5rem; text-transform: uppercase;" onkeydown="if(event.key === 'Enter') window.confirmAddHisse();">
             <div style="display: flex; gap: 1rem; justify-content: center;">
                 <button class="btn" style="flex: 1; background: var(--accent-color);" onclick="window.confirmAddHisse()">Ekle</button>
-                <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1);" onclick="document.getElementById('hisse-modal').style.display = 'none'">İptal</button>
+                <button class="btn" style="flex: 1; background: var(--overlay-bg);" onclick="document.getElementById('hisse-modal').style.display = 'none'">İptal</button>
             </div>
         </div>
     </div>
@@ -395,7 +395,7 @@ window.showAnalizEkleModal = function(hisse) {
             </select>
             <div style="display: flex; gap: 1rem; justify-content: center;">
                 <button class="btn" style="flex: 1; background: #ff6b6b;" onclick="window.confirmRemoveHisse()">Sil</button>
-                <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1);" onclick="document.getElementById('hisse-sil-modal').style.display = 'none'">İptal</button>
+                <button class="btn" style="flex: 1; background: var(--overlay-bg);" onclick="document.getElementById('hisse-sil-modal').style.display = 'none'">İptal</button>
             </div>
         </div>
     </div>
@@ -451,25 +451,25 @@ window.showAnalizEkleModal = function(hisse) {
     
     <!-- Theme Compatible Alert Modal -->
     <div id="theme-alert-modal" class="app-container" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000;">
-        <div class="glass" style="padding: 2rem; width: 350px; text-align: center; border-radius: var(--border-radius); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div class="glass" style="padding: 2rem; width: 350px; text-align: center; border-radius: var(--border-radius); border: 1px solid var(--overlay-bg); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             <div style="font-size: 3rem; color: var(--accent-color); margin-bottom: 1rem;"><i class="fas fa-info-circle"></i></div>
             <h3 style="margin-bottom: 1rem; color: var(--text-primary); font-weight: 600;">Bilgi</h3>
             <p id="theme-alert-message" style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 13px; line-height: 1.5;"></p>
             <div style="display: flex; justify-content: center;">
-                <button class="btn" style="width: 100%; background: var(--accent-color); color: #fff;" onclick="document.getElementById('theme-alert-modal').style.display='none';">Tamam</button>
+                <button class="btn" style="width: 100%; background: var(--accent-color); color: var(--btn-text);" onclick="document.getElementById('theme-alert-modal').style.display='none';">Tamam</button>
             </div>
         </div>
     </div>
 
     <!-- Theme Compatible Confirm Modal -->
     <div id="theme-confirm-modal" class="app-container" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999;">
-        <div class="glass" style="padding: 2rem; width: 350px; text-align: center; border-radius: var(--border-radius); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div class="glass" style="padding: 2rem; width: 350px; text-align: center; border-radius: var(--border-radius); border: 1px solid var(--overlay-bg); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             <div style="font-size: 3rem; color: var(--danger-color); margin-bottom: 1rem;"><i class="fas fa-exclamation-circle"></i></div>
             <h3 style="margin-bottom: 1rem; color: var(--text-primary); font-weight: 600;">Emin misiniz?</h3>
             <p id="theme-confirm-message" style="margin-bottom: 1.5rem; color: var(--text-secondary); font-size: 12px; line-height: 1.5;"></p>
             <div style="display: flex; gap: 1rem; justify-content: center;">
-                <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1); color: var(--text-primary);" onclick="document.getElementById('theme-confirm-modal').style.display='none';">İptal</button>
-                <button class="btn" style="flex: 1; background: var(--danger-color); color: #fff;" onclick="document.getElementById('theme-confirm-modal').style.display='none'; if(window.themeConfirmAction) window.themeConfirmAction();">Evet, Sil</button>
+                <button class="btn" style="flex: 1; background: var(--overlay-bg); color: var(--text-primary);" onclick="document.getElementById('theme-confirm-modal').style.display='none';">İptal</button>
+                <button class="btn" style="flex: 1; background: var(--danger-color); color: var(--btn-text);" onclick="document.getElementById('theme-confirm-modal').style.display='none'; if(window.themeConfirmAction) window.themeConfirmAction();">Evet, Sil</button>
             </div>
         </div>
     </div>
