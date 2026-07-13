@@ -2522,6 +2522,7 @@ const renderHisseler = (container) => {
                 if (sData && sData.bilanco && sData.bilanco.rows) {
                     let finansalBorclarTotal = 0;
                     let nakitTotal = 0;
+                    let finYatTotal = 0;
                     sData.bilanco.rows.forEach(r => {
                         if (!r[0]) return;
                         const rName = r[0].toLocaleLowerCase('tr-TR');
@@ -2533,8 +2534,12 @@ const renderHisseler = (container) => {
                             const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
                             nakitTotal += val;
                         }
+                        if (rName.includes('finansal yatırımlar')) {
+                            const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                            finYatTotal += val;
+                        }
                     });
-                    netBorc = finansalBorclarTotal - nakitTotal;
+                    netBorc = finansalBorclarTotal - nakitTotal - finYatTotal;
                 }
                 const guncelFiyat = parseFloat(State.getFiyat ? State.getFiyat(selectedHisse) : (window.fiyatlar ? window.fiyatlar[selectedHisse] : 0)) || 0;
                 const usdKuru = window.dolarKuru || 33;
@@ -2550,6 +2555,7 @@ const renderHisseler = (container) => {
                     { key: 'fd_favok', label: 'FD/FAVÖK', type: 'decimal' },
                     { key: 'f_k', label: 'F/K', type: 'decimal' },
                     { key: 'pd_dd', label: 'PD/DD', type: 'decimal' },
+                    { key: 'sermaye', label: 'Ödenmiş Sermaye*', type: 'decimal', placeholder: 'Bilanço verisi' },
                     { key: 'hedef_fiyat', label: 'Hedef Fiyat', readonly: true, isTarget: true, type: 'target' },
                     { key: 'potansiyel', label: 'Potansiyel', readonly: true, type: 'percent_target' }
                 ];
@@ -2595,8 +2601,13 @@ const renderHisseler = (container) => {
                         
                         // Calculate PDs
                         let validPDs = [];
+                        
+                        let currentNetBorc = netBorc;
+                        if (curCurrency === 'USD') currentNetBorc = netBorc / usdKuru;
+                        else if (curCurrency === 'EUR') currentNetBorc = netBorc / eurKuru;
+
                         if (hasFavok && d.fd_favok !== undefined && d.fd_favok !== '') {
-                            validPDs.push((favok * (parseFloat(d.fd_favok) || 0)) - netBorc);
+                            validPDs.push((favok * (parseFloat(d.fd_favok) || 0)) - currentNetBorc);
                         }
                         if (hasNetKar && d.f_k !== undefined && d.f_k !== '') {
                             validPDs.push(net_kar * (parseFloat(d.f_k) || 0));
@@ -2613,8 +2624,13 @@ const renderHisseler = (container) => {
                         let hedefFiyatTL = 0;
                         let hasHedef = false;
                         
-                        if (validPDs.length > 0 && odenmisSermaye > 0) {
-                            let hedefFiyatForeign = avgPD / odenmisSermaye;
+                        let currentOdenmisSermaye = odenmisSermaye;
+                        if (d.sermaye !== undefined && d.sermaye !== '') {
+                            currentOdenmisSermaye = parseFloat(d.sermaye) || currentOdenmisSermaye;
+                        }
+                        
+                        if (validPDs.length > 0 && currentOdenmisSermaye > 0) {
+                            let hedefFiyatForeign = avgPD / currentOdenmisSermaye;
                             if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
                             else if (curCurrency === 'EUR') hedefFiyatTL = hedefFiyatForeign * eurKuru;
                             else hedefFiyatTL = hedefFiyatForeign;
@@ -2637,6 +2653,10 @@ const renderHisseler = (container) => {
                                 displayVal = val = '---';
                             }
                         }
+                        if (r.key === 'sermaye' && !editMode && (d.sermaye === undefined || d.sermaye === '')) {
+                            displayVal = odenmisSermaye;
+                        }
+
                         
                         // Formatting logic
                         if (displayVal !== '---' && displayVal !== '') {

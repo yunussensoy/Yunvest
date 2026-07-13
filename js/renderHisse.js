@@ -374,13 +374,23 @@ const renderHisseler = (container) => {
                             return { v1: fBorc.v1 - nakit.v1 - finYat.v1, v2: fBorc.v2 - nakit.v2 - finYat.v2 };
                         }
                         const searchName = name.toLocaleLowerCase('tr-TR');
-                        if (searchName.includes('finansal bor')) {
+                        if (searchName.includes('finansal bor') || searchName.includes('finansal yatırımlar') || searchName.includes('nakit ve nakit')) {
                             let v1 = 0, v2 = 0;
                             let addedRows = [];
+                            let inDuran = false;
                             sData.bilanco.rows.forEach((x, idx) => {
                                 if (x[0]) {
                                     const rName = x[0].toLocaleLowerCase('tr-TR');
-                                    if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && idx < sData.bilanco.rows.length - 2) {
+                                    if (rName.trim() === 'duran varlıklar') inDuran = true;
+                                    let match = false;
+                                    if (searchName.includes('finansal bor') && rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && idx < sData.bilanco.rows.length - 2) {
+                                        match = true;
+                                    } else if (searchName.includes('finansal yatırımlar') && rName.includes('finansal yatırımlar') && !inDuran) {
+                                        match = true;
+                                    } else if (searchName.includes('nakit ve nakit') && (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler'))) {
+                                        match = true;
+                                    }
+                                    if (match) {
                                         let val1 = parseTRNumber(x[1]);
                                         v1 += val1;
                                         v2 += parseTRNumber(x[bp2_idx]);

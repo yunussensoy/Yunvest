@@ -2005,13 +2005,23 @@ const renderHisseler = (container) => {
                             return { v1: fBorc.v1 - nakit.v1 - finYat.v1, v2: fBorc.v2 - nakit.v2 - finYat.v2 };
                         }
                         const searchName = name.toLocaleLowerCase('tr-TR');
-                        if (searchName.includes('finansal bor')) {
+                        if (searchName.includes('finansal bor') || searchName.includes('finansal yatırımlar') || searchName.includes('nakit ve nakit')) {
                             let v1 = 0, v2 = 0;
                             let addedRows = [];
+                            let inDuran = false;
                             sData.bilanco.rows.forEach((x, idx) => {
                                 if (x[0]) {
                                     const rName = x[0].toLocaleLowerCase('tr-TR');
-                                    if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && idx < sData.bilanco.rows.length - 2) {
+                                    if (rName.trim() === 'duran varlıklar') inDuran = true;
+                                    let match = false;
+                                    if (searchName.includes('finansal bor') && rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && idx < sData.bilanco.rows.length - 2) {
+                                        match = true;
+                                    } else if (searchName.includes('finansal yatırımlar') && rName.includes('finansal yatırımlar') && !inDuran) {
+                                        match = true;
+                                    } else if (searchName.includes('nakit ve nakit') && (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler'))) {
+                                        match = true;
+                                    }
+                                    if (match) {
                                         let val1 = parseTRNumber(x[1]);
                                         v1 += val1;
                                         v2 += parseTRNumber(x[bp2_idx]);
@@ -2522,9 +2532,12 @@ const renderHisseler = (container) => {
                 if (sData && sData.bilanco && sData.bilanco.rows) {
                     let finansalBorclarTotal = 0;
                     let nakitTotal = 0;
+                    let finYatTotal = 0;
+                    let inDuran = false;
                     sData.bilanco.rows.forEach(r => {
                         if (!r[0]) return;
                         const rName = r[0].toLocaleLowerCase('tr-TR');
+                        if (rName.trim() === 'duran varlıklar') inDuran = true;
                         if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
                             const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
                             finansalBorclarTotal += val;
@@ -2533,12 +2546,16 @@ const renderHisseler = (container) => {
                             const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
                             nakitTotal += val;
                         }
+                        if (rName.includes('finansal yatırımlar') && !inDuran) {
+                            const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                            finYatTotal += val;
+                        }
                     });
-                    netBorc = finansalBorclarTotal - nakitTotal;
+                    netBorc = finansalBorclarTotal - nakitTotal - finYatTotal;
                 }
                 const guncelFiyat = parseFloat(State.getFiyat ? State.getFiyat(selectedHisse) : (window.fiyatlar ? window.fiyatlar[selectedHisse] : 0)) || 0;
-                const usdKuru = window.dolarKuru || 33;
-                const eurKuru = window.euroKuru || 35;
+                const usdKuru = (State.getFiyat ? parseFloat(State.getFiyat('USDTRY')) : null) || window.dolarKuru || 46.99;
+                const eurKuru = (State.getFiyat ? parseFloat(State.getFiyat('EURTRY')) : null) || window.euroKuru || 50;
                 
                 const rows = [
                     { key: 'ciro', label: 'Satış Gelirleri', type: 'currency' },
@@ -2595,8 +2612,13 @@ const renderHisseler = (container) => {
                         
                         // Calculate PDs
                         let validPDs = [];
+                        
+                        let currentNetBorc = netBorc;
+                        if (curCurrency === 'USD') currentNetBorc = netBorc / usdKuru;
+                        else if (curCurrency === 'EUR') currentNetBorc = netBorc / eurKuru;
+
                         if (hasFavok && d.fd_favok !== undefined && d.fd_favok !== '') {
-                            validPDs.push((favok * (parseFloat(d.fd_favok) || 0)) - netBorc);
+                            validPDs.push((favok * (parseFloat(d.fd_favok) || 0)) - currentNetBorc);
                         }
                         if (hasNetKar && d.f_k !== undefined && d.f_k !== '') {
                             validPDs.push(net_kar * (parseFloat(d.f_k) || 0));
@@ -2613,8 +2635,13 @@ const renderHisseler = (container) => {
                         let hedefFiyatTL = 0;
                         let hasHedef = false;
                         
-                        if (validPDs.length > 0 && odenmisSermaye > 0) {
-                            let hedefFiyatForeign = avgPD / odenmisSermaye;
+                        let currentOdenmisSermaye = odenmisSermaye;
+                        if (d.sermaye !== undefined && d.sermaye !== '') {
+                            currentOdenmisSermaye = parseFloat(d.sermaye) || currentOdenmisSermaye;
+                        }
+                        
+                        if (validPDs.length > 0 && currentOdenmisSermaye > 0) {
+                            let hedefFiyatForeign = avgPD / currentOdenmisSermaye;
                             if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
                             else if (curCurrency === 'EUR') hedefFiyatTL = hedefFiyatForeign * eurKuru;
                             else hedefFiyatTL = hedefFiyatForeign;
@@ -2637,6 +2664,10 @@ const renderHisseler = (container) => {
                                 displayVal = val = '---';
                             }
                         }
+                        if (r.key === 'sermaye' && !editMode && (d.sermaye === undefined || d.sermaye === '')) {
+                            displayVal = odenmisSermaye;
+                        }
+
                         
                         // Formatting logic
                         if (displayVal !== '---' && displayVal !== '') {
@@ -5150,12 +5181,24 @@ window.recalculateHedefFiyatlar = () => {
                 }
             });
         }
-        const netBorc = finansalBorclarTotal - nakitTotal;
+        let finYatTotal = 0;
+        let inDuran = false;
+        if (sData.bilanco && sData.bilanco.rows) {
+            sData.bilanco.rows.forEach(r => {
+                if (!r[0]) return;
+                const rName = r[0].toLocaleLowerCase('tr-TR');
+                if (rName.trim() === 'duran varlıklar') inDuran = true;
+                if (rName.includes('finansal yatırımlar') && !inDuran) {
+                    finYatTotal += typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                }
+            });
+        }
+        const netBorc = finansalBorclarTotal - nakitTotal - finYatTotal;
         const odenmisSermaye = getVal(sData.bilanco, 'Ödenmiş Sermaye');
         const guncelFiyat = parseFloat(State.getFiyat(hisse)) || 0;
         const usdtry = parseFloat(State.getFiyat('USDTRY')) || 32.50;
-        const eurKuru = window.euroKuru || 35.00;
-        const usdKuru = window.dolarKuru || 32.50;
+        const eurKuru = (State.getFiyat ? parseFloat(State.getFiyat('EURTRY')) : null) || window.euroKuru || 50.00;
+        const usdKuru = (State.getFiyat ? parseFloat(State.getFiyat('USDTRY')) : null) || window.dolarKuru || 46.99;
 
         if (!State.data.hedefFiyatlar[hisse]) State.data.hedefFiyatlar[hisse] = {};
 
@@ -5177,7 +5220,11 @@ window.recalculateHedefFiyatlar = () => {
             let favok = (ySatis !== null && yFavokMarji !== null) ? ySatis * (yFavokMarji/100) : null;
             let netKar = (ySatis !== null && yNetKarMarji !== null) ? ySatis * (yNetKarMarji/100) : null;
             
-            let pd1 = (favok !== null && yFdFavok !== null) ? (favok * yFdFavok) - netBorc : null;
+            let currentNetBorc = netBorc;
+            if (curCurrency === 'USD') currentNetBorc = netBorc / usdKuru;
+            else if (curCurrency === 'EUR') currentNetBorc = netBorc / eurKuru;
+
+            let pd1 = (favok !== null && yFdFavok !== null) ? (favok * yFdFavok) - currentNetBorc : null;
             let pd2 = (netKar !== null && yFk !== null) ? (netKar * yFk) : null;
             let pd3 = (yOzkaynak !== null && yPdDd !== null) ? (yOzkaynak * yPdDd) : null;
             
