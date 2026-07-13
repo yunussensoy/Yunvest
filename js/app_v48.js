@@ -983,11 +983,37 @@ const renderPortfoy = (container) => {
     
     const filteredPortfoy = portfoyList.filter(p => !p.isNakit);
 
+    window.varliklarSort = window.varliklarSort || { col: null, asc: true };
     filteredPortfoy.sort((a, b) => {
-        const aTur = a.menkul.length === 3 ? 1 : 0;
-        const bTur = b.menkul.length === 3 ? 1 : 0;
-        if (aTur !== bTur) return aTur - bTur;
-        return b.guncelTutar - a.guncelTutar;
+        if (!window.varliklarSort.col) {
+            const aTur = a.menkul.length === 3 ? 1 : 0;
+            const bTur = b.menkul.length === 3 ? 1 : 0;
+            if (aTur !== bTur) return aTur - bTur;
+            return b.guncelTutar - a.guncelTutar;
+        }
+
+        let valA, valB;
+        if (window.varliklarSort.col === 'menkul') {
+            valA = a.menkul; valB = b.menkul;
+            return window.varliklarSort.asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        } else if (window.varliklarSort.col === 'odenenTutar') {
+            valA = a.odenenTutar; valB = b.odenenTutar;
+        } else if (window.varliklarSort.col === 'guncelTutar') {
+            valA = a.guncelTutar; valB = b.guncelTutar;
+        } else if (window.varliklarSort.col === 'kar') {
+            valA = a.kar; valB = b.kar;
+        } else if (window.varliklarSort.col === 'karYuzde') {
+            valA = a.karYuzde; valB = b.karYuzde;
+        } else if (window.varliklarSort.col === 'portfoyOrani') {
+            valA = a.portfoyOrani; valB = b.portfoyOrani;
+        } else if (window.varliklarSort.col === 'ilkAlimTarihi') {
+            valA = new Date(a.ilkAlimTarihi).getTime(); valB = new Date(b.ilkAlimTarihi).getTime();
+        } else if (window.varliklarSort.col === 'gecenSure') {
+            valA = new Date(a.ilkAlimTarihi).getTime(); valB = new Date(b.ilkAlimTarihi).getTime();
+            return window.varliklarSort.asc ? valB - valA : valA - valB;
+        }
+
+        return window.varliklarSort.asc ? valA - valB : valB - valA;
     });
 
     let portfoyHtml = filteredPortfoy.map((p, i) => {
@@ -1051,6 +1077,31 @@ const renderPortfoy = (container) => {
     }
 
     let arsivKarTotal = 0;
+
+    window.arsivSort = window.arsivSort || { col: null, asc: true };
+    arsivList.sort((a, b) => {
+        if (!window.arsivSort.col) return 0;
+        
+        let valA, valB;
+        if (window.arsivSort.col === 'menkul') {
+            valA = a.menkul; valB = b.menkul;
+            return window.arsivSort.asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        } else if (window.arsivSort.col === 'kar') {
+            valA = a.kar; valB = b.kar;
+        } else if (window.arsivSort.col === 'karYuzde') {
+            valA = a.karYuzde; valB = b.karYuzde;
+        } else if (window.arsivSort.col === 'ilkAlimTarihi') {
+            valA = new Date(a.ilkAlimTarihi).getTime(); valB = new Date(b.ilkAlimTarihi).getTime();
+        } else if (window.arsivSort.col === 'sonSatimTarihi') {
+            valA = new Date(a.sonSatimTarihi).getTime(); valB = new Date(b.sonSatimTarihi).getTime();
+        } else if (window.arsivSort.col === 'tasimaSuresi') {
+            valA = new Date(a.sonSatimTarihi).getTime() - new Date(a.ilkAlimTarihi).getTime();
+            valB = new Date(b.sonSatimTarihi).getTime() - new Date(b.ilkAlimTarihi).getTime();
+        }
+        
+        return window.arsivSort.asc ? valA - valB : valB - valA;
+    });
+
     const arsivHtml = arsivList.map((a, i) => {
         arsivKarTotal += a.kar;
         const guncelFiyat = State.getFiyat(a.menkul);
@@ -1172,13 +1223,19 @@ const renderPortfoy = (container) => {
             </div>
 
             <div id="portfoy-varliklar" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
+                <style>
+                    .varliklar-table th, .varliklar-table td, .varliklar-table .total-row td {
+                        font-size: 12px !important;
+                        font-weight: normal !important;
+                    }
+                </style>
                 <div class="table-container glass" style="margin-bottom: 0;">
                     <div class="table-header">Varlıklarım</div>
                 <div class="flex-row" style="align-items: center; gap: 1rem;">
                     <div style="flex: 2.5; overflow-x: auto;">
-                        <table>
+                        <table class="dash-table compact-table varliklar-table">
                             <thead>
-                                <tr><th style="font-size: 14px;">S.N.</th><th>Menkul</th><th>Tür</th><th>Güncel<br>Fiyat</th><th>Adet</th><th>Güncel<br>Maliyet</th><th>Net<br>Maliyet</th><th>Ödenen<br>Tutar</th><th>Güncel<br>Tutar</th><th>Kar/Zarar</th><th>Kar/Zarar <br> %</th><th>Portföy<br>Oranı</th><th>İlk Alım<br>Tarihi</th><th>Geçen<br>Süre</th></tr>
+                                <tr><th>S.N.</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('menkul')">Menkul${getVarliklarSortIcon('menkul')}</th><th>Tür</th><th>Güncel<br>Fiyat</th><th>Adet</th><th>Güncel<br>Maliyet</th><th>Net<br>Maliyet</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('odenenTutar')">Ödenen<br>Tutar${getVarliklarSortIcon('odenenTutar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('guncelTutar')">Güncel<br>Tutar${getVarliklarSortIcon('guncelTutar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('kar')">Kar/Zarar${getVarliklarSortIcon('kar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('karYuzde')">Kar/Zarar <br> %${getVarliklarSortIcon('karYuzde')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('portfoyOrani')">Portföy<br>Oranı${getVarliklarSortIcon('portfoyOrani')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('ilkAlimTarihi')">İlk Alım<br>Tarihi${getVarliklarSortIcon('ilkAlimTarihi')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('gecenSure')">Geçen<br>Süre${getVarliklarSortIcon('gecenSure')}</th></tr>
                             </thead>
                             <tbody>
                                 ${portfoyHtml}
@@ -1209,7 +1266,7 @@ const renderPortfoy = (container) => {
                     <div class="table-header">Arşiv</div>
 <table class="dash-table compact-table" style="min-width: 1000px;">
                     <thead>
-                        <tr><th style="font-size: 14px;">S.N.</th><th>Menkul</th><th>Güncel<br>Fiyat</th><th>Adet</th><th>Alış Fiyatı</th><th>Satış Fiyatı</th><th>Kar / Zarar</th><th>Kar / Zarar %</th><th>İlk Alım Tarihi</th><th>Son Satım Tarihi</th><th>Taşıma Süresi</th></tr>
+                        <tr><th style="font-size: 14px;">S.N.</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('menkul')">Menkul${getArsivSortIcon('menkul')}</th><th>Güncel<br>Fiyat</th><th>Adet</th><th>Alış Fiyatı</th><th>Satış Fiyatı</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('kar')">Kar / Zarar${getArsivSortIcon('kar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('karYuzde')">Kar / Zarar %${getArsivSortIcon('karYuzde')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('ilkAlimTarihi')">İlk Alım Tarihi${getArsivSortIcon('ilkAlimTarihi')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('sonSatimTarihi')">Son Satım Tarihi${getArsivSortIcon('sonSatimTarihi')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('tasimaSuresi')">Taşıma Süresi${getArsivSortIcon('tasimaSuresi')}</th></tr>
                     </thead>
                     <tbody>
                         ${arsivHtml}
@@ -2655,12 +2712,12 @@ const renderHisseler = (container) => {
                     <table class="dash-table compact-table" style="width:100%; min-width:800px; border-collapse:collapse;">
                         <thead>
                             <tr style="border-bottom:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2);">
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">S.N.</th>
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Tarih</th>
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Analist</th>
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle; width:250px; max-width:250px;">Link</th>
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle;">Notlar</th>
-                                <th style="font-size:13px; font-weight:bold; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">İşlem</th>
+                                <th style="font-size:12px; font-weight:normal; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">S.N.</th>
+                                <th style="font-size:12px; font-weight:normal; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Tarih</th>
+                                <th style="font-size:12px; font-weight:normal; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Analist</th>
+                                <th style="font-size:12px; font-weight:normal; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle; width:250px; max-width:250px;">Link</th>
+                                <th style="font-size:12px; font-weight:normal; color:white; text-align:left !important; padding:8px 5px; vertical-align:middle;">Notlar</th>
+                                <th style="font-size:12px; font-weight:normal; color:white; text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">İşlem</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -2682,18 +2739,18 @@ const renderHisseler = (container) => {
                                 text = a.baslik || 'X (Twitter) Linki';
                                 icon = 'fab fa-twitter';
                             }
-                            linkHtml = `<a href="${a.baglanti}" target="_blank" style="color:var(--accent-color); text-decoration:none;"><i class="${icon}"></i> ${text}</a>`;
+                            linkHtml = `<a href="${a.baglanti}" target="_blank" style="color:var(--accent-color); text-decoration:none; font-weight:400 !important;"><i class="${icon}"></i> ${text}</a>`;
                         } else if (a.baslik) {
                             linkHtml = `<span style="color:var(--text-secondary);">${a.baslik}</span>`;
                         }
                         const tarihStr = a.tarih ? a.tarih.split('-').reverse().join('.') : '-';
                         tableHtml += `
                             <tr style="border-bottom:1px solid rgba(255,255,255,0.05);">
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:right !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${tarihStr}</td>
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${a.borsaci || 'Anonim'}</td>
-                                <td style="font-size:13px; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px;"><div style="width:100%; max-width:250px; white-space:normal; overflow-wrap:break-word; word-break:break-word;">${linkHtml}</div></td>
-                                <td style="font-size:11px; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:right !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${tarihStr}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${a.borsaci || 'Anonim'}</td>
+                                <td style="font-size:12px; font-weight:400 !important; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px;"><div style="width:100%; max-width:250px; white-space:normal; overflow-wrap:break-word; word-break:break-word; font-weight:400 !important;">${linkHtml}</div></td>
+                                <td style="font-size:10px; font-weight:400 !important; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
                                 <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
                                     <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
                                     <button class="btn btn-icon" style="color: var(--danger-color); padding: 4px !important; font-size: 14px;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash"></i></button>
@@ -2992,17 +3049,104 @@ window.setHisseTab = (tab) => {
 };
 
 
+window.toggleHisseSort = (col) => {
+    if (!window.hisseSort) window.hisseSort = { col: null, asc: true };
+    if (window.hisseSort.col === col) {
+        window.hisseSort.asc = !window.hisseSort.asc;
+    } else {
+        window.hisseSort = { col: col, asc: true };
+    }
+    if (typeof renderPage === 'function') renderPage();
+};
+
+const getHisseSortIcon = (col) => {
+    if (window.hisseSort && window.hisseSort.col === col) {
+        return window.hisseSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
+    }
+    return ' <i class="fas fa-sort" style="color: rgba(255,255,255,0.3);"></i>';
+};
+
+window.toggleArsivSort = (col) => {
+    if (!window.arsivSort) window.arsivSort = { col: null, asc: true };
+    if (window.arsivSort.col === col) {
+        window.arsivSort.asc = !window.arsivSort.asc;
+    } else {
+        window.arsivSort = { col: col, asc: true };
+    }
+    if (typeof renderPage === 'function') renderPage();
+    if (typeof window.switchPortfoyTab === 'function') window.switchPortfoyTab('arsiv');
+};
+
+const getArsivSortIcon = (col) => {
+    if (window.arsivSort && window.arsivSort.col === col) {
+        return window.arsivSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
+    }
+    return ' <i class="fas fa-sort" style="color: rgba(255,255,255,0.3);"></i>';
+};
+
+window.toggleVarliklarSort = (col) => {
+    if (!window.varliklarSort) window.varliklarSort = { col: null, asc: true };
+    if (window.varliklarSort.col === col) {
+        window.varliklarSort.asc = !window.varliklarSort.asc;
+    } else {
+        window.varliklarSort = { col: col, asc: true };
+    }
+    if (typeof renderPage === 'function') renderPage();
+    if (typeof window.switchPortfoyTab === 'function') window.switchPortfoyTab('varliklar');
+};
+
+const getVarliklarSortIcon = (col) => {
+    if (window.varliklarSort && window.varliklarSort.col === col) {
+        return window.varliklarSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
+    }
+    return ' <i class="fas fa-sort" style="color: rgba(255,255,255,0.3);"></i>';
+};
+
+window.toggleNakitSort = (col) => {
+    if (!window.nakitSort) window.nakitSort = { col: null, asc: true };
+    if (window.nakitSort.col === col) {
+        window.nakitSort.asc = !window.nakitSort.asc;
+    } else {
+        window.nakitSort = { col: col, asc: true };
+    }
+    if (typeof renderPage === 'function') renderPage();
+};
+
+const getNakitSortIcon = (col) => {
+    if (window.nakitSort && window.nakitSort.col === col) {
+        return window.nakitSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
+    }
+    return ' <i class="fas fa-sort" style="color: rgba(255,255,255,0.3);"></i>';
+};
+
 const renderHisseIslemleri = (container) => {
     window.currentEditId = window.currentEditId || null;
+    window.hisseSort = window.hisseSort || { col: null, asc: true };
 
-    const sortedEkstre = [...State.data.ekstre].sort((a, b) => {
-        if (a.menkul === 'NAKİT' && b.menkul !== 'NAKİT') return -1;
-        if (b.menkul === 'NAKİT' && a.menkul !== 'NAKİT') return 1;
-        if (a.menkul !== b.menkul) return a.menkul.localeCompare(b.menkul);
-        return new Date(b.tarih) - new Date(a.tarih);
+    const hisseFonEkstre = [...State.data.ekstre].filter(e => e.menkul !== 'NAKİT');
+
+    hisseFonEkstre.sort((a, b) => {
+        if (window.hisseSort.col === 'tarih') {
+            const dateA = new Date(a.tarih);
+            const dateB = new Date(b.tarih);
+            return window.hisseSort.asc ? dateA - dateB : dateB - dateA;
+        } else if (window.hisseSort.col === 'tutar') {
+            const tutarA = a.fiyat * Math.abs(a.adet);
+            const tutarB = b.fiyat * Math.abs(b.adet);
+            return window.hisseSort.asc ? tutarA - tutarB : tutarB - tutarA;
+        } else if (window.hisseSort.col === 'tur') {
+            const turA = a.menkul.length === 3 ? 'Fon' : 'Hisse';
+            const turB = b.menkul.length === 3 ? 'Fon' : 'Hisse';
+            if (turA !== turB) return window.hisseSort.asc ? turA.localeCompare(turB) : turB.localeCompare(turA);
+            return new Date(b.tarih) - new Date(a.tarih);
+        } else if (window.hisseSort.col === 'menkul') {
+            if (a.menkul !== b.menkul) return window.hisseSort.asc ? a.menkul.localeCompare(b.menkul) : b.menkul.localeCompare(a.menkul);
+            return new Date(b.tarih) - new Date(a.tarih);
+        } else {
+            if (a.menkul !== b.menkul) return a.menkul.localeCompare(b.menkul);
+            return new Date(b.tarih) - new Date(a.tarih);
+        }
     });
-
-    const hisseFonEkstre = sortedEkstre.filter(e => e.menkul !== 'NAKİT');
 
     const ekstreRows = hisseFonEkstre.map((e, i) => {
         const isFon = e.menkul.length === 3;
@@ -3059,12 +3203,12 @@ const renderHisseIslemleri = (container) => {
         <div class="page-section active">
             <div class="table-container glass" style="overflow-x: auto;">
                 <div class="table-header">
-                    <span>Hisse ve Fon Hareketleri</span>
+                    <span>Hisse ve Fon İşlemleri</span>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleInlineForm('hisse')">+</button>
                 </div>
                 <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
                     <thead>
-                        <tr><th style="width: 5%;">S.N.</th><th style="width: 15%; text-align: right;">Tarih</th><th style="width: 8%; text-align: left;">Tür</th><th style="width: 12%; text-align: left;">Menkul</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%;">Tutar</th><th style="width: 18%;">İşlem</th></tr>
+                        <tr><th style="width: 5%;">S.N.</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tarih')">Tarih${getHisseSortIcon('tarih')}</th><th style="width: 8%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tur')">Tür${getHisseSortIcon('tur')}</th><th style="width: 12%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('menkul')">Menkul${getHisseSortIcon('menkul')}</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tutar')">Tutar${getHisseSortIcon('tutar')}</th><th style="width: 18%;">İşlem</th></tr>
                     </thead>
                     <tbody id="hisse-tbody">
                         <tr id="inline-hisse-row" style="display: none; background: rgba(0,0,0,0.4);">
@@ -3191,8 +3335,25 @@ const renderHisseIslemleri = (container) => {
 
 const renderNakitIslemleri = (container) => {
     window.currentNakitEditId = window.currentNakitEditId || null;
-    
-    const nakitHareketleriList = [...(State.data.nakitHareketleri || [])].sort((a,b) => new Date(b.tarih) - new Date(a.tarih));
+    window.nakitSort = window.nakitSort || { col: null, asc: true };
+    const nakitHareketleriList = [...(State.data.nakitHareketleri || [])].sort((a,b) => {
+        if (!window.nakitSort.col) return new Date(b.tarih) - new Date(a.tarih);
+        
+        let valA, valB;
+        if (window.nakitSort.col === 'tarih') {
+            valA = new Date(a.tarih).getTime(); valB = new Date(b.tarih).getTime();
+        } else if (window.nakitSort.col === 'tutar') {
+            valA = a.tutar; valB = b.tutar;
+        } else if (window.nakitSort.col === 'bist100') {
+            valA = a.bist100 || 0; valB = b.bist100 || 0;
+        } else if (window.nakitSort.col === 'dolar') {
+            valA = a.dolar || 0; valB = b.dolar || 0;
+        } else if (window.nakitSort.col === 'gramAltin') {
+            valA = a.gramAltin || 0; valB = b.gramAltin || 0;
+        }
+        return window.nakitSort.asc ? valA - valB : valB - valA;
+    });
+
     const nakitRows = nakitHareketleriList.map((n, i) => {
         if (n.id === window.currentNakitEditId) {
             return `<tr style="background: rgba(0,0,0,0.4);">
@@ -3223,12 +3384,12 @@ const renderNakitIslemleri = (container) => {
         <div class="page-section active">
             <div class="table-container glass" style="overflow-x: auto;">
                 <div class="table-header">
-                    <span>Nakit Hareketleri</span>
+                    <span>Nakit İşlemleri</span>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleInlineForm('nakit')">+</button>
                 </div>
                 <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
                     <thead>
-                        <tr><th style="width: 5%;">S.N.</th><th style="width: 15%; text-align: right;">Tarih</th><th style="width: 15%;">Tutar</th><th style="width: 15%;">XU100</th><th style="width: 15%;">USDTRY</th><th style="width: 15%;">GRAMALTIN</th><th style="width: 20%;">İşlem</th></tr>
+                        <tr><th style="width: 5%;">S.N.</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tarih')">Tarih${getNakitSortIcon('tarih')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tutar')">Tutar${getNakitSortIcon('tutar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('bist100')">XU100${getNakitSortIcon('bist100')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('dolar')">USDTRY${getNakitSortIcon('dolar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('gramAltin')">GRAMALTIN${getNakitSortIcon('gramAltin')}</th><th style="width: 20%;">İşlem</th></tr>
                     </thead>
                     <tbody id="nakit-tbody">
                         <tr id="inline-nakit-row" style="display: none; background: rgba(0,0,0,0.4);">
@@ -4068,44 +4229,29 @@ window.removeHisseFromTakip = (hisseKodu) => {
     document.getElementById('theme-confirm-modal').style.display = 'flex';
 };
 
+window.toggleTakipSort = (col) => {
+    if (!window.takipSort) window.takipSort = { col: null, asc: true };
+    if (window.takipSort.col === col) {
+        window.takipSort.asc = !window.takipSort.asc;
+    } else {
+        window.takipSort = { col: col, asc: true };
+    }
+    if (typeof renderPage === 'function') renderPage();
+};
+
+const getTakipSortIcon = (col) => {
+    if (window.takipSort && window.takipSort.col === col) {
+        return window.takipSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
+    }
+    return ' <i class="fas fa-sort" style="color: rgba(255,255,255,0.3);"></i>';
+};
+
 const renderAnasayfa = (container) => {
     if (window.recalculateHedefFiyatlar) window.recalculateHedefFiyatlar();
     let takipList = State.data.takipListesi ? [...State.data.takipListesi] : [];
     
-    // Sort by Potansiyel (2026 > 2027 > 2028 > alphabetical)
-    takipList.sort((a, b) => {
-        const getPot = (hisse, year) => {
-            if (State.data.hedefFiyatlar && State.data.hedefFiyatlar[hisse] && State.data.hedefFiyatlar[hisse][year]) {
-                return State.data.hedefFiyatlar[hisse][year].potansiyel !== undefined ? State.data.hedefFiyatlar[hisse][year].potansiyel : -Infinity;
-            }
-            return -Infinity;
-        };
-
-        const pot26A = getPot(a, '2026');
-        const pot26B = getPot(b, '2026');
-        if (pot26B !== pot26A) return pot26B - pot26A;
-
-        const pot27A = getPot(a, '2027');
-        const pot27B = getPot(b, '2027');
-        if (pot27B !== pot27A) return pot27B - pot27A;
-
-        const pot28A = getPot(a, '2028');
-        const pot28B = getPot(b, '2028');
-        if (pot28B !== pot28A) return pot28B - pot28A;
-
-        const pot29A = getPot(a, '2029');
-        const pot29B = getPot(b, '2029');
-        if (pot29B !== pot29A) return pot29B - pot29A;
-
-        const pot30A = getPot(a, '2030');
-        const pot30B = getPot(b, '2030');
-        if (pot30B !== pot30A) return pot30B - pot30A;
-
-        return a.localeCompare(b);
-    });
-
     const fmtDec = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(val);
-    const fmtPct = (val) => { let num = val * 100; let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(Math.abs(num)); return num < 0 ? '%-' + formatted : '%' + formatted; };
+    const fmtPct = (val) => { let num = val * 100; let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(Math.abs(num))); return num < 0 ? '%-' + formatted : '%' + formatted; };
     const fmtNum = (val) => {
         if (val === 0 || isNaN(val) || !val) return '-';
         if (val >= 1000000000) return (val / 1000000000).toFixed(2) + ' Mlr';
@@ -4116,9 +4262,8 @@ const renderAnasayfa = (container) => {
         if (val === 0 || isNaN(val) || !val || !isFinite(val)) return '-';
         return fmtDec(val);
     };
-    
-    let rowsHtml = '';
-    takipList.forEach((hisse, i) => {
+
+    let takipDataList = takipList.map(hisse => {
         let fiyat = 0;
         const td = window.tickerData && window.tickerData[hisse];
         if (td) {
@@ -4206,6 +4351,46 @@ const renderAnasayfa = (container) => {
             pdDd = anaOrtaklikOzkaynaklar !== 0 ? (piyasaDegeri / anaOrtaklikOzkaynaklar) : 0;
         }
 
+        const getPot = (year) => {
+            if (State.data.hedefFiyatlar && State.data.hedefFiyatlar[hisse] && State.data.hedefFiyatlar[hisse][year]) {
+                return State.data.hedefFiyatlar[hisse][year].potansiyel !== undefined ? State.data.hedefFiyatlar[hisse][year].potansiyel : -Infinity;
+            }
+            return -Infinity;
+        };
+
+        return {
+            hisse, fiyat, piyasaDegeri, fdFavok, fk, pdDd,
+            pot2026: getPot('2026'), pot2027: getPot('2027'),
+            pot2028: getPot('2028'), pot2029: getPot('2029'), pot2030: getPot('2030')
+        };
+    });
+
+    window.takipSort = window.takipSort || { col: null, asc: true };
+    takipDataList.sort((a, b) => {
+        if (!window.takipSort.col) {
+            if (b.pot2026 !== a.pot2026) return b.pot2026 - a.pot2026;
+            if (b.pot2027 !== a.pot2027) return b.pot2027 - a.pot2027;
+            if (b.pot2028 !== a.pot2028) return b.pot2028 - a.pot2028;
+            if (b.pot2029 !== a.pot2029) return b.pot2029 - a.pot2029;
+            if (b.pot2030 !== a.pot2030) return b.pot2030 - a.pot2030;
+            return a.hisse.localeCompare(b.hisse);
+        }
+        
+        if (window.takipSort.col === 'hisse') {
+            return window.takipSort.asc ? a.hisse.localeCompare(b.hisse) : b.hisse.localeCompare(a.hisse);
+        }
+        
+        let valA = a[window.takipSort.col];
+        let valB = b[window.takipSort.col];
+        if (valA === -Infinity) valA = -999999999;
+        if (valB === -Infinity) valB = -999999999;
+        return window.takipSort.asc ? valA - valB : valB - valA;
+    });
+
+    let rowsHtml = '';
+    takipDataList.forEach((item, i) => {
+        const { hisse, fiyat, piyasaDegeri, fdFavok, fk, pdDd, pot2026, pot2027, pot2028, pot2029, pot2030 } = item;
+        
         const hData = State.data.hedefFiyatlar && State.data.hedefFiyatlar[hisse] ? State.data.hedefFiyatlar[hisse] : null;
         const renderCell = (year) => {
             if (!hData || !hData[year]) return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
@@ -4239,32 +4424,38 @@ const renderAnasayfa = (container) => {
     }
 
     container.innerHTML = `
+        <style>
+            .takip-table th, .takip-table td {
+                font-size: 12px !important;
+                font-weight: normal !important;
+            }
+        </style>
         <div class="page-section active" style="display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 0px;">
 
             <!-- Takip Listesi Tablosu -->
             <div class="glass" style="flex: 1; overflow-y: auto; padding: 0.5rem 1rem 1rem 1rem;">
                 <div class="table-header" style="font-size:1.2rem; display:flex; align-items:center; gap:0.5rem;">Takip Listesi</div>
                 <div style="overflow-x: auto;">
-                    <table class="dash-table compact-table" style="text-align: center;">
+                    <table class="dash-table compact-table takip-table" style="text-align: center;">
                         <thead>
                             <tr>
                                 <th style="text-align: center;">S.N</th>
-                                <th style="text-align: center;">Hisse</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('hisse')">Hisse${getTakipSortIcon('hisse')}</th>
                                 <th style="text-align: center;">Fiyat</th>
-                                <th style="text-align: center;">Piyasa Değeri</th>
-                                <th style="text-align: center;">FD/FAVÖK</th>
-                                <th style="text-align: center;">F/K</th>
-                                <th style="text-align: center;">PD/DD</th>
-                                <th style="text-align: center;">2026<br>H. F.</th>
-                                <th style="text-align: center;">2026<br>Pot.</th>
-                                <th style="text-align: center;">2027<br>H. F.</th>
-                                <th style="text-align: center;">2027<br>Pot.</th>
-                                <th style="text-align: center;">2028<br>H. F.</th>
-                                <th style="text-align: center;">2028<br>Pot.</th>
-                                <th style="text-align: center;">2029<br>H. F.</th>
-                                <th style="text-align: center;">2029<br>Pot.</th>
-                                <th style="text-align: center;">2030<br>H. F.</th>
-                                <th style="text-align: center;">2030<br>Pot.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('piyasaDegeri')">Piyasa Değeri${getTakipSortIcon('piyasaDegeri')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('fdFavok')">FD/FAVÖK${getTakipSortIcon('fdFavok')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('fk')">F/K${getTakipSortIcon('fk')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pdDd')">PD/DD${getTakipSortIcon('pdDd')}</th>
+                                <th style="text-align: center;">2026 H. F.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2026')">2026 Pot.${getTakipSortIcon('pot2026')}</th>
+                                <th style="text-align: center;">2027 H. F.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2027')">2027 Pot.${getTakipSortIcon('pot2027')}</th>
+                                <th style="text-align: center;">2028 H. F.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2028')">2028 Pot.${getTakipSortIcon('pot2028')}</th>
+                                <th style="text-align: center;">2029 H. F.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2029')">2029 Pot.${getTakipSortIcon('pot2029')}</th>
+                                <th style="text-align: center;">2030 H. F.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2030')">2030 Pot.${getTakipSortIcon('pot2030')}</th>
                                 <th style="text-align: center;">İşlem</th>
                             </tr>
                         </thead>
