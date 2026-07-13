@@ -2203,13 +2203,13 @@ const renderHisseler = (container) => {
                 <style>
                 .compact-table { table-layout: auto !important; width: 100%; border-collapse: collapse; }
                 .compact-table th, .compact-table td { padding: 0.6rem 0.5rem !important; white-space: nowrap; }
-                .compact-table th { font-size: 0.85rem !important; font-weight: 600 !important; color: var(--text-primary)fff !important; height: 39px; }
+                .compact-table th { font-size: 0.85rem !important; font-weight: 600 !important; color: var(--text-primary) !important; height: 39px; }
                 .compact-table td:first-child { font-size: 0.85rem !important; font-weight: 500 !important; color: #cccccc !important; }
                 .compact-table tr { height: 39px !important; }
                 .compact-table td { font-size: 0.85rem !important; font-weight: 500 !important; color: #cccccc; height: 34px !important; line-height: 1 !important; }
                 /* nav-btn override removed to protect main sidebar */
                 .nav-dropdown-content a { font-size: 0.85rem !important; font-weight: 600 !important; }
-                .dash-title { font-size: 0.85rem !important; font-weight: 600 !important; color: var(--text-primary)fff !important; }
+                .dash-title { font-size: 0.85rem !important; font-weight: 600 !important; color: var(--text-primary) !important; }
                 .compact-card { padding: 1.2rem !important; }
                 .gauge-container { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 80px; height: 50px; }
                 .gauge-bg { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid rgba(255,255,255,0.1); border-bottom: none; box-sizing: border-box; }
@@ -3485,37 +3485,37 @@ const renderVeriler = (container) => {
     });
 
     container.innerHTML = `
-        <div class="page-section active" style="display: flex; flex-direction: column; gap: 2rem;">
+        <div class="page-section active" style="display: flex; flex-direction: column; gap: 16px;">
             
                         <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <!-- Nakit Düzenleme -->
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary)fff; text-align: left; margin-bottom: 0.5rem;">Mevcut Nakit Tutarı</div>
+                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Mevcut Nakit Tutarı</div>
                     <div style="display:flex; gap: 0.5rem;">
-                        <input type="number" step="0.01" id="v-nakit-input" value="${State.data.manuelNakitTutar || 0}" class="form-control" style="width:100%; font-size: 13px; color: var(--text-secondary);">
-                        <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.manuelNakitTutar = parseFloat(document.getElementById('v-nakit-input').value) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
+                        <input type="text" id="v-nakit-input" value="${formatNumber(State.data.manuelNakitTutar || 0, 2)}" class="form-control" style="width:100%; font-size: 13px; color: var(--text-secondary);" onblur="this.value = formatNumber(parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0, 2)">
+                        <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.manuelNakitTutar = parseFloat(document.getElementById('v-nakit-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
                     </div>
                 </div>
                 <!-- Fon Fiyatları -->
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary)fff; text-align: left; margin-bottom: 0.5rem;">Fon Fiyatları</div>
+                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Fon Fiyatları</div>
                     <div style="max-height: 150px; overflow-y: auto; padding-right: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
                         ${fonHtml || '<p style="color:var(--text-secondary); margin: 0;">Portföyde fon bulunmuyor.</p>'}
                     </div>
                 </div>
                 <!-- Hedef Portföy -->
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary)fff; text-align: left; margin-bottom: 0.5rem;">Hedef Portföy</div>
+                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Hedef Portföy</div>
                     <div style="display:flex; gap: 0.5rem;">
-                        <input type="number" step="1" id="v-hedef-input" value="${hedefPortfoy}" class="form-control" style="width:100%; font-size: 13px; color: var(--text-secondary);">
-                        <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
+                        <input type="text" id="v-hedef-input" value="${formatNumber(hedefPortfoy, 0)}" class="form-control" style="width:100%; font-size: 13px; color: var(--text-secondary);" onblur="this.value = formatNumber(parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0, 0)">
+                        <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
                     </div>
                 </div>
             </div>
 
             <!-- Rapor Yükle (Bulut) -->
-            <div class="glass" style="padding: 8px 1rem; margin-top: 1rem; position: relative; z-index: 99;">
-                <div style="font-size: 14px; font-weight: bold; color: var(--text-primary)fff; text-align: left; margin-bottom: 0.5rem;"><i class="fas fa-cloud-upload-alt" style="margin-right: 0.5rem;"></i> Buluta Rapor Yükle</div>
+            <div class="glass" style="padding: 8px 1rem; margin-top: 0; position: relative; z-index: 99;">
+                <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;"><i class="fas fa-cloud-upload-alt" style="margin-right: 0.5rem;"></i> Buluta Rapor Yükle</div>
                 <div style="display:flex; flex-direction:row; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
                     <div style="flex: 1; min-width: 120px;">
                         <input type="text" id="upload-hisse" placeholder="Hisse Kodu (Örn: THYAO)" class="form-control" style="width: 100%; text-transform: uppercase; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);">
@@ -3557,9 +3557,9 @@ const renderVeriler = (container) => {
             </div>
 
             <!-- Enflasyon -->
-            <div class="glass" style="padding: 8px 1rem; margin-top: 1rem;">
+            <div class="glass" style="padding: 8px 1rem; margin-top: 0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0;">
-                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary)fff; text-align: left;">Aylık Enflasyon Verileri</div>
+                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left;">Aylık Enflasyon Verileri</div>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleEnfForm()">+</button>
                 </div>
                 
