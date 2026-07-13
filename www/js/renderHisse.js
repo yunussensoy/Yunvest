@@ -370,7 +370,8 @@ const renderHisseler = (container) => {
                         if (name === 'net borç' || name === 'net bor') {
                             const fBorc = getB('finansal borçlar');
                             const nakit = getB('nakit ve nakit');
-                            return { v1: fBorc.v1 - nakit.v1, v2: fBorc.v2 - nakit.v2 };
+                            const finYat = getB('finansal yatırımlar');
+                            return { v1: fBorc.v1 - nakit.v1 - finYat.v1, v2: fBorc.v2 - nakit.v2 - finYat.v2 };
                         }
                         const searchName = name.toLocaleLowerCase('tr-TR');
                         if (searchName.includes('finansal bor')) {
