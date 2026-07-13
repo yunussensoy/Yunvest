@@ -660,3 +660,6 @@ input[type="file"]::-webkit-file-upload-button:hover {
 
 
 
+
+.takip-table th, .takip-table td { font-size: 11px !important; }
+

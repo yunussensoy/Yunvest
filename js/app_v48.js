@@ -4194,16 +4194,16 @@ const renderHedef = (container) => {
                             <th>S.N.</th>
                             <th>Hisse</th>
                             <th>Güncel Fiyat</th>
-                            <th>2026<br>H. F.</th>
-                            <th>2026<br>Pot.</th>
-                            <th>2027<br>H. F.</th>
-                            <th>2027<br>Pot.</th>
-                            <th>2028<br>H. F.</th>
-                            <th>2028<br>Pot.</th>
-                            <th>2029<br>H. F.</th>
-                            <th>2029<br>Pot.</th>
-                            <th>2030<br>H. F.</th>
-                            <th>2030<br>Pot.</th>
+                            <th>2026<br>H.</th>
+                            <th>2026<br>P.</th>
+                            <th>2027<br>H.</th>
+                            <th>2027<br>P.</th>
+                            <th>2028<br>H.</th>
+                            <th>2028<br>P.</th>
+                            <th>2029<br>H.</th>
+                            <th>2029<br>P.</th>
+                            <th>2030<br>H.</th>
+                            <th>2030<br>P.</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -4478,16 +4478,16 @@ const renderAnasayfa = (container) => {
                                 <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('fdFavok')">FD/FAVÖK${getTakipSortIcon('fdFavok')}</th>
                                 <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('fk')">F/K${getTakipSortIcon('fk')}</th>
                                 <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pdDd')">PD/DD${getTakipSortIcon('pdDd')}</th>
-                                <th style="text-align: center;">2026 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2026')">2026 Pot.${getTakipSortIcon('pot2026')}</th>
-                                <th style="text-align: center;">2027 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2027')">2027 Pot.${getTakipSortIcon('pot2027')}</th>
-                                <th style="text-align: center;">2028 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2028')">2028 Pot.${getTakipSortIcon('pot2028')}</th>
-                                <th style="text-align: center;">2029 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2029')">2029 Pot.${getTakipSortIcon('pot2029')}</th>
-                                <th style="text-align: center;">2030 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2030')">2030 Pot.${getTakipSortIcon('pot2030')}</th>
+                                <th style="text-align: center;">2026 H.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2026')">2026 P.${getTakipSortIcon('pot2026')}</th>
+                                <th style="text-align: center;">2027 H.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2027')">2027 P.${getTakipSortIcon('pot2027')}</th>
+                                <th style="text-align: center;">2028 H.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2028')">2028 P.${getTakipSortIcon('pot2028')}</th>
+                                <th style="text-align: center;">2029 H.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2029')">2029 P.${getTakipSortIcon('pot2029')}</th>
+                                <th style="text-align: center;">2030 H.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2030')">2030 P.${getTakipSortIcon('pot2030')}</th>
                                 <th style="text-align: center;">İşlem</th>
                             </tr>
                         </thead>
