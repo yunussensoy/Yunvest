@@ -1465,6 +1465,18 @@ const renderPortfoy = (container) => {
         }
 
         if (!State.data.portfoyGecmisi) State.data.portfoyGecmisi = [];
+
+        // Hatalı kaydedilmiş olabilecek hafta sonu (Cumartesi, Pazar) verilerini kalıcı olarak temizle
+        let hasWeekendData = false;
+        State.data.portfoyGecmisi = State.data.portfoyGecmisi.filter(r => {
+            const dw = new Date(r.tarih).getDay();
+            if (dw === 0 || dw === 6) {
+                hasWeekendData = true;
+                return false;
+            }
+            return true;
+        });
+        if (hasWeekendData) State.save();
         
         // Hedeflenen kapanış günü için kayıt
         if (targetDate) {
@@ -1491,26 +1503,7 @@ const renderPortfoy = (container) => {
             let historyData = [...State.data.portfoyGecmisi];
             historyData.sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
             
-            // Aradaki boş günleri doldur
-            if (historyData.length > 0) {
-                const filledData = [];
-                let curr = new Date(historyData[0].tarih);
-                const lastRecordDate = new Date(historyData[historyData.length - 1].tarih);
-                let lastKnownVal = historyData[0].tutar;
-                let lastKnownAnapara = historyData[0].anapara !== undefined ? historyData[0].anapara : historyData[0].tutar;
-                
-                while (curr <= lastRecordDate) {
-                    const dStr = curr.getFullYear() + '-' + String(curr.getMonth() + 1).padStart(2, '0') + '-' + String(curr.getDate()).padStart(2, '0');
-                    const existing = historyData.find(r => r.tarih === dStr);
-                    if (existing) {
-                        lastKnownVal = existing.tutar;
-                        lastKnownAnapara = existing.anapara !== undefined ? existing.anapara : existing.tutar;
-                    }
-                    filledData.push({ tarih: dStr, tutar: lastKnownVal, anapara: lastKnownAnapara, isAnlik: false });
-                    curr.setDate(curr.getDate() + 1);
-                }
-                historyData = filledData;
-            }
+
             
             // Anlık (Güncel) durumu ekle (Hafta içi piyasa açıkken)
             if (dayOfWeek >= 1 && dayOfWeek <= 5 && !isBefore0950 && !isAfter1830) {
@@ -1618,11 +1611,11 @@ const renderPortfoy = (container) => {
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(128,128,128,0.2)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.03)' },
                             ticks: { color: '#aaa', font: { size: 10 } }
                         },
                         y: {
-                            grid: { color: 'rgba(128,128,128,0.2)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.03)' },
                             ticks: { 
                                 color: '#aaa', 
                                 font: { size: 10 },
@@ -2945,8 +2938,8 @@ if (window.shouldRenderDashboardCharts) {
                                   responsive: true, maintainAspectRatio: false,
                                   plugins: { legend: { display: false }, datalabels: { display: false } },
                                   scales: {
-                                      x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(128,128,128,0.2)' } },
-                                      y: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(128,128,128,0.2)' } }
+                                      x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } },
+                                      y: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } }
                                   }
                               };
                               const pinkColor = '#d6336c';
