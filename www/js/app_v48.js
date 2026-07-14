@@ -1109,7 +1109,7 @@ const renderPortfoy = (container) => {
             <td style="text-align: center !important;">${i+1}</td>
             <td style="text-align: left !important;">${a.menkul}</td>
             <td style="text-align: right !important;">${formatCurrency(guncelFiyat)}</td>
-            <td style="text-align: right !important;">${a.adet}</td>
+            <td style="text-align: right !important;">${a.adet.toLocaleString('tr-TR')}</td>
             <td style="text-align: right !important;">${formatCurrency(a.alisFiyati)}</td>
             <td style="text-align: right !important;">${formatCurrency(a.satisFiyati)}</td>
             <td class="${a.kar >= 0 ? 'text-success' : 'text-danger'}" style="text-align: right !important;">${formatCurrency(a.kar, 0)}</td>
@@ -1651,11 +1651,11 @@ const renderPortfoy = (container) => {
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(128,128,128,0.2)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.03)' },
                             ticks: { color: '#aaa', font: { size: 10 } }
                         },
                         y: {
-                            grid: { color: 'rgba(128,128,128,0.2)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.03)' },
                             ticks: { 
                                 color: '#aaa', 
                                 font: { size: 10 },
@@ -2038,13 +2038,23 @@ const renderHisseler = (container) => {
                             return { v1: fBorc.v1 - nakit.v1 - finYat.v1, v2: fBorc.v2 - nakit.v2 - finYat.v2 };
                         }
                         const searchName = name.toLocaleLowerCase('tr-TR');
-                        if (searchName.includes('finansal bor')) {
+                        if (searchName.includes('finansal bor') || searchName.includes('finansal yatırımlar') || searchName.includes('nakit ve nakit')) {
                             let v1 = 0, v2 = 0;
                             let addedRows = [];
+                            let inDuran = false;
                             sData.bilanco.rows.forEach((x, idx) => {
                                 if (x[0]) {
                                     const rName = x[0].toLocaleLowerCase('tr-TR');
-                                    if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && idx < sData.bilanco.rows.length - 2) {
+                                    if (rName.trim() === 'duran varlıklar') inDuran = true;
+                                    let match = false;
+                                    if (searchName.includes('finansal bor') && rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && idx < sData.bilanco.rows.length - 2) {
+                                        match = true;
+                                    } else if (searchName.includes('finansal yatırımlar') && rName.includes('finansal yatırımlar') && !inDuran) {
+                                        match = true;
+                                    } else if (searchName.includes('nakit ve nakit') && (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler'))) {
+                                        match = true;
+                                    }
+                                    if (match) {
                                         let val1 = parseTRNumber(x[1]);
                                         v1 += val1;
                                         v2 += parseTRNumber(x[bp2_idx]);
@@ -2556,9 +2566,11 @@ const renderHisseler = (container) => {
                     let finansalBorclarTotal = 0;
                     let nakitTotal = 0;
                     let finYatTotal = 0;
+                    let inDuran = false;
                     sData.bilanco.rows.forEach(r => {
                         if (!r[0]) return;
                         const rName = r[0].toLocaleLowerCase('tr-TR');
+                        if (rName.trim() === 'duran varlıklar') inDuran = true;
                         if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
                             const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
                             finansalBorclarTotal += val;
@@ -2567,7 +2579,7 @@ const renderHisseler = (container) => {
                             const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
                             nakitTotal += val;
                         }
-                        if (rName.includes('finansal yatırımlar')) {
+                        if (rName.includes('finansal yatırımlar') && !inDuran) {
                             const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
                             finYatTotal += val;
                         }
@@ -2575,8 +2587,8 @@ const renderHisseler = (container) => {
                     netBorc = finansalBorclarTotal - nakitTotal - finYatTotal;
                 }
                 const guncelFiyat = parseFloat(State.getFiyat ? State.getFiyat(selectedHisse) : (window.fiyatlar ? window.fiyatlar[selectedHisse] : 0)) || 0;
-                const usdKuru = window.dolarKuru || 33;
-                const eurKuru = window.euroKuru || 35;
+                const usdKuru = (State.getFiyat ? parseFloat(State.getFiyat('USDTRY')) : null) || window.dolarKuru || 46.99;
+                const eurKuru = (State.getFiyat ? parseFloat(State.getFiyat('EURTRY')) : null) || window.euroKuru || 50;
                 
                 const rows = [
                     { key: 'ciro', label: 'Satış Gelirleri', type: 'currency' },
@@ -2588,7 +2600,6 @@ const renderHisseler = (container) => {
                     { key: 'fd_favok', label: 'FD/FAVÖK', type: 'decimal' },
                     { key: 'f_k', label: 'F/K', type: 'decimal' },
                     { key: 'pd_dd', label: 'PD/DD', type: 'decimal' },
-                    { key: 'sermaye', label: 'Ödenmiş Sermaye*', type: 'decimal', placeholder: 'Bilanço verisi' },
                     { key: 'hedef_fiyat', label: 'Hedef Fiyat', readonly: true, isTarget: true, type: 'target' },
                     { key: 'potansiyel', label: 'Potansiyel', readonly: true, type: 'percent_target' }
                 ];
@@ -2967,8 +2978,8 @@ if (window.shouldRenderDashboardCharts) {
                                   responsive: true, maintainAspectRatio: false,
                                   plugins: { legend: { display: false }, datalabels: { display: false } },
                                   scales: {
-                                      x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(128,128,128,0.2)' } },
-                                      y: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(128,128,128,0.2)' } }
+                                      x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } },
+                                      y: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } }
                                   }
                               };
                               const pinkColor = '#d6336c';
@@ -3232,7 +3243,7 @@ const renderHisseIslemleri = (container) => {
             <td style="font-weight:600; color: var(--text-primary); text-align:left;">${tur}</td>
             <td style="font-weight:600; color: var(--text-primary); text-align:left;">${e.menkul}</td>
             <td>${formatCurrency(e.fiyat)}</td>
-            <td class="${e.adet >= 0 ? 'text-success' : 'text-danger'}">${e.adet}</td>
+            <td class="${e.adet >= 0 ? 'text-success' : 'text-danger'}">${e.adet.toLocaleString('tr-TR')}</td>
             <td>${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}</td>
             <td>
                 <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--warning-color);" onclick="window.setEditEkstre('${e.id}')"><i class="fas fa-edit"></i></button>
@@ -4216,16 +4227,16 @@ const renderHedef = (container) => {
                             <th>S.N.</th>
                             <th>Hisse</th>
                             <th>Güncel Fiyat</th>
-                            <th>2026<br>H. F.</th>
-                            <th>2026<br>Pot.</th>
-                            <th>2027<br>H. F.</th>
-                            <th>2027<br>Pot.</th>
-                            <th>2028<br>H. F.</th>
-                            <th>2028<br>Pot.</th>
-                            <th>2029<br>H. F.</th>
-                            <th>2029<br>Pot.</th>
-                            <th>2030<br>H. F.</th>
-                            <th>2030<br>Pot.</th>
+                            <th>2026<br>H.</th>
+                            <th>2026<br>P.</th>
+                            <th>2027<br>H.</th>
+                            <th>2027<br>P.</th>
+                            <th>2028<br>H.</th>
+                            <th>2028<br>P.</th>
+                            <th>2029<br>H.</th>
+                            <th>2029<br>P.</th>
+                            <th>2030<br>H.</th>
+                            <th>2030<br>P.</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -4500,16 +4511,16 @@ const renderAnasayfa = (container) => {
                                 <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('fdFavok')">FD/FAVÖK${getTakipSortIcon('fdFavok')}</th>
                                 <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('fk')">F/K${getTakipSortIcon('fk')}</th>
                                 <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pdDd')">PD/DD${getTakipSortIcon('pdDd')}</th>
-                                <th style="text-align: center;">2026 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2026')">2026 Pot.${getTakipSortIcon('pot2026')}</th>
-                                <th style="text-align: center;">2027 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2027')">2027 Pot.${getTakipSortIcon('pot2027')}</th>
-                                <th style="text-align: center;">2028 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2028')">2028 Pot.${getTakipSortIcon('pot2028')}</th>
-                                <th style="text-align: center;">2029 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2029')">2029 Pot.${getTakipSortIcon('pot2029')}</th>
-                                <th style="text-align: center;">2030 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2030')">2030 Pot.${getTakipSortIcon('pot2030')}</th>
+                                <th style="text-align: center;">2026 H.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2026')">2026 P.${getTakipSortIcon('pot2026')}</th>
+                                <th style="text-align: center;">2027 H.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2027')">2027 P.${getTakipSortIcon('pot2027')}</th>
+                                <th style="text-align: center;">2028 H.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2028')">2028 P.${getTakipSortIcon('pot2028')}</th>
+                                <th style="text-align: center;">2029 H.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2029')">2029 P.${getTakipSortIcon('pot2029')}</th>
+                                <th style="text-align: center;">2030 H.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2030')">2030 P.${getTakipSortIcon('pot2030')}</th>
                                 <th style="text-align: center;">İşlem</th>
                             </tr>
                         </thead>
@@ -5203,12 +5214,24 @@ window.recalculateHedefFiyatlar = () => {
                 }
             });
         }
-        const netBorc = finansalBorclarTotal - nakitTotal;
+        let finYatTotal = 0;
+        let inDuran = false;
+        if (sData.bilanco && sData.bilanco.rows) {
+            sData.bilanco.rows.forEach(r => {
+                if (!r[0]) return;
+                const rName = r[0].toLocaleLowerCase('tr-TR');
+                if (rName.trim() === 'duran varlıklar') inDuran = true;
+                if (rName.includes('finansal yatırımlar') && !inDuran) {
+                    finYatTotal += typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                }
+            });
+        }
+        const netBorc = finansalBorclarTotal - nakitTotal - finYatTotal;
         const odenmisSermaye = getVal(sData.bilanco, 'Ödenmiş Sermaye');
         const guncelFiyat = parseFloat(State.getFiyat(hisse)) || 0;
         const usdtry = parseFloat(State.getFiyat('USDTRY')) || 32.50;
-        const eurKuru = window.euroKuru || 35.00;
-        const usdKuru = window.dolarKuru || 32.50;
+        const eurKuru = (State.getFiyat ? parseFloat(State.getFiyat('EURTRY')) : null) || window.euroKuru || 50.00;
+        const usdKuru = (State.getFiyat ? parseFloat(State.getFiyat('USDTRY')) : null) || window.dolarKuru || 46.99;
 
         if (!State.data.hedefFiyatlar[hisse]) State.data.hedefFiyatlar[hisse] = {};
 
@@ -5230,7 +5253,11 @@ window.recalculateHedefFiyatlar = () => {
             let favok = (ySatis !== null && yFavokMarji !== null) ? ySatis * (yFavokMarji/100) : null;
             let netKar = (ySatis !== null && yNetKarMarji !== null) ? ySatis * (yNetKarMarji/100) : null;
             
-            let pd1 = (favok !== null && yFdFavok !== null) ? (favok * yFdFavok) - netBorc : null;
+            let currentNetBorc = netBorc;
+            if (curCurrency === 'USD') currentNetBorc = netBorc / usdKuru;
+            else if (curCurrency === 'EUR') currentNetBorc = netBorc / eurKuru;
+
+            let pd1 = (favok !== null && yFdFavok !== null) ? (favok * yFdFavok) - currentNetBorc : null;
             let pd2 = (netKar !== null && yFk !== null) ? (netKar * yFk) : null;
             let pd3 = (yOzkaynak !== null && yPdDd !== null) ? (yOzkaynak * yPdDd) : null;
             

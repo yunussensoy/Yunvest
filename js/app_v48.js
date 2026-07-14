@@ -1109,7 +1109,7 @@ const renderPortfoy = (container) => {
             <td style="text-align: center !important;">${i+1}</td>
             <td style="text-align: left !important;">${a.menkul}</td>
             <td style="text-align: right !important;">${formatCurrency(guncelFiyat)}</td>
-            <td style="text-align: right !important;">${a.adet}</td>
+            <td style="text-align: right !important;">${a.adet.toLocaleString('tr-TR')}</td>
             <td style="text-align: right !important;">${formatCurrency(a.alisFiyati)}</td>
             <td style="text-align: right !important;">${formatCurrency(a.satisFiyati)}</td>
             <td class="${a.kar >= 0 ? 'text-success' : 'text-danger'}" style="text-align: right !important;">${formatCurrency(a.kar, 0)}</td>
@@ -3243,7 +3243,7 @@ const renderHisseIslemleri = (container) => {
             <td style="font-weight:600; color: var(--text-primary); text-align:left;">${tur}</td>
             <td style="font-weight:600; color: var(--text-primary); text-align:left;">${e.menkul}</td>
             <td>${formatCurrency(e.fiyat)}</td>
-            <td class="${e.adet >= 0 ? 'text-success' : 'text-danger'}">${e.adet}</td>
+            <td class="${e.adet >= 0 ? 'text-success' : 'text-danger'}">${e.adet.toLocaleString('tr-TR')}</td>
             <td>${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}</td>
             <td>
                 <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--warning-color);" onclick="window.setEditEkstre('${e.id}')"><i class="fas fa-edit"></i></button>

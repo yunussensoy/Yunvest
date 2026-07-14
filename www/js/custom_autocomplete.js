@@ -63,7 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
         items.forEach((item, index) => {
             const div = document.createElement('div');
             div.className = 'custom-autocomplete-item';
-            div.textContent = item;
+            if (val && item.toUpperCase().startsWith(val.toUpperCase())) {
+                div.innerHTML = `<strong style="color: var(--accent-color);">${item.substr(0, val.length)}</strong>${item.substr(val.length)}`;
+            } else {
+                div.textContent = item;
+            }
             if (index === activeIndex) div.classList.add('active');
             
             div.addEventListener('mousedown', (e) => {
