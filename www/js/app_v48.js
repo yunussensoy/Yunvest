@@ -2537,6 +2537,14 @@ const renderHisseler = (container) => {
                     if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
                 };
 
+                window.saveDegerlemeNot = (hisse) => {
+                    if (!State.data.degerleme[hisse]) State.data.degerleme[hisse] = {};
+                    const input = document.getElementById('degerleme-not-input');
+                    const val = input.value;
+                    State.data.degerleme[hisse].genelNot = val;
+                    State.save();
+                };
+
                 let headerHtml = `<tr><th>Kalem</th>`;
                 years.forEach(y => {
                     headerHtml += `<th style="font-size: 14px; text-align:center;">
@@ -2545,9 +2553,9 @@ const renderHisseler = (container) => {
                 });
                 headerHtml += `</tr>`;
 
-                let html = `<div class="dash-card" style="display:flex; flex-direction:column; height:100%;">
+                let html = `<div class="dash-card" style="display:flex; flex-direction:column;">
                     <div class="dash-title">Geleceğe İlişkin Beklentileriniz</div>
-                    <div style="flex:1; overflow-x:auto;">
+                    <div style="overflow-x:auto;">
                         <table class="dash-table compact-table" style="min-width: 1000px;">
                             <thead>${headerHtml}</thead>
                             <tbody>`;
@@ -2759,7 +2767,17 @@ const renderHisseler = (container) => {
                 });
                 html += `</tr>`;
                 
-                html += `</tbody></table></div></div>`;
+                const savedNot = stateData.genelNot || '';
+                html += `</tbody></table></div>`; // End of table wrapper
+                html += `
+                    <div style="margin-top: 1rem; border-top: 1px solid var(--surface-border); padding-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <div style="font-size: 13px; font-weight: bold; color: var(--text-primary);">Değerleme Notları</div>
+                            <button class="btn" style="padding: 0.3rem 0.8rem; font-size: 13px; font-weight: bold; background: var(--success-color);" onclick="window.saveDegerlemeNot('${selectedHisse}')">Kaydet</button>
+                        </div>
+                        <textarea id="degerleme-not-input" class="form-control" style="width: 100%; height: 80px; resize: vertical; font-size: 12px; font-family: inherit; margin-bottom: 0.5rem;" placeholder="Bu hisse için değerleme notlarınızı buraya yazabilirsiniz...">${savedNot}</textarea>
+                    </div>
+                </div>`; // End of dash-card
                 contentHtml += html;
             } else if (activeTab === 'Hisse Notları') {
                 let analizler = State.data.analizler || [];
