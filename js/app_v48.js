@@ -1465,18 +1465,32 @@ const renderPortfoy = (container) => {
         }
 
         if (!State.data.portfoyGecmisi) State.data.portfoyGecmisi = [];
-
-        // Hatalı kaydedilmiş olabilecek hafta sonu (Cumartesi, Pazar) verilerini kalıcı olarak temizle
-        let hasWeekendData = false;
-        State.data.portfoyGecmisi = State.data.portfoyGecmisi.filter(r => {
+        
+        // Hatalı kaydedilmiş olabilecek hafta sonu (Cumartesi, Pazar) verilerini ve mükerrerleri temizle
+        let needsSave = false;
+        const uniqueGecmis = [];
+        const seenDates = new Set();
+        
+        // Sondan başa doğru giderek en güncel kaydı tutalım
+        for (let i = State.data.portfoyGecmisi.length - 1; i >= 0; i--) {
+            const r = State.data.portfoyGecmisi[i];
             const dw = new Date(r.tarih).getDay();
             if (dw === 0 || dw === 6) {
-                hasWeekendData = true;
-                return false;
+                needsSave = true; // Hafta sonu varsa silincek
+                continue;
             }
-            return true;
-        });
-        if (hasWeekendData) State.save();
+            if (!seenDates.has(r.tarih)) {
+                seenDates.add(r.tarih);
+                uniqueGecmis.unshift(r);
+            } else {
+                needsSave = true; // Mükerrer bulundu
+            }
+        }
+        
+        if (needsSave) {
+            State.data.portfoyGecmisi = uniqueGecmis;
+            State.save();
+        }
         
         // Hedeflenen kapanış günü için kayıt
         if (targetDate) {
@@ -1503,7 +1517,29 @@ const renderPortfoy = (container) => {
             let historyData = [...State.data.portfoyGecmisi];
             historyData.sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
             
-
+            // Aradaki boş günleri doldur
+            if (historyData.length > 0) {
+                const filledData = [];
+                let curr = new Date(historyData[0].tarih);
+                const lastRecordDate = new Date(historyData[historyData.length - 1].tarih);
+                let lastKnownVal = historyData[0].tutar;
+                let lastKnownAnapara = historyData[0].anapara !== undefined ? historyData[0].anapara : historyData[0].tutar;
+                
+                while (curr <= lastRecordDate) {
+                    const dw = curr.getDay();
+                    if (dw !== 0 && dw !== 6) { // Hafta sonlarını atla
+                        const dStr = curr.getFullYear() + '-' + String(curr.getMonth() + 1).padStart(2, '0') + '-' + String(curr.getDate()).padStart(2, '0');
+                        const existing = historyData.find(r => r.tarih === dStr);
+                        if (existing) {
+                            lastKnownVal = existing.tutar;
+                            lastKnownAnapara = existing.anapara !== undefined ? existing.anapara : existing.tutar;
+                        }
+                        filledData.push({ tarih: dStr, tutar: lastKnownVal, anapara: lastKnownAnapara, isAnlik: false });
+                    }
+                    curr.setDate(curr.getDate() + 1);
+                }
+                historyData = filledData;
+            }
             
             // Anlık (Güncel) durumu ekle (Hafta içi piyasa açıkken)
             if (dayOfWeek >= 1 && dayOfWeek <= 5 && !isBefore0950 && !isAfter1830) {
@@ -1551,7 +1587,11 @@ const renderPortfoy = (container) => {
             
             const labels = historyData.map(d => {
                 const parts = d.tarih.split('-');
-                return d.isAnlik ? 'Güncel' : `${parts[2]}.${parts[1]}`;
+                if (d.isAnlik) return 'Güncel';
+                if (currentRange === 'MAX' || currentRange === '1Y' || currentRange === '5Y') {
+                    return `${parts[2]}.${parts[1]}.${parts[0].slice(-2)}`;
+                }
+                return `${parts[2]}.${parts[1]}`;
             });
             const data = historyData.map(d => d.tutar);
             const dataAnapara = historyData.map(d => d.anapara !== undefined ? d.anapara : d.tutar);

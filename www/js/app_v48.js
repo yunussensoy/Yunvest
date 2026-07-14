@@ -1466,6 +1466,32 @@ const renderPortfoy = (container) => {
 
         if (!State.data.portfoyGecmisi) State.data.portfoyGecmisi = [];
         
+        // Hatalı kaydedilmiş olabilecek hafta sonu (Cumartesi, Pazar) verilerini ve mükerrerleri temizle
+        let needsSave = false;
+        const uniqueGecmis = [];
+        const seenDates = new Set();
+        
+        // Sondan başa doğru giderek en güncel kaydı tutalım
+        for (let i = State.data.portfoyGecmisi.length - 1; i >= 0; i--) {
+            const r = State.data.portfoyGecmisi[i];
+            const dw = new Date(r.tarih).getDay();
+            if (dw === 0 || dw === 6) {
+                needsSave = true; // Hafta sonu varsa silincek
+                continue;
+            }
+            if (!seenDates.has(r.tarih)) {
+                seenDates.add(r.tarih);
+                uniqueGecmis.unshift(r);
+            } else {
+                needsSave = true; // Mükerrer bulundu
+            }
+        }
+        
+        if (needsSave) {
+            State.data.portfoyGecmisi = uniqueGecmis;
+            State.save();
+        }
+        
         // Hedeflenen kapanış günü için kayıt
         if (targetDate) {
             const yyyyMmDd = targetDate.getFullYear() + '-' + String(targetDate.getMonth() + 1).padStart(2, '0') + '-' + String(targetDate.getDate()).padStart(2, '0');
@@ -1500,13 +1526,16 @@ const renderPortfoy = (container) => {
                 let lastKnownAnapara = historyData[0].anapara !== undefined ? historyData[0].anapara : historyData[0].tutar;
                 
                 while (curr <= lastRecordDate) {
-                    const dStr = curr.getFullYear() + '-' + String(curr.getMonth() + 1).padStart(2, '0') + '-' + String(curr.getDate()).padStart(2, '0');
-                    const existing = historyData.find(r => r.tarih === dStr);
-                    if (existing) {
-                        lastKnownVal = existing.tutar;
-                        lastKnownAnapara = existing.anapara !== undefined ? existing.anapara : existing.tutar;
+                    const dw = curr.getDay();
+                    if (dw !== 0 && dw !== 6) { // Hafta sonlarını atla
+                        const dStr = curr.getFullYear() + '-' + String(curr.getMonth() + 1).padStart(2, '0') + '-' + String(curr.getDate()).padStart(2, '0');
+                        const existing = historyData.find(r => r.tarih === dStr);
+                        if (existing) {
+                            lastKnownVal = existing.tutar;
+                            lastKnownAnapara = existing.anapara !== undefined ? existing.anapara : existing.tutar;
+                        }
+                        filledData.push({ tarih: dStr, tutar: lastKnownVal, anapara: lastKnownAnapara, isAnlik: false });
                     }
-                    filledData.push({ tarih: dStr, tutar: lastKnownVal, anapara: lastKnownAnapara, isAnlik: false });
                     curr.setDate(curr.getDate() + 1);
                 }
                 historyData = filledData;
@@ -1558,7 +1587,11 @@ const renderPortfoy = (container) => {
             
             const labels = historyData.map(d => {
                 const parts = d.tarih.split('-');
-                return d.isAnlik ? 'Güncel' : `${parts[2]}.${parts[1]}`;
+                if (d.isAnlik) return 'Güncel';
+                if (currentRange === 'MAX' || currentRange === '1Y' || currentRange === '5Y') {
+                    return `${parts[2]}.${parts[1]}.${parts[0].slice(-2)}`;
+                }
+                return `${parts[2]}.${parts[1]}`;
             });
             const data = historyData.map(d => d.tutar);
             const dataAnapara = historyData.map(d => d.anapara !== undefined ? d.anapara : d.tutar);
