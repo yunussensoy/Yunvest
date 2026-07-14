@@ -10,6 +10,7 @@
     --accent-glow: rgba(79, 172, 254, 0.4);
     --success-color: #00e676;
     --danger-color: #ff1744;
+    --warning-color: #ffc107;
     --font-family: 'Inter', sans-serif;
     --border-radius: 12px;
     --transition: all 0.3s ease;

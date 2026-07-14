@@ -1800,7 +1800,7 @@ const renderHisseler = (container) => {
                         <div style="display:flex; gap: 4px;">
                             ${colors.map(col => `<div onclick="window.changeGenelNotColor('${not.id}', '${col}')" style="width:15px; height:15px; border-radius:50%; background:${col}; cursor:pointer; border: 1px solid rgba(0,0,0,0.2);"></div>`).join('')}
                         </div>
-                        <i class="fas fa-trash" style="cursor:pointer; color: rgba(0,0,0,0.5);" onclick="window.deleteGenelNot('${not.id}')"></i>
+                        <button class="btn btn-icon" style="padding: 2px; background: #000000; color: var(--danger-color); display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; border: none;" onclick="window.deleteGenelNot('${not.id}')"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -2760,8 +2760,8 @@ const renderHisseler = (container) => {
                                 <option value="EUR" ${curCurrency === 'EUR' ? 'selected' : ''}>€</option>
                             </select>
                             <i class="fas fa-edit" style="cursor:pointer; color:var(--accent-color);" onclick="window.toggleDegerlemeEdit('${y}')" title="Düzenle"></i>
-                            <i class="fas fa-save" style="cursor:pointer; color:var(--success-color);" onclick="window.toggleDegerlemeEdit('${y}')" title="Kaydet"></i>
-                            <i class="fas fa-trash" style="cursor:pointer; color:var(--danger-color);" onclick="if(confirm('${y} verilerini silmek istediğinize emin misiniz?')){ delete State.data.degerleme['${selectedHisse}']['${y}']; State.save(); if(typeof renderUI === 'function') renderUI(); else if(typeof renderPage === 'function') renderPage(); }" title="Sil"></i>
+                            <i class="fas fa-save" style="cursor:pointer; color:var(--success-color); background:#000000; border-radius:3px; padding:2px 3px; font-size:12px;" onclick="window.toggleDegerlemeEdit('${y}')" title="Kaydet"></i>
+                            <i class="fas fa-trash-alt" style="cursor:pointer; color:var(--danger-color); background:#000000; border-radius:3px; padding:2px 3px; font-size:12px;" onclick="if(confirm('${y} verilerini silmek istediğinize emin misiniz?')){ delete State.data.degerleme['${selectedHisse}']['${y}']; State.save(); if(typeof renderUI === 'function') renderUI(); else if(typeof renderPage === 'function') renderPage(); }" title="Sil"></i>
                         </div>
                     </td>`;
                 });
@@ -2789,7 +2789,7 @@ const renderHisseler = (container) => {
                 <div class="dash-card" style="padding:0; overflow:hidden;">
                     <div style="display: flex; align-items: center; justify-content: center; padding: 3px 5px; border-bottom: 1px solid var(--table-border); position: relative;">
                         <div style="font-size: 18px; font-weight: bold; color: var(--accent-color); text-align: center;">Hisse Notları</div>
-                        <button class="btn" style="background: var(--success-color); padding: 4px 10px; font-size: 14px; position: absolute; right: 5px;" onclick="window.toggleInlineAnaliz()" title="Yeni Not Ekle"><i class="fas fa-plus"></i></button>
+                        <button class="btn" style="background: var(--warning-color); padding: 3px 8px; font-size: 12px; position: absolute; right: 5px;" onclick="window.toggleInlineAnaliz()" title="Yeni Not Ekle"><i class="fas fa-plus" style="font-size: 11px;"></i></button>
                     </div>
                     <div style="overflow-x:auto;">
                     <table class="dash-table compact-table" style="width:100%; min-width:800px; border-collapse:collapse;">
@@ -2836,7 +2836,7 @@ const renderHisseler = (container) => {
                                 <td style="font-size:10px; font-weight:400 !important; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
                                 <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
                                     <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-icon" style="color: var(--danger-color); padding: 4px !important; font-size: 14px;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash"></i></button>
+                                    <button class="btn btn-icon" style="background: #000000; color: var(--danger-color); padding: 2px !important; font-size: 14px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
                                 </td>
                             </tr>
                         `;
@@ -2879,8 +2879,8 @@ const renderHisseler = (container) => {
                             <textarea id="analiz-not" class="form-control" style="width:100%; height: 120px; resize: vertical;" placeholder="Bu analizden / videodan çıkardığınız özet notlar..."></textarea>
                         </div>
                         <div style="display: flex; gap: 0.8rem; justify-content: flex-end; margin-top: 0.5rem;">
-                            <button class="btn" style="background: var(--success-color); padding: 0.5rem 1.5rem;" onclick="window.addAnaliz()"><i class="fas fa-check"></i> Kaydet</button>
-                            <button class="btn" style="background: var(--danger-color); padding: 0.5rem 1.5rem;" onclick="window.toggleInlineAnaliz()"><i class="fas fa-times"></i> İptal</button>
+                            <button class="btn" style="background: var(--success-color); color: var(--btn-text); padding: 4px 8px !important; font-size: 13px !important; min-width: 0 !important; width: fit-content !important; border-radius: 4px; border: none; cursor: pointer; box-sizing: border-box !important;" onclick="window.addAnaliz()">Kaydet</button>
+                            <button class="btn" style="background: var(--danger-color); color: #fff; padding: 4px 8px !important; font-size: 13px !important; min-width: 0 !important; width: fit-content !important; border-radius: 4px; border: none; cursor: pointer; box-sizing: border-box !important;" onclick="window.toggleInlineAnaliz()">İptal</button>
                         </div>
                     </div>
 
@@ -3265,7 +3265,7 @@ const renderHisseIslemleri = (container) => {
             <td>${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}</td>
             <td>
                 <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--warning-color);" onclick="window.setEditEkstre('${e.id}')"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-danger" style="padding: 0.1rem 0.3rem; font-size: 12px; background: transparent;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-danger" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
             </td>
         </tr>`;
     }).join('');
@@ -3456,7 +3456,7 @@ const renderNakitIslemleri = (container) => {
             <td>${i+1}</td><td style="text-align: right;">${formatDate(n.tarih)}</td><td class="${n.tutar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(n.tutar, 0)}</td><td>${formatNumber(n.bist100)}</td><td>${formatNumber(n.dolar)}</td><td>${formatNumber(n.gramAltin)}</td>
             <td>
                 <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--warning-color);" onclick="window.setEditNakit('${n.id}')"><i class="fas fa-edit"></i></button>
-                <button class="btn btn-danger" style="padding: 0.1rem 0.3rem; font-size: 12px; background: transparent;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-danger" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
             </td>
         </tr>`;
     }).join('');
@@ -3560,8 +3560,8 @@ const renderVeriler = (container) => {
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">${fon}</span>
                 <div style="display:flex; align-items:center; gap: 0.5rem;">
-                    <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100px; text-align:right; font-size: 13px; color: var(--text-secondary);">
-                    <button class="btn" style="padding: 0.2rem 0.5rem; background: var(--accent-color);" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value); alert('Güncellendi!');"><i class="fas fa-check"></i></button>
+                    <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100px; text-align:right; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key === 'Enter') { State.updateFiyat('${fon}', this.value); this.blur(); }">
+                    <button class="btn" style="padding: 4px; width: 28px; height: 28px; background: #000000; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value);" title="Kaydet"><i class="fas fa-save" style="font-size: 13px; color: var(--success-color) !important;"></i></button>
                 </div>
             </div>
         `;
@@ -3575,8 +3575,8 @@ const renderVeriler = (container) => {
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
                     <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Mevcut Nakit Tutarı</div>
                     <div style="display:flex; gap: 0.5rem;">
-                        <input type="text" id="v-nakit-input" value="${formatNumber(State.data.manuelNakitTutar || 0, 2)}" class="form-control" style="width:100%; font-size: 13px; color: var(--text-secondary);" onblur="this.value = formatNumber(parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0, 2)">
-                        <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.manuelNakitTutar = parseFloat(document.getElementById('v-nakit-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
+                        <input type="text" id="v-nakit-input" value="${formatNumber(State.data.manuelNakitTutar || 0, 2)}" class="form-control" style="width:100%; font-size: 13px; color: var(--text-secondary);" onblur="this.value = formatNumber(parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0, 2)" onkeydown="if(event.key === 'Enter') { State.data.manuelNakitTutar = parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0; State.save(); this.blur(); }">
+                        <button class="btn btn-icon" style="padding: 4px; width: 28px; height: 28px; background: #000000; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.data.manuelNakitTutar = parseFloat(document.getElementById('v-nakit-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save();" title="Kaydet"><i class="fas fa-save" style="font-size: 13px; color: var(--success-color) !important;"></i></button>
                     </div>
                 </div>
                 <!-- Fon Fiyatları -->
@@ -3590,8 +3590,8 @@ const renderVeriler = (container) => {
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
                     <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Hedef Portföy</div>
                     <div style="display:flex; gap: 0.5rem;">
-                        <input type="text" id="v-hedef-input" value="${formatNumber(hedefPortfoy, 0)}" class="form-control" style="width:100%; font-size: 13px; color: var(--text-secondary);" onblur="this.value = formatNumber(parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0, 0)">
-                        <button class="btn btn-icon" style="color: var(--success-color); padding: 4px 8px; font-size: 16px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save(); alert('Kaydedildi!');" title="Kaydet"><i class="fas fa-save"></i></button>
+                        <input type="text" id="v-hedef-input" value="${formatNumber(hedefPortfoy, 0)}" class="form-control" style="width:100%; font-size: 13px; color: var(--text-secondary);" onblur="this.value = formatNumber(parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0, 0)" onkeydown="if(event.key === 'Enter') { State.data.hedefPortfoyTL = parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0; State.save(); this.blur(); }">
+                        <button class="btn btn-icon" style="padding: 4px; width: 28px; height: 28px; background: #000000; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save();" title="Kaydet"><i class="fas fa-save" style="font-size: 13px; color: var(--success-color) !important;"></i></button>
                     </div>
                 </div>
             </div>
@@ -3667,8 +3667,8 @@ const renderVeriler = (container) => {
                                 <td style="text-align:right; color: var(--text-secondary);">-</td>
                                 <td style="text-align:center;">
                                     <div style="display:flex; gap:0.2rem; justify-content:center;">
-                                        <button class="btn" style="padding:0.2rem; background:var(--accent-color);" onclick="window.addEnflasyon(event)" title="Kaydet"><i class="fas fa-check"></i></button>
-                                        <button class="btn btn-danger" style="padding:0.2rem;" onclick="window.toggleEnfForm()" title="İptal"><i class="fas fa-times"></i></button>
+                                        <div style="background: #000000; width: 24px !important; height: 24px !important; max-width: 24px !important; max-height: 24px !important; min-width: 24px !important; min-height: 24px !important; padding: 0 !important; margin: 0 !important; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; box-sizing: border-box !important; line-height: 1 !important;" onclick="window.addEnflasyon(event)" title="Kaydet"><i class="fas fa-save" style="font-size: 13px; color: var(--success-color) !important;"></i></div>
+                                        <div style="background: var(--danger-color); width: 24px !important; height: 24px !important; max-width: 24px !important; max-height: 24px !important; min-width: 24px !important; min-height: 24px !important; padding: 0 !important; margin: 0 !important; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; box-sizing: border-box !important; line-height: 1 !important;" onclick="window.toggleEnfForm()" title="İptal"><i class="fas fa-times" style="font-size: 13px; color: #ffffff !important;"></i></div>
                                     </div>
                                 </td>
                             </tr>
@@ -3738,7 +3738,7 @@ window.renderEnflasyonData = () => {
                 <td style="text-align:right; color:${color}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', {maximumFractionDigits:2}).format(pct)}%</td>
                 <td style="text-align:right; color:${cumColor}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', {maximumFractionDigits:2}).format(cumMap[item.tarih])}%</td>
                 <td style="text-align:center;">
-                    <button class="btn btn-danger" style="padding: 0.1rem 0.3rem; font-size: 12px; background: transparent;" onclick="window.deleteEnflasyon('${item.id}')" title="Sil"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-danger" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteEnflasyon('${item.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
                 </td>
             </tr>`;
         });
@@ -4059,7 +4059,7 @@ const renderAnalizler = (container) => {
                 <td style="text-align: center; white-space: nowrap; width: 90px;">
                     <div style="display: flex; gap: 0.5rem; justify-content: center;">
                         <button class="btn btn-icon" style="color: var(--accent-color);" onclick="window.editAnaliz(${a.id})" title="Düzenle"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-icon" style="color: var(--danger-color);" onclick="window.deleteAnaliz(${a.id})" title="Sil"><i class="fas fa-trash"></i></button>
+                        <button class="btn btn-icon" style="background: #000000; color: var(--danger-color); padding: 2px; font-size: 14px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteAnaliz(${a.id})" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
                     </div>
                 </td>
             </tr>
@@ -4102,8 +4102,8 @@ const renderAnalizler = (container) => {
                                 <td><input type="text" id="analiz-not" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Not..."></td>
                                 <td style="text-align: center;">
                                     <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                                        <button class="btn btn-icon" style="color: var(--success-color);" onclick="window.addAnaliz()" title="Kaydet"><i class="fas fa-check"></i></button>
-                                        <button class="btn btn-icon" style="color: var(--danger-color);" onclick="window.toggleInlineAnaliz()" title="İptal"><i class="fas fa-times"></i></button>
+                                        <button class="btn" style="background: var(--success-color); color: var(--btn-text); padding: 2px 6px !important; font-size: 12px !important; min-width: 0 !important; width: fit-content !important; border-radius: 4px; border: none; cursor: pointer; box-sizing: border-box !important;" onclick="window.addAnaliz()">Kaydet</button>
+                                        <button class="btn" style="background: var(--danger-color); color: #fff; padding: 2px 6px !important; font-size: 12px !important; min-width: 0 !important; width: fit-content !important; border-radius: 4px; border: none; cursor: pointer; box-sizing: border-box !important;" onclick="window.toggleInlineAnaliz()">İptal</button>
                                     </div>
                                 </td>
                             </tr>
@@ -4496,7 +4496,7 @@ const renderAnasayfa = (container) => {
                 ${renderCell('2029')}
                 ${renderCell('2030')}
                 <td style="text-align: center !important;" onclick="event.stopPropagation()">
-                    <button class="btn btn-icon" style="color: var(--danger-color); padding: 0.1rem 0.3rem;" onclick="window.removeHisseFromTakip('${hisse}')"><i class="fas fa-trash-alt" style="font-size: 11px;"></i></button>
+                    <button class="btn btn-icon" style="padding: 1px; width: 18px; height: 18px; background: #000000; color: var(--danger-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="window.removeHisseFromTakip('${hisse}')"><i class="fas fa-trash-alt" style="font-size: 10px; color: var(--danger-color) !important;"></i></button>
                 </td>
             </tr>
         `;

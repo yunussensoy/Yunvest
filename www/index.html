@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css?v=20260707">
+    <link rel="stylesheet" href="css/styles.css?v=20260714">
     
     <!-- PWA Setup -->
     <link rel="manifest" href="manifest.json">
@@ -118,7 +118,7 @@
             <div style="position: relative; display: flex; gap: 0.5rem; align-items: center; background: var(--surface-border); padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid var(--overlay-bg); margin-left: auto; margin-right: 1rem;">
                 <i class="fas fa-search" style="color: var(--text-secondary); font-size: 12px;"></i>
                 <input type="text" id="anasayfa-arama-input" placeholder="Hisse (Örn: THYAO)" autocomplete="off" style="background: transparent; border: none; color: var(--btn-text); width: 130px; font-size: 12px; outline: none; text-transform: uppercase;" onkeydown="if(event.key==='Enter') { window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none'; }">
-                <button style="background: var(--success-color); border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--btn-text); cursor: pointer;" onclick="window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none';"><i class="fas fa-plus" style="font-size: 12px;"></i></button>
+                <button style="background: var(--warning-color); border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--btn-text); cursor: pointer;" onclick="window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none';"><i class="fas fa-plus" style="font-size: 12px;"></i></button>
                 
                 <!-- Custom Autocomplete Dropdown -->
                 <div id="search-autocomplete-list" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; max-height: 250px; overflow-y: auto; flex-direction: column; padding: 0.5rem 0; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); margin-top: 5px; z-index: 2000; background: var(--surface-color); border: 1px solid var(--surface-border);">
@@ -331,7 +331,7 @@ window.showAnalizEkleModal = function(hisse) {
             <div style="position: relative; display: flex; gap: 0.5rem; align-items: center; background: var(--surface-border); padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid var(--overlay-bg); margin-left: auto; margin-right: 1rem;">
                 <i class="fas fa-search" style="color: var(--text-secondary); font-size: 12px;"></i>
                 <input type="text" id="anasayfa-arama-input" placeholder="Hisse (Örn: THYAO)" autocomplete="off" style="background: transparent; border: none; color: var(--btn-text); width: 130px; font-size: 12px; outline: none; text-transform: uppercase;" onkeydown="if(event.key==='Enter') { window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none'; }">
-                <button style="background: var(--success-color); border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--btn-text); cursor: pointer;" onclick="window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none';"><i class="fas fa-plus" style="font-size: 12px;"></i></button>
+                <button style="background: var(--warning-color); border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--btn-text); cursor: pointer;" onclick="window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none';"><i class="fas fa-plus" style="font-size: 12px;"></i></button>
                 
                 <!-- Custom Autocomplete Dropdown -->
                 <div id="search-autocomplete-list" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; max-height: 250px; overflow-y: auto; flex-direction: column; padding: 0.5rem 0; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); margin-top: 5px; z-index: 2000; background: var(--surface-color); border: 1px solid var(--surface-border);">
@@ -488,7 +488,7 @@ window.showAnalizEkleModal = function(hisse) {
     <script src="js/excel_parser_v2.js"></script>
     <script src="js/import_data.js"></script>
     <script src="js/custom_autocomplete.js?v=2"></script>
-    <script src="js/app_v48.js?v=20260712"></script>
+    <script src="js/app_v49.js?v=20260714-33"></script>
 
     <!-- Register Service Worker for PWA -->
     <script>
