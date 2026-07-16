@@ -1395,9 +1395,15 @@ const renderPortfoy = (container) => {
         }
 
         const ctxVarliklar = document.getElementById('chart-varliklar');
-        if (ctxVarliklar && filteredPortfoy.length > 0) {
+        if (ctxVarliklar && (filteredPortfoy.length > 0 || (nakitItemForTable && nakitItemForTable.guncelTutar > 0))) {
             const labels = filteredPortfoy.map(p => p.menkul);
             const data = filteredPortfoy.map(p => p.guncelTutar);
+            
+            if (nakitItemForTable && nakitItemForTable.guncelTutar > 0) {
+                labels.push('Nakit');
+                data.push(nakitItemForTable.guncelTutar);
+            }
+
             const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'];
             
             window.chartVarliklarInstance = new Chart(ctxVarliklar, {
@@ -3264,7 +3270,7 @@ const renderHisseIslemleri = (container) => {
             <td class="${e.adet >= 0 ? 'text-success' : 'text-danger'}">${e.adet.toLocaleString('tr-TR')}</td>
             <td>${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}</td>
             <td>
-                <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--warning-color);" onclick="window.setEditEkstre('${e.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditEkstre('${e.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
                 <button class="btn btn-danger" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
             </td>
         </tr>`;
@@ -3455,7 +3461,7 @@ const renderNakitIslemleri = (container) => {
         return `<tr>
             <td>${i+1}</td><td style="text-align: right;">${formatDate(n.tarih)}</td><td class="${n.tutar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(n.tutar, 0)}</td><td>${formatNumber(n.bist100)}</td><td>${formatNumber(n.dolar)}</td><td>${formatNumber(n.gramAltin)}</td>
             <td>
-                <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--warning-color);" onclick="window.setEditNakit('${n.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditNakit('${n.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
                 <button class="btn btn-danger" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
             </td>
         </tr>`;
