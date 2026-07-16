@@ -3270,7 +3270,7 @@ const renderHisseIslemleri = (container) => {
             <td class="${e.adet >= 0 ? 'text-success' : 'text-danger'}">${e.adet.toLocaleString('tr-TR')}</td>
             <td>${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}</td>
             <td>
-                <button class="btn" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--warning-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditEkstre('${e.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--warning-color) !important;"></i></button>
+                <button class="btn" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditEkstre('${e.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
                 <button class="btn btn-danger" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
             </td>
         </tr>`;
@@ -3461,7 +3461,7 @@ const renderNakitIslemleri = (container) => {
         return `<tr>
             <td>${i+1}</td><td style="text-align: right;">${formatDate(n.tarih)}</td><td class="${n.tutar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(n.tutar, 0)}</td><td>${formatNumber(n.bist100)}</td><td>${formatNumber(n.dolar)}</td><td>${formatNumber(n.gramAltin)}</td>
             <td>
-                <button class="btn" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--warning-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditNakit('${n.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--warning-color) !important;"></i></button>
+                <button class="btn" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditNakit('${n.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
                 <button class="btn btn-danger" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
             </td>
         </tr>`;
