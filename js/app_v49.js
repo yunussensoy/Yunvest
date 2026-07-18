@@ -2817,35 +2817,51 @@ const renderHisseler = (container) => {
                 } else {
                     let sn = 1;
                     analizler.forEach(a => {
-                        let linkHtml = '-';
-                        if (a.baglanti) {
-                            let text = a.baslik || 'Dış Bağlantı';
-                            let icon = 'fas fa-external-link-alt';
-                            if (a.baglanti.includes('youtube.com') || a.baglanti.includes('youtu.be')) {
-                                text = a.baslik || 'YouTube Linki';
-                                icon = 'fab fa-youtube';
-                            } else if (a.baglanti.includes('twitter.com') || a.baglanti.includes('x.com')) {
-                                text = a.baslik || 'X (Twitter) Linki';
-                                icon = 'fab fa-twitter';
-                            }
-                            linkHtml = `<a href="${a.baglanti}" target="_blank" style="color:var(--accent-color); text-decoration:none; font-weight:400 !important;"><i class="${icon}"></i> ${text}</a>`;
-                        } else if (a.baslik) {
-                            linkHtml = `<span style="color:var(--text-secondary);">${a.baslik}</span>`;
-                        }
-                        const tarihStr = a.tarih ? a.tarih.split('-').reverse().join('.') : '-';
-                        tableHtml += `
-                            <tr style="border-bottom:1px solid var(--table-border);">
+                        if (a.isKisiselNot) {
+                            tableHtml += `
+                            <tr style="border-bottom:1px solid var(--table-border); background: var(--overlay-bg);">
                                 <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:right !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${tarihStr}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${a.borsaci || 'Anonim'}</td>
-                                <td style="font-size:12px; font-weight:400 !important; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px;"><div style="width:100%; max-width:250px; white-space:normal; overflow-wrap:break-word; word-break:break-word; font-weight:400 !important;">${linkHtml}</div></td>
-                                <td style="font-size:10px; font-weight:400 !important; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:right !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;"></td>
+                                <td style="font-size:12px; font-weight:bold; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">Yunus Şensoy</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px;"></td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
                                 <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
                                     <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
                                     <button class="btn btn-icon" style="background: #000000; color: var(--danger-color); padding: 2px !important; font-size: 14px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
                                 </td>
                             </tr>
-                        `;
+                            `;
+                        } else {
+                            let linkHtml = '-';
+                            if (a.baglanti) {
+                                let text = a.baslik || 'Dış Bağlantı';
+                                let icon = 'fas fa-external-link-alt';
+                                if (a.baglanti.includes('youtube.com') || a.baglanti.includes('youtu.be')) {
+                                    text = a.baslik || 'YouTube Linki';
+                                    icon = 'fab fa-youtube';
+                                } else if (a.baglanti.includes('twitter.com') || a.baglanti.includes('x.com')) {
+                                    text = a.baslik || 'X (Twitter) Linki';
+                                    icon = 'fab fa-twitter';
+                                }
+                                linkHtml = `<a href="${a.baglanti}" target="_blank" style="color:var(--accent-color); text-decoration:none; font-weight:400 !important;"><i class="${icon}"></i> ${text}</a>`;
+                            } else if (a.baslik) {
+                                linkHtml = `<span style="color:var(--text-secondary);">${a.baslik}</span>`;
+                            }
+                            const tarihStr = a.tarih ? a.tarih.split('-').reverse().join('.') : '-';
+                            tableHtml += `
+                                <tr style="border-bottom:1px solid var(--table-border);">
+                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
+                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:right !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${tarihStr}</td>
+                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${a.borsaci || 'Anonim'}</td>
+                                    <td style="font-size:12px; font-weight:400 !important; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px;"><div style="width:100%; max-width:250px; white-space:normal; overflow-wrap:break-word; word-break:break-word; font-weight:400 !important;">${linkHtml}</div></td>
+                                    <td style="font-size:10px; font-weight:400 !important; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
+                                    <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
+                                        <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-icon" style="background: #000000; color: var(--danger-color); padding: 2px !important; font-size: 14px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
+                                    </td>
+                                </tr>
+                            `;
+                        }
                     });
                 }
                 tableHtml += `</tbody></table></div></div>`;
@@ -2857,8 +2873,18 @@ const renderHisseler = (container) => {
                     
                     <!-- Yeni Not Ekleme Formu (Gizli) -->
                     <div id="inline-analiz-row" class="glass" style="display: none; flex-direction: column; gap: 1rem; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--accent-color);">
-                        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-primary); margin-bottom: 0.5rem;">Analiz / Not Ekle</div>
-                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                            <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-primary);">Analiz / Not Ekle</div>
+                            <div style="display: flex; gap: 1rem;">
+                                <label style="display: flex; align-items: center; gap: 0.3rem; color: var(--text-primary); font-size: 0.9rem; cursor: pointer;">
+                                    <input type="radio" name="notTipi" value="analiz" checked onchange="document.getElementById('analiz-detay-alanlari').style.display='flex'"> Analiz Ekle
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.3rem; color: var(--text-primary); font-size: 0.9rem; cursor: pointer;">
+                                    <input type="radio" name="notTipi" value="kisisel" onchange="document.getElementById('analiz-detay-alanlari').style.display='none'"> Kendi Notlarım
+                                </label>
+                            </div>
+                        </div>
+                        <div id="analiz-detay-alanlari" style="display: flex; gap: 1rem; flex-wrap: wrap;">
                             <div style="flex: 1; min-width: 150px;">
                                 <label style="font-size: 0.8rem; color: var(--text-secondary);">Tarih</label>
                                 <input type="date" id="analiz-tarih" class="form-control" style="width:100%;" value="${today}">
@@ -3803,6 +3829,9 @@ window.toggleInlineAnaliz = () => {
 
 window.sortAnalizler = (analizlerList) => {
     return analizlerList.sort((a, b) => {
+        if (a.isKisiselNot && !b.isKisiselNot) return -1;
+        if (!a.isKisiselNot && b.isKisiselNot) return 1;
+        
         const hA = (a.hisse || '').toUpperCase();
         const hB = (b.hisse || '').toUpperCase();
         if (hA !== hB) {
@@ -3827,6 +3856,9 @@ window.addAnaliz = () => {
             return;
         }
 
+        const notTipiEl = document.querySelector('input[name="notTipi"]:checked');
+        const isKisiselNot = notTipiEl && notTipiEl.value === 'kisisel';
+
         const tarih = tarihEl.value;
         const borsaci = borsaciEl.value.trim();
         const hisse = hisseEl.value.trim().toUpperCase();
@@ -3835,9 +3867,16 @@ window.addAnaliz = () => {
         const baglanti = baglantiEl ? baglantiEl.value.trim() : '';
         const notText = notTextEl ? notTextEl.value.trim() : '';
         
-        if (!tarih || !borsaci || !hisse) {
-            alert('Lütfen Tarih, Analist ve Hisse alanlarını doldurun.');
-            return;
+        if (isKisiselNot) {
+            if (!notText || !hisse) {
+                alert('Lütfen Hisse ve Notlar alanlarını doldurun.');
+                return;
+            }
+        } else {
+            if (!tarih || !borsaci || !hisse) {
+                alert('Lütfen Tarih, Analist ve Hisse alanlarını doldurun.');
+                return;
+            }
         }
         
         if (!State.data.analizler) State.data.analizler = [];
@@ -3845,7 +3884,7 @@ window.addAnaliz = () => {
         if (window.currentEditingAnalizId) {
             const index = State.data.analizler.findIndex(a => String(a.id) === String(window.currentEditingAnalizId));
             if (index !== -1) {
-                State.data.analizler[index] = { ...State.data.analizler[index], tarih, borsaci, hisse, baslik, baglanti, notText };
+                State.data.analizler[index] = { ...State.data.analizler[index], tarih, borsaci, hisse, baslik, baglanti, notText, isKisiselNot };
             }
             window.currentEditingAnalizId = null;
         } else {
@@ -3856,6 +3895,7 @@ window.addAnaliz = () => {
                 baslik,
                 baglanti,
                 notText,
+                isKisiselNot,
                 id: Date.now()
             });
         }
@@ -3920,7 +3960,20 @@ window.editAnaliz = (id) => {
         const nEl = document.getElementById('analiz-not');
         if(nEl) nEl.value = analiz.notText || '';
         
-        if(bEl) bEl.focus();
+        const radioAnaliz = document.querySelector('input[name="notTipi"][value="analiz"]');
+        const radioKisisel = document.querySelector('input[name="notTipi"][value="kisisel"]');
+        const detayAlanlari = document.getElementById('analiz-detay-alanlari');
+        
+        if (analiz.isKisiselNot) {
+            if (radioKisisel) radioKisisel.checked = true;
+            if (detayAlanlari) detayAlanlari.style.display = 'none';
+        } else {
+            if (radioAnaliz) radioAnaliz.checked = true;
+            if (detayAlanlari) detayAlanlari.style.display = 'flex';
+        }
+        
+        if(bEl && !analiz.isKisiselNot) bEl.focus();
+        else if (nEl) nEl.focus();
     }, 50);
 };
 
