@@ -516,6 +516,26 @@ window.showAnalizEkleModal = function(hisse) {
                     navigator.serviceWorker.register('sw.js')
                         .then(reg => console.log('Service Worker registered', reg))
                         .catch(err => console.log('Service Worker registration failed', err));
+                });
+            }
+        }
+        
+        window.updateBorsaciDatalist = function() {
+            if (!window.State || !window.State.data || !window.State.data.analizler) return;
+            const analizler = window.State.data.analizler;
+            const uniqueBorsacilar = [...new Set(analizler.map(a => a.borsaci).filter(b => b && b.trim() !== ''))];
+            const datalist = document.getElementById('analiz-borsaci-list');
+            if (datalist) {
+                datalist.innerHTML = uniqueBorsacilar.map(b => `<option value="${b}">`).join('');
+            }
+        };
+        
+        document.addEventListener('focusin', function(e) {
+            if (e.target && e.target.id === 'analiz-borsaci') {
+                window.updateBorsaciDatalist();
+            }
+        });
     </script>
+    <datalist id="analiz-borsaci-list"></datalist>
 </body>
 </html>
