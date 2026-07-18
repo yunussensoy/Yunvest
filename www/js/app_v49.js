@@ -2968,6 +2968,15 @@ const renderHisseler = (container) => {
             </div>
         `;
 
+        if (activeTab === 'Hisse Notları') {
+            setTimeout(() => {
+                const uniqueBorsacilar = [...new Set((State.data.analizler || []).map(a => a.borsaci ? a.borsaci.trim() : '').filter(b => b))].sort();
+                if (typeof window.setupCustomDropdown === 'function') {
+                    window.setupCustomDropdown('analiz-borsaci', uniqueBorsacilar);
+                }
+            }, 50);
+        }
+
         if (selectedHisse) {
             setTimeout(() => {
                 fetch('https://scanner.tradingview.com/turkey/scan', {
@@ -4031,8 +4040,9 @@ window.setupCustomDropdown = (inputId, optionsList) => {
         
         let matches = [];
         if (val) {
-            // Only show matches
-            matches = optionsList.filter(s => s && s.toUpperCase().startsWith(val));
+            matches = optionsList.filter(s => s && s.toUpperCase().includes(val));
+        } else {
+            matches = optionsList;
         }
         
         // Find the table container and disable overflow while dropdown is open so it isn't clipped
@@ -4052,7 +4062,12 @@ window.setupCustomDropdown = (inputId, optionsList) => {
                 item.style.textAlign = 'left';
                 
                 if (val) {
-                    item.innerHTML = `<strong>${match.substr(0, val.length)}</strong>${match.substr(val.length)}`;
+                    const matchIndex = match.toUpperCase().indexOf(val);
+                    if (matchIndex !== -1) {
+                        item.innerHTML = match.substr(0, matchIndex) + `<strong>${match.substr(matchIndex, val.length)}</strong>` + match.substr(matchIndex + val.length);
+                    } else {
+                        item.innerHTML = match;
+                    }
                 } else {
                     item.innerHTML = match;
                 }
@@ -4073,7 +4088,14 @@ window.setupCustomDropdown = (inputId, optionsList) => {
             });
             list.style.display = 'flex';
         } else {
-            list.style.display = 'none';
+            const emptyItem = document.createElement('div');
+            emptyItem.style.padding = '10px 15px';
+            emptyItem.style.color = '#aaa';
+            emptyItem.style.textAlign = 'center';
+            emptyItem.style.fontStyle = 'italic';
+            emptyItem.textContent = val ? "Eşleşen analist yok" : "Kayıtlı analist yok";
+            list.appendChild(emptyItem);
+            list.style.display = 'flex';
             if (tableContainer) {
                 tableContainer.style.overflow = '';
                 tableContainer.style.overflowX = 'auto';
