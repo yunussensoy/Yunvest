@@ -488,7 +488,7 @@ window.showAnalizEkleModal = function(hisse) {
     <script src="js/excel_parser_v2.js"></script>
     <script src="js/import_data.js"></script>
     <script src="js/custom_autocomplete.js?v=2"></script>
-    <script src="js/app_v49.js?v=20260718-02"></script>
+    <script src="js/app_v49.js?v=20260718-01"></script>
 
     <!-- Register Service Worker for PWA -->
     <script>
@@ -516,6 +516,26 @@ window.showAnalizEkleModal = function(hisse) {
                     navigator.serviceWorker.register('sw.js')
                         .then(reg => console.log('Service Worker registered', reg))
                         .catch(err => console.log('Service Worker registration failed', err));
+                });
+            }
+        }
+        
+        window.updateBorsaciDatalist = function() {
+            if (!window.State || !window.State.data || !window.State.data.analizler) return;
+            const analizler = window.State.data.analizler;
+            const uniqueBorsacilar = [...new Set(analizler.map(a => a.borsaci).filter(b => b && b.trim() !== ''))];
+            const datalist = document.getElementById('analiz-borsaci-list');
+            if (datalist) {
+                datalist.innerHTML = uniqueBorsacilar.map(b => `<option value="${b}">`).join('');
+            }
+        };
+        
+        document.addEventListener('focusin', function(e) {
+            if (e.target && e.target.id === 'analiz-borsaci') {
+                window.updateBorsaciDatalist();
+            }
+        });
     </script>
+    <datalist id="analiz-borsaci-list"></datalist>
 </body>
 </html>
