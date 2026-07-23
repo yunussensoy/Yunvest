@@ -2483,30 +2483,31 @@ const renderHisseler = (container) => {
                 const availablePdfs = (window.stockReports && window.stockReports[selectedHisse]) ? window.stockReports[selectedHisse] : [];
                 
                 availablePdfs.forEach(file => {
-                    const lowerFile = file.toLowerCase();
-                    if (lowerFile === 'arastirma_raporu.pdf') {
-                        foundReports.push({ file: file, name: 'Araştırma Raporu' });
-                    } else if (lowerFile.startsWith('arastirma_raporu_') && lowerFile.endsWith('.pdf')) {
-                        let suffix = lowerFile.substring('arastirma_raporu_'.length, lowerFile.length - 4);
-                        suffix = suffix.split('_').map(word => {
-                            const trMap = {
-                                'yatirim': 'Yatırım', 'degerler': 'Değerler', 'is': 'İş', 'unlu': 'Ünlü',
-                                'yapi': 'Yapı', 'vakif': 'Vakıf', 'araci': 'Aracı', 'info': 'İnfo', 'teb': 'TEB', 'qnb': 'QNB'
-                            };
-                            return trMap[word.toLowerCase()] || (word.charAt(0).toUpperCase() + word.slice(1));
-                        }).join(' ');
-                        foundReports.push({ file: file, name: 'Araştırma Raporu (' + suffix + ')' });
-                    } else if (lowerFile === 'faaliyet_raporu.pdf') {
-                        foundReports.push({ file: file, name: 'Faaliyet Raporu' });
-                    } else if (lowerFile === 'finansal_rapor.pdf') {
-                        foundReports.push({ file: file, name: 'Finansal Rapor' });
-                    } else if (lowerFile === 'toplanti_notlari.pdf') {
-                        foundReports.push({ file: file, name: 'Toplantı Notları' });
-                    } else if (lowerFile === 'yatirimci_sunumu.pdf') {
-                        foundReports.push({ file: file, name: 'Yatırımcı Sunumu' });
-                    } else if (lowerFile === 'fiyat_tespit_raporu.pdf') {
-                        foundReports.push({ file: file, name: 'Fiyat Tespit Raporu' });
+                    let baseName = file.toLowerCase();
+                    if (baseName.endsWith('.pdf')) {
+                        baseName = baseName.substring(0, baseName.length - 4);
                     }
+                    
+                    const trMap = {
+                        'arastirma': 'Araştırma', 'raporu': 'Raporu', 'faaliyet': 'Faaliyet',
+                        'finansal': 'Finansal', 'toplanti': 'Toplantı', 'notlari': 'Notları',
+                        'yatirimci': 'Yatırımcı', 'sunumu': 'Sunumu', 'fiyat': 'Fiyat',
+                        'tespit': 'Tespit', 'degerleme': 'Değerleme', 'sirket': 'Şirket',
+                        'yatirim': 'Yatırım', 'degerler': 'Değerler', 'is': 'İş',
+                        'unlu': 'Ünlü', 'yapi': 'Yapı', 'vakif': 'Vakıf', 'araci': 'Aracı',
+                        'info': 'İnfo', 'teb': 'TEB', 'qnb': 'QNB', 'a1': 'A1',
+                        'capital': 'Capital', 'tacirler': 'Tacirler', 'ak': 'Ak',
+                        'tera': 'Tera', 'bulls': 'Bulls', 'ziyaretci': 'Ziyaretçi',
+                        'ziyareti': 'Ziyareti', 'notu': 'Notu', 'rapor': 'Rapor'
+                    };
+                    
+                    const formattedName = baseName.split('_').map(word => {
+                        if (!word) return '';
+                        if (trMap[word]) return trMap[word];
+                        return word.charAt(0).toUpperCase() + word.slice(1);
+                    }).join(' ');
+                    
+                    foundReports.push({ file: file, name: formattedName });
                 });
                 
                 // Alfabetik sıralama (tr-TR ile)

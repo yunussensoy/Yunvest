@@ -327129,13 +327129,13 @@ window.stockData = {
 window.stockReports = {
   "AKSEN": [],
   "ARDYZ": [
-    "arastirma_raporu_sai.pdf",
     "faaliyet_raporu.pdf",
     "finansal_rapor.pdf",
-    "toplanti_notlari.pdf"
+    "pusula_yatirim_toplanti_notlari.pdf",
+    "sai_arastirma_raporu.pdf"
   ],
   "ASTOR": [
-    "arastirma_raporu_tacirler_yatirim.pdf"
+    "tarcirler_yatirim_arastirma_raporu.pdf"
   ],
   "BETAE": [
     "fiyat_tespit_raporu.pdf"
@@ -327143,13 +327143,14 @@ window.stockReports = {
   "BRSAN": [],
   "EBEBK": [],
   "EUPWR": [
-    "arastirma_raporu_ak_yatirim.pdf"
+    "ak_yatirim_arastirma_raporu.pdf"
   ],
   "FONET": [],
   "GOKNR": [],
   "GRSEL": [
     "faaliyet_raporu.pdf",
     "finansal_rapor.pdf",
+    "tera_yatirim_ziyaretci_notu.pdf",
     "yatirimci_sunumu.pdf"
   ],
   "GUBRF": [
@@ -327158,8 +327159,8 @@ window.stockReports = {
   ],
   "INDES": [],
   "KBORU": [
-    "arastirma_raporu_a1_capital.pdf",
-    "arastirma_raporu_bulls.pdf",
+    "a1_capital_arastirma_raporu.pdf",
+    "bulls_yatirim_arastirma_raporu.pdf",
     "yatirimci_sunumu.pdf"
   ],
   "KRONT": [],
@@ -327172,8 +327173,8 @@ window.stockReports = {
   ],
   "YATAS": [],
   "YEOTK": [
-    "arastirma_raporu_a1.pdf",
-    "arastirma_raporu_bulls.pdf",
+    "a1_capital_arastirma_raporu.pdf",
+    "bulls_yatirim_arastirma_raporu.pdf",
     "faaliyet_raporu.pdf",
     "finansal_rapor.pdf",
     "yatirimci_sunumu.pdf"
