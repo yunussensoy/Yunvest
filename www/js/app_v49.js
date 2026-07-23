@@ -2144,7 +2144,9 @@ const renderHisseler = (container) => {
                     chartLabels = []; chartSatislar = []; chartFavok = []; chartNetKar = [];
                     chartYSatislar = []; chartYFavok = []; chartYNetKar = [];
                     chartDSatislar = []; chartDFavok = []; chartDNetKar = [];
-                    chartBKM = []; chartFKM = []; chartNKM = []; chartCari = []; chartKaldirac = []; chartROE = [];
+                    chartBKM = []; chartFKM = []; chartNKM = [];
+                    let chartYBKM = []; let chartYFKM = []; let chartYNKM = [];
+                    chartCari = []; chartKaldirac = []; chartROE = [];
                     for (let i = limit; i >= 1; i--) {
                         chartLabels.push(headers[i]);
                         const sR = sData.gelirDonemsel.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
@@ -2167,14 +2169,16 @@ const renderHisseler = (container) => {
                         chartDFavok.push(rawFavok);
                         chartDNetKar.push(rawNetKar);
 
-                        let ySatis = 0, yFavok = 0, yNetKar = 0;
+                        let ySatis = 0, yFavok = 0, yNetKar = 0, yBrut = 0;
                         if (sData.gelirYillik && sData.gelirYillik.rows) {
                             const ySR = sData.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
                             const yFR = sData.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
                             const yNR = sData.gelirYillik.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                            const yBR = sData.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('brüt kar'));
                             if (ySR && ySR[i] !== undefined) ySatis = parseTRNumber(ySR[i]);
                             if (yFR && yFR[i] !== undefined) yFavok = parseTRNumber(yFR[i]);
                             if (yNR && yNR[i] !== undefined) yNetKar = parseTRNumber(yNR[i]);
+                            if (yBR && yBR[i] !== undefined) yBrut = parseTRNumber(yBR[i]);
                         }
                         chartYSatislar.push(ySatis);
                         chartYFavok.push(yFavok);
@@ -2183,6 +2187,10 @@ const renderHisseler = (container) => {
                           chartBKM.push(cqSatis ? (cqBrut / cqSatis) * 100 : 0);
                           chartFKM.push(cqSatis ? (cqFavok / cqSatis) * 100 : 0);
                           chartNKM.push(cqSatis ? (cqNetKar / cqSatis) * 100 : 0);
+
+                          chartYBKM.push(ySatis ? (yBrut / ySatis) * 100 : 0);
+                          chartYFKM.push(ySatis ? (yFavok / ySatis) * 100 : 0);
+                          chartYNKM.push(ySatis ? (yNetKar / ySatis) * 100 : 0);
 
                           const vDonen = donenR ? parseTRNumber(donenR[i]) : 0;
                           const vKisa = kisaR ? parseTRNumber(kisaR[i]) : 0;
@@ -2394,17 +2402,17 @@ const renderHisseler = (container) => {
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Brüt Kar Marjı (Çeyreklik)</div>
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Brüt Kar Marjı</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-bkm"></canvas></div>
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">FAVÖK Marjı (Çeyreklik)</div>
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">FAVÖK Marjı</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-fkm"></canvas></div>
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Net Kar Marjı (Çeyreklik)</div>
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Net Kar Marjı</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-nkm"></canvas></div>
                         </div>
 
@@ -2439,6 +2447,7 @@ const renderHisseler = (container) => {
                     dFavok: chartDFavok,
                     dNetKar: chartDNetKar,
                       bkm: chartBKM, fkm: chartFKM, nkm: chartNKM,
+                      ybkm: chartYBKM, yfkm: chartYFKM, ynkm: chartYNKM,
                       cari: chartCari, kaldirac: chartKaldirac, roe: chartROE
                   };
             } else if (activeTab === 'Gelir Tablosu') {
@@ -3093,10 +3102,62 @@ if (window.shouldRenderDashboardCharts) {
                                       options: commonOpts
                                   });
                               };
+
+                              const createMarjChart = (id, ceyreklikData, yillikData) => {
+                                  let chartCanvas = document.getElementById(id);
+                                  if (!chartCanvas) return;
+                                  let existingChart = Chart.getChart(chartCanvas);
+                                  if (existingChart) existingChart.destroy();
+                                  new Chart(chartCanvas.getContext('2d'), {
+                                      type: 'line',
+                                      data: {
+                                          labels: labels,
+                                          datasets: [
+                                              {
+                                                  label: 'Çeyreklik',
+                                                  data: ceyreklikData,
+                                                  borderColor: '#10b981', // yeşil
+                                                  backgroundColor: 'transparent',
+                                                  borderWidth: 2,
+                                                  pointRadius: 4,
+                                                  pointBackgroundColor: '#10b981',
+                                                  tension: 0.3
+                                              },
+                                              {
+                                                  label: 'Yıllıklandırılmış',
+                                                  data: yillikData,
+                                                  borderColor: '#3b82f6', // mavi
+                                                  backgroundColor: 'transparent',
+                                                  borderWidth: 2,
+                                                  pointRadius: 4,
+                                                  pointBackgroundColor: '#3b82f6',
+                                                  tension: 0.3
+                                              }
+                                          ]
+                                      },
+                                      options: {
+                                          responsive: true,
+                                          maintainAspectRatio: false,
+                                          plugins: {
+                                              legend: { display: false },
+                                              datalabels: {
+                                                  color: '#fff',
+                                                  align: 'top',
+                                                  formatter: (value) => '%' + (value || 0).toFixed(1),
+                                                  font: { size: 10, weight: 'bold' }
+                                              }
+                                          },
+                                          scales: {
+                                              y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', callback: v => '%' + v } },
+                                              x: { grid: { display: false }, ticks: { color: '#888', maxRotation: 45, minRotation: 45, font: { size: 10 } } }
+                                          }
+                                      }
+                                  });
+                              };
                               
-                              createChart('chart-bkm', dData.bkm, 'Brüt Kar Marjı (%)');
-                              createChart('chart-fkm', dData.fkm, 'FAVÖK Marjı (%)');
-                              createChart('chart-nkm', dData.nkm, 'Net Kar Marjı (%)');
+                              createMarjChart('chart-bkm', dData.bkm, dData.ybkm);
+                              createMarjChart('chart-fkm', dData.fkm, dData.yfkm);
+                              createMarjChart('chart-nkm', dData.nkm, dData.ynkm);
                               createChart('chart-cari', dData.cari, 'Cari Oran');
                               createChart('chart-kaldirac', dData.kaldirac, 'Kaldıraç Oranı (%)');
                               createChart('chart-roe', dData.roe, 'Özkaynak Karlılığı (%)');
