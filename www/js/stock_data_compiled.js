@@ -327137,9 +327137,6 @@ window.stockReports = {
   "ASTOR": [
     "tarcirler_yatirim_arastirma_raporu.pdf"
   ],
-  "BETAE": [
-    "fiyat_tespit_raporu.pdf"
-  ],
   "BRSAN": [],
   "EBEBK": [],
   "EUPWR": [

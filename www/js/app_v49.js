@@ -1971,6 +1971,7 @@ const renderHisseler = (container) => {
                 let chartSatislar = [];
                 let chartFavok = [];
                 let chartNetKar = [];
+                let chartYSatislar = []; let chartYFavok = []; let chartYNetKar = [];
                 let chartBKM = []; let chartFKM = []; let chartNKM = [];
                 let chartCari = []; let chartKaldirac = []; let chartROE = [];
 
@@ -2116,7 +2117,7 @@ const renderHisseler = (container) => {
                     bilancoHtml += `</tbody></table>`;
 
                     // Chart Data
-                    const limit = Math.min(5, headers.length - 1);
+                    const limit = headers.length - 1;
                     
                     const getCQ = (array, i, headers) => {
                         if (!array || !array[i]) return 0;
@@ -2140,17 +2141,14 @@ const renderHisseler = (container) => {
                     const toplamVR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam varlıklar'));
                     const ozR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
 
-                    for (let i = limit; i >= 1; i--) {
-                        chartLabels.push(headers[i]);
-                        chartSatislar.push(getG('satış gelirleri').v2); // actually we need the values for each period
-                    }
-                    // re-fetch chart data correctly
                     chartLabels = []; chartSatislar = []; chartFavok = []; chartNetKar = [];
+                    chartYSatislar = []; chartYFavok = []; chartYNetKar = [];
+                    chartDSatislar = []; chartDFavok = []; chartDNetKar = [];
                     chartBKM = []; chartFKM = []; chartNKM = []; chartCari = []; chartKaldirac = []; chartROE = [];
                     for (let i = limit; i >= 1; i--) {
                         chartLabels.push(headers[i]);
                         const sR = sData.gelirDonemsel.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
-                                                const fR = sData.gelirDonemsel.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
+                        const fR = sData.gelirDonemsel.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
                         const nR = sData.gelirDonemsel.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
                           
                           const cqSatis = getCQ(sR, i, headers);
@@ -2161,6 +2159,26 @@ const renderHisseler = (container) => {
                         chartSatislar.push(cqSatis);
                         chartFavok.push(cqFavok);
                         chartNetKar.push(cqNetKar);
+                        
+                        const rawSatis = sR && sR[i] !== undefined ? parseTRNumber(sR[i]) : 0;
+                        const rawFavok = fR && fR[i] !== undefined ? parseTRNumber(fR[i]) : 0;
+                        const rawNetKar = nR && nR[i] !== undefined ? parseTRNumber(nR[i]) : 0;
+                        chartDSatislar.push(rawSatis);
+                        chartDFavok.push(rawFavok);
+                        chartDNetKar.push(rawNetKar);
+
+                        let ySatis = 0, yFavok = 0, yNetKar = 0;
+                        if (sData.gelirYillik && sData.gelirYillik.rows) {
+                            const ySR = sData.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
+                            const yFR = sData.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
+                            const yNR = sData.gelirYillik.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                            if (ySR && ySR[i] !== undefined) ySatis = parseTRNumber(ySR[i]);
+                            if (yFR && yFR[i] !== undefined) yFavok = parseTRNumber(yFR[i]);
+                            if (yNR && yNR[i] !== undefined) yNetKar = parseTRNumber(yNR[i]);
+                        }
+                        chartYSatislar.push(ySatis);
+                        chartYFavok.push(yFavok);
+                        chartYNetKar.push(yNetKar);
 
                           chartBKM.push(cqSatis ? (cqBrut / cqSatis) * 100 : 0);
                           chartFKM.push(cqSatis ? (cqFavok / cqSatis) * 100 : 0);
@@ -2277,141 +2295,132 @@ const renderHisseler = (container) => {
                 .gauge-label { font-size: 0.7rem; color: #aaa; margin-top: 4px; text-align: center; }
                 </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
-                    <!-- Row 1: Özet Gelir & Bilanço -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: stretch;">
-                        <div class="dash-card compact-card" style="margin-bottom:0;">
-                            ${gelirHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadı</div>'}
-                        </div>
-                        <div class="dash-card compact-card" style="margin-bottom:0;">
-                            ${bilancoHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadı</div>'}
-                        </div>
-                    </div>
-                    
-                    <!-- Row 2: Çeyreklik Bar Grafikleri -->
-                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; overflow: hidden;">
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Çeyreklik Satışlar</div>
-                            <div style="flex:1; min-height:180px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-satislar"></canvas></div>
-                        </div>
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Çeyreklik FAVÖK</div>
-                            <div style="flex:1; min-height:180px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-favok"></canvas></div>
-                        </div>
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Çeyreklik Net Kar</div>
-                            <div style="flex:1; min-height:180px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-netkar"></canvas></div>
-                        </div>
-                    </div>
-
-                    <!-- Row 3: Çarpanlar, Karne, Şirket Detayları -->
-                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch;">
                         
-                        <!-- Çarpanlar -->
-                        <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;">Çarpanlar</div>
-                            <table class="dash-table compact-table" style="flex: 1;">
-                                <tbody>
-                                    <tr style="border-bottom: 1px solid var(--table-border);">
-                                        <td style="text-align: left !important;">F/K</td>
-                                        <td style="text-align: right !important;">${fmtDec(fk)}</td>
-                                    </tr>
-                                    <tr style="border-bottom: 1px solid var(--table-border);">
-                                        <td style="text-align: left !important;">FD/FAVÖK</td>
-                                        <td style="text-align: right !important;">${fmtDec(fdFavok)}</td>
-                                    </tr>
-                                    <tr style="border-bottom: 1px solid var(--table-border);">
-                                        <td style="text-align: left !important;">PD/DD</td>
-                                        <td style="text-align: right !important;">${fmtDec(pdDd)}</td>
-                                    </tr>
-                                    
-                                    <tr>
-                                        <td style="text-align: left !important;">Net Borç / FAVÖK</td>
-                                        <td style="text-align: right !important;">${fmtDec(netBorcFavok)}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <!-- Kaynak Dağılımı -->
-                        <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 0.8rem;">Kaynak Dağılımı</div>
-                            <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-                                <div style="display:flex; height: 12px; border-radius: 6px; overflow:hidden; margin-bottom: 1.5rem;">
-                                    <div style="width:${pctOz}%; background:#6c5ce7;" title="Özkaynaklar: %${pctOz}"></div>
-                                    <div style="width:${pctKisa}%; background:#fd79a8;" title="Kısa Vade Yükümlülükler: %${pctKisa}"></div>
-                                    <div style="width:${pctUzun}%; background:#636e72;" title="Uzun Vade Yükümlülükler: %${pctUzun}"></div>
-                                </div>
-                                <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 1rem; font-size: 13px; color:#aaa;">
-                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#6c5ce7;"></div>Özkaynaklar: %${pctOz}</div>
-                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#fd79a8;"></div>Kısa Vade Yük.: %${pctKisa}</div>
-                                    <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#636e72;"></div>Uzun Vade Yük.: %${pctUzun}</div>
-                                </div>
+                        <!-- Row 1: Özet Gelir & Bilanço -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: stretch;">
+                            <div class="dash-card compact-card" style="margin-bottom:0;">
+                                ${gelirHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadı</div>'}
+                            </div>
+                            <div class="dash-card compact-card" style="margin-bottom:0;">
+                                ${bilancoHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadı</div>'}
                             </div>
                         </div>
 
-                        <!-- Şirket Detayları -->
-                        <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;">Şirket Detayları</div>
-                            <table class="dash-table compact-table" style="flex: 1;">
-                                <tbody>
-                                    <tr style="border-bottom: 1px solid var(--table-border);">
-                                        <td style="text-align: left !important;">Hisse Başına Kar</td>
-                                        <td style="text-align: right !important;">${fmtDec(hbk)}</td>
-                                    </tr>
-                                    <tr style="border-bottom: 1px solid var(--table-border);">
-                                        <td style="text-align: left !important;">Ödenmiş Sermaye</td>
-                                        <td style="text-align: right !important;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(odenmisSermaye)}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="text-align: left !important;">Piyasa Değeri</td>
-                                        <td style="text-align: right !important;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeri)}</td>
-                                    </tr>
-                                    <tr>
-                                        <td style="text-align: left !important;">Piyasa Değeri $</td>
-                                        <td style="text-align: right !important;">$${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeriUsd)}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                        <!-- Row 2: Çarpanlar, Karne, Şirket Detayları -->
+                        <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch;">
+                            
+                            <!-- Çarpanlar -->
+                            <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
+                                <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;">Çarpanlar</div>
+                                <table class="dash-table compact-table" style="flex: 1;">
+                                    <tbody>
+                                        <tr style="border-bottom: 1px solid var(--table-border);">
+                                            <td style="text-align: left !important;">F/K</td>
+                                            <td style="text-align: right !important;">${fmtDec(fk)}</td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid var(--table-border);">
+                                            <td style="text-align: left !important;">FD/FAVÖK</td>
+                                            <td style="text-align: right !important;">${fmtDec(fdFavok)}</td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid var(--table-border);">
+                                            <td style="text-align: left !important;">PD/DD</td>
+                                            <td style="text-align: right !important;">${fmtDec(pdDd)}</td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td style="text-align: left !important;">Net Borç / FAVÖK</td>
+                                            <td style="text-align: right !important;">${fmtDec(netBorcFavok)}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
 
-                    <!-- Row 4: Line Grafikler -->
-                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem;">
+                            <!-- Kaynak Dağılımı -->
+                            <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
+                                <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 0.8rem;">Kaynak Dağılımı</div>
+                                <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+                                    <div style="display:flex; height: 12px; border-radius: 6px; overflow:hidden; margin-bottom: 1.5rem;">
+                                        <div style="width:${pctOz}%; background:#6c5ce7;" title="Özkaynaklar: %${pctOz}"></div>
+                                        <div style="width:${pctKisa}%; background:#fd79a8;" title="Kısa Vade Yükümlülükler: %${pctKisa}"></div>
+                                        <div style="width:${pctUzun}%; background:#636e72;" title="Uzun Vade Yükümlülükler: %${pctUzun}"></div>
+                                    </div>
+                                    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 1rem; font-size: 13px; color:#aaa;">
+                                        <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#6c5ce7;"></div>Özkaynaklar: %${pctOz}</div>
+                                        <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#fd79a8;"></div>Kısa Vade Yük.: %${pctKisa}</div>
+                                        <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#636e72;"></div>Uzun Vade Yük.: %${pctUzun}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Şirket Detayları -->
+                            <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
+                                <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;">Şirket Detayları</div>
+                                <table class="dash-table compact-table" style="flex: 1;">
+                                    <tbody>
+                                        <tr style="border-bottom: 1px solid var(--table-border);">
+                                            <td style="text-align: left !important;">Hisse Başına Kar</td>
+                                            <td style="text-align: right !important;">${fmtDec(hbk)}</td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid var(--table-border);">
+                                            <td style="text-align: left !important;">Ödenmiş Sermaye</td>
+                                            <td style="text-align: right !important;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(odenmisSermaye)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: left !important;">Piyasa Değeri</td>
+                                            <td style="text-align: right !important;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeri)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="text-align: left !important;">Piyasa Değeri $</td>
+                                            <td style="text-align: right !important;">$${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeriUsd)}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Satışlar</div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-satislar"></canvas></div>
+                        </div>
+
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">FAVÖK</div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-favok"></canvas></div>
+                        </div>
+
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Net Kar</div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-netkar"></canvas></div>
+                        </div>
+
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Brüt Kar Marjı (Çeyreklik)</div>
-                            <div style="flex: 1; min-height: 150px; position: relative;">
-                                <canvas id="chart-bkm"></canvas>
-                            </div>
+                            <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-bkm"></canvas></div>
                         </div>
+
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">FAVÖK Marjı (Çeyreklik)</div>
-                            <div style="flex: 1; min-height: 150px; position: relative;">
-                                <canvas id="chart-fkm"></canvas>
-                            </div>
+                            <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-fkm"></canvas></div>
                         </div>
+
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Net Kar Marjı (Çeyreklik)</div>
-                            <div style="flex: 1; min-height: 150px; position: relative;">
-                                <canvas id="chart-nkm"></canvas>
-                            </div>
+                            <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-nkm"></canvas></div>
                         </div>
+
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Cari Oran</div>
-                            <div style="flex: 1; min-height: 150px; position: relative;">
-                                <canvas id="chart-cari"></canvas>
-                            </div>
+                            <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-cari"></canvas></div>
                         </div>
+
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Kaldıraç Oranı</div>
-                            <div style="flex: 1; min-height: 150px; position: relative;">
-                                <canvas id="chart-kaldirac"></canvas>
-                            </div>
+                            <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-kaldirac"></canvas></div>
                         </div>
+
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Özkaynak Karlılığı</div>
-                            <div style="flex: 1; min-height: 150px; position: relative;">
-                                <canvas id="chart-roe"></canvas>
-                            </div>
+                            <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-roe"></canvas></div>
                         </div>
                     </div>
                 </div>
@@ -2423,6 +2432,12 @@ const renderHisseler = (container) => {
                     satislar: chartSatislar,
                     favok: chartFavok,
                     netkar: chartNetKar,
+                    ySatislar: chartYSatislar,
+                    yFavok: chartYFavok,
+                    yNetKar: chartYNetKar,
+                    dSatislar: chartDSatislar,
+                    dFavok: chartDFavok,
+                    dNetKar: chartDNetKar,
                       bkm: chartBKM, fkm: chartFKM, nkm: chartNKM,
                       cari: chartCari, kaldirac: chartKaldirac, roe: chartROE
                   };
@@ -2755,7 +2770,7 @@ const renderHisseler = (container) => {
                         }
                         
                         if (editMode && !r.readonly) {
-                            html += `<td style="text-align: right !important;"><input type="number" step="any" style="width:100%; background:var(--input-bg); color:var(--text-primary); border:1px solid var(--accent-color); padding:4px; text-align:right; border-radius:4px;" value="${val !== '---' ? val : ''}" onchange="window.updateDegerlemeInput('${selectedHisse}', '${y}', '${r.key}', this.value)"></td>`;
+                            html += `<td style="text-align: right !important;"><input type="number" step="any" style="width:100%; background:var(--input-bg); color:var(--text-primary); border:1px solid var(--accent-color); padding:4px; text-align:right; border-radius:4px;" value="${val !== '---' ? val : ''}" onblur="window.updateDegerlemeInput('${selectedHisse}', '${y}', '${r.key}', this.value)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); window.degerlemeEditMode['${y}'] = false; this.blur(); }"></td>`;
                         } else {
                             html += `<td style="text-align: right !important; ${extraStyle}">${displayVal === '' ? '---' : displayVal}</td>`;
                         }
@@ -3023,7 +3038,19 @@ if (window.shouldRenderDashboardCharts) {
                     maintainAspectRatio: false,
                     plugins: { 
                         legend: { display: false },
-                        tooltip: { enabled: true },
+                        tooltip: { 
+                            enabled: true,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(context.parsed.y);
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
                         datalabels: { display: false }
                     },
                     scales: { 
@@ -3075,21 +3102,81 @@ if (window.shouldRenderDashboardCharts) {
                               createChart('chart-roe', dData.roe, 'Özkaynak Karlılığı (%)');
                           }
 
-                  const ctxSatislar = document.getElementById('chart-ceyreklik-satislar');
+                const lineOpts = {
+                    ...cOpts,
+                    plugins: {
+                        ...cOpts.plugins,
+                        legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10, color: '#aaa' } } },
+                        tooltip: {
+                            ...cOpts.plugins.tooltip,
+                            callbacks: {
+                                ...cOpts.plugins.tooltip.callbacks,
+                                label: function(context) {
+                                    if (context.parsed.y !== null) {
+                                        return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(context.parsed.y);
+                                    }
+                                    return '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } },
+                        y: { 
+                            ticks: { 
+                                font: { size: 10 }, color: 'rgba(255,255,255,0.5)',
+                                callback: function(value) {
+                                    if (Math.abs(value) >= 1e9) return (value / 1e9).toFixed(1) + 'Mlyr';
+                                    if (Math.abs(value) >= 1e6) return (value / 1e6).toFixed(1) + 'Mn';
+                                    return value;
+                                }
+                            }, 
+                            grid: { color: 'rgba(255, 255, 255, 0.03)' } 
+                        }
+                    }
+                };
+
+                const ctxSatislar = document.getElementById('chart-ceyreklik-satislar');
                 if (ctxSatislar) {
                     let exS = Chart.getChart(ctxSatislar); if (exS) exS.destroy();
                     new Chart(ctxSatislar, {
-                        type: 'bar',
+                        type: 'line',
                         data: {
                             labels: labels,
-                            datasets: [{
-                                data: dData.satislar,
-                                backgroundColor: '#4da6ff',
-                                borderRadius: 4,
-                                barPercentage: 0.6
-                            }]
+                            datasets: [
+                                {
+                                    label: 'Çeyreklik',
+                                    data: dData.satislar,
+                                    borderColor: '#2ecc71',
+                                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: '#2ecc71',
+                                    pointRadius: 3,
+                                    tension: 0.1
+                                },
+                                {
+                                    label: 'Yıllıklandırılmış',
+                                    data: dData.ySatislar,
+                                    borderColor: '#4da6ff',
+                                    backgroundColor: 'rgba(77, 166, 255, 0.1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: '#4da6ff',
+                                    pointRadius: 3,
+                                    tension: 0.1
+                                },
+                                {
+                                    label: 'Dönemsel',
+                                    data: dData.dSatislar,
+                                    borderColor: '#f1c40f',
+                                    backgroundColor: 'rgba(241, 196, 15, 0.1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: '#f1c40f',
+                                    pointRadius: 3,
+                                    tension: 0.1
+                                }
+                            ]
                         },
-                        options: cOpts
+                        options: lineOpts
                     });
                 }
 
@@ -3097,17 +3184,43 @@ if (window.shouldRenderDashboardCharts) {
                 if (ctxFavok) {
                     let exF = Chart.getChart(ctxFavok); if (exF) exF.destroy();
                     new Chart(ctxFavok, {
-                        type: 'bar',
+                        type: 'line',
                         data: {
                             labels: labels,
-                            datasets: [{
-                                data: dData.favok,
-                                backgroundColor: '#4da6ff',
-                                borderRadius: 4,
-                                barPercentage: 0.6
-                            }]
+                            datasets: [
+                                {
+                                    label: 'Çeyreklik',
+                                    data: dData.favok,
+                                    borderColor: '#2ecc71',
+                                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: '#2ecc71',
+                                    pointRadius: 3,
+                                    tension: 0.1
+                                },
+                                {
+                                    label: 'Yıllıklandırılmış',
+                                    data: dData.yFavok,
+                                    borderColor: '#4da6ff',
+                                    backgroundColor: 'rgba(77, 166, 255, 0.1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: '#4da6ff',
+                                    pointRadius: 3,
+                                    tension: 0.1
+                                },
+                                {
+                                    label: 'Dönemsel',
+                                    data: dData.dFavok,
+                                    borderColor: '#f1c40f',
+                                    backgroundColor: 'rgba(241, 196, 15, 0.1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: '#f1c40f',
+                                    pointRadius: 3,
+                                    tension: 0.1
+                                }
+                            ]
                         },
-                        options: cOpts
+                        options: lineOpts
                     });
                 }
 
@@ -3115,17 +3228,43 @@ if (window.shouldRenderDashboardCharts) {
                 if (ctxNetKar) {
                     let exN = Chart.getChart(ctxNetKar); if (exN) exN.destroy();
                     new Chart(ctxNetKar, {
-                        type: 'bar',
+                        type: 'line',
                         data: {
                             labels: labels,
-                            datasets: [{
-                                data: dData.netkar,
-                                backgroundColor: '#4da6ff',
-                                borderRadius: 4,
-                                barPercentage: 0.6
-                            }]
+                            datasets: [
+                                {
+                                    label: 'Çeyreklik',
+                                    data: dData.netkar,
+                                    borderColor: '#2ecc71',
+                                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: '#2ecc71',
+                                    pointRadius: 3,
+                                    tension: 0.1
+                                },
+                                {
+                                    label: 'Yıllıklandırılmış',
+                                    data: dData.yNetKar,
+                                    borderColor: '#4da6ff',
+                                    backgroundColor: 'rgba(77, 166, 255, 0.1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: '#4da6ff',
+                                    pointRadius: 3,
+                                    tension: 0.1
+                                },
+                                {
+                                    label: 'Dönemsel',
+                                    data: dData.dNetKar,
+                                    borderColor: '#f1c40f',
+                                    backgroundColor: 'rgba(241, 196, 15, 0.1)',
+                                    borderWidth: 2,
+                                    pointBackgroundColor: '#f1c40f',
+                                    pointRadius: 3,
+                                    tension: 0.1
+                                }
+                            ]
                         },
-                        options: cOpts
+                        options: lineOpts
                     });
                 }
                 
