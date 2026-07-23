@@ -3544,12 +3544,12 @@ const renderNakitIslemleri = (container, append = false) => {
         if (n.id === window.currentNakitEditId) {
             return `<tr style="background: rgba(0,0,0,0.4);">
                 <td>${i+1}</td>
-                <td><input type="date" id="edit-n-tarih" class="form-control" style="width:100%; font-size:12px; padding:2px; text-align:right;" value="${n.tarih}"></td>
-                <td><input type="number" step="0.01" id="edit-n-tutar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.tutar}"></td>
-                <td><input type="number" step="0.01" id="edit-n-bist" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.bist100 || ''}"></td>
-                <td><input type="number" step="0.01" id="edit-n-dolar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.dolar || ''}"></td>
-                <td><input type="number" step="0.01" id="edit-n-altin" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.gramAltin || ''}"></td>
-                <td><input type="number" step="0.000001" id="edit-n-pry" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.pry || ''}"></td>
+                <td><input type="date" id="edit-n-tarih" class="form-control" style="width:100%; font-size:12px; padding:2px; text-align:right;" value="${n.tarih}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
+                <td><input type="number" step="0.01" id="edit-n-tutar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.tutar}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
+                <td><input type="number" step="0.01" id="edit-n-bist" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.bist100 || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
+                <td><input type="number" step="0.01" id="edit-n-dolar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.dolar || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
+                <td><input type="number" step="0.01" id="edit-n-altin" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.gramAltin || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
+                <td><input type="text" inputmode="decimal" id="edit-n-pry" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.pry || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
                 <td>
                     <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveEditNakit('${n.id}')">Kaydet</button>
                     <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--input-bg);" onclick="window.cancelNakitEdit()">İptal</button>
@@ -3581,12 +3581,12 @@ const renderNakitIslemleri = (container, append = false) => {
                     <tbody id="nakit-tbody" style="${window.nakitTableCollapsed ? 'display: none;' : ''}">
                         <tr id="inline-nakit-row" style="display: none; background: rgba(0,0,0,0.4);">
                             <td>-</td>
-                            <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}"></td>
-                            <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar"></td>
-                            <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="XU100"></td>
-                            <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Dolar"></td>
-                            <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN"></td>
-                            <td><input type="number" step="0.000001" id="n-pry" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="PRY"></td>
+                            <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="XU100" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Dolar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="text" inputmode="decimal" id="n-pry" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="PRY" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
                             <td>
                                 <button class="btn" id="n-submit-btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveInlineNakitEntry()">Ekle</button>
                                 <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--input-bg);" onclick="window.toggleInlineForm('nakit')">İptal</button>
@@ -3635,7 +3635,8 @@ const renderNakitIslemleri = (container, append = false) => {
             tutar: parseFloat(document.getElementById('edit-n-tutar').value) || 0,
             bist100: parseFloat(document.getElementById('edit-n-bist').value) || 0,
             dolar: parseFloat(document.getElementById('edit-n-dolar').value) || 0,
-            gramAltin: parseFloat(document.getElementById('edit-n-altin').value) || 0
+            gramAltin: parseFloat(document.getElementById('edit-n-altin').value) || 0,
+            pry: parseFloat((document.getElementById('edit-n-pry').value || '').toString().replace(',', '.')) || 0
         };
         State.updateNakitHareket(id, islem);
         window.currentNakitEditId = null;
@@ -3647,7 +3648,8 @@ const renderNakitIslemleri = (container, append = false) => {
             tutar: parseFloat(document.getElementById('n-tutar').value) || 0,
             bist100: parseFloat(document.getElementById('n-bist').value) || 0,
             dolar: parseFloat(document.getElementById('n-dolar').value) || 0,
-            gramAltin: parseFloat(document.getElementById('n-altin').value) || 0
+            gramAltin: parseFloat(document.getElementById('n-altin').value) || 0,
+            pry: parseFloat((document.getElementById('n-pry').value || '').toString().replace(',', '.')) || 0
         };
         State.addNakitHareket(islem);
         if (typeof renderPage === 'function') renderPage();
