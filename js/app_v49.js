@@ -352,6 +352,7 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
     let virtualAltinGr = 0;
     let virtualDolar = 0;
     let virtualBist = 0;
+    let virtualPry = 0;
     let enflasyonAnapara = 0;
 
     (nakitHareketleri || []).forEach(n => {
@@ -379,6 +380,7 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
             if (n.gramAltin) virtualAltinGr += (tutar / parseFloat(n.gramAltin));
             if (n.dolar) virtualDolar += (tutar / parseFloat(n.dolar));
             if (n.bist100) virtualBist += (tutar / parseFloat(n.bist100));
+            if (n.pry) virtualPry += (tutar / parseFloat(n.pry));
         } else {
             // Çıkış varsa oransal düşürme (Basitleştirilmiş)
             if (anapara - tutar > 0) {
@@ -387,6 +389,7 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
                 virtualAltinGr -= (virtualAltinGr * oran);
                 virtualDolar -= (virtualDolar * oran);
                 virtualBist -= (virtualBist * oran);
+                virtualPry -= (virtualPry * oran);
             }
         }
     });
@@ -394,10 +397,15 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
     const guncelAltin = getFiyat('Gram Altın') || 1;
     const guncelDolar = getFiyat('Dolar') > 1 ? getFiyat('Dolar') : 46.08;
     const guncelBist = getFiyat('BIST') || 1;
+    const guncelPry = getFiyat('PRY') || 1;
 
     const reelAltinDeger = virtualAltinGr * guncelAltin;
     const reelDolarDeger = virtualDolar * guncelDolar;
     const reelBistDeger = virtualBist * guncelBist;
+    const brutPryDeger = virtualPry * guncelPry;
+    const pryKar = brutPryDeger - anapara;
+    const netPryKar = pryKar > 0 ? pryKar * (1 - 0.175) : pryKar;
+    const reelPryDeger = anapara + netPryKar;
 
     const reelGetiriEnflasyon = enflasyonAnapara > 0 ? (toplamGuncelTutar - enflasyonAnapara) / enflasyonAnapara : 0;
 
@@ -410,6 +418,7 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
         reelGetiriAltin: reelAltinDeger > 0 ? (toplamGuncelTutar - reelAltinDeger) / reelAltinDeger : 0,
         reelGetiriDolar: reelDolarDeger > 0 ? (toplamGuncelTutar - reelDolarDeger) / reelDolarDeger : 0,
         reelGetiriBist: reelBistDeger > 0 ? (toplamGuncelTutar - reelBistDeger) / reelBistDeger : 0,
+        reelGetiriPry: reelPryDeger > 0 ? (toplamGuncelTutar - reelPryDeger) / reelPryDeger : 0,
         hedefPortfoy: State.data.hedefPortfoyTL || 0,
     };
     portfoyBilgileri.hedefArtis = portfoyBilgileri.hedefPortfoy > toplamGuncelTutar ? (portfoyBilgileri.hedefPortfoy - toplamGuncelTutar) / toplamGuncelTutar : 0;
@@ -1153,32 +1162,32 @@ const renderPortfoy = (container) => {
                                 <tr>
                                     <td style="text-align:left !important; width:25%;">Nakit</td>
                                     <td style="text-align:right !important; width:25%; border-right: 1px solid rgba(255, 255, 255, 0.03);"><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;"><span id="nakit-text">${formatCurrency(guncelNakitTutar, 0)}</span></div></td>
-                                    <td style="text-align:left !important; width:25%; padding-left: 1rem;">Nominal Getiri Oranı</td>
-                                    <td style="text-align:right !important; width:25%;" class="${portfoyBilgileri.nominalGetiri >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.nominalGetiri)}</td>
+                                    <td style="text-align:left !important; width:25%; padding-left: 1rem;">Reel Getiri Oranı (Enflasyon)</td>
+                                    <td style="text-align:right !important; width:25%;" class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Hisse Portföyü</td>
                                     <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(hissePortfoyTutar, 0)}</td>
-                                    <td style="text-align:left !important; padding-left: 1rem;">Reel Getiri Oranı (Enflasyon)</td>
-                                    <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align:left !important;">Fon Portföyü</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(fonPortfoyTutar, 0)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">BIST 100'e Göre Reel Getiri Oranı</td>
                                     <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriBist >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriBist)}</td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align:left !important;">Toplam Portföy</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.toplamPortfoy, 0)}</td>
+                                    <td style="text-align:left !important;">Fon Portföyü</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(fonPortfoyTutar, 0)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">Dolar Kuruna Göre Reel Getiri Oranı</td>
                                     <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriDolar >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriDolar)}</td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align:left !important;">Anapara</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.anapara, 0)}</td>
+                                    <td style="text-align:left !important;">Toplam Portföy</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.toplamPortfoy, 0)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">Gram Altına Göre Reel Getiri Oranı</td>
                                     <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriAltin >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriAltin)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left !important;">Anapara</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.anapara, 0)}</td>
+                                    <td style="text-align:left !important; padding-left: 1rem;">PRY Fonuna Göre Reel Getiri Oranı</td>
+                                    <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriPry >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriPry)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Kar</td>
@@ -1187,8 +1196,8 @@ const renderPortfoy = (container) => {
                                     <td style="text-align:right !important;"><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;"><span id="hedef-text">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span></div></td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align:left !important;">&nbsp;</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">&nbsp;</td>
+                                    <td style="text-align:left !important;">Nominal Getiri Oranı</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.nominalGetiri >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.nominalGetiri)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">Hedefe Ulaşmak İçin Gereken Artış %</td>
                                     <td style="text-align:right !important;">${formatPercent(portfoyBilgileri.hedefArtis, 0)}</td>
                                 </tr>
@@ -3525,6 +3534,8 @@ const renderNakitIslemleri = (container, append = false) => {
             valA = a.dolar || 0; valB = b.dolar || 0;
         } else if (window.nakitSort.col === 'gramAltin') {
             valA = a.gramAltin || 0; valB = b.gramAltin || 0;
+        } else if (window.nakitSort.col === 'pry') {
+            valA = a.pry || 0; valB = b.pry || 0;
         }
         return window.nakitSort.asc ? valA - valB : valB - valA;
     });
@@ -3538,6 +3549,7 @@ const renderNakitIslemleri = (container, append = false) => {
                 <td><input type="number" step="0.01" id="edit-n-bist" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.bist100 || ''}"></td>
                 <td><input type="number" step="0.01" id="edit-n-dolar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.dolar || ''}"></td>
                 <td><input type="number" step="0.01" id="edit-n-altin" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.gramAltin || ''}"></td>
+                <td><input type="number" step="0.000001" id="edit-n-pry" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.pry || ''}"></td>
                 <td>
                     <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveEditNakit('${n.id}')">Kaydet</button>
                     <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--input-bg);" onclick="window.cancelNakitEdit()">İptal</button>
@@ -3545,7 +3557,7 @@ const renderNakitIslemleri = (container, append = false) => {
             </tr>`;
         }
         return `<tr>
-            <td>${i+1}</td><td style="text-align: right;">${formatDate(n.tarih)}</td><td class="${n.tutar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(n.tutar, 0)}</td><td>${formatNumber(n.bist100)}</td><td>${formatNumber(n.dolar)}</td><td>${formatNumber(n.gramAltin)}</td>
+            <td>${i+1}</td><td style="text-align: right;">${formatDate(n.tarih)}</td><td class="${n.tutar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(n.tutar, 0)}</td><td>${formatNumber(n.bist100)}</td><td>${formatNumber(n.dolar)}</td><td>${formatNumber(n.gramAltin)}</td><td>${formatNumber(n.pry, 6)}</td>
             <td>
                 <button class="btn" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditNakit('${n.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
                 <button class="btn btn-danger" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
@@ -3564,7 +3576,7 @@ const renderNakitIslemleri = (container, append = false) => {
                 </div>
                 <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
                     <thead>
-                        <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleNakitTableCollapse()"><i class="fas ${window.nakitTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tarih')">Tarih${getNakitSortIcon('tarih')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tutar')">Tutar${getNakitSortIcon('tutar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('bist100')">XU100${getNakitSortIcon('bist100')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('dolar')">USDTRY${getNakitSortIcon('dolar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('gramAltin')">GRAMALTIN${getNakitSortIcon('gramAltin')}</th><th style="width: 20%;">İşlem</th></tr>
+                        <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleNakitTableCollapse()"><i class="fas ${window.nakitTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tarih')">Tarih${getNakitSortIcon('tarih')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tutar')">Tutar${getNakitSortIcon('tutar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('bist100')">XU100${getNakitSortIcon('bist100')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('dolar')">USDTRY${getNakitSortIcon('dolar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('gramAltin')">GRAMALTIN${getNakitSortIcon('gramAltin')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('pry')">PRY${getNakitSortIcon('pry')}</th><th style="width: 20%;">İşlem</th></tr>
                     </thead>
                     <tbody id="nakit-tbody" style="${window.nakitTableCollapsed ? 'display: none;' : ''}">
                         <tr id="inline-nakit-row" style="display: none; background: rgba(0,0,0,0.4);">
@@ -3574,6 +3586,7 @@ const renderNakitIslemleri = (container, append = false) => {
                             <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="XU100"></td>
                             <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Dolar"></td>
                             <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN"></td>
+                            <td><input type="number" step="0.000001" id="n-pry" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="PRY"></td>
                             <td>
                                 <button class="btn" id="n-submit-btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveInlineNakitEntry()">Ekle</button>
                                 <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--input-bg);" onclick="window.toggleInlineForm('nakit')">İptal</button>
