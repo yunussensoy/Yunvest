@@ -4555,7 +4555,7 @@ const renderAnasayfa = (container) => {
                 ${renderCell('2029')}
                 ${renderCell('2030')}
                 <td style="text-align: center !important;" onclick="event.stopPropagation()">
-                    <button class="btn btn-icon" style="padding: 1px; width: 18px; height: 18px; background: #000000; color: var(--danger-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="window.removeHisseFromTakip('${hisse}')"><i class="fas fa-trash-alt" style="font-size: 10px; color: var(--danger-color) !important;"></i></button>
+                    <button class="btn btn-icon" style="padding: 1px; width: 18px; height: 18px; background: #000000; color: var(--danger-color); display: inline-flex; margin: 0 auto; align-items: center; justify-content: center; border-radius: 4px;" onclick="window.removeHisseFromTakip('${hisse}')"><i class="fas fa-trash-alt" style="font-size: 10px; color: var(--danger-color) !important;"></i></button>
                 </td>
             </tr>
         `;
