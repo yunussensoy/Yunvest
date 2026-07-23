@@ -3375,7 +3375,7 @@ const renderHisseIslemleri = (container) => {
             <div class="table-container glass" style="overflow-x: auto; margin-bottom: 0;">
                 <div class="table-header">
                     <span>Hisse ve Fon İşlemleri</span>
-                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleInlineForm('hisse')">+</button>
+                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--warning-color); color: #fff;" onclick="window.toggleInlineForm('hisse')">+</button>
                 </div>
                 <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
                     <thead>
@@ -3560,7 +3560,7 @@ const renderNakitIslemleri = (container, append = false) => {
             <div class="table-container glass" style="overflow-x: auto;">
                 <div class="table-header">
                     <span>Nakit İşlemleri</span>
-                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleInlineForm('nakit')">+</button>
+                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--warning-color); color: #fff;" onclick="window.toggleInlineForm('nakit')">+</button>
                 </div>
                 <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
                     <thead>
@@ -3741,7 +3741,7 @@ const renderVeriler = (container) => {
             <div class="glass" style="padding: 8px 1rem; margin-top: 0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0;">
                     <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left;">Aylık Enflasyon Verileri</div>
-                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleEnfForm()">+</button>
+                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--warning-color); color: #fff;" onclick="window.toggleEnfForm()">+</button>
                 </div>
                 
                 <div class="table-container" style="max-height: 400px; overflow-y: auto; margin-bottom: 0;">
