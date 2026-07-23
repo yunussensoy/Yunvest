@@ -327147,7 +327147,11 @@ window.stockReports = {
   ],
   "FONET": [],
   "GOKNR": [],
-  "GRSEL": [],
+  "GRSEL": [
+    "faaliyet_raporu.pdf",
+    "finansal_rapor.pdf",
+    "yatirimci_sunumu.pdf"
+  ],
   "GUBRF": [
     "faaliyet_raporu.pdf",
     "yatirimci_sunumu.pdf"

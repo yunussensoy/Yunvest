@@ -3190,6 +3190,11 @@ const getHisseSortIcon = (col) => {
     return ' <i class="fas fa-sort" style="color: rgba(255,255,255,0.3);"></i>';
 };
 
+window.toggleHisseTableCollapse = () => {
+    window.hisseTableCollapsed = !window.hisseTableCollapsed;
+    if (typeof renderPage === 'function') renderPage();
+};
+
 window.toggleArsivSort = (col) => {
     if (!window.arsivSort) window.arsivSort = { col: null, asc: true };
     if (window.arsivSort.col === col) {
@@ -3243,9 +3248,25 @@ const getNakitSortIcon = (col) => {
     return ' <i class="fas fa-sort" style="color: rgba(255,255,255,0.3);"></i>';
 };
 
+window.toggleNakitTableCollapse = () => {
+    window.nakitTableCollapsed = !window.nakitTableCollapsed;
+    if (typeof renderPage === 'function') renderPage();
+};
+
+window.toggleHisseGroup = (menkul) => {
+    window.hisseGroupCollapsed = window.hisseGroupCollapsed || {};
+    if (window.hisseGroupCollapsed[menkul] === undefined) {
+        window.hisseGroupCollapsed[menkul] = false;
+    } else {
+        window.hisseGroupCollapsed[menkul] = !window.hisseGroupCollapsed[menkul];
+    }
+    if (typeof renderPage === 'function') renderPage();
+};
+
 const renderHisseIslemleri = (container) => {
     window.currentEditId = window.currentEditId || null;
     window.hisseSort = window.hisseSort || { col: null, asc: true };
+    if (window.hisseTableCollapsed === undefined) window.hisseTableCollapsed = true;
 
     const hisseFonEkstre = [...State.data.ekstre].filter(e => e.menkul !== 'NAKİT');
 
@@ -3272,44 +3293,79 @@ const renderHisseIslemleri = (container) => {
         }
     });
 
-    const ekstreRows = hisseFonEkstre.map((e, i) => {
-        const isFon = e.menkul.length === 3;
-        const tur = isFon ? 'Fon' : 'Hisse';
-
-        if (e.id === window.currentEditId) {
-            return `<tr style="background: rgba(0,0,0,0.4);">
-                <td>${i + 1}</td>
-                <td><input type="date" id="edit-tarih" class="form-control" style="width:100%; font-size:12px; padding:2px; text-align:right;" value="${e.tarih}"></td>
-                <td>
-                    <select id="edit-tur" class="form-control" style="width:100%; font-size:12px; padding:2px;" onchange="window.updateEditDatalist()">
-                        <option value="Hisse" ${!isFon ? 'selected' : ''}>Hisse</option>
-                        <option value="Fon" ${isFon ? 'selected' : ''}>Fon</option>
-                    </select>
-                </td>
-                <td><input type="text" id="edit-menkul" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.menkul}" list="${isFon ? 'fon-list' : 'bist-hisse-list'}"></td>
-                <td><input type="number" step="0.000001" id="edit-fiyat" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.fiyat}"></td>
-                <td><input type="number" step="0.0001" id="edit-adet" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.adet}"></td>
-                <td><input type="text" id="edit-tutar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}" disabled></td>
-                <td>
-                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveEditEkstre('${e.id}')">Kaydet</button>
-                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--input-bg);" onclick="window.cancelEdit()">İptal</button>
-                </td>
-            </tr>`;
+    window.hisseGroupCollapsed = window.hisseGroupCollapsed || {};
+    
+    const groupedItems = [];
+    const groupMap = {};
+    
+    hisseFonEkstre.forEach(e => {
+        if (!groupMap[e.menkul]) {
+            groupMap[e.menkul] = [];
+            groupedItems.push({ menkul: e.menkul, rows: groupMap[e.menkul] });
         }
-        return `<tr>
-            <td>${i + 1}</td>
-            <td style="text-align: right;">${formatDate(e.tarih)}</td>
-            <td style="font-weight:600; color: var(--text-primary); text-align:left;">${tur}</td>
-            <td style="font-weight:600; color: var(--text-primary); text-align:left;">${e.menkul}</td>
-            <td>${formatCurrency(e.fiyat)}</td>
-            <td class="${e.adet >= 0 ? 'text-success' : 'text-danger'}">${e.adet.toLocaleString('tr-TR')}</td>
-            <td>${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}</td>
-            <td>
-                <button class="btn" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditEkstre('${e.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
-                <button class="btn btn-danger" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
+        groupMap[e.menkul].push(e);
+    });
+
+    let rowIndex = 1;
+    let ekstreRowsHtml = '';
+
+    groupedItems.forEach(g => {
+        const isCollapsed = window.hisseGroupCollapsed[g.menkul] !== false;
+        const iconClass = isCollapsed ? 'fa-chevron-right' : 'fa-chevron-down';
+        
+        ekstreRowsHtml += `<tr class="group-header-row" style="background: rgba(255,255,255,0.05); font-weight: bold; cursor: pointer;" onclick="window.toggleHisseGroup('${g.menkul}')">
+            <td></td>
+            <td></td>
+            <td style="text-align: left; color: var(--accent-color);">
+                <i class="fas ${iconClass}" style="margin-right: 8px; width: 12px; display: inline-block; text-align: center;"></i>${g.menkul}
             </td>
+            <td colspan="5"></td>
         </tr>`;
-    }).join('');
+
+        if (!isCollapsed) {
+            g.rows.forEach(e => {
+                const isFon = e.menkul.length === 3;
+                const tur = isFon ? 'Fon' : 'Hisse';
+
+                if (e.id === window.currentEditId) {
+                    ekstreRowsHtml += `<tr style="background: rgba(0,0,0,0.4);">
+                        <td>${rowIndex++}</td>
+                        <td>
+                            <select id="edit-tur" class="form-control" style="width:100%; font-size:12px; padding:2px;" onchange="window.updateEditDatalist()">
+                                <option value="Hisse" ${!isFon ? 'selected' : ''}>Hisse</option>
+                                <option value="Fon" ${isFon ? 'selected' : ''}>Fon</option>
+                            </select>
+                        </td>
+                        <td><input type="text" id="edit-menkul" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.menkul}" list="${isFon ? 'fon-list' : 'bist-hisse-list'}"></td>
+                        <td><input type="date" id="edit-tarih" class="form-control" style="width:100%; font-size:12px; padding:2px; text-align:right;" value="${e.tarih}"></td>
+                        <td><input type="number" step="0.000001" id="edit-fiyat" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.fiyat}"></td>
+                        <td><input type="number" step="0.0001" id="edit-adet" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.adet}"></td>
+                        <td><input type="text" id="edit-tutar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}" disabled></td>
+                        <td>
+                            <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveEditEkstre('${e.id}')">Kaydet</button>
+                            <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--input-bg);" onclick="window.cancelEdit()">İptal</button>
+                        </td>
+                    </tr>`;
+                } else {
+                    ekstreRowsHtml += `<tr>
+                        <td>${rowIndex++}</td>
+                        <td style="font-weight:600; color: var(--text-primary); text-align:left;">${tur}</td>
+                        <td style="font-weight:600; color: var(--text-primary); text-align:left;">${e.menkul}</td>
+                        <td style="text-align: right;">${formatDate(e.tarih)}</td>
+                        <td>${formatCurrency(e.fiyat)}</td>
+                        <td class="${e.adet >= 0 ? 'text-success' : 'text-danger'}">${e.adet.toLocaleString('tr-TR')}</td>
+                        <td>${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}</td>
+                        <td>
+                            <button class="btn" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditEkstre('${e.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
+                            <button class="btn btn-danger" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
+                        </td>
+                    </tr>`;
+                }
+            });
+        }
+    });
+
+    const ekstreRows = ekstreRowsHtml;
 
     const todayStr = new Date().toISOString().split('T')[0];
     
@@ -3325,19 +3381,18 @@ const renderHisseIslemleri = (container) => {
     container.innerHTML = `
         <datalist id="fon-list">${fonDatalistOptions}</datalist>
         <div class="page-section active">
-            <div class="table-container glass" style="overflow-x: auto;">
+            <div class="table-container glass" style="overflow-x: auto; margin-bottom: 0;">
                 <div class="table-header">
                     <span>Hisse ve Fon İşlemleri</span>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--warning-color); color: #fff;" onclick="window.toggleInlineForm('hisse')">+</button>
                 </div>
                 <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
                     <thead>
-                        <tr><th style="width: 5%;">S.N.</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tarih')">Tarih${getHisseSortIcon('tarih')}</th><th style="width: 8%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tur')">Tür${getHisseSortIcon('tur')}</th><th style="width: 12%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('menkul')">Menkul${getHisseSortIcon('menkul')}</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tutar')">Tutar${getHisseSortIcon('tutar')}</th><th style="width: 18%;">İşlem</th></tr>
+                        <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleHisseTableCollapse()"><i class="fas ${window.hisseTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 8%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tur')">Tür${getHisseSortIcon('tur')}</th><th style="width: 12%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('menkul')">Menkul${getHisseSortIcon('menkul')}</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tarih')">Tarih${getHisseSortIcon('tarih')}</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tutar')">Tutar${getHisseSortIcon('tutar')}</th><th style="width: 18%;">İşlem</th></tr>
                     </thead>
-                    <tbody id="hisse-tbody">
+                    <tbody id="hisse-tbody" style="${window.hisseTableCollapsed ? 'display: none;' : ''}">
                         <tr id="inline-hisse-row" style="display: none; background: rgba(0,0,0,0.4);">
                             <td>-</td>
-                            <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}"></td>
                             <td>
                                 <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px;" onchange="window.updateInlineDatalist()">
                                     <option value="Hisse" selected>Hisse</option>
@@ -3345,6 +3400,7 @@ const renderHisseIslemleri = (container) => {
                                 </select>
                             </td>
                             <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off"></td>
+                            <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}"></td>
                             <td><input type="number" step="0.000001" id="i-fiyat" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Fiyat"></td>
                             <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Adet"></td>
                             <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" disabled></td>
@@ -3405,8 +3461,9 @@ const renderHisseIslemleri = (container) => {
 
     window.toggleInlineForm = (type) => {
         const row = document.getElementById(`inline-${type}-row`);
-        row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
-        window.cancelEdit();
+        if(row) row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+        if (type === 'nakit' && typeof window.cancelNakitEdit === 'function') window.cancelNakitEdit();
+        else if (typeof window.cancelEdit === 'function') window.cancelEdit();
     };
 
     window.deleteEkstre = (id) => {
@@ -3455,11 +3512,14 @@ const renderHisseIslemleri = (container) => {
         State.addEkstre(islem);
         if (typeof renderPage === 'function') renderPage();
     };
+    
+    renderNakitIslemleri(container, true);
 };
 
-const renderNakitIslemleri = (container) => {
+const renderNakitIslemleri = (container, append = false) => {
     window.currentNakitEditId = window.currentNakitEditId || null;
     window.nakitSort = window.nakitSort || { col: null, asc: true };
+    if (window.nakitTableCollapsed === undefined) window.nakitTableCollapsed = true;
     const nakitHareketleriList = [...(State.data.nakitHareketleri || [])].sort((a,b) => {
         if (!window.nakitSort.col) return new Date(b.tarih) - new Date(a.tarih);
         
@@ -3507,7 +3567,7 @@ const renderNakitIslemleri = (container) => {
 
     const todayStr = new Date().toISOString().split('T')[0];
 
-    container.innerHTML = `
+    const htmlContent = `
         <div class="page-section active">
             <div class="table-container glass" style="overflow-x: auto;">
                 <div class="table-header">
@@ -3516,9 +3576,9 @@ const renderNakitIslemleri = (container) => {
                 </div>
                 <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
                     <thead>
-                        <tr><th style="width: 5%;">S.N.</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tarih')">Tarih${getNakitSortIcon('tarih')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tutar')">Tutar${getNakitSortIcon('tutar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('bist100')">XU100${getNakitSortIcon('bist100')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('dolar')">USDTRY${getNakitSortIcon('dolar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('gramAltin')">GRAMALTIN${getNakitSortIcon('gramAltin')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('pry')">PRY${getNakitSortIcon('pry')}</th><th style="width: 20%;">İşlem</th></tr>
+                        <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleNakitTableCollapse()"><i class="fas ${window.nakitTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tarih')">Tarih${getNakitSortIcon('tarih')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tutar')">Tutar${getNakitSortIcon('tutar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('bist100')">XU100${getNakitSortIcon('bist100')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('dolar')">USDTRY${getNakitSortIcon('dolar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('gramAltin')">GRAMALTIN${getNakitSortIcon('gramAltin')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('pry')">PRY${getNakitSortIcon('pry')}</th><th style="width: 20%;">İşlem</th></tr>
                     </thead>
-                    <tbody id="nakit-tbody">
+                    <tbody id="nakit-tbody" style="${window.nakitTableCollapsed ? 'display: none;' : ''}">
                         <tr id="inline-nakit-row" style="display: none; background: rgba(0,0,0,0.4);">
                             <td>-</td>
                             <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
@@ -3538,13 +3598,19 @@ const renderNakitIslemleri = (container) => {
             </div>
         </div>
     `;
+    if (append) {
+        container.insertAdjacentHTML('beforeend', htmlContent);
+    } else {
+        container.innerHTML = htmlContent;
+    }
 
     window.toggleInlineForm = (type) => {
         const row = document.getElementById(`inline-${type}-row`);
         if(row) {
             row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
         }
-        window.cancelNakitEdit();
+        if (type === 'nakit' && typeof window.cancelNakitEdit === 'function') window.cancelNakitEdit();
+        else if (typeof window.cancelEdit === 'function') window.cancelEdit();
     };
 
     window.deleteNakit = (id) => {
