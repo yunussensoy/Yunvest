@@ -469,6 +469,8 @@ const State = {
             }
             if (this.data.hisseFiyatlari) {
                 this.data.hisseFiyatlari.forEach(h => { if (h.menkul) h.menkul = h.menkul.trim().toUpperCase(); });
+            } else {
+                this.data.hisseFiyatlari = [];
             }
         };
 
@@ -795,6 +797,7 @@ const State = {
         if (!menkul) return 0;
         let m = menkul.trim().toUpperCase();
         if (m === 'NAKIT') return 1;
+        if (!this.data || !this.data.hisseFiyatlari) return 0;
         const h = this.data.hisseFiyatlari.find(x => x.menkul.trim().toUpperCase() === m);
         return h ? h.fiyat : 0;
     },
@@ -802,6 +805,8 @@ const State = {
     updateFiyat(menkul, fiyat, skipSave = false) {
         if (!menkul) return;
         let m = menkul.trim().toUpperCase();
+        if (!this.data) return;
+        if (!this.data.hisseFiyatlari) this.data.hisseFiyatlari = [];
         let hf = this.data.hisseFiyatlari.find(h => h.menkul.trim().toUpperCase() === m);
         if (hf) {
             hf.fiyat = parseFloat(fiyat);
@@ -1972,7 +1977,9 @@ const renderHisseler = (container) => {
                 let chartFavok = [];
                 let chartNetKar = [];
                 let chartYSatislar = []; let chartYFavok = []; let chartYNetKar = [];
+                let chartDSatislar = []; let chartDFavok = []; let chartDNetKar = [];
                 let chartBKM = []; let chartFKM = []; let chartNKM = [];
+                let chartYBKM = []; let chartYFKM = []; let chartYNKM = [];
                 let chartCari = []; let chartKaldirac = []; let chartROE = [];
 
                 if (sData.gelirDonemsel && sData.bilanco && sData.gelirDonemsel.headers.length > 2) {
@@ -1997,7 +2004,7 @@ const renderHisseler = (container) => {
                         return parseFloat(str.replace(/\./g, '').replace(/,/g, '.')) || 0;
                     };
                     const getG = (name) => {
-                        const r = sData.gelirDonemsel.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes(name.toLocaleLowerCase('tr-TR')));
+                        const r = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes(name.toLocaleLowerCase('tr-TR')));
                         return r ? { v1: parseTRNumber(r[1]), v2: parseTRNumber(r[p2_idx]) } : { v1: 0, v2: 0 };
                     };
                     
@@ -2134,24 +2141,24 @@ const renderHisseler = (container) => {
                         return val;
                     };
                     
-                    const brutR = sData.gelirDonemsel.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('brüt kar'));
-                    const donenR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam dönen varlıklar'));
-                    const kisaR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam kısa vadeli'));
-                    const uzunR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam uzun vadeli'));
-                    const toplamVR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam varlıklar'));
-                    const ozR = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
+                    const brutR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('brüt kar'));
+                    const donenR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam dönen varlıklar'));
+                    const kisaR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam kısa vadeli'));
+                    const uzunR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam uzun vadeli'));
+                    const toplamVR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam varlıklar'));
+                    const ozR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
 
                     chartLabels = []; chartSatislar = []; chartFavok = []; chartNetKar = [];
                     chartYSatislar = []; chartYFavok = []; chartYNetKar = [];
                     chartDSatislar = []; chartDFavok = []; chartDNetKar = [];
                     chartBKM = []; chartFKM = []; chartNKM = [];
-                    let chartYBKM = []; let chartYFKM = []; let chartYNKM = [];
+                    chartYBKM = []; chartYFKM = []; chartYNKM = [];
                     chartCari = []; chartKaldirac = []; chartROE = [];
                     for (let i = limit; i >= 1; i--) {
                         chartLabels.push(headers[i]);
-                        const sR = sData.gelirDonemsel.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
-                        const fR = sData.gelirDonemsel.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
-                        const nR = sData.gelirDonemsel.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                        const sR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
+                        const fR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
+                        const nR = (sData.gelirDonemsel.rows || []).find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
                           
                           const cqSatis = getCQ(sR, i, headers);
                           const cqBrut = getCQ(brutR, i, headers);
@@ -3072,7 +3079,21 @@ if (window.shouldRenderDashboardCharts) {
                           if (document.getElementById('chart-bkm')) {
                               const commonOpts = {
                                   responsive: true, maintainAspectRatio: false,
-                                  plugins: { legend: { display: false }, datalabels: { display: false } },
+                                  plugins: { 
+                                      legend: { display: false }, 
+                                      datalabels: { display: false },
+                                      tooltip: {
+                                          callbacks: {
+                                              label: (ctx) => {
+                                                  let val = ctx.parsed.y !== null ? new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(ctx.parsed.y) : '';
+                                                  if (ctx.dataset.label && ctx.dataset.label.includes('%') && val) {
+                                                      return '%' + val;
+                                                  }
+                                                  return val;
+                                              }
+                                          }
+                                      }
+                                  },
                                   scales: {
                                       x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } },
                                       y: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } }
@@ -3139,7 +3160,12 @@ if (window.shouldRenderDashboardCharts) {
                                           responsive: true,
                                           maintainAspectRatio: false,
                                           plugins: {
-                                              legend: { display: false },
+                                              legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10, color: '#aaa' } } },
+                                              tooltip: {
+                                                  callbacks: {
+                                                      label: (ctx) => '%' + (ctx.parsed.y || 0).toFixed(1)
+                                                  }
+                                              },
                                               datalabels: {
                                                   color: '#fff',
                                                   align: 'top',
