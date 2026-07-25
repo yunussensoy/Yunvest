@@ -327195,6 +327195,6 @@ window.stockReports = {
     "2026_1._ceyrek_faaliyet_raporu-29.04.2026.pdf",
     "2026_1._ceyrek_finansal_rapor-29.04.2026.pdf",
     "2026_1._ceyrek_finansal_rapor_degerlendirmesi-30.04.2026-alnus_yatirim.pdf",
-    "yatirimci_sunumu-29.04.2026.pdf"
+    "gelecege_donuk_beklentiler-23.05.2025.pdf"
   ]
 };
