@@ -2518,7 +2518,8 @@ const renderHisseler = (container) => {
                         'degerlendirme': 'Değerlendirme', 'degerlendirmesi': 'Değerlendirmesi',
                         'ceyrek': 'Çeyrek', 'yillik': 'Yıllık', 'bilanco': 'Bilanço',
                         'gelir': 'Gelir', 'tablosu': 'Tablosu', 'nakit': 'Nakit', 'akisi': 'Akışı',
-                        'gelecege': 'Geleceğe', 'donuk': 'Dönük', 'beklentiler': 'Beklentiler'
+                        'gelecege': 'Geleceğe', 'donuk': 'Dönük', 'beklentiler': 'Beklentiler',
+                        'aciklama': 'Açıklama'
                     };
                     
                     const cols = baseName.split('-');
