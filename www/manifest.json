@@ -8,14 +8,9 @@
   "theme_color": "#4facfe",
   "icons": [
     {
-      "src": "img/ys_logo_blue.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "img/ys_logo_blue.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "img/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
     }
   ]
 }

@@ -17,7 +17,7 @@
     <!-- PWA Setup -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0b0c10">
-    <link rel="apple-touch-icon" href="img/ys_logo_blue.png">
+    <link rel="apple-touch-icon" href="img/favicon.svg">
 </head>
 <body>
     <div id="auth-container" class="app-container" style="justify-content: center; align-items: center;">
@@ -95,6 +95,11 @@
     <div class="main-wrapper" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative;">
         <!-- Topbar -->
         <div class="top-bar glass" style="display: flex; justify-content: space-between; padding: 0.5rem 1rem; align-items: center; border-radius: 0; border-bottom: 1px solid var(--surface-border); gap: 1rem; position: relative; z-index: 9999; width: 100%;">
+            
+            <!-- Mobile Sidebar Toggle -->
+            <button class="btn btn-icon mobile-sidebar-toggle" style="display: none; padding: 0.3rem 0.5rem;" onclick="window.toggleSidebar()">
+                <i class="fas fa-bars" style="font-size: 1.2rem; color: var(--accent-color);"></i>
+            </button>
             
             <!-- Ticker Bar Wrapper -->
             <div id="ticker-wrapper" style="flex: 1; overflow: hidden; margin-left: 0.5rem;">

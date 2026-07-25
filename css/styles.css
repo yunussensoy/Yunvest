@@ -664,3 +664,43 @@ input[type="file"]::-webkit-file-upload-button:hover {
 
 .takip-table th, .takip-table td { font-size: 11px !important; }
 
+/* Responsive Mobile Layout (Web PWA & Native) */
+@media (max-width: 768px) {
+    .glass-sidebar {
+        position: fixed;
+        left: -100%;
+        top: 0;
+        height: 100vh;
+        z-index: 10000;
+        transition: left 0.3s ease;
+        box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+    }
+    
+    .glass-sidebar.show-mobile {
+        left: 0;
+    }
+    
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0,0,0,0.6);
+        z-index: 9999;
+        backdrop-filter: blur(2px);
+    }
+    
+    .sidebar-overlay.show-mobile {
+        display: block;
+    }
+
+    .bottom-nav {
+        display: flex !important;
+    }
+
+    .mobile-sidebar-toggle {
+        display: block !important;
+    }
+}
