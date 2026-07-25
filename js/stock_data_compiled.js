@@ -327158,6 +327158,7 @@ window.stockReports = {
   "KBORU": [
     "a1_capital_arastirma_raporu.pdf",
     "bulls_yatirim_arastirma_raporu.pdf",
+    "fintables_analist_toplantisi_notlari.pdf",
     "yatirimci_sunumu.pdf"
   ],
   "KRONT": [],
@@ -327177,6 +327178,7 @@ window.stockReports = {
     "yatirimci_sunumu.pdf"
   ],
   "YYLGD": [
+    "alnus_yatirim_2026-3_finansal_rapor_degerlendirmesi.pdf",
     "faaliyet_raporu.pdf",
     "finansal_rapor.pdf",
     "yatirimci_sunumu.pdf"

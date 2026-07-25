@@ -1138,20 +1138,7 @@ const renderPortfoy = (container) => {
     const guncelNakitTutar = nakitItem ? nakitItem.guncelTutar : 0;
 
     
-    window.switchPortfoyTab = (tabId) => {
-        document.querySelectorAll('.portfoy-tab-content').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.portfoy-tab-btn').forEach(btn => {
-            btn.style.background = 'rgba(255,255,255,0.05)';
-            btn.style.color = 'var(--text-secondary)';
-        });
-        const target = document.getElementById('portfoy-' + tabId); if (target) target.style.display = 'flex';
-        const activeBtn = document.querySelector(`.portfoy-tab-btn[data-tab="${tabId}"]`);
-        if(activeBtn) {
-            activeBtn.style.background = 'var(--accent-color)';
-            activeBtn.style.color = '#fff';
-        }
-    };
-
+    
     const html = `
         <div class="page-section active" style="display: flex; flex-direction: column; gap: 40px;">
             
@@ -1166,37 +1153,37 @@ const renderPortfoy = (container) => {
                             <tbody>
                                 <tr>
                                     <td style="text-align:left !important; width:25%;">Nakit</td>
-                                    <td style="text-align:right !important; width:25%; border-right: 1px solid rgba(255, 255, 255, 0.03);"><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;"><span id="nakit-text">${formatCurrency(guncelNakitTutar, 0)}</span></div></td>
+                                    <td style="text-align:right !important; width:25%; border-right: 1px solid rgba(255, 255, 255, 0.03);"><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;"><span id="nakit-text">${formatCurrency(guncelNakitTutar)}</span></div></td>
                                     <td style="text-align:left !important; width:25%; padding-left: 1rem;">Reel Getiri Oranı (Enflasyon)</td>
                                     <td style="text-align:right !important; width:25%;" class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Hisse Portföyü</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(hissePortfoyTutar, 0)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(hissePortfoyTutar)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">BIST 100'e Göre Reel Getiri Oranı</td>
                                     <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriBist >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriBist)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Fon Portföyü</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(fonPortfoyTutar, 0)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(fonPortfoyTutar)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">Dolar Kuruna Göre Reel Getiri Oranı</td>
                                     <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriDolar >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriDolar)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Toplam Portföy</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.toplamPortfoy, 0)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.toplamPortfoy)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">Gram Altına Göre Reel Getiri Oranı</td>
                                     <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriAltin >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriAltin)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Anapara</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.anapara, 0)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.anapara)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">PRY Fonuna Göre Reel Getiri Oranı</td>
                                     <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriPry >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriPry)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Kar</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.kar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(portfoyBilgileri.kar, 0)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.kar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(portfoyBilgileri.kar)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">Hedef Portföy</td>
                                     <td style="text-align:right !important;"><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;"><span id="hedef-text">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span></div></td>
                                 </tr>
@@ -1355,9 +1342,7 @@ const renderPortfoy = (container) => {
         const activeTabId = activeTabBtn ? activeTabBtn.getAttribute('data-tab') : 'bilgiler';
         if (typeof renderPage === "function") {
             renderPage();
-            if (typeof window.switchPortfoyTab === "function") {
-                window.switchPortfoyTab(activeTabId);
-            }
+
         }
     };
 
@@ -3430,7 +3415,7 @@ window.toggleArsivSort = (col) => {
         window.arsivSort = { col: col, asc: true };
     }
     if (typeof renderPage === 'function') renderPage();
-    if (typeof window.switchPortfoyTab === 'function') window.switchPortfoyTab('arsiv');
+
 };
 
 const getArsivSortIcon = (col) => {
@@ -3448,7 +3433,7 @@ window.toggleVarliklarSort = (col) => {
         window.varliklarSort = { col: col, asc: true };
     }
     if (typeof renderPage === 'function') renderPage();
-    if (typeof window.switchPortfoyTab === 'function') window.switchPortfoyTab('varliklar');
+
 };
 
 const getVarliklarSortIcon = (col) => {
@@ -3613,29 +3598,49 @@ const renderHisseIslemleri = (container) => {
                     <span>Hisse ve Fon İşlemleri</span>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--warning-color); color: #fff;" onclick="window.toggleInlineForm('hisse')">+</button>
                 </div>
+                
+                <div id="hisse-ekle-section" style="display: none; margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 1rem;">
+                    <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">S.N.</th>
+                                <th style="width: 8%; text-align: left;">Tür</th>
+                                <th style="width: 12%; text-align: left;">Menkul</th>
+                                <th style="width: 15%; text-align: right;">Tarih</th>
+                                <th style="width: 14%;">Fiyat</th>
+                                <th style="width: 15%;">Adet</th>
+                                <th style="width: 13%;">Tutar</th>
+                                <th style="width: 18%;">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: rgba(0,0,0,0.4);">
+                                <td style="text-align: center;">-</td>
+                                <td>
+                                    <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px;" onchange="window.updateInlineDatalist()">
+                                        <option value="Hisse" selected>Hisse</option>
+                                        <option value="Fon">Fon</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                                <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                                <td><input type="number" step="0.000001" id="i-fiyat" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Fiyat" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                                <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Adet" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                                <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" disabled></td>
+                                <td>
+                                    <button class="btn" id="i-submit-btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineHisse()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
+                                    <button class="btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('hisse')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
                 <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
                     <thead>
                         <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleHisseTableCollapse()"><i class="fas ${window.hisseTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 8%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tur')">Tür${getHisseSortIcon('tur')}</th><th style="width: 12%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('menkul')">Menkul${getHisseSortIcon('menkul')}</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tarih')">Tarih${getHisseSortIcon('tarih')}</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tutar')">Tutar${getHisseSortIcon('tutar')}</th><th style="width: 18%;">İşlem</th></tr>
                     </thead>
                     <tbody id="hisse-tbody" style="${window.hisseTableCollapsed ? 'display: none;' : ''}">
-                        <tr id="inline-hisse-row" style="display: none; background: rgba(0,0,0,0.4);">
-                            <td>-</td>
-                            <td>
-                                <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px;" onchange="window.updateInlineDatalist()">
-                                    <option value="Hisse" selected>Hisse</option>
-                                    <option value="Fon">Fon</option>
-                                </select>
-                            </td>
-                            <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off"></td>
-                            <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}"></td>
-                            <td><input type="number" step="0.000001" id="i-fiyat" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Fiyat"></td>
-                            <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Adet"></td>
-                            <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" disabled></td>
-                            <td>
-                                <button class="btn" id="i-submit-btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveInlineHisse()">Ekle</button>
-                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--input-bg);" onclick="window.toggleInlineForm('hisse')">İptal</button>
-                            </td>
-                        </tr>
                         ${ekstreRows}
                     </tbody>
                 </table>
@@ -3687,10 +3692,17 @@ const renderHisseIslemleri = (container) => {
     }
 
     window.toggleInlineForm = (type) => {
-        const row = document.getElementById(`inline-${type}-row`);
-        if(row) row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+        const section = document.getElementById(`${type}-ekle-section`);
+        if(section) section.style.display = section.style.display === 'none' ? 'block' : 'none';
+        
         if (type === 'nakit' && typeof window.cancelNakitEdit === 'function') window.cancelNakitEdit();
         else if (typeof window.cancelEdit === 'function') window.cancelEdit();
+        
+        // focus the first input if opening
+        if(section && section.style.display === 'block') {
+            const firstInput = section.querySelector('input, select');
+            if(firstInput) firstInput.focus();
+        }
     };
 
     window.deleteEkstre = (id) => {
@@ -3801,24 +3813,44 @@ const renderNakitIslemleri = (container, append = false) => {
                     <span>Nakit İşlemleri</span>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--warning-color); color: #fff;" onclick="window.toggleInlineForm('nakit')">+</button>
                 </div>
+                
+                <div id="nakit-ekle-section" style="display: none; margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 1rem;">
+                    <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">S.N.</th>
+                                <th style="width: 15%; text-align: right;">Tarih</th>
+                                <th style="width: 15%;">Tutar</th>
+                                <th style="width: 15%;">XU100</th>
+                                <th style="width: 15%;">USDTRY</th>
+                                <th style="width: 15%;">GRAMALTIN</th>
+                                <th style="width: 15%;">PRY</th>
+                                <th style="width: 20%;">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: rgba(0,0,0,0.4);">
+                                <td style="text-align: center;">-</td>
+                                <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                                <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                                <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="XU100" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                                <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Dolar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                                <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                                <td><input type="text" inputmode="decimal" id="n-pry" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="PRY" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                                <td>
+                                    <button class="btn" id="n-submit-btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineNakitEntry()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
+                                    <button class="btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('nakit')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
                 <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
                     <thead>
                         <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleNakitTableCollapse()"><i class="fas ${window.nakitTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tarih')">Tarih${getNakitSortIcon('tarih')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tutar')">Tutar${getNakitSortIcon('tutar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('bist100')">XU100${getNakitSortIcon('bist100')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('dolar')">USDTRY${getNakitSortIcon('dolar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('gramAltin')">GRAMALTIN${getNakitSortIcon('gramAltin')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('pry')">PRY${getNakitSortIcon('pry')}</th><th style="width: 20%;">İşlem</th></tr>
                     </thead>
                     <tbody id="nakit-tbody" style="${window.nakitTableCollapsed ? 'display: none;' : ''}">
-                        <tr id="inline-nakit-row" style="display: none; background: rgba(0,0,0,0.4);">
-                            <td>-</td>
-                            <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="XU100" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Dolar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="text" inputmode="decimal" id="n-pry" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="PRY" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td>
-                                <button class="btn" id="n-submit-btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveInlineNakitEntry()">Ekle</button>
-                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--input-bg);" onclick="window.toggleInlineForm('nakit')">İptal</button>
-                            </td>
-                        </tr>
                         ${nakitRows}
                     </tbody>
                 </table>
@@ -3832,12 +3864,18 @@ const renderNakitIslemleri = (container, append = false) => {
     }
 
     window.toggleInlineForm = (type) => {
-        const row = document.getElementById(`inline-${type}-row`);
-        if(row) {
-            row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+        const section = document.getElementById(`${type}-ekle-section`);
+        if(section) {
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
         }
         if (type === 'nakit' && typeof window.cancelNakitEdit === 'function') window.cancelNakitEdit();
         else if (typeof window.cancelEdit === 'function') window.cancelEdit();
+        
+        // focus the first input if opening
+        if(section && section.style.display === 'block') {
+            const firstInput = section.querySelector('input, select');
+            if(firstInput) firstInput.focus();
+        }
     };
 
     window.deleteNakit = (id) => {
@@ -5539,14 +5577,7 @@ window.cancelHideTakip = () => {
 
 
 
-window.goToPortfoyTab = (tabId) => {
-    currentPage = 'portfoy';
-    if (typeof renderPage === 'function') renderPage();
-    if (typeof window.switchPortfoyTab === 'function') {
-        window.switchPortfoyTab(tabId);
-    }
-    document.querySelectorAll('#primary-sidebar .nav-btn').forEach(btn => btn.classList.remove('active'));
-};
+
 
 
 

@@ -1138,20 +1138,7 @@ const renderPortfoy = (container) => {
     const guncelNakitTutar = nakitItem ? nakitItem.guncelTutar : 0;
 
     
-    window.switchPortfoyTab = (tabId) => {
-        document.querySelectorAll('.portfoy-tab-content').forEach(el => el.style.display = 'none');
-        document.querySelectorAll('.portfoy-tab-btn').forEach(btn => {
-            btn.style.background = 'rgba(255,255,255,0.05)';
-            btn.style.color = 'var(--text-secondary)';
-        });
-        const target = document.getElementById('portfoy-' + tabId); if (target) target.style.display = 'flex';
-        const activeBtn = document.querySelector(`.portfoy-tab-btn[data-tab="${tabId}"]`);
-        if(activeBtn) {
-            activeBtn.style.background = 'var(--accent-color)';
-            activeBtn.style.color = '#fff';
-        }
-    };
-
+    
     const html = `
         <div class="page-section active" style="display: flex; flex-direction: column; gap: 40px;">
             
@@ -1166,37 +1153,37 @@ const renderPortfoy = (container) => {
                             <tbody>
                                 <tr>
                                     <td style="text-align:left !important; width:25%;">Nakit</td>
-                                    <td style="text-align:right !important; width:25%; border-right: 1px solid rgba(255, 255, 255, 0.03);"><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;"><span id="nakit-text">${formatCurrency(guncelNakitTutar, 0)}</span></div></td>
+                                    <td style="text-align:right !important; width:25%; border-right: 1px solid rgba(255, 255, 255, 0.03);"><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;"><span id="nakit-text">${formatCurrency(guncelNakitTutar)}</span></div></td>
                                     <td style="text-align:left !important; width:25%; padding-left: 1rem;">Reel Getiri Oranı (Enflasyon)</td>
                                     <td style="text-align:right !important; width:25%;" class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Hisse Portföyü</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(hissePortfoyTutar, 0)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(hissePortfoyTutar)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">BIST 100'e Göre Reel Getiri Oranı</td>
                                     <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriBist >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriBist)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Fon Portföyü</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(fonPortfoyTutar, 0)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(fonPortfoyTutar)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">Dolar Kuruna Göre Reel Getiri Oranı</td>
                                     <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriDolar >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriDolar)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Toplam Portföy</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.toplamPortfoy, 0)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.toplamPortfoy)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">Gram Altına Göre Reel Getiri Oranı</td>
                                     <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriAltin >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriAltin)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Anapara</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.anapara, 0)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.anapara)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">PRY Fonuna Göre Reel Getiri Oranı</td>
                                     <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriPry >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriPry)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Kar</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.kar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(portfoyBilgileri.kar, 0)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.kar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(portfoyBilgileri.kar)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">Hedef Portföy</td>
                                     <td style="text-align:right !important;"><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;"><span id="hedef-text">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span></div></td>
                                 </tr>
@@ -1355,9 +1342,7 @@ const renderPortfoy = (container) => {
         const activeTabId = activeTabBtn ? activeTabBtn.getAttribute('data-tab') : 'bilgiler';
         if (typeof renderPage === "function") {
             renderPage();
-            if (typeof window.switchPortfoyTab === "function") {
-                window.switchPortfoyTab(activeTabId);
-            }
+
         }
     };
 
@@ -2529,20 +2514,51 @@ const renderHisseler = (container) => {
                         'info': 'İnfo', 'teb': 'TEB', 'qnb': 'QNB', 'a1': 'A1',
                         'capital': 'Capital', 'tacirler': 'Tacirler', 'ak': 'Ak',
                         'tera': 'Tera', 'bulls': 'Bulls', 'ziyaretci': 'Ziyaretçi',
-                        'ziyareti': 'Ziyareti', 'notu': 'Notu', 'rapor': 'Rapor'
+                        'ziyareti': 'Ziyareti', 'notu': 'Notu', 'rapor': 'Rapor',
+                        'degerlendirme': 'Değerlendirme', 'degerlendirmesi': 'Değerlendirmesi'
                     };
                     
-                    const formattedName = baseName.split('_').map(word => {
-                        if (!word) return '';
-                        if (trMap[word]) return trMap[word];
-                        return word.charAt(0).toUpperCase() + word.slice(1);
-                    }).join(' ');
+                    const cols = baseName.split('-');
+                    let sirket = '-';
+                    let tarih = '-';
+                    let ad = '-';
                     
-                    foundReports.push({ file: file, name: formattedName });
+                    const formatWords = (str) => {
+                        if(!str) return '-';
+                        return str.split('_').map(w => trMap[w] || w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    };
+
+                    if (cols.length >= 3) {
+                        ad = formatWords(cols[0]);
+                        tarih = formatWords(cols[1]);
+                        sirket = formatWords(cols[2]);
+                    } else if (cols.length === 2) {
+                        ad = formatWords(cols[0]);
+                        tarih = formatWords(cols[1]);
+                    } else {
+                        ad = formatWords(cols[0]);
+                    }
+
+                    const fullName = baseName.replace(/-/g, ' ').replace(/_/g, ' ');
+
+                    foundReports.push({ file: file, name: ad, sirket: sirket, tarih: tarih, fullName: fullName });
                 });
                 
-                // Alfabetik sıralama (tr-TR ile)
-                foundReports.sort((a, b) => a.name.localeCompare(b.name, 'tr-TR'));
+                // Tarihe göre artan sıralama (Eskiden yeniye)
+                const parseDate = (dStr) => {
+                    if (!dStr || dStr === '-') return 0;
+                    const parts = dStr.split(/[.\-\/]/);
+                    if (parts.length === 3) {
+                        if (parts[0].length === 4) return parseInt(parts[0]+parts[1].padStart(2,'0')+parts[2].padStart(2,'0'));
+                        return parseInt(parts[2]+parts[1].padStart(2,'0')+parts[0].padStart(2,'0'));
+                    }
+                    if (parts.length === 2) {
+                        return parseInt(parts[0]+parts[1].padStart(2,'0')+'00');
+                    }
+                    return parseInt(parts[0]+'0000') || 0;
+                };
+
+                foundReports.sort((a, b) => parseDate(a.tarih) - parseDate(b.tarih));
                 
                 if (foundReports.length === 0) {
                     contentHtml += `<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
@@ -2550,17 +2566,35 @@ const renderHisseler = (container) => {
                         <p>Bu hisseye ait rapor bulunamadı.</p>
                     </div>`;
                 } else {
-                    contentHtml += `<div class="dash-card"><div class="dash-title">Raporlar</div><ul style="list-style: none; padding: 0;">`;
-                    foundReports.forEach(report => {
+                    contentHtml += `<div class="dash-card"><div class="dash-title">Raporlar</div>
+                        <div class="table-container">
+                            <table class="dash-table compact-table" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%; text-align: center;">S.N.</th>
+                                        <th style="width: 45%; text-align: left;">Ad</th>
+                                        <th style="width: 25%; text-align: center;">Tarih</th>
+                                        <th style="width: 25%; text-align: left;">Yatırım Şirketi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+                    
+                    foundReports.forEach((report, index) => {
                         let filePath = 'Hisseler/' + selectedHisse + '/' + report.file;
-                        let icon = 'fa-file-pdf';
-                        contentHtml += `<li style="margin-bottom: 0.5rem; padding: 0.5rem; background: var(--overlay-bg); border-radius: 4px;">
-                            <a href="${filePath}" target="_blank" style="color: var(--text-primary); text-decoration: none; font-weight: normal; font-size: 13px; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-                                <i class="fas ${icon}"></i> ${report.name}
-                            </a>
-                        </li>`;
+                        contentHtml += `
+                            <tr>
+                                <td style="text-align: center;">${index + 1}</td>
+                                <td style="text-align: left;">
+                                    <a href="${filePath}" target="_blank" style="color: var(--text-primary); text-decoration: none; font-weight: normal; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                        <i class="fas fa-file-pdf" style="color: var(--danger-color); font-size: 14px;"></i> ${report.name !== '-' ? report.name : report.fullName}
+                                    </a>
+                                </td>
+                                <td style="text-align: center;">${report.tarih}</td>
+                                <td style="text-align: left;">${report.sirket}</td>
+                            </tr>
+                        `;
                     });
-                    contentHtml += `</ul></div>`;
+                    contentHtml += `</tbody></table></div></div>`;
                 }
             } else if (activeTab === 'Değerleme') {
                 // Initialize default edit modes if not present
@@ -3430,7 +3464,7 @@ window.toggleArsivSort = (col) => {
         window.arsivSort = { col: col, asc: true };
     }
     if (typeof renderPage === 'function') renderPage();
-    if (typeof window.switchPortfoyTab === 'function') window.switchPortfoyTab('arsiv');
+
 };
 
 const getArsivSortIcon = (col) => {
@@ -3448,7 +3482,7 @@ window.toggleVarliklarSort = (col) => {
         window.varliklarSort = { col: col, asc: true };
     }
     if (typeof renderPage === 'function') renderPage();
-    if (typeof window.switchPortfoyTab === 'function') window.switchPortfoyTab('varliklar');
+
 };
 
 const getVarliklarSortIcon = (col) => {
@@ -3613,29 +3647,49 @@ const renderHisseIslemleri = (container) => {
                     <span>Hisse ve Fon İşlemleri</span>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--warning-color); color: #fff;" onclick="window.toggleInlineForm('hisse')">+</button>
                 </div>
+                
+                <div id="hisse-ekle-section" style="display: none; margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 1rem;">
+                    <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">S.N.</th>
+                                <th style="width: 8%; text-align: left;">Tür</th>
+                                <th style="width: 12%; text-align: left;">Menkul</th>
+                                <th style="width: 15%; text-align: right;">Tarih</th>
+                                <th style="width: 14%;">Fiyat</th>
+                                <th style="width: 15%;">Adet</th>
+                                <th style="width: 13%;">Tutar</th>
+                                <th style="width: 18%;">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: rgba(0,0,0,0.4);">
+                                <td style="text-align: center;">-</td>
+                                <td>
+                                    <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px;" onchange="window.updateInlineDatalist()">
+                                        <option value="Hisse" selected>Hisse</option>
+                                        <option value="Fon">Fon</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                                <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                                <td><input type="number" step="0.000001" id="i-fiyat" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Fiyat" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                                <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Adet" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                                <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" disabled></td>
+                                <td>
+                                    <button class="btn" id="i-submit-btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineHisse()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
+                                    <button class="btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('hisse')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
                 <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
                     <thead>
                         <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleHisseTableCollapse()"><i class="fas ${window.hisseTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 8%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tur')">Tür${getHisseSortIcon('tur')}</th><th style="width: 12%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('menkul')">Menkul${getHisseSortIcon('menkul')}</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tarih')">Tarih${getHisseSortIcon('tarih')}</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tutar')">Tutar${getHisseSortIcon('tutar')}</th><th style="width: 18%;">İşlem</th></tr>
                     </thead>
                     <tbody id="hisse-tbody" style="${window.hisseTableCollapsed ? 'display: none;' : ''}">
-                        <tr id="inline-hisse-row" style="display: none; background: rgba(0,0,0,0.4);">
-                            <td>-</td>
-                            <td>
-                                <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px;" onchange="window.updateInlineDatalist()">
-                                    <option value="Hisse" selected>Hisse</option>
-                                    <option value="Fon">Fon</option>
-                                </select>
-                            </td>
-                            <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off"></td>
-                            <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}"></td>
-                            <td><input type="number" step="0.000001" id="i-fiyat" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Fiyat"></td>
-                            <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Adet"></td>
-                            <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" disabled></td>
-                            <td>
-                                <button class="btn" id="i-submit-btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveInlineHisse()">Ekle</button>
-                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--input-bg);" onclick="window.toggleInlineForm('hisse')">İptal</button>
-                            </td>
-                        </tr>
                         ${ekstreRows}
                     </tbody>
                 </table>
@@ -3687,10 +3741,17 @@ const renderHisseIslemleri = (container) => {
     }
 
     window.toggleInlineForm = (type) => {
-        const row = document.getElementById(`inline-${type}-row`);
-        if(row) row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+        const section = document.getElementById(`${type}-ekle-section`);
+        if(section) section.style.display = section.style.display === 'none' ? 'block' : 'none';
+        
         if (type === 'nakit' && typeof window.cancelNakitEdit === 'function') window.cancelNakitEdit();
         else if (typeof window.cancelEdit === 'function') window.cancelEdit();
+        
+        // focus the first input if opening
+        if(section && section.style.display === 'block') {
+            const firstInput = section.querySelector('input, select');
+            if(firstInput) firstInput.focus();
+        }
     };
 
     window.deleteEkstre = (id) => {
@@ -3801,24 +3862,44 @@ const renderNakitIslemleri = (container, append = false) => {
                     <span>Nakit İşlemleri</span>
                     <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--warning-color); color: #fff;" onclick="window.toggleInlineForm('nakit')">+</button>
                 </div>
+                
+                <div id="nakit-ekle-section" style="display: none; margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 1rem;">
+                    <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">S.N.</th>
+                                <th style="width: 15%; text-align: right;">Tarih</th>
+                                <th style="width: 15%;">Tutar</th>
+                                <th style="width: 15%;">XU100</th>
+                                <th style="width: 15%;">USDTRY</th>
+                                <th style="width: 15%;">GRAMALTIN</th>
+                                <th style="width: 15%;">PRY</th>
+                                <th style="width: 20%;">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="background: rgba(0,0,0,0.4);">
+                                <td style="text-align: center;">-</td>
+                                <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                                <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                                <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="XU100" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                                <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Dolar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                                <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                                <td><input type="text" inputmode="decimal" id="n-pry" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="PRY" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                                <td>
+                                    <button class="btn" id="n-submit-btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineNakitEntry()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
+                                    <button class="btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('nakit')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
                 <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
                     <thead>
                         <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleNakitTableCollapse()"><i class="fas ${window.nakitTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tarih')">Tarih${getNakitSortIcon('tarih')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tutar')">Tutar${getNakitSortIcon('tutar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('bist100')">XU100${getNakitSortIcon('bist100')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('dolar')">USDTRY${getNakitSortIcon('dolar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('gramAltin')">GRAMALTIN${getNakitSortIcon('gramAltin')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('pry')">PRY${getNakitSortIcon('pry')}</th><th style="width: 20%;">İşlem</th></tr>
                     </thead>
                     <tbody id="nakit-tbody" style="${window.nakitTableCollapsed ? 'display: none;' : ''}">
-                        <tr id="inline-nakit-row" style="display: none; background: rgba(0,0,0,0.4);">
-                            <td>-</td>
-                            <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="XU100" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Dolar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="text" inputmode="decimal" id="n-pry" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="PRY" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td>
-                                <button class="btn" id="n-submit-btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveInlineNakitEntry()">Ekle</button>
-                                <button class="btn" style="padding: 0.2rem 0.5rem; font-size: 12px; background: var(--input-bg);" onclick="window.toggleInlineForm('nakit')">İptal</button>
-                            </td>
-                        </tr>
                         ${nakitRows}
                     </tbody>
                 </table>
@@ -3832,12 +3913,18 @@ const renderNakitIslemleri = (container, append = false) => {
     }
 
     window.toggleInlineForm = (type) => {
-        const row = document.getElementById(`inline-${type}-row`);
-        if(row) {
-            row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+        const section = document.getElementById(`${type}-ekle-section`);
+        if(section) {
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
         }
         if (type === 'nakit' && typeof window.cancelNakitEdit === 'function') window.cancelNakitEdit();
         else if (typeof window.cancelEdit === 'function') window.cancelEdit();
+        
+        // focus the first input if opening
+        if(section && section.style.display === 'block') {
+            const firstInput = section.querySelector('input, select');
+            if(firstInput) firstInput.focus();
+        }
     };
 
     window.deleteNakit = (id) => {
@@ -3938,43 +4025,44 @@ const renderVeriler = (container) => {
 
             <!-- Rapor Yükle (Bulut) -->
             <div class="glass" style="padding: 8px 1rem; margin-top: 0; position: relative; z-index: 99;">
-                <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;"><i class="fas fa-cloud-upload-alt" style="margin-right: 0.5rem;"></i> Buluta Rapor Yükle</div>
+                <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;"><i class="fas fa-cloud-upload-alt" style="margin-right: 0.5rem;"></i> Hisse Raporu Yükle</div>
                 <div style="display:flex; flex-direction:row; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
-                    <div style="flex: 1; min-width: 120px;">
-                        <input type="text" id="upload-hisse" placeholder="Hisse Kodu (Örn: THYAO)" class="form-control" style="width: 100%; text-transform: uppercase; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);">
-                    </div>
-                    <select id="upload-type" class="form-control" style="flex: 2; min-width: 150px; appearance: auto; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);">
-                        <option value="">-- Rapor Türü Seçin --</option>
-                        <option value="arastirma_raporu.pdf">Araştırma Raporu</option>
-                        <option value="faaliyet_raporu.pdf">Faaliyet Raporu</option>
-                        <option value="finansal_rapor.pdf">Finansal Rapor</option>
-                        <option value="toplanti_notlari.pdf">Toplantı Notları</option>
-                        <option value="yatirimci_sunumu.pdf">Yatırımcı Sunumu</option>
-                        <option value="fiyat_tespit_raporu.pdf">Fiyat Tespit Raporu</option>
-                    </select>
                     <style>
-                        #upload-file::file-selector-button,
-                        #upload-file::-webkit-file-upload-button {
-                            background: var(--accent-color);
+                        #upload-file { display: none; }
+                        .upload-file-label {
+                            background: var(--surface-border);
                             color: var(--text-primary);
-                            border: none;
-                            padding: 6px 12px;
+                            padding: 0.3rem 0.8rem;
                             border-radius: 6px;
                             cursor: pointer;
-                            font-weight: 500;
-                            margin-right: 10px;
-                            font-size: 12px !important;
-                            font-family: 'Inter', sans-serif !important;
-                            transition: var(--transition);
+                            font-size: 12px;
+                            font-family: 'Inter', sans-serif;
+                            display: flex;
+                            align-items: center;
+                            gap: 0.5rem;
+                            white-space: nowrap;
                         }
-                        #upload-file::file-selector-button:hover,
-                        #upload-file::-webkit-file-upload-button:hover {
-                            background: rgba(79, 172, 254, 0.8);
-                            transform: translateY(-1px);
-                        }
+                        .upload-file-label:hover { background: var(--overlay-bg); }
                     </style>
-                    <input type="file" id="upload-file" accept="application/pdf" class="form-control" style="flex: 2; min-width: 180px; padding: 0.3rem; cursor: pointer; font-size: 12px !important; font-family: 'Inter', sans-serif !important;">
-                    <button class="btn" style="background: var(--accent-color); flex: 0 0 auto; padding: 0.3rem 1.2rem; font-size: 12px !important; font-weight: 500 !important; font-family: 'Inter', sans-serif !important; white-space: nowrap;" onclick="window.uploadRapor()">Yükle</button>
+                    <label for="upload-file" class="upload-file-label">
+                        <i class="fas fa-folder-open"></i> Bir Dosya Seç
+                    </label>
+                    <input type="file" id="upload-file" accept="application/pdf" onchange="const f = this.files[0]; if(f) this.previousElementSibling.innerHTML = '<i class=\\'fas fa-file-pdf\\' style=\\'color:var(--danger-color);\\'></i> ' + (f.name.length > 15 ? f.name.substring(0,15)+'...' : f.name)">
+                    
+                    <div style="flex: 1; min-width: 80px;">
+                        <input type="text" id="upload-hisse" placeholder="Hisse" class="form-control" style="width: 100%; text-transform: uppercase; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+                    </div>
+                    <div style="flex: 2; min-width: 120px;">
+                        <input type="text" id="upload-ad" placeholder="Ad" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+                    </div>
+                    <div style="flex: 1; min-width: 90px;">
+                        <input type="text" id="upload-tarih" placeholder="Tarih" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+                    </div>
+                    <div style="flex: 2; min-width: 120px;">
+                        <input type="text" id="upload-sirket" placeholder="Yatırım Şirketi" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+                    </div>
+
+                    <button class="btn btn-icon" style="padding: 4px; width: 32px; height: 32px; background: var(--accent-color); color: #fff; display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="window.uploadRapor()" title="Yükle"><i class="fas fa-upload" style="font-size: 14px;"></i></button>
                 </div>
                 <div id="upload-status" style="font-size: 13px; font-weight: 500; min-height: 0; width: 100%; margin-top: 0;"></div>
             </div>
@@ -5539,14 +5627,7 @@ window.cancelHideTakip = () => {
 
 
 
-window.goToPortfoyTab = (tabId) => {
-    currentPage = 'portfoy';
-    if (typeof renderPage === 'function') renderPage();
-    if (typeof window.switchPortfoyTab === 'function') {
-        window.switchPortfoyTab(tabId);
-    }
-    document.querySelectorAll('#primary-sidebar .nav-btn').forEach(btn => btn.classList.remove('active'));
-};
+
 
 
 
@@ -5671,3 +5752,85 @@ window.recalculateHedefFiyatlar = () => {
     }
 };
 
+
+window.uploadRapor = async () => {
+    const fileInput = document.getElementById('upload-file');
+    const hisse = document.getElementById('upload-hisse').value.trim().toUpperCase();
+    const ad = document.getElementById('upload-ad').value.trim();
+    const tarih = document.getElementById('upload-tarih').value.trim();
+    const sirket = document.getElementById('upload-sirket').value.trim();
+    const status = document.getElementById('upload-status');
+
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        if(status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Lütfen bir dosya seçin.'; }
+        return;
+    }
+    if (!hisse || !ad || !tarih || !sirket) {
+        if(status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Lütfen Hisse, Ad, Tarih ve Yatırım Şirketi bilgilerini doldurun.'; }
+        return;
+    }
+
+    if(status) { status.style.color = 'var(--text-primary)'; status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> GitHub\\'a yükleniyor, lütfen bekleyin...'; }
+
+    const file = fileInput.files[0];
+    
+    // Format characters
+    const formatStr = (str) => {
+        return str.toLowerCase()
+            .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+            .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+            .replace(/\s+/g, '_');
+    };
+    
+    const newFileName = `${formatStr(ad)}-${formatStr(tarih)}-${formatStr(sirket)}.pdf`;
+    
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+
+    try {
+        const base64Content = await toBase64(file);
+        
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                hisse: hisse,
+                filename: newFileName,
+                content: base64Content
+            })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            if(status) { 
+                status.style.color = 'var(--success-color)'; 
+                status.innerHTML = `<i class="fas fa-check-circle"></i> Başarılı! <b>${newFileName}</b> yüklendi. Vercel 1-2 dakika içinde güncelleyecektir.`; 
+            }
+            // Clear inputs
+            fileInput.value = '';
+            const label = fileInput.previousElementSibling;
+            if (label) label.innerHTML = '<i class="fas fa-folder-open"></i> Bir Dosya Seç';
+            document.getElementById('upload-ad').value = '';
+            document.getElementById('upload-tarih').value = '';
+            document.getElementById('upload-sirket').value = '';
+        } else {
+            if(status) { 
+                status.style.color = 'var(--danger-color)'; 
+                status.innerHTML = `<i class="fas fa-times-circle"></i> Hata: ${result.error || 'Bilinmeyen bir hata oluştu.'}`; 
+            }
+        }
+    } catch (error) {
+        console.error('Upload Error:', error);
+        if(status) { 
+            status.style.color = 'var(--danger-color)'; 
+            status.innerHTML = `<i class="fas fa-times-circle"></i> Ağ veya sunucu hatası oluştu.`; 
+        }
+    }
+};

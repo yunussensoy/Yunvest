@@ -56,17 +56,7 @@
         <nav class="sidebar-nav" style="display: flex; flex-direction: column; padding: 1rem 0; overflow-y: auto; overflow-x: hidden;">
             <button id="takip-listesi-btn" class="nav-btn" data-target="anasayfa" onmouseenter="if(window.showSidebarTakip) window.showSidebarTakip(this)" onmouseleave="if(window.hideSidebarTakip) window.hideSidebarTakip()"><i class="fas fa-list"></i> <span class="nav-text">Takip Listesi</span></button>
             
-            <div class="nav-accordion" style="width: 100%;">
-                <button class="nav-btn" style="width: 100%; justify-content: flex-start;" onclick="const content = this.nextElementSibling; const icon = this.querySelector('.fa-chevron-down, .fa-chevron-up'); if(content.style.display === 'flex') { content.style.display = 'none'; icon.classList.replace('fa-chevron-up', 'fa-chevron-down'); } else { content.style.display = 'flex'; icon.classList.replace('fa-chevron-down', 'fa-chevron-up'); }">
-                    <i class="fas fa-briefcase" style="width: 20px; text-align: center; font-size: 16px;"></i> <span class="nav-text">Portföy</span> <i class="fas fa-chevron-down nav-text" style="font-size: 0.7em; margin-left: auto;"></i>
-                </button>
-                <div class="accordion-content" style="display: none; flex-direction: column; background: rgba(0,0,0,0.1);">
-                    <button class="nav-btn" style="padding: 0.6rem 1rem; padding-left: 3rem; font-size: 13px;" onclick="if(window.goToPortfoyTab) window.goToPortfoyTab('bilgiler');"><span class="nav-text">Portföy Bilgileri</span></button>
-                    <button class="nav-btn" style="padding: 0.6rem 1rem; padding-left: 3rem; font-size: 13px;" onclick="if(window.goToPortfoyTab) window.goToPortfoyTab('varliklar');"><span class="nav-text">Varlıklarım</span></button>
-                    <button id="nav-btn-arsiv" class="nav-btn" style="padding: 0.6rem 1rem; padding-left: 3rem; font-size: 13px;" onclick="if(window.goToPortfoyTab) window.goToPortfoyTab('arsiv');"><span class="nav-text">Arşiv</span></button>
-
-                </div>
-            </div>
+            <button class="nav-btn" data-target="portfoy"><i class="fas fa-briefcase"></i> <span class="nav-text">Portföy</span></button>
             
             <button class="nav-btn" data-target="hisse_islemleri"><i class="fas fa-receipt"></i> <span class="nav-text">Ekstreler</span></button>
             <button class="nav-btn" data-target="veriler"><i class="fas fa-database"></i> <span class="nav-text">Veri Girişi</span></button>
@@ -138,7 +128,7 @@
                 <i class="fas fa-list"></i>
                 <span>Takip</span>
             </button>
-            <button class="nav-btn bottom-nav-btn" data-target="portfoy" onclick="if(window.goToPortfoyTab) window.goToPortfoyTab('bilgiler'); else document.querySelector('.nav-btn[data-target=\'portfoy_bilgiler\']')?.click()">
+            <button class="nav-btn bottom-nav-btn" data-target="portfoy">
                 <i class="fas fa-briefcase"></i>
                 <span>Portföy</span>
             </button>

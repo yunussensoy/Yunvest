@@ -6,6 +6,6 @@
   "scripts": {
     "build-web": "node build.js",
     "compile": "echo 'No compilation needed'",
-    "build": "echo 'Build complete'"
+    "build": "node update_reports.js"
   }
 }
