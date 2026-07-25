@@ -327172,14 +327172,14 @@ window.stockReports = {
   "TCKRC": [
     "1-2026_1._ceyrek_finansal_rapor-11.05.2026.pdf",
     "2-2026_1._ceyrek_faaliyet_raporu-11.05.2026.pdf",
-    "3-yatirimci_sunumu-11.05.2026.pdf",
+    "3-2026_1._ceyrek_yatirimci_sunumu-11.05.2026.pdf",
     "4-2026_1._ceyrek_degerlendirmesi-12.05.2026-pusula_yatirim.pdf"
   ],
   "YATAS": [],
   "YEOTK": [
     "1-2026_1._ceyrek-finansal_rapor-12.05.2026.pdf",
     "2-2026_1._ceyrek-faaliyet_raporu-12.05.2026.pdf",
-    "3-yatirimci_sunumu-12.05.2026.pdf",
+    "3-2026_1._ceyrek_yatirimci_sunumu-12.05.2026.pdf",
     "4-arastirma_raporu-14.05.2026-bulls_yatirim.pdf"
   ],
   "YYLGD": [
