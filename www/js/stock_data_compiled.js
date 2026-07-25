@@ -327130,7 +327130,7 @@ window.stockReports = {
   "AKSEN": [],
   "ARDYZ": [
     "2025_4._ceyrek_degerlendirmesi-18.02.2026-pusula_yatirim.pdf",
-    "2026_1._ceyrek_arastirma_raporu-13.05.2026.pdf",
+    "2026_1._ceyrek_arastirma_raporu-13.05.2026-sai_manager.pdf",
     "2026_1._ceyrek_degerlendirmesi-12.05.2026-pusula_yatirim.pdf",
     "2026_1._ceyrek_faaliyet_raporu-12.05.2026.pdf",
     "2026_1._ceyrek_finansal_rapor-12.05.2026.pdf",
