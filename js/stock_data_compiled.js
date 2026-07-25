@@ -327135,15 +327135,21 @@ window.stockReports = {
     "4-2026_1._ceyrek_arastirma_raporu-13.05.2026-sai_manager.pdf"
   ],
   "ASTOR": [
-    "1-arastirma_raporu-20.05.2026-tacirler_yatirim.pdf"
+    "1-toplanti_notlari-18.05.2026-pusula_yatirim.pdf",
+    "2-arastirma_raporu-20.05.2026-tacirler_yatirim.pdf"
   ],
   "BRSAN": [],
-  "EBEBK": [],
+  "EBEBK": [
+    "1-2026_1._ceyrek_degerlendirmesi-30.04.2026-pusula_yatirim.pdf"
+  ],
   "EUPWR": [
-    "1-arastirma_raporu-10.06.2026-ak_yatirim.pdf"
+    "1-2026_1_ceyrek_degerlendirmesi-20.05.2026-pusula_yatirim.pdf",
+    "2-arastirma_raporu-10.06.2026-ak_yatirim.pdf"
   ],
   "FONET": [],
-  "GOKNR": [],
+  "GOKNR": [
+    "1-2026_1_ceyrek_degerlendirmesi-12.05.2026-pusula_yatirim.pdf"
+  ],
   "GRSEL": [
     "1-2026_1._ceyrek_finansal_rapor-11.05.2026.pdf",
     "2-2026_1._ceyrek_faaliyet_raporu-11.05.2026.pdf",
@@ -327154,7 +327160,8 @@ window.stockReports = {
   "GUBRF": [
     "1-2026_1._ceyrek_finansal_rapor-12.05.2026.pdf",
     "2-2026_1._ceyrek_faaliyet_raporu-12.05.2026.pdf",
-    "3-2026_1._ceyrek_yatirimci_sunumu-12.05.2026.pdf"
+    "3-2026_1._ceyrek_yatirimci_sunumu-12.05.2026.pdf",
+    "4-2026_1.ceyrek_degerlendirmesi-12.06.2026-pusula_yatirim.pdf"
   ],
   "INDES": [],
   "KBORU": [
@@ -327164,9 +327171,13 @@ window.stockReports = {
     "4-2026_1._ceyrek_degerlendirmesi-04.05.2026-pusula_yatirim.pdf",
     "5-analist_toplantisi_notlari-23.06.2026-fintables.pdf",
     "6-arastirma_raporu-25.06.2026-bulls_yatirim.pdf",
-    "7-toplanti_notlari-25.06.2026-a1_capital.pdf"
+    "7-toplanti_notlari-25.06.2026-a1_capital.pdf",
+    "8-ziyaret_notu-23.06.2026-pusula_yatirim.pdf",
+    "9-aciklama-25.06.2026-pusula_yatirim.pdf"
   ],
-  "KRONT": [],
+  "KRONT": [
+    "1-toplanti_notlari-14.05.2026-pusula_yatirim.pdf"
+  ],
   "MEGMT": [],
   "MPARK": [],
   "TCKRC": [
@@ -327180,12 +327191,14 @@ window.stockReports = {
     "1-2026_1._ceyrek-finansal_rapor-12.05.2026.pdf",
     "2-2026_1._ceyrek-faaliyet_raporu-12.05.2026.pdf",
     "3-2026_1._ceyrek_yatirimci_sunumu-12.05.2026.pdf",
-    "4-arastirma_raporu-14.05.2026-bulls_yatirim.pdf"
+    "4-arastirma_raporu-14.05.2026-bulls_yatirim.pdf",
+    "5-2026_1.ceyrek_degerlendirmesi-12.05.2026-pusula_yatirim.pdf"
   ],
   "YYLGD": [
     "1-gelecege_donuk_beklentiler-23.05.2025.pdf",
     "2-2026_1._ceyrek_finansal_rapor-29.04.2026.pdf",
     "3-2026_1._ceyrek_faaliyet_raporu-29.04.2026.pdf",
+    "4-2026_1.ceyrek_degerlendirmesi-30.04.2026-pusula_yatirim.pdf",
     "4-2026_1._ceyrek_finansal_rapor_degerlendirmesi-30.04.2026-alnus_yatirim.pdf"
   ]
 };
