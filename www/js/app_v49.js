@@ -2514,20 +2514,53 @@ const renderHisseler = (container) => {
                         'info': 'İnfo', 'teb': 'TEB', 'qnb': 'QNB', 'a1': 'A1',
                         'capital': 'Capital', 'tacirler': 'Tacirler', 'ak': 'Ak',
                         'tera': 'Tera', 'bulls': 'Bulls', 'ziyaretci': 'Ziyaretçi',
-                        'ziyareti': 'Ziyareti', 'notu': 'Notu', 'rapor': 'Rapor'
+                        'ziyareti': 'Ziyareti', 'notu': 'Notu', 'rapor': 'Rapor',
+                        'degerlendirme': 'Değerlendirme', 'degerlendirmesi': 'Değerlendirmesi',
+                        'ceyrek': 'Çeyrek', 'yillik': 'Yıllık', 'bilanco': 'Bilanço',
+                        'gelir': 'Gelir', 'tablosu': 'Tablosu', 'nakit': 'Nakit', 'akisi': 'Akışı'
                     };
                     
-                    const formattedName = baseName.split('_').map(word => {
-                        if (!word) return '';
-                        if (trMap[word]) return trMap[word];
-                        return word.charAt(0).toUpperCase() + word.slice(1);
-                    }).join(' ');
+                    const cols = baseName.split('-');
+                    let sirket = '-';
+                    let tarih = '-';
+                    let ad = '-';
                     
-                    foundReports.push({ file: file, name: formattedName });
+                    const formatWords = (str) => {
+                        if(!str) return '-';
+                        return str.split('_').map(w => trMap[w] || w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    };
+
+                    if (cols.length >= 3) {
+                        ad = formatWords(cols[0]);
+                        tarih = formatWords(cols[1]);
+                        sirket = formatWords(cols[2]);
+                    } else if (cols.length === 2) {
+                        ad = formatWords(cols[0]);
+                        tarih = formatWords(cols[1]);
+                    } else {
+                        ad = formatWords(cols[0]);
+                    }
+
+                    const fullName = baseName.replace(/-/g, ' ').replace(/_/g, ' ');
+
+                    foundReports.push({ file: file, name: ad, sirket: sirket, tarih: tarih, fullName: fullName });
                 });
                 
-                // Alfabetik sıralama (tr-TR ile)
-                foundReports.sort((a, b) => a.name.localeCompare(b.name, 'tr-TR'));
+                // Tarihe göre artan sıralama (Eskiden yeniye)
+                const parseDate = (dStr) => {
+                    if (!dStr || dStr === '-') return 0;
+                    const parts = dStr.split(/[.\-\/]/);
+                    if (parts.length === 3) {
+                        if (parts[0].length === 4) return parseInt(parts[0]+parts[1].padStart(2,'0')+parts[2].padStart(2,'0'));
+                        return parseInt(parts[2]+parts[1].padStart(2,'0')+parts[0].padStart(2,'0'));
+                    }
+                    if (parts.length === 2) {
+                        return parseInt(parts[0]+parts[1].padStart(2,'0')+'00');
+                    }
+                    return parseInt(parts[0]+'0000') || 0;
+                };
+
+                foundReports.sort((a, b) => parseDate(a.tarih) - parseDate(b.tarih));
                 
                 if (foundReports.length === 0) {
                     contentHtml += `<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
@@ -2535,17 +2568,35 @@ const renderHisseler = (container) => {
                         <p>Bu hisseye ait rapor bulunamadı.</p>
                     </div>`;
                 } else {
-                    contentHtml += `<div class="dash-card"><div class="dash-title">Raporlar</div><ul style="list-style: none; padding: 0;">`;
-                    foundReports.forEach(report => {
+                    contentHtml += `<div class="dash-card"><div class="dash-title">Raporlar</div>
+                        <div class="table-container">
+                            <table class="dash-table compact-table" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%; text-align: center;">S.N.</th>
+                                        <th style="width: 45%; text-align: left;">Ad</th>
+                                        <th style="width: 25%; text-align: center;">Tarih</th>
+                                        <th style="width: 25%; text-align: left;">Yatırım Şirketi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>`;
+                    
+                    foundReports.forEach((report, index) => {
                         let filePath = 'Hisseler/' + selectedHisse + '/' + report.file;
-                        let icon = 'fa-file-pdf';
-                        contentHtml += `<li style="margin-bottom: 0.5rem; padding: 0.5rem; background: var(--overlay-bg); border-radius: 4px;">
-                            <a href="${filePath}" target="_blank" style="color: var(--text-primary); text-decoration: none; font-weight: normal; font-size: 13px; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-                                <i class="fas ${icon}"></i> ${report.name}
-                            </a>
-                        </li>`;
+                        contentHtml += `
+                            <tr>
+                                <td style="text-align: center;">${index + 1}</td>
+                                <td style="text-align: left;">
+                                    <a href="${filePath}" target="_blank" style="color: var(--text-primary); text-decoration: none; font-weight: normal; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                        <i class="fas fa-file-pdf" style="color: var(--danger-color); font-size: 14px;"></i> ${report.name !== '-' ? report.name : report.fullName}
+                                    </a>
+                                </td>
+                                <td style="text-align: center;">${report.tarih}</td>
+                                <td style="text-align: left;">${report.sirket}</td>
+                            </tr>
+                        `;
                     });
-                    contentHtml += `</ul></div>`;
+                    contentHtml += `</tbody></table></div></div>`;
                 }
             } else if (activeTab === 'Değerleme') {
                 // Initialize default edit modes if not present
@@ -3935,12 +3986,9 @@ const renderVeriler = (container) => {
     fonSet.forEach(fon => {
         const pFiyat = State.getFiyat(fon);
         fonHtml += `
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">${fon}</span>
-                <div style="display:flex; align-items:center; gap: 0.5rem;">
-                    <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100px; text-align:right; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key === 'Enter') { State.updateFiyat('${fon}', this.value); this.blur(); }">
-                    <button class="btn" style="padding: 4px; width: 28px; height: 28px; background: #000000; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value);" title="Kaydet"><i class="fas fa-save" style="font-size: 13px; color: var(--success-color) !important;"></i></button>
-                </div>
+            <div style="display:flex; gap: 0.5rem; width: 100%;">
+                <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100%; text-align:right; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key === 'Enter') { State.updateFiyat('${fon}', this.value); this.blur(); }">
+                <button class="btn" style="padding: 0; width: 26px; height: 26px; background: #000000; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value);" title="Kaydet"><i class="fas fa-save" style="font-size: 18px; color: var(--success-color) !important;"></i></button>
             </div>
         `;
     });
@@ -3953,13 +4001,13 @@ const renderVeriler = (container) => {
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
                     <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Mevcut Nakit Tutarı</div>
                     <div style="display:flex; gap: 0.5rem;">
-                        <input type="text" id="v-nakit-input" value="${formatNumber(State.data.manuelNakitTutar || 0, 2)}" class="form-control" style="width:100%; font-size: 13px; color: var(--text-secondary);" onblur="this.value = formatNumber(parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0, 2)" onkeydown="if(event.key === 'Enter') { State.data.manuelNakitTutar = parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0; State.save(); this.blur(); }">
-                        <button class="btn btn-icon" style="padding: 4px; width: 28px; height: 28px; background: #000000; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.data.manuelNakitTutar = parseFloat(document.getElementById('v-nakit-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save();" title="Kaydet"><i class="fas fa-save" style="font-size: 13px; color: var(--success-color) !important;"></i></button>
+                        <input type="text" id="v-nakit-input" value="${formatNumber(State.data.manuelNakitTutar || 0, 2)}" class="form-control" style="width:100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onblur="this.value = formatNumber(parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0, 2)" onkeydown="if(event.key === 'Enter') { State.data.manuelNakitTutar = parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0; State.save(); this.blur(); }">
+                        <button class="btn btn-icon" style="padding: 0; width: 26px; height: 26px; background: #000000; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.data.manuelNakitTutar = parseFloat(document.getElementById('v-nakit-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save();" title="Kaydet"><i class="fas fa-save" style="font-size: 18px; color: var(--success-color) !important;"></i></button>
                     </div>
                 </div>
                 <!-- Fon Fiyatları -->
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Fon Fiyatları</div>
+                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">PRY Fon Fiyatı</div>
                     <div style="max-height: 150px; overflow-y: auto; padding-right: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
                         ${fonHtml || '<p style="color:var(--text-secondary); margin: 0;">Portföyde fon bulunmuyor.</p>'}
                     </div>
@@ -3968,51 +4016,38 @@ const renderVeriler = (container) => {
                 <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
                     <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Hedef Portföy</div>
                     <div style="display:flex; gap: 0.5rem;">
-                        <input type="text" id="v-hedef-input" value="${formatNumber(hedefPortfoy, 0)}" class="form-control" style="width:100%; font-size: 13px; color: var(--text-secondary);" onblur="this.value = formatNumber(parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0, 0)" onkeydown="if(event.key === 'Enter') { State.data.hedefPortfoyTL = parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0; State.save(); this.blur(); }">
-                        <button class="btn btn-icon" style="padding: 4px; width: 28px; height: 28px; background: #000000; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save();" title="Kaydet"><i class="fas fa-save" style="font-size: 13px; color: var(--success-color) !important;"></i></button>
+                        <input type="text" id="v-hedef-input" value="${formatNumber(hedefPortfoy, 0)}" class="form-control" style="width:100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onblur="this.value = formatNumber(parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0, 0)" onkeydown="if(event.key === 'Enter') { State.data.hedefPortfoyTL = parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0; State.save(); this.blur(); }">
+                        <button class="btn btn-icon" style="padding: 0; width: 26px; height: 26px; background: #000000; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save();" title="Kaydet"><i class="fas fa-save" style="font-size: 18px; color: var(--success-color) !important;"></i></button>
                     </div>
                 </div>
             </div>
 
             <!-- Rapor Yükle (Bulut) -->
             <div class="glass" style="padding: 8px 1rem; margin-top: 0; position: relative; z-index: 99;">
-                <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;"><i class="fas fa-cloud-upload-alt" style="margin-right: 0.5rem;"></i> Buluta Rapor Yükle</div>
+                <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Hisse Raporu Yükle</div>
                 <div style="display:flex; flex-direction:row; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
-                    <div style="flex: 1; min-width: 120px;">
-                        <input type="text" id="upload-hisse" placeholder="Hisse Kodu (Örn: THYAO)" class="form-control" style="width: 100%; text-transform: uppercase; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);">
-                    </div>
-                    <select id="upload-type" class="form-control" style="flex: 2; min-width: 150px; appearance: auto; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);">
-                        <option value="">-- Rapor Türü Seçin --</option>
-                        <option value="arastirma_raporu.pdf">Araştırma Raporu</option>
-                        <option value="faaliyet_raporu.pdf">Faaliyet Raporu</option>
-                        <option value="finansal_rapor.pdf">Finansal Rapor</option>
-                        <option value="toplanti_notlari.pdf">Toplantı Notları</option>
-                        <option value="yatirimci_sunumu.pdf">Yatırımcı Sunumu</option>
-                        <option value="fiyat_tespit_raporu.pdf">Fiyat Tespit Raporu</option>
-                    </select>
                     <style>
-                        #upload-file::file-selector-button,
-                        #upload-file::-webkit-file-upload-button {
-                            background: var(--accent-color);
-                            color: var(--text-primary);
-                            border: none;
-                            padding: 6px 12px;
-                            border-radius: 6px;
-                            cursor: pointer;
-                            font-weight: 500;
-                            margin-right: 10px;
-                            font-size: 12px !important;
-                            font-family: 'Inter', sans-serif !important;
-                            transition: var(--transition);
-                        }
-                        #upload-file::file-selector-button:hover,
-                        #upload-file::-webkit-file-upload-button:hover {
-                            background: rgba(79, 172, 254, 0.8);
-                            transform: translateY(-1px);
-                        }
+                        #upload-file { display: none; }
                     </style>
-                    <input type="file" id="upload-file" accept="application/pdf" class="form-control" style="flex: 2; min-width: 180px; padding: 0.3rem; cursor: pointer; font-size: 12px !important; font-family: 'Inter', sans-serif !important;">
-                    <button class="btn" style="background: var(--accent-color); flex: 0 0 auto; padding: 0.3rem 1.2rem; font-size: 12px !important; font-weight: 500 !important; font-family: 'Inter', sans-serif !important; white-space: nowrap;" onclick="window.uploadRapor()">Yükle</button>
+                    <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç" style="padding: 3px 7px 3px 4px; background: #000000; color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; border: none; font-size: 13px;">
+                        <span class="fa-stack" style="font-size: 8px; width: 2em; height: 2em;"><i class="fas fa-folder-open fa-stack-2x" style="color: #ffffff;"></i></span>
+                    </label>
+                    <input type="file" id="upload-file" accept="application/pdf" onchange="const f = this.files[0]; if(f) this.previousElementSibling.innerHTML = '<i class=\\'fas fa-file-pdf\\' style=\\'color:var(--danger-color); font-size: 14px;\\'></i> <span style=\\'color: #fff; margin-left: 5px;\\'>' + (f.name.length > 15 ? f.name.substring(0,15)+'...' : f.name) + '</span>'">
+                    
+                    <div style="flex: 1; min-width: 80px;">
+                        <input type="text" id="upload-hisse" placeholder="Hisse" class="form-control" list="bist-hisse-list" autocomplete="off" style="width: 100%; text-transform: uppercase; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+                    </div>
+                    <div style="flex: 2; min-width: 120px;">
+                        <input type="text" id="upload-ad" placeholder="Ad" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+                    </div>
+                    <div style="flex: 1; min-width: 90px;">
+                        <input type="text" id="upload-tarih" placeholder="Tarih" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+                    </div>
+                    <div style="flex: 2; min-width: 120px;">
+                        <input type="text" id="upload-sirket" placeholder="Yatırım Şirketi" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+                    </div>
+
+                    <button class="btn btn-icon" style="padding: 3px 7px 3px 4px; background: #000000; border: none; color: var(--accent-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="window.uploadRapor()" title="Yükle"><span class="fa-stack" style="font-size: 9.5px; width: 2em; height: 2em;"><i class="fas fa-cloud fa-stack-2x" style="color: var(--accent-color);"></i><i class="fas fa-arrow-up fa-stack-1x" style="color: #ffffff; margin-top: 2px;"></i></span></button>
                 </div>
                 <div id="upload-status" style="font-size: 13px; font-weight: 500; min-height: 0; width: 100%; margin-top: 0;"></div>
             </div>
@@ -4398,7 +4433,7 @@ window.setupCustomDropdown = (inputId, optionsList) => {
                 item.style.textAlign = 'left';
                 
                 if (val) {
-                    item.innerHTML = `<strong>${match.substr(0, val.length)}</strong>${match.substr(val.length)}`;
+                    item.innerHTML = `<strong style="color: var(--accent-color);">${match.substr(0, val.length)}</strong>${match.substr(val.length)}`;
                 } else {
                     item.innerHTML = match;
                 }
@@ -5702,3 +5737,91 @@ window.recalculateHedefFiyatlar = () => {
     }
 };
 
+
+window.uploadRapor = async () => {
+    const fileInput = document.getElementById('upload-file');
+    const hisse = document.getElementById('upload-hisse').value.trim().toUpperCase();
+    const ad = document.getElementById('upload-ad').value.trim();
+    const tarih = document.getElementById('upload-tarih').value.trim();
+    const sirket = document.getElementById('upload-sirket').value.trim();
+    const status = document.getElementById('upload-status');
+
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        if(status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Lütfen bir dosya seçin.'; }
+        return;
+    }
+    if (!hisse) {
+        if(status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Lütfen Hisse kodunu doldurun.'; }
+        return;
+    }
+
+    if(status) { status.style.color = 'var(--text-primary)'; status.innerHTML = `<i class="fas fa-spinner fa-spin"></i> GitHub'a yükleniyor, lütfen bekleyin...`; }
+
+    const file = fileInput.files[0];
+    
+    // Format characters
+    const formatStr = (str) => {
+        if (!str) return '';
+        return str.toLowerCase()
+            .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+            .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+            .replace(/\s+/g, '_');
+    };
+    
+    const parts = [];
+    if (ad) parts.push(formatStr(ad));
+    if (tarih) parts.push(formatStr(tarih));
+    if (sirket) parts.push(formatStr(sirket));
+
+    const newFileName = parts.length > 0 ? parts.join('-') + '.pdf' : file.name;
+    
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+
+    try {
+        const base64Content = await toBase64(file);
+        
+        const response = await fetch('/api/upload', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                hisse: hisse,
+                filename: newFileName,
+                content: base64Content
+            })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            if(status) { 
+                status.style.color = 'var(--success-color)'; 
+                status.innerHTML = `<i class="fas fa-check-circle"></i> Dosyanız başarıyla yüklendi.`; 
+            }
+            // Clear inputs
+            fileInput.value = '';
+            const label = fileInput.previousElementSibling;
+            if (label) label.innerHTML = '<i class="fas fa-folder-open"></i> Bir Dosya Seç';
+            document.getElementById('upload-ad').value = '';
+            document.getElementById('upload-tarih').value = '';
+            document.getElementById('upload-sirket').value = '';
+        } else {
+            if(status) { 
+                status.style.color = 'var(--danger-color)'; 
+                status.innerHTML = `<i class="fas fa-times-circle"></i> Hata: ${result.error || 'Bilinmeyen bir hata oluştu.'}`; 
+            }
+        }
+    } catch (error) {
+        console.error('Upload Error:', error);
+        if(status) { 
+            status.style.color = 'var(--danger-color)'; 
+            status.innerHTML = `<i class="fas fa-times-circle"></i> Ağ veya sunucu hatası oluştu.`; 
+        }
+    }
+};

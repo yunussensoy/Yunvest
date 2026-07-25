@@ -327129,58 +327129,72 @@ window.stockData = {
 window.stockReports = {
   "AKSEN": [],
   "ARDYZ": [
-    "faaliyet_raporu.pdf",
-    "finansal_rapor.pdf",
-    "pusula_yatirim_toplanti_notlari.pdf",
-    "sai_arastirma_raporu.pdf"
+    "2025_4._ceyrek_degerlendirmesi-18.02.2026-pusula_yatirim.pdf",
+    "2026_1._ceyrek_arastirma_raporu-13.05.2026.pdf",
+    "2026_1._ceyrek_degerlendirmesi-12.05.2026-pusula_yatirim.pdf",
+    "2026_1._ceyrek_faaliyet_raporu-12.05.2026.pdf",
+    "2026_1._ceyrek_finansal_rapor-12.05.2026.pdf",
+    "toplanti_notlari-24.04.2026-pusula_yatirim.pdf"
   ],
   "ASTOR": [
-    "tarcirler_yatirim_arastirma_raporu.pdf"
+    "arastirma_raporu-20.05.2026-tacirler_yatirim.pdf"
   ],
   "BRSAN": [],
   "EBEBK": [],
   "EUPWR": [
-    "ak_yatirim_arastirma_raporu.pdf"
+    "arastirma_raporu-10.06.2026-ak_yatirim.pdf"
   ],
   "FONET": [],
   "GOKNR": [],
   "GRSEL": [
-    "faaliyet_raporu.pdf",
-    "finansal_rapor.pdf",
-    "tera_yatirim_ziyaretci_notu.pdf",
-    "yatirimci_sunumu.pdf"
+    "2025_4._ceyrek_degerlendirmesi-11.03.2026-pusula_yatirim.pdf",
+    "2026_1._ceyrek_degerlendirmesi-12.05.2026-pusula_yatirim.pdf",
+    "2026_1._ceyrek_faaliyet_raporu-11.05.2026.pdf",
+    "2026_1._ceyrek_finansal_rapor-11.05.2026.pdf",
+    "2026_1._ceyrek_yatirimci_sunumu-11.05.2026.pdf",
+    "toplanti_notlari-14.05.2026-pusula_yatirim.pdf",
+    "toplanti_notlari-25.03.2026-pusula_yatirim.pdf"
   ],
   "GUBRF": [
-    "faaliyet_raporu.pdf",
-    "yatirimci_sunumu.pdf"
+    "2026_1._ceyrek_faaliyet_raporu-12.05.2026.pdf",
+    "2026_1._ceyrek_finansal_rapor-12.05.2026.pdf",
+    "2026_1._ceyrek_yatirimci_sunumu-12.05.2026.pdf"
   ],
   "INDES": [],
   "KBORU": [
-    "a1_capital_arastirma_raporu.pdf",
-    "bulls_yatirim_arastirma_raporu.pdf",
-    "fintables_analist_toplantisi_notlari.pdf",
-    "yatirimci_sunumu.pdf"
+    "2025_4._ceyrek_degerlendirmesi-18.02.2026-pusula_yatirim.pdf",
+    "2026_1._ceyrek_degerlendirmesi-04.05.2026-pusula_yatirim.pdf",
+    "2026_1._ceyrek_faaliyet_raporu-30.04.2026.pdf",
+    "2026_1._ceyrek_finansal_rapor-30.04.2026.pdf",
+    "analist_toplantisi_notlari-23.06.2026-fintables.pdf",
+    "arastirma_raporu-25.06.2026-bulls_yatirim.pdf",
+    "toplanti_notlari-25.06.2026-a1_capital.pdf",
+    "yatirimci_sunumu-30.04.2026.pdf"
   ],
   "KRONT": [],
   "MEGMT": [],
   "MPARK": [],
   "TCKRC": [
-    "faaliyet_raporu.pdf",
-    "finansal_rapor.pdf",
-    "yatirimci_sunumu.pdf"
+    "2025_4._ceyrek_degerlendirmesi-11.03.2026-pusula_yatirim.pdf",
+    "2026_1._ceyrek_degerlendirmesi-12.05.2026-pusula_yatirim.pdf",
+    "2026_1._ceyrek_faaliyet_raporu-11.05.2026.pdf",
+    "2026_1._ceyrek_finansal_rapor-11.05.2026.pdf",
+    "toplanti_notlari-22.04.2026-alnus_yatirim.pdf",
+    "toplanti_notlari-22.04.2026-pusula_yatirim.pdf",
+    "yatirimci_sunumu-11.05.2026.pdf"
   ],
   "YATAS": [],
   "YEOTK": [
-    "a1_capital_arastirma_raporu.pdf",
-    "bulls_yatirim_arastirma_raporu.pdf",
-    "faaliyet_raporu.pdf",
-    "finansal_rapor.pdf",
-    "yatirimci_sunumu.pdf"
+    "2025._4._ceyrek_degerlendirmesi-11.05.2026-a1_capital.pdf",
+    "2026_1._ceyrek-faaliyet_raporu-12.05.2026.pdf",
+    "2026_1._ceyrek-finansal_rapor-12.05.2026.pdf",
+    "arastirma_raporu-14.05.2026-bulls_yatirim.pdf",
+    "yatirimci_sunumu-12.05.2026.pdf"
   ],
   "YYLGD": [
-    "alnus_yatirim_2026-3_finansal_rapor_degerlendirmesi.pdf",
-    "faaliyet_raporu.pdf",
-    "finansal_rapor.pdf",
-    "yatirimci_sunumu.pdf"
+    "2026_3._ceyrek_faaliyet_raporu-29.04.2026.pdf",
+    "2026_3._ceyrek_finansal_rapor-29.04.2026.pdf",
+    "2026_3._ceyrek_finansal_rapor_degerlendirmesi-30.04.2026-alnus_yatirim.pdf",
+    "yatirimci_sunumu-29.04.2026.pdf"
   ]
 };

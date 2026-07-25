@@ -2515,7 +2515,9 @@ const renderHisseler = (container) => {
                         'capital': 'Capital', 'tacirler': 'Tacirler', 'ak': 'Ak',
                         'tera': 'Tera', 'bulls': 'Bulls', 'ziyaretci': 'Ziyaretçi',
                         'ziyareti': 'Ziyareti', 'notu': 'Notu', 'rapor': 'Rapor',
-                        'degerlendirme': 'Değerlendirme', 'degerlendirmesi': 'Değerlendirmesi'
+                        'degerlendirme': 'Değerlendirme', 'degerlendirmesi': 'Değerlendirmesi',
+                        'ceyrek': 'Çeyrek', 'yillik': 'Yıllık', 'bilanco': 'Bilanço',
+                        'gelir': 'Gelir', 'tablosu': 'Tablosu', 'nakit': 'Nakit', 'akisi': 'Akışı'
                     };
                     
                     const cols = baseName.split('-');
@@ -3986,7 +3988,7 @@ const renderVeriler = (container) => {
         fonHtml += `
             <div style="display:flex; gap: 0.5rem; width: 100%;">
                 <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100%; text-align:right; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key === 'Enter') { State.updateFiyat('${fon}', this.value); this.blur(); }">
-                <button class="btn" style="padding: 3px 7px 3px 4px; background: #000000; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value);" title="Kaydet"><i class="fas fa-save" style="font-size: 13px; color: var(--success-color) !important;"></i></button>
+                <button class="btn" style="padding: 0; width: 26px; height: 26px; background: #000000; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value);" title="Kaydet"><i class="fas fa-save" style="font-size: 18px; color: var(--success-color) !important;"></i></button>
             </div>
         `;
     });
@@ -4000,7 +4002,7 @@ const renderVeriler = (container) => {
                     <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Mevcut Nakit Tutarı</div>
                     <div style="display:flex; gap: 0.5rem;">
                         <input type="text" id="v-nakit-input" value="${formatNumber(State.data.manuelNakitTutar || 0, 2)}" class="form-control" style="width:100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onblur="this.value = formatNumber(parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0, 2)" onkeydown="if(event.key === 'Enter') { State.data.manuelNakitTutar = parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0; State.save(); this.blur(); }">
-                        <button class="btn btn-icon" style="padding: 3px 7px 3px 4px; background: #000000; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.data.manuelNakitTutar = parseFloat(document.getElementById('v-nakit-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save();" title="Kaydet"><i class="fas fa-save" style="font-size: 13px; color: var(--success-color) !important;"></i></button>
+                        <button class="btn btn-icon" style="padding: 0; width: 26px; height: 26px; background: #000000; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.data.manuelNakitTutar = parseFloat(document.getElementById('v-nakit-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save();" title="Kaydet"><i class="fas fa-save" style="font-size: 18px; color: var(--success-color) !important;"></i></button>
                     </div>
                 </div>
                 <!-- Fon Fiyatları -->
@@ -4015,7 +4017,7 @@ const renderVeriler = (container) => {
                     <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Hedef Portföy</div>
                     <div style="display:flex; gap: 0.5rem;">
                         <input type="text" id="v-hedef-input" value="${formatNumber(hedefPortfoy, 0)}" class="form-control" style="width:100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onblur="this.value = formatNumber(parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0, 0)" onkeydown="if(event.key === 'Enter') { State.data.hedefPortfoyTL = parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0; State.save(); this.blur(); }">
-                        <button class="btn btn-icon" style="padding: 3px 7px 3px 4px; background: #000000; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save();" title="Kaydet"><i class="fas fa-save" style="font-size: 13px; color: var(--success-color) !important;"></i></button>
+                        <button class="btn btn-icon" style="padding: 0; width: 26px; height: 26px; background: #000000; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save();" title="Kaydet"><i class="fas fa-save" style="font-size: 18px; color: var(--success-color) !important;"></i></button>
                     </div>
                 </div>
             </div>
