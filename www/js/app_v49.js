@@ -2525,29 +2525,46 @@ const renderHisseler = (container) => {
                     let sirket = '-';
                     let tarih = '-';
                     let ad = '-';
+                    let sn = '-';
                     
                     const formatWords = (str) => {
                         if(!str) return '-';
                         return str.split('_').map(w => trMap[w] || w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                     };
+                    
+                    const isSn = /^\d+$/.test(cols[0]);
 
-                    if (cols.length >= 3) {
-                        ad = formatWords(cols[0]);
-                        tarih = formatWords(cols[1]);
-                        sirket = formatWords(cols[2]);
-                    } else if (cols.length === 2) {
-                        ad = formatWords(cols[0]);
-                        tarih = formatWords(cols[1]);
+                    if (isSn) {
+                        sn = cols[0];
+                        if (cols.length >= 4) {
+                            ad = formatWords(cols[1]);
+                            tarih = formatWords(cols[2]);
+                            sirket = formatWords(cols[3]);
+                        } else if (cols.length === 3) {
+                            ad = formatWords(cols[1]);
+                            tarih = formatWords(cols[2]);
+                        } else if (cols.length === 2) {
+                            ad = formatWords(cols[1]);
+                        }
                     } else {
-                        ad = formatWords(cols[0]);
+                        if (cols.length >= 3) {
+                            ad = formatWords(cols[0]);
+                            tarih = formatWords(cols[1]);
+                            sirket = formatWords(cols[2]);
+                        } else if (cols.length === 2) {
+                            ad = formatWords(cols[0]);
+                            tarih = formatWords(cols[1]);
+                        } else {
+                            ad = formatWords(cols[0]);
+                        }
                     }
 
                     const fullName = baseName.replace(/-/g, ' ').replace(/_/g, ' ');
 
-                    foundReports.push({ file: file, name: ad, sirket: sirket, tarih: tarih, fullName: fullName });
+                    foundReports.push({ file: file, sn: sn, name: ad, sirket: sirket, tarih: tarih, fullName: fullName });
                 });
                 
-                // Tarihe göre artan sıralama (Eskiden yeniye)
+                // Tarihe ve SN'ye göre artan sıralama
                 const parseDate = (dStr) => {
                     if (!dStr || dStr === '-') return 0;
                     const parts = dStr.split(/[.\-\/]/);
@@ -2561,7 +2578,23 @@ const renderHisseler = (container) => {
                     return parseInt(parts[0]+'0000') || 0;
                 };
 
-                foundReports.sort((a, b) => parseDate(a.tarih) - parseDate(b.tarih));
+                foundReports.sort((a, b) => {
+                    const snA = parseInt(a.sn);
+                    const snB = parseInt(b.sn);
+                    const hasSnA = !isNaN(snA);
+                    const hasSnB = !isNaN(snB);
+
+                    if (hasSnA && hasSnB) {
+                        if (snA !== snB) return snA - snB;
+                        return parseDate(a.tarih) - parseDate(b.tarih);
+                    } else if (hasSnA) {
+                        return -1;
+                    } else if (hasSnB) {
+                        return 1;
+                    } else {
+                        return parseDate(a.tarih) - parseDate(b.tarih);
+                    }
+                });
                 
                 if (foundReports.length === 0) {
                     contentHtml += `<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
@@ -2586,7 +2619,7 @@ const renderHisseler = (container) => {
                         let filePath = 'Hisseler/' + selectedHisse + '/' + report.file;
                         contentHtml += `
                             <tr>
-                                <td style="text-align: center;">${index + 1}</td>
+                                <td style="text-align: center;">${report.sn !== '-' ? report.sn : (index + 1)}</td>
                                 <td style="text-align: left;">
                                     <a href="${filePath}" target="_blank" style="color: var(--text-primary); text-decoration: none; font-weight: normal; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
                                         <i class="fas fa-file-pdf" style="color: var(--danger-color); font-size: 14px;"></i> ${report.name !== '-' ? report.name : report.fullName}
@@ -4037,6 +4070,9 @@ const renderVeriler = (container) => {
                     
                     <div style="flex: 1; min-width: 80px;">
                         <input type="text" id="upload-hisse" placeholder="Hisse" class="form-control" list="bist-hisse-list" autocomplete="off" style="width: 100%; text-transform: uppercase; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+                    </div>
+                    <div style="flex: 1; min-width: 60px; max-width: 80px;">
+                        <input type="number" id="upload-sn" placeholder="S.N." class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
                     </div>
                     <div style="flex: 2; min-width: 120px;">
                         <input type="text" id="upload-ad" placeholder="Ad" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
@@ -5742,6 +5778,7 @@ window.recalculateHedefFiyatlar = () => {
 window.uploadRapor = async () => {
     const fileInput = document.getElementById('upload-file');
     const hisse = document.getElementById('upload-hisse').value.trim().toUpperCase();
+    const sn = document.getElementById('upload-sn')?.value.trim() || '';
     const ad = document.getElementById('upload-ad').value.trim();
     const tarih = document.getElementById('upload-tarih').value.trim();
     const sirket = document.getElementById('upload-sirket').value.trim();
@@ -5770,6 +5807,7 @@ window.uploadRapor = async () => {
     };
     
     const parts = [];
+    if (sn) parts.push(sn);
     if (ad) parts.push(formatStr(ad));
     if (tarih) parts.push(formatStr(tarih));
     if (sirket) parts.push(formatStr(sirket));
@@ -5809,6 +5847,7 @@ window.uploadRapor = async () => {
             fileInput.value = '';
             const label = fileInput.previousElementSibling;
             if (label) label.innerHTML = '<i class="fas fa-folder-open"></i> Bir Dosya Seç';
+            if (document.getElementById('upload-sn')) document.getElementById('upload-sn').value = '';
             document.getElementById('upload-ad').value = '';
             document.getElementById('upload-tarih').value = '';
             document.getElementById('upload-sirket').value = '';
