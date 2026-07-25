@@ -327148,7 +327148,7 @@ window.stockReports = {
   ],
   "FONET": [],
   "GOKNR": [
-    "1-2026_1_ceyrek_degerlendirmesi-12.05.2026-pusula_yatirim.pdf"
+    "1-2026_1._ceyrek_degerlendirmesi-12.05.2026-pusula_yatirim.pdf"
   ],
   "GRSEL": [
     "1-2026_1._ceyrek_finansal_rapor-11.05.2026.pdf",
