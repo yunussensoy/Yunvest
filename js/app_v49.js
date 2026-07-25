@@ -1041,8 +1041,18 @@ const renderPortfoy = (container) => {
         const tur = p.menkul.length === 3 ? 'Fon' : 'Hisse';
         let fiyatHtml = `<td style="text-align: right !important;">${formatCurrency(p.guncelFiyat)}</td>`;
         if (tur === 'Fon') {
-            fiyatHtml = `<td style="text-align: right !important;">${formatCurrency(p.guncelFiyat)}</td>`;
+            if (p.menkul === 'PRY') {
+                fiyatHtml = `<td style="text-align: right !important;">
+                    <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
+                        <span class="pry-text">${formatCurrency(p.guncelFiyat)}</span>
+                        <input type="number" step="0.000001" class="form-control glass-input inline-pry-input" style="display:none; width: 80px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${p.guncelFiyat}" onkeydown="if(event.key==='Enter') window.saveVarliklarEdit()">
+                    </div>
+                </td>`;
+            } else {
+                fiyatHtml = `<td style="text-align: right !important;">${formatCurrency(p.guncelFiyat)}</td>`;
+            }
         }
+
 
         let menkulHtml = `<td style="text-align: left !important; font-weight: 300 !important;" onclick="window.goToHisse('${p.menkul}')">${p.menkul}</td>`;
         if (tur === 'Fon') {
@@ -1146,14 +1156,30 @@ const renderPortfoy = (container) => {
 
             <div id="portfoy-bilgiler" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
                 <div class="table-container glass" style="margin-bottom: 0;">
-                    <div class="table-header">Portföy Bilgileri</div>
+                    <div class="table-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Portföy Bilgileri</span>
+                        <div>
+                            <button id="portfoy-edit-btn" class="btn btn-icon" style="color: var(--accent-color); font-size: 14px; padding: 4px;" onclick="window.togglePortfoyEdit()" title="Düzenle"><i class="fas fa-edit"></i></button>
+                            <button id="portfoy-save-btn" class="btn btn-icon" style="color: var(--success-color); font-size: 14px; padding: 4px; display: none;" onclick="window.savePortfoyEdit()" title="Kaydet"><i class="fas fa-save"></i></button>
+                        </div>
+                    </div>
                 <div class="flex-row" style="align-items: flex-start; gap: 1rem;">
                     <div style="flex: 2; overflow-x: auto;">
                         <table class="dash-table compact-table" style="width: 100%;">
                             <tbody>
                                 <tr>
                                     <td style="text-align:left !important; width:25%;">Nakit</td>
-                                    <td style="text-align:right !important; width:25%; border-right: 1px solid rgba(255, 255, 255, 0.03);"><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;"><span id="nakit-text">${formatCurrency(guncelNakitTutar)}</span></div></td>
+                                    <td style="text-align:right !important; width:25%; border-right: 1px solid rgba(255, 255, 255, 0.03);">
+                                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
+                                    <td style="text-align:right !important; width:25%; border-right: 1px solid rgba(255, 255, 255, 0.03);">
+                                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
+                                            <span id="nakit-text">${formatCurrency(guncelNakitTutar)}</span>
+                                            <input type="number" step="0.01" id="inline-nakit-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${State.data.manuelNakitTutar || 0}" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
+                                        </div>
+                                    </td>
+                                            <input type="number" step="0.01" id="inline-nakit-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${State.data.manuelNakitTutar || 0}" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
+                                        </div>
+                                    </td>
                                     <td style="text-align:left !important; width:25%; padding-left: 1rem;">Reel Getiri Oranı (Enflasyon)</td>
                                     <td style="text-align:right !important; width:25%;" class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td>
                                 </tr>
@@ -1185,7 +1211,17 @@ const renderPortfoy = (container) => {
                                     <td style="text-align:left !important;">Kar</td>
                                     <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.kar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(portfoyBilgileri.kar)}</td>
                                     <td style="text-align:left !important; padding-left: 1rem;">Hedef Portföy</td>
-                                    <td style="text-align:right !important;"><div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;"><span id="hedef-text">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span></div></td>
+                                    <td style="text-align:right !important;">
+                                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
+                                    <td style="text-align:right !important;">
+                                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
+                                            <span id="hedef-text">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span>
+                                            <input type="number" id="inline-hedef-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${portfoyBilgileri.hedefPortfoy}" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
+                                        </div>
+                                    </td>
+                                            <input type="number" id="inline-hedef-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${portfoyBilgileri.hedefPortfoy}" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
+                                        </div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Nominal Getiri Oranı</td>
@@ -1231,7 +1267,13 @@ const renderPortfoy = (container) => {
                     }
                 </style>
                 <div class="table-container glass" style="margin-bottom: 0;">
-                    <div class="table-header">Varlıklarım</div>
+                    <div class="table-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Varlıklarım</span>
+                        <div>
+                            <button id="varliklar-edit-btn" class="btn btn-icon" style="color: var(--accent-color); font-size: 14px; padding: 4px;" onclick="window.toggleVarliklarEdit()" title="Düzenle"><i class="fas fa-edit"></i></button>
+                            <button id="varliklar-save-btn" class="btn btn-icon" style="color: var(--success-color); font-size: 14px; padding: 4px; display: none;" onclick="window.saveVarliklarEdit()" title="Kaydet"><i class="fas fa-save"></i></button>
+                        </div>
+                    </div>
                 <div class="flex-row" style="align-items: center; gap: 1rem;">
                     <div style="flex: 2.5; overflow-x: auto;">
                         <table class="dash-table compact-table varliklar-table">
@@ -1289,51 +1331,61 @@ const renderPortfoy = (container) => {
     container.innerHTML = html;
 
 
-    window.toggleHedefEdit = () => {
-        const text = document.getElementById('hedef-text');
-        const form = document.getElementById('inline-hedef-form');
-        const btn = document.getElementById('hedef-edit-btn');
-        if(form.style.display === 'none') {
-            text.style.display = 'none';
-            if(btn) btn.style.display = 'none';
-            form.style.display = 'flex';
-            form.style.gap = '0.5rem';
-        } else {
-            text.style.display = 'inline';
-            if(btn) btn.style.display = 'inline-block';
-            form.style.display = 'none';
+    window.togglePortfoyEdit = () => {
+        const isEditing = document.getElementById('portfoy-save-btn').style.display !== 'none';
+        
+        document.getElementById('nakit-text').style.display = isEditing ? 'inline' : 'none';
+        document.getElementById('inline-nakit-input').style.display = isEditing ? 'none' : 'inline-block';
+        
+        document.getElementById('hedef-text').style.display = isEditing ? 'inline' : 'none';
+        document.getElementById('inline-hedef-input').style.display = isEditing ? 'none' : 'inline-block';
+        
+        document.getElementById('portfoy-edit-btn').style.display = isEditing ? 'inline-block' : 'none';
+        document.getElementById('portfoy-save-btn').style.display = isEditing ? 'none' : 'inline-block';
+        
+        if (!isEditing) {
+            document.getElementById('inline-nakit-input').focus();
         }
     };
-    window.saveInlineHedef = (e) => {
-        e.preventDefault();
-        const yeniHedef = parseFloat(document.getElementById('inline-hedef-input').value);
-        State.data.hedefPortfoyTL = yeniHedef;
+    
+    window.savePortfoyEdit = () => {
+        const nakitVal = document.getElementById('inline-nakit-input').value;
+        const hedefVal = document.getElementById('inline-hedef-input').value;
+        
+        if (nakitVal !== '') State.data.manuelNakitTutar = parseFloat(nakitVal) || 0;
+        if (hedefVal !== '') State.data.hedefPortfoyTL = parseFloat(hedefVal) || 0;
+        
         State.save();
         if (typeof renderPage === "function") renderPage();
     };
 
-    window.toggleNakitEdit = () => {
-        const text = document.getElementById('nakit-text');
-        const form = document.getElementById('inline-nakit-form');
-        const btn = document.getElementById('nakit-edit-btn');
-        if(form.style.display === 'none') {
-            text.style.display = 'none';
-            if(btn) btn.style.display = 'none';
-            form.style.display = 'flex';
-            form.style.gap = '0.5rem';
-        } else {
-            text.style.display = 'inline';
-            if(btn) btn.style.display = 'inline-block';
-            form.style.display = 'none';
+    window.toggleVarliklarEdit = () => {
+        const isEditing = document.getElementById('varliklar-save-btn').style.display !== 'none';
+        
+        const pryText = document.querySelector('.pry-text');
+        const pryInput = document.querySelector('.inline-pry-input');
+        
+        if (pryText && pryInput) {
+            pryText.style.display = isEditing ? 'inline' : 'none';
+            pryInput.style.display = isEditing ? 'none' : 'inline-block';
+        }
+        
+        document.getElementById('varliklar-edit-btn').style.display = isEditing ? 'inline-block' : 'none';
+        document.getElementById('varliklar-save-btn').style.display = isEditing ? 'none' : 'inline-block';
+        
+        if (!isEditing && pryInput) {
+            pryInput.focus();
         }
     };
-    window.saveInlineNakit = (e) => {
-        e.preventDefault();
-        const inputVal = document.getElementById('inline-nakit-input').value;
-        if (!inputVal) return window.toggleNakitEdit();
-        State.data.manuelNakitTutar = parseFloat(inputVal) || 0;
-        State.save();
-        if (typeof renderPage === "function") renderPage();
+    
+    window.saveVarliklarEdit = () => {
+        const pryInput = document.querySelector('.inline-pry-input');
+        if (pryInput && pryInput.value !== '') {
+            State.data.manuelFonFiyatlari = State.data.manuelFonFiyatlari || {};
+            State.data.manuelFonFiyatlari['PRY'] = parseFloat(pryInput.value.replace(',', '.'));
+            State.save();
+            if (typeof renderPage === "function") renderPage();
+        }
     };
 
     window.setPortfoyChartRange = (range) => {
@@ -1693,7 +1745,7 @@ const renderHisseler = (container) => {
     window.currentSelectedHisse = selectedHisse; // sync it back
     const hName = selectedHisse || 'Hisse';
     
-    const validTabs = ['Özet Rapor', 'Raporlar', 'Değerleme', 'Hisse Notları'];
+    const validTabs = ['Özet Rapor', 'Akış', 'Değerleme'];
     let activeTab = window.currentHisseTab || 'Özet Rapor';
     if (!validTabs.includes(activeTab)) {
         activeTab = 'Özet Rapor';
@@ -1767,7 +1819,7 @@ const renderHisseler = (container) => {
     const renderUI = () => {
         const tabIcons = {
             'Özet Rapor': 'fas fa-chart-pie',
-            'Diğer Raporlar': 'fas fa-folder-open',
+            
             'Değerleme': 'fas fa-gem',
             'Gelir Tablosu': 'fas fa-file-invoice-dollar',
             'Nakit Akım Tablosu': 'fas fa-water',
@@ -1784,9 +1836,7 @@ const renderHisseler = (container) => {
                 </div>
             </div>`;
 
-        let tabsHtml = makeBtn('Özet Rapor') + 
-                       makeBtn('Raporlar') +
-                       makeBtn('Değerleme') + makeBtn('Hisse Notları');
+        let tabsHtml = makeBtn('Özet Rapor') + makeBtn('Akış') + makeBtn('Değerleme');
                        
         let contentHtml = '';
 
@@ -2494,146 +2544,7 @@ const renderHisseler = (container) => {
                 window.shouldRenderDashboardCharts = true;
             } else if (['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler'].includes(activeTab)) {
                 contentHtml = `<div style="display:flex; justify-content:center; align-items:center; height:200px; opacity:0.5; font-style:italic;">${activeTab} sayfası henüz yapım aşamasındadır.</div>`;
-            } else if (activeTab === 'Raporlar') {
-                let foundReports = [];
-                const availablePdfs = (window.stockReports && window.stockReports[selectedHisse]) ? window.stockReports[selectedHisse] : [];
-                
-                availablePdfs.forEach(file => {
-                    let baseName = file.toLowerCase();
-                    if (baseName.endsWith('.pdf')) {
-                        baseName = baseName.substring(0, baseName.length - 4);
-                    }
-                    
-                    const trMap = {
-                        'arastirma': 'Araştırma', 'raporu': 'Raporu', 'faaliyet': 'Faaliyet',
-                        'finansal': 'Finansal', 'toplanti': 'Toplantı', 'notlari': 'Notları',
-                        'yatirimci': 'Yatırımcı', 'sunumu': 'Sunumu', 'fiyat': 'Fiyat',
-                        'tespit': 'Tespit', 'degerleme': 'Değerleme', 'sirket': 'Şirket',
-                        'yatirim': 'Yatırım', 'degerler': 'Değerler', 'is': 'İş',
-                        'unlu': 'Ünlü', 'yapi': 'Yapı', 'vakif': 'Vakıf', 'araci': 'Aracı',
-                        'info': 'İnfo', 'teb': 'TEB', 'qnb': 'QNB', 'a1': 'A1',
-                        'capital': 'Capital', 'tacirler': 'Tacirler', 'ak': 'Ak',
-                        'tera': 'Tera', 'bulls': 'Bulls', 'ziyaretci': 'Ziyaretçi',
-                        'ziyareti': 'Ziyareti', 'notu': 'Notu', 'rapor': 'Rapor',
-                        'degerlendirme': 'Değerlendirme', 'degerlendirmesi': 'Değerlendirmesi',
-                        'ceyrek': 'Çeyrek', 'yillik': 'Yıllık', 'bilanco': 'Bilanço',
-                        'gelir': 'Gelir', 'tablosu': 'Tablosu', 'nakit': 'Nakit', 'akisi': 'Akışı',
-                        'gelecege': 'Geleceğe', 'donuk': 'Dönük', 'beklentiler': 'Beklentiler',
-                        'aciklama': 'Açıklama'
-                    };
-                    
-                    const cols = baseName.split('-');
-                    let sirket = '-';
-                    let tarih = '-';
-                    let ad = '-';
-                    let sn = '-';
-                    
-                    const formatWords = (str) => {
-                        if(!str) return '-';
-                        return str.split('_').map(w => trMap[w] || w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-                    };
-                    
-                    const isSn = /^\d+$/.test(cols[0]);
-
-                    if (isSn) {
-                        sn = cols[0];
-                        if (cols.length >= 4) {
-                            ad = formatWords(cols[1]);
-                            tarih = formatWords(cols[2]);
-                            sirket = formatWords(cols[3]);
-                        } else if (cols.length === 3) {
-                            ad = formatWords(cols[1]);
-                            tarih = formatWords(cols[2]);
-                        } else if (cols.length === 2) {
-                            ad = formatWords(cols[1]);
-                        }
-                    } else {
-                        if (cols.length >= 3) {
-                            ad = formatWords(cols[0]);
-                            tarih = formatWords(cols[1]);
-                            sirket = formatWords(cols[2]);
-                        } else if (cols.length === 2) {
-                            ad = formatWords(cols[0]);
-                            tarih = formatWords(cols[1]);
-                        } else {
-                            ad = formatWords(cols[0]);
-                        }
-                    }
-
-                    const fullName = baseName.replace(/-/g, ' ').replace(/_/g, ' ');
-
-                    foundReports.push({ file: file, sn: sn, name: ad, sirket: sirket, tarih: tarih, fullName: fullName });
-                });
-                
-                // Tarihe ve SN'ye göre artan sıralama
-                const parseDate = (dStr) => {
-                    if (!dStr || dStr === '-') return 0;
-                    const parts = dStr.split(/[.\-\/]/);
-                    if (parts.length === 3) {
-                        if (parts[0].length === 4) return parseInt(parts[0]+parts[1].padStart(2,'0')+parts[2].padStart(2,'0'));
-                        return parseInt(parts[2]+parts[1].padStart(2,'0')+parts[0].padStart(2,'0'));
-                    }
-                    if (parts.length === 2) {
-                        return parseInt(parts[0]+parts[1].padStart(2,'0')+'00');
-                    }
-                    return parseInt(parts[0]+'0000') || 0;
-                };
-
-                foundReports.sort((a, b) => {
-                    const snA = parseInt(a.sn);
-                    const snB = parseInt(b.sn);
-                    const hasSnA = !isNaN(snA);
-                    const hasSnB = !isNaN(snB);
-
-                    if (hasSnA && hasSnB) {
-                        if (snA !== snB) return snA - snB;
-                        return parseDate(a.tarih) - parseDate(b.tarih);
-                    } else if (hasSnA) {
-                        return -1;
-                    } else if (hasSnB) {
-                        return 1;
-                    } else {
-                        return parseDate(a.tarih) - parseDate(b.tarih);
-                    }
-                });
-                
-                if (foundReports.length === 0) {
-                    contentHtml += `<div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
-                        <i class="fas fa-exclamation-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                        <p>Bu hisseye ait rapor bulunamadı.</p>
-                    </div>`;
-                } else {
-                    contentHtml += `<div class="dash-card"><div class="dash-title">Raporlar</div>
-                        <div class="table-container">
-                            <table class="dash-table compact-table" style="width: 100%;">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 5%; text-align: center;">S.N.</th>
-                                        <th style="width: 45%; text-align: left;">Ad</th>
-                                        <th style="width: 25%; text-align: center;">Tarih</th>
-                                        <th style="width: 25%; text-align: left;">Yatırım Şirketi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>`;
-                    
-                    foundReports.forEach((report, index) => {
-                        let filePath = 'Hisseler/' + selectedHisse + '/' + report.file;
-                        contentHtml += `
-                            <tr>
-                                <td style="text-align: center;">${report.sn !== '-' ? report.sn : (index + 1)}</td>
-                                <td style="text-align: left;">
-                                    <a href="${filePath}" target="_blank" style="color: var(--text-primary); text-decoration: none; font-weight: normal; display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
-                                        <i class="fas fa-file-pdf" style="color: var(--danger-color); font-size: 14px;"></i> ${report.name !== '-' ? report.name : report.fullName}
-                                    </a>
-                                </td>
-                                <td style="text-align: center;">${report.tarih}</td>
-                                <td style="text-align: left;">${report.sirket}</td>
-                            </tr>
-                        `;
-                    });
-                    contentHtml += `</tbody></table></div></div>`;
-                }
-            } else if (activeTab === 'Değerleme') {
+             } else if (activeTab === 'Değerleme') {
                 // Initialize default edit modes if not present
                 if (!window.degerlemeEditMode) window.degerlemeEditMode = { '2026': false, '2027': false, '2028': false, '2029': false, '2030': false };
                 window.toggleDegerlemeEdit = (y) => {
@@ -2674,7 +2585,7 @@ const renderHisseler = (container) => {
                 let html = `<div class="dash-card" style="display:flex; flex-direction:column;">
                     <div class="dash-title">Geleceğe İlişkin Beklentileriniz</div>
                     <div style="overflow-x:auto;">
-                        <table class="dash-table compact-table" style="min-width: 1000px;">
+                    <table class="dash-table compact-table" style="min-width: 1000px;">
                             <thead>${headerHtml}</thead>
                             <tbody>`;
                 
@@ -2897,26 +2808,197 @@ const renderHisseler = (container) => {
                     </div>
                 </div>`; // End of dash-card
                 contentHtml += html;
-            } else if (activeTab === 'Hisse Notları') {
+            } else if (activeTab === 'Akış') {
                 let analizler = State.data.analizler || [];
-                // Filter only for the selected hisse
                 analizler = analizler.filter(a => (a.hisse || '').toUpperCase() === selectedHisse.toUpperCase());
-                analizler = window.sortAnalizler([...analizler]);
+                
+                // Get Reports
+                let foundReports = [];
+                const availablePdfs = (window.stockReports && window.stockReports[selectedHisse]) ? window.stockReports[selectedHisse] : [];
+                availablePdfs.forEach(file => {
+                    let baseName = file.toLowerCase();
+                    if (baseName.endsWith('.pdf')) baseName = baseName.substring(0, baseName.length - 4);
+                    
+                    const trMap = {
+                        'arastirma': 'Araştırma', 'raporu': 'Raporu', 'faaliyet': 'Faaliyet',
+                        'finansal': 'Finansal', 'toplanti': 'Toplantı', 'notlari': 'Notları',
+                        'yatirimci': 'Yatırımcı', 'sunumu': 'Sunumu', 'fiyat': 'Fiyat',
+                        'tespit': 'Tespit', 'degerleme': 'Değerleme', 'sirket': 'Şirket',
+                        'yatirim': 'Yatırım', 'degerler': 'Değerler', 'is': 'İş',
+                        'unlu': 'Ünlü', 'yapi': 'Yapı', 'vakif': 'Vakıf', 'araci': 'Aracı',
+                        'info': 'İnfo', 'teb': 'TEB', 'qnb': 'QNB', 'a1': 'A1',
+                        'capital': 'Capital', 'tacirler': 'Tacirler', 'ak': 'Ak',
+                        'tera': 'Tera', 'bulls': 'Bulls', 'ziyaretci': 'Ziyaretçi',
+                        'ziyareti': 'Ziyareti', 'notu': 'Notu', 'rapor': 'Rapor',
+                        'degerlendirme': 'Değerlendirme', 'degerlendirmesi': 'Değerlendirmesi',
+                        'ceyrek': 'Çeyrek', 'yillik': 'Yıllık', 'bilanco': 'Bilanço',
+                        'gelir': 'Gelir', 'tablosu': 'Tablosu', 'nakit': 'Nakit', 'akisi': 'Akışı',
+                        'gelecege': 'Geleceğe', 'donuk': 'Dönük', 'beklentiler': 'Beklentiler',
+                        'aciklama': 'Açıklama'
+                    };
+                    
+                    const cols = baseName.split('-');
+                    let sirket = '-';
+                    let tarih = '-';
+                    let ad = '-';
+                    let sn = '-';
+                    
+                    const formatWords = (str) => {
+                        if(!str) return '-';
+                        return str.split('_').map(w => trMap[w] || w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    };
+                    
+                    if (/^\d+$/.test(cols[0])) {
+                        sn = cols[0];
+                        if (cols.length >= 4) { ad = formatWords(cols[1]); tarih = formatWords(cols[2]); sirket = formatWords(cols[3]); }
+                        else if (cols.length === 3) { ad = formatWords(cols[1]); tarih = formatWords(cols[2]); }
+                        else if (cols.length === 2) { ad = formatWords(cols[1]); }
+                    } else {
+                        if (cols.length >= 3) { ad = formatWords(cols[0]); tarih = formatWords(cols[1]); sirket = formatWords(cols[2]); }
+                        else if (cols.length === 2) { ad = formatWords(cols[0]); tarih = formatWords(cols[1]); }
+                        else if (cols.length === 1) { ad = formatWords(cols[0]); }
+                    }
+                    
+                    foundReports.push({ type: 'report', file: file, sn: sn, name: ad, tarih: tarih, company: sirket });
+                });
+
+                                  const parseDateStr = (dStr) => {
+                      if (!dStr || dStr === '-') return 0;
+                      let s = dStr.replace(/[\s\._]/g, '-');
+                      let p = s.split('-');
+                      if (p.length >= 3) {
+                          if (p[0].length === 4) {
+                              return parseInt(p[0] + p[1].padStart(2,'0') + p[2].padStart(2,'0'));
+                          } else if (p[2].length === 4) {
+                              return parseInt(p[2] + p[1].padStart(2,'0') + p[0].padStart(2,'0'));
+                          }
+                      }
+                      let clean = dStr.replace(/\D/g, '');
+                      if (clean.length === 8) {
+                          if (clean.startsWith('20')) return parseInt(clean);
+                          return parseInt(clean.substring(4,8) + clean.substring(2,4) + clean.substring(0,2));
+                      }
+                      return parseInt(clean) || 0;
+                  };
+
+                const today = new Date().toISOString().split('T')[0];
+                let unifiedList = [];
+                
+                analizler.forEach(a => {
+                    let d = 0;
+                    if (a.tarih) {
+                        d = parseDateStr(a.tarih);
+                    }
+                    unifiedList.push({
+                        type: 'analiz',
+                        data: a,
+                        sortTarih: d,
+                        gosterimTarih: a.tarih ? a.tarih.split('-').reverse().join('.') : '-'
+                    });
+                });
+
+                foundReports.forEach(r => {
+                    let d = parseDateStr(r.tarih);
+                    unifiedList.push({
+                        type: 'report',
+                        data: r,
+                        sortTarih: d,
+                        gosterimTarih: r.tarih !== '-' ? r.tarih : '-'
+                    });
+                });
+
+                // Yeniden eskiye (Descending) siralama
+                unifiedList.sort((a, b) => b.sortTarih - a.sortTarih); // Yeniden eskiye siralama (En yeni en ustte)
 
                 let tableHtml = `
-                <div class="dash-card" style="padding:0; overflow:hidden;">
+                <div class="dash-card" style="padding-bottom: 20px;">
                     <div style="display: flex; align-items: center; justify-content: center; padding: 3px 5px; border-bottom: 1px solid var(--table-border); position: relative;">
-                        <div style="font-size: 18px; font-weight: bold; color: var(--accent-color); text-align: center;">Hisse Notları</div>
+                        <div style="font-size: 18px; font-weight: bold; color: var(--accent-color); text-align: center;">Akış</div>
                         <button class="btn" style="background: var(--warning-color); padding: 3px 8px; font-size: 12px; position: absolute; right: 5px;" onclick="window.toggleInlineAnaliz()" title="Yeni Not Ekle"><i class="fas fa-plus" style="font-size: 11px;"></i></button>
                     </div>
-                    <div style="overflow-x:auto;">
-                    <table class="dash-table compact-table" style="width:100%; min-width:800px; border-collapse:collapse;">
-                        <thead>
+                    
+                      <div id="inline-analiz-row" class="glass" style="display: none; flex-direction: column; gap: 1rem; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--accent-color);">
+    <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+        <div style="display: flex; gap: 1rem;">
+            <label style="display: flex; align-items: center; gap: 0.3rem; color: var(--text-primary); font-size: 0.9rem; cursor: pointer;">
+                <input type="radio" name="notTipi" value="analiz" checked onchange="document.getElementById('analiz-detay-alanlari').style.display='flex'; document.getElementById('analiz-alt-alanlar').style.display='flex'; document.getElementById('pdf-detay-alanlari').style.display='none'; document.getElementById('upload-status').style.display='none';"> Analiz Ekle
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.3rem; color: var(--text-primary); font-size: 0.9rem; cursor: pointer;">
+                <input type="radio" name="notTipi" value="pdf" onchange="document.getElementById('analiz-detay-alanlari').style.display='none'; document.getElementById('analiz-alt-alanlar').style.display='none'; document.getElementById('pdf-detay-alanlari').style.display='flex'; document.getElementById('upload-status').style.display='block';"> PDF Ekle
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.3rem; color: var(--text-primary); font-size: 0.9rem; cursor: pointer;">
+                <input type="radio" name="notTipi" value="kisisel" onchange="document.getElementById('analiz-detay-alanlari').style.display='none'; document.getElementById('analiz-alt-alanlar').style.display='flex'; document.getElementById('pdf-detay-alanlari').style.display='none'; document.getElementById('upload-status').style.display='none';"> Kişisel Not Ekle
+            </label>
+        </div>
+    </div>
+    
+    <div id="analiz-detay-alanlari" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 150px;">
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Tarih</label>
+            <input type="date" id="analiz-tarih" class="form-control" style="width:100%; color-scheme: dark;" value="${today}">
+        </div>
+        <div style="flex: 1; min-width: 150px;">
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Analist/Şirket</label>
+            <input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%;" placeholder="Örn: Ak Yatırım">
+        </div>
+        <input type="hidden" id="analiz-hisse" value="${selectedHisse || ''}">
+        <div style="flex: 1; min-width: 150px;">
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Başlık (Opsiyonel)</label>
+            <input type="text" id="analiz-baslik" class="form-control" style="width:100%;" placeholder="Rapor/Video Başlığı">
+        </div>
+        <div style="flex: 1; min-width: 150px;">
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Bağlantı Linki</label>
+            <input type="text" id="analiz-baglanti" class="form-control" style="width:100%;" placeholder="https://...">
+        </div>
+    </div>
+    
+    <div id="analiz-alt-alanlar" style="display: flex; flex-direction: column; width: 100%;">
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Notunuz</label>
+            <textarea id="analiz-not" class="form-control" style="width:100%; min-height: 80px; resize: vertical;" placeholder="Notlarınızı buraya yazın..."></textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 0.5rem;">
+            <button class="btn" style="background: var(--danger-color); color: #fff; padding: 6px 16px;" onclick="window.toggleInlineAnaliz()">İptal</button>
+            <button class="btn" style="background: var(--success-color); color: #fff; padding: 6px 16px;" onclick="window.addAnaliz()">Kaydet</button>
+        </div>
+    </div>
+
+    <div id="pdf-detay-alanlari" style="display: none; flex-direction:row; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.5rem;">
+        <style>
+            #upload-file { display: none; }
+        </style>
+        <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç" style="padding: 3px 7px 3px 4px; background: #000000; color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; border: none; font-size: 13px;">
+            <span class="fa-stack" style="font-size: 8px; width: 2em; height: 2em;"><i class="fas fa-folder-open fa-stack-2x" style="color: #ffffff;"></i></span>
+        </label>
+        <input type="file" id="upload-file" accept="application/pdf" onchange="const f = this.files[0]; if(f) this.previousElementSibling.innerHTML = '<i class=\'fas fa-file-pdf\' style=\'color:var(--danger-color); font-size: 14px;\'></i> <span style=\'color: #fff; margin-left: 5px;\'>' + (f.name.length > 15 ? f.name.substring(0,15)+'...' : f.name) + '</span>'">
+        
+        
+        <div style="flex: 1; min-width: 60px; max-width: 80px;">
+            <input type="number" id="upload-sn" placeholder="S.N." class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+        </div>
+        <div style="flex: 2; min-width: 120px;">
+            <input type="text" id="upload-ad" placeholder="Ad" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+        </div>
+        <div style="flex: 1; min-width: 90px;">
+            <input type="text" id="upload-tarih" placeholder="Tarih" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+        </div>
+        <div style="flex: 2; min-width: 120px;">
+            <input type="text" id="upload-sirket" placeholder="Yatırım Şirketi" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+        </div>
+
+        <button class="btn btn-icon" style="padding: 3px 7px 3px 4px; background: #000000; border: none; color: var(--accent-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="window.uploadRapor()" title="Yükle"><span class="fa-stack" style="font-size: 9.5px; width: 2em; height: 2em;"><i class="fas fa-cloud fa-stack-2x" style="color: var(--accent-color);"></i><i class="fas fa-arrow-up fa-stack-1x" style="color: #ffffff; margin-top: 2px;"></i></span></button>
+        <button class="btn btn-icon" style="width: 30px; height: 25px; padding: 0; background: #000000; border: none; color: var(--danger-color); display: flex; align-items: center; justify-content: center; border-radius: 4px; margin-left: 0.2rem;" onclick="window.toggleInlineAnaliz()" title="İptal"><i class="fas fa-times" style="font-size: 22px; color: var(--danger-color);"></i></button>
+    </div>
+    <div id="upload-status" style="font-size: 13px; font-weight: 500; min-height: 0; width: 100%; margin-top: 0.5rem; display: none;"></div>
+</div>
+                      <div style="overflow-x:auto;">
+                      <table class="dash-table compact-table" style="width:100%; min-width:800px; border-collapse:collapse;">
+                          <thead>
                             <tr style="border-bottom:1px solid var(--table-border); background:var(--table-header-bg);">
                                 <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">S.N.</th>
+                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">Ad</th>
                                 <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Tarih</th>
-                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Analist</th>
-                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle; width:250px; max-width:250px;">Link</th>
+                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Analist/Şirket</th>
                                 <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle;">Notlar</th>
                                 <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">İşlem</th>
                             </tr>
@@ -2924,116 +3006,76 @@ const renderHisseler = (container) => {
                         <tbody>
                 `;
                 
-                if (analizler.length === 0) {
-                    tableHtml += `<tr><td colspan="6" style="text-align: center; padding: 2rem; opacity: 0.5;">Henüz eklenmiş bir analiz bulunmuyor.</td></tr>`;
+                if (unifiedList.length === 0) {
+                    tableHtml += `<tr><td colspan="6" style="text-align: center; padding: 2rem; opacity: 0.5;">Henüz akış verisi bulunmuyor.</td></tr>`;
                 } else {
                     let sn = 1;
-                    analizler.forEach(a => {
-                        if (a.isKisiselNot) {
+                    unifiedList.forEach(item => {
+                        if (item.type === 'report') {
+                            const r = item.data;
+                            let filePath = 'Hisseler/' + selectedHisse + '/' + r.file;
                             tableHtml += `
-                            <tr style="border-bottom:1px solid var(--table-border); background: var(--overlay-bg);">
+                            <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
                                 <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:right !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;"></td>
-                                <td style="font-size:12px; font-weight:bold; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">Yunus Şensoy</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px;"></td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
-                                <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
-                                    <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-icon" style="background: #000000; color: var(--danger-color); padding: 2px !important; font-size: 14px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">
+                                    <a href="${filePath}" target="_blank" style="color: var(--text-primary); text-decoration: none; font-weight: normal; word-break: break-word;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                        <i class="fas fa-file-pdf" style="color: #3b82f6;"></i> ${r.name !== '-' ? r.name : r.file}
+                                    </a>
                                 </td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${item.gosterimTarih}</td>
+                                <td style="font-size:12px; font-weight:bold; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${r.company !== '-' ? r.company : '-'}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">-</td>
+                                <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;"></td>
                             </tr>
                             `;
                         } else {
-                            let linkHtml = '-';
-                            if (a.baglanti) {
-                                let text = a.baslik || 'Dış Bağlantı';
-                                let icon = 'fas fa-external-link-alt';
-                                if (a.baglanti.includes('youtube.com') || a.baglanti.includes('youtu.be')) {
-                                    text = a.baslik || 'YouTube Linki';
-                                    icon = 'fab fa-youtube';
-                                } else if (a.baglanti.includes('twitter.com') || a.baglanti.includes('x.com')) {
-                                    text = a.baslik || 'X (Twitter) Linki';
-                                    icon = 'fab fa-twitter';
-                                }
-                                linkHtml = `<a href="${a.baglanti}" target="_blank" style="color:var(--accent-color); text-decoration:none; font-weight:400 !important;"><i class="${icon}"></i> ${text}</a>`;
-                            } else if (a.baslik) {
-                                linkHtml = `<span style="color:var(--text-secondary);">${a.baslik}</span>`;
-                            }
-                            const tarihStr = a.tarih ? a.tarih.split('-').reverse().join('.') : '-';
-                            tableHtml += `
-                                <tr style="border-bottom:1px solid var(--table-border);">
+                            const a = item.data;
+                            if (a.isKisiselNot) {
+                                tableHtml += `
+                                <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
                                     <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:right !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${tarihStr}</td>
-                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${a.borsaci || 'Anonim'}</td>
-                                    <td style="font-size:12px; font-weight:400 !important; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px;"><div style="width:100%; max-width:250px; white-space:normal; overflow-wrap:break-word; word-break:break-word; font-weight:400 !important;">${linkHtml}</div></td>
-                                    <td style="font-size:10px; font-weight:400 !important; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
+                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">-</td>
+                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">-</td>
+                                    <td style="font-size:12px; font-weight:bold; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">Yunus Şensoy</td>
+                                    <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
                                     <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
                                         <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
                                         <button class="btn btn-icon" style="background: #000000; color: var(--danger-color); padding: 2px !important; font-size: 14px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
                                     </td>
                                 </tr>
-                            `;
+                                `;
+                            } else {
+                                let linkHtml = '-';
+                                if (a.baglanti) {
+                                    let text = a.baslik || 'Dış Bağlantı';
+                                    let icon = 'fas fa-external-link-alt';
+                                    if (a.baglanti.includes('youtube.com') || a.baglanti.includes('youtu.be')) { text = a.baslik || 'YouTube Linki'; icon = 'fas fa-play" style="color:#fff; background:#FF0000; display:flex; justify-content:center; align-items:center; width:16px; height:11px; border-radius:3px; border:1px solid #000; font-size:6px; flex-shrink:0; margin-top:3px;'; }
+                                    else if (a.baglanti.includes('twitter.com') || a.baglanti.includes('x.com')) { text = a.baslik || 'X Linki'; icon = 'fa-brands fa-x-twitter" style="color: var(--text-primary); font-size: 12px; flex-shrink:0; margin-top:2px;'; }
+                                    linkHtml = `<a href="${a.baglanti}" target="_blank" style="color: var(--accent-color); text-decoration: none; word-break: break-word; display: flex; align-items: flex-start; gap: 5px;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'"><i class="${icon}"></i> <span style="line-height: 1.3;">${text}</span></a>`;
+                                }
+                                tableHtml += `
+                                <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
+                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
+                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">${linkHtml}</td>
+                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${item.gosterimTarih}</td>
+                                    <td style="font-size:12px; font-weight:bold; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${a.borsaci || '-'}</td>
+                                    <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
+                                    <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
+                                        <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
+                                        <button class="btn btn-icon" style="background: #000000; color: var(--danger-color); padding: 2px !important; font-size: 14px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
+                                    </td>
+                                </tr>
+                                `;
+                            }
                         }
                     });
                 }
-                tableHtml += `</tbody></table></div></div>`;
-
-                const today = new Date().toISOString().split('T')[0];
-
-                contentHtml = `
-                <div style="display:flex; flex-direction:column; gap: 1rem; padding-top: 0; min-height: calc(100vh - 250px);">
-                    
-                    <!-- Yeni Not Ekleme Formu (Gizli) -->
-                    <div id="inline-analiz-row" class="glass" style="display: none; flex-direction: column; gap: 1rem; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--accent-color);">
-                        <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
-                            <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-primary);">Analiz / Not Ekle</div>
-                            <div style="display: flex; gap: 1rem;">
-                                <label style="display: flex; align-items: center; gap: 0.3rem; color: var(--text-primary); font-size: 0.9rem; cursor: pointer;">
-                                    <input type="radio" name="notTipi" value="analiz" checked onchange="document.getElementById('analiz-detay-alanlari').style.display='flex'"> Analiz Ekle
-                                </label>
-                                <label style="display: flex; align-items: center; gap: 0.3rem; color: var(--text-primary); font-size: 0.9rem; cursor: pointer;">
-                                    <input type="radio" name="notTipi" value="kisisel" onchange="document.getElementById('analiz-detay-alanlari').style.display='none'"> Kendi Notlarım
-                                </label>
-                            </div>
-                        </div>
-                        <div id="analiz-detay-alanlari" style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                            <div style="flex: 1; min-width: 150px;">
-                                <label style="font-size: 0.8rem; color: var(--text-secondary);">Tarih</label>
-                                <input type="date" id="analiz-tarih" class="form-control" style="width:100%;" value="${today}">
-                            </div>
-                            <div style="flex: 1; min-width: 150px;">
-                                <label style="font-size: 0.8rem; color: var(--text-secondary);">Analist</label>
-                                <input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%;" placeholder="Analist Adı">
-                            </div>
-                            <!-- Gizli Hisse Inputu: Zaten secili hissedeyiz, ondan sabit kalacak -->
-                            <input type="hidden" id="analiz-hisse" value="${selectedHisse}">
-                            <input type="hidden" id="analiz-hisse" value="${selectedHisse}">
-                            
-                            <div style="flex: 1; min-width: 150px;">
-                                <label style="font-size: 0.8rem; color: var(--text-secondary);">Başlık (Opsiyonel)</label>
-                                <input type="text" id="analiz-baslik" class="form-control" style="width:100%;" placeholder="Videonun Başlığı">
-                            </div>
-                            <div style="flex: 1; min-width: 150px;">
-                                <label style="font-size: 0.8rem; color: var(--text-secondary);">Bağlantı Linki</label>
-                                <input type="text" id="analiz-baglanti" class="form-control" style="width:100%;" placeholder="https://youtube.com/...">
-                            </div>
-                        </div>
-                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                            <label style="font-size: 0.8rem; color: var(--text-secondary);">Özet Notlar</label>
-                            <textarea id="analiz-not" class="form-control" style="width:100%; height: 120px; resize: vertical;" placeholder="Bu analizden / videodan çıkardığınız özet notlar..."></textarea>
-                        </div>
-                        <div style="display: flex; gap: 0.8rem; justify-content: flex-end; margin-top: 0.5rem;">
-                            <button class="btn" style="background: var(--success-color); color: var(--btn-text); padding: 4px 8px !important; font-size: 13px !important; min-width: 0 !important; width: fit-content !important; border-radius: 4px; border: none; cursor: pointer; box-sizing: border-box !important;" onclick="window.addAnaliz()">Kaydet</button>
-                            <button class="btn" style="background: var(--danger-color); color: #fff; padding: 4px 8px !important; font-size: 13px !important; min-width: 0 !important; width: fit-content !important; border-radius: 4px; border: none; cursor: pointer; box-sizing: border-box !important;" onclick="window.toggleInlineAnaliz()">İptal</button>
-                        </div>
+                tableHtml += `
+                        </tbody>
+                    </table>
                     </div>
-
-                    <!-- Kartların Listelendiği Alan -->
-                    <div style="flex: 1; padding-right: 0.5rem;">
-                        ${tableHtml}
-                    </div>
-                </div>
-                `;
+                </div>`;
+                contentHtml += tableHtml;
             }
         let stockHeaderHtml = '';
         if (selectedHisse) {
@@ -3056,7 +3098,7 @@ const renderHisseler = (container) => {
             else if (!isPos) initChangeStr = '-' + initChangeStr;
 
             stockHeaderHtml = `
-            <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 0 1rem 0 1rem; flex-shrink: 0;">
+            <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 0; flex-shrink: 0;">
                 <div>
                     <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; color: var(--text-primary);">${selectedHisse}</h1>
                 </div>
@@ -3072,10 +3114,10 @@ const renderHisseler = (container) => {
 
         container.innerHTML = `
             ${stockHeaderHtml}
-            <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--table-border); flex-wrap: wrap; align-items: center; background: var(--overlay-bg);">
+            <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--table-border); border-radius: 12px; flex-wrap: wrap; align-items: center; background: var(--overlay-bg);">
                 ${tabsHtml}
             </div>
-            <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0 1rem; padding-top: 0.5rem; flex: 1; overflow-y: auto;">
+            <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem 0 1rem 0; flex: 1; overflow-y: auto;">
                 ${contentHtml}
             </div>
         `;
@@ -4031,73 +4073,18 @@ const renderVeriler = (container) => {
     container.innerHTML = `
         <div class="page-section active" style="display: flex; flex-direction: column; gap: 16px;">
             
-                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <!-- Nakit Düzenleme -->
-                <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Mevcut Nakit Tutarı</div>
-                    <div style="display:flex; gap: 0.5rem;">
-                        <input type="text" id="v-nakit-input" value="${formatNumber(State.data.manuelNakitTutar || 0, 2)}" class="form-control" style="width:100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onblur="this.value = formatNumber(parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0, 2)" onkeydown="if(event.key === 'Enter') { State.data.manuelNakitTutar = parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0; State.save(); this.blur(); }">
-                        <button class="btn btn-icon" style="padding: 0; width: 26px; height: 26px; background: #000000; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.data.manuelNakitTutar = parseFloat(document.getElementById('v-nakit-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save();" title="Kaydet"><i class="fas fa-save" style="font-size: 18px; color: var(--success-color) !important;"></i></button>
-                    </div>
-                </div>
-                <!-- Fon Fiyatları -->
-                <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">PRY Fon Fiyatı</div>
-                    <div style="max-height: 150px; overflow-y: auto; padding-right: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
-                        ${fonHtml || '<p style="color:var(--text-secondary); margin: 0;">Portföyde fon bulunmuyor.</p>'}
-                    </div>
-                </div>
-                <!-- Hedef Portföy -->
-                <div class="glass" style="flex: 1; padding: 8px 1rem; min-width: 200px;">
-                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Hedef Portföy</div>
-                    <div style="display:flex; gap: 0.5rem;">
-                        <input type="text" id="v-hedef-input" value="${formatNumber(hedefPortfoy, 0)}" class="form-control" style="width:100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onblur="this.value = formatNumber(parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0, 0)" onkeydown="if(event.key === 'Enter') { State.data.hedefPortfoyTL = parseFloat(this.value.replace(/\\./g, '').replace(',', '.')) || 0; State.save(); this.blur(); }">
-                        <button class="btn btn-icon" style="padding: 0; width: 26px; height: 26px; background: #000000; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.data.hedefPortfoyTL = parseFloat(document.getElementById('v-hedef-input').value.replace(/\\./g, '').replace(',', '.')) || 0; State.save();" title="Kaydet"><i class="fas fa-save" style="font-size: 18px; color: var(--success-color) !important;"></i></button>
-                    </div>
-                </div>
-            </div>
+                        
 
-            <!-- Rapor Yükle (Bulut) -->
-            <div class="glass" style="padding: 8px 1rem; margin-top: 0; position: relative; z-index: 99;">
-                <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Hisse Raporu Yükle</div>
-                <div style="display:flex; flex-direction:row; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
-                    <style>
-                        #upload-file { display: none; }
-                    </style>
-                    <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç" style="padding: 3px 7px 3px 4px; background: #000000; color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; border: none; font-size: 13px;">
-                        <span class="fa-stack" style="font-size: 8px; width: 2em; height: 2em;"><i class="fas fa-folder-open fa-stack-2x" style="color: #ffffff;"></i></span>
-                    </label>
-                    <input type="file" id="upload-file" accept="application/pdf" onchange="const f = this.files[0]; if(f) this.previousElementSibling.innerHTML = '<i class=\\'fas fa-file-pdf\\' style=\\'color:var(--danger-color); font-size: 14px;\\'></i> <span style=\\'color: #fff; margin-left: 5px;\\'>' + (f.name.length > 15 ? f.name.substring(0,15)+'...' : f.name) + '</span>'">
-                    
-                    <div style="flex: 1; min-width: 80px;">
-                        <input type="text" id="upload-hisse" placeholder="Hisse" class="form-control" list="bist-hisse-list" autocomplete="off" style="width: 100%; text-transform: uppercase; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
-                    </div>
-                    <div style="flex: 1; min-width: 60px; max-width: 80px;">
-                        <input type="number" id="upload-sn" placeholder="S.N." class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
-                    </div>
-                    <div style="flex: 2; min-width: 120px;">
-                        <input type="text" id="upload-ad" placeholder="Ad" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
-                    </div>
-                    <div style="flex: 1; min-width: 90px;">
-                        <input type="text" id="upload-tarih" placeholder="Tarih" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
-                    </div>
-                    <div style="flex: 2; min-width: 120px;">
-                        <input type="text" id="upload-sirket" placeholder="Yatırım Şirketi" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
-                    </div>
-
-                    <button class="btn btn-icon" style="padding: 3px 7px 3px 4px; background: #000000; border: none; color: var(--accent-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="window.uploadRapor()" title="Yükle"><span class="fa-stack" style="font-size: 9.5px; width: 2em; height: 2em;"><i class="fas fa-cloud fa-stack-2x" style="color: var(--accent-color);"></i><i class="fas fa-arrow-up fa-stack-1x" style="color: #ffffff; margin-top: 2px;"></i></span></button>
-                </div>
-                <div id="upload-status" style="font-size: 13px; font-weight: 500; min-height: 0; width: 100%; margin-top: 0;"></div>
-            </div>
+            
 
             <!-- Enflasyon -->
-            <div class="glass" style="padding: 8px 1rem; margin-top: 0;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0;">
-                    <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left;">Aylık Enflasyon Verileri</div>
-                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--warning-color); color: #fff;" onclick="window.toggleEnfForm()">+</button>
+            <div class="table-container glass" style="margin-bottom: 0;">
+                <div class="table-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Aylık Enflasyon Verileri</span>
+                    <button class="btn btn-icon" style="color: var(--accent-color); font-size: 14px; padding: 4px;" onclick="window.toggleEnfForm()" title="Ekle"><i class="fas fa-plus"></i></button>
                 </div>
                 
-                <div class="table-container" style="max-height: 400px; overflow-y: auto; margin-bottom: 0;">
+                <div style="max-height: 400px; overflow-y: auto; margin-bottom: 0;">
                     <table class="dash-table compact-table" style="width: 100%;">
                         <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 10;">
                             <tr>
@@ -4573,7 +4560,7 @@ const renderAnalizler = (container) => {
                         </thead>
                         <tbody>
                             <tr id="inline-analiz-row" style="display: none; background: rgba(0,0,0,0.4);">
-                                <td><input type="date" id="analiz-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${today}"></td>
+                                <td><input type="date" id="analiz-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right; color-scheme: dark;" value="${today}"></td>
                                 <td><input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:left;" placeholder="Analist"></td>
                                 <td><input type="text" id="analiz-hisse" list="bist-hisse-list" class="form-control" style="width:100%; font-size:12px; padding:4px; text-transform:uppercase; text-align:left;" placeholder="Hisse"></td>
                                 <td><input type="text" id="analiz-baglanti" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:left;" placeholder="Link"></td>
@@ -5778,7 +5765,7 @@ window.recalculateHedefFiyatlar = () => {
 
 window.uploadRapor = async () => {
     const fileInput = document.getElementById('upload-file');
-    const hisse = document.getElementById('upload-hisse').value.trim().toUpperCase();
+    const hisse = State.ui.selectedHisse;
     const sn = document.getElementById('upload-sn')?.value.trim() || '';
     const ad = document.getElementById('upload-ad').value.trim();
     const tarih = document.getElementById('upload-tarih').value.trim();
