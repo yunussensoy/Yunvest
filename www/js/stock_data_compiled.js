@@ -327192,7 +327192,7 @@ window.stockReports = {
     "2-2026_1._ceyrek-faaliyet_raporu-12.05.2026.pdf",
     "3-2026_1._ceyrek_yatirimci_sunumu-12.05.2026.pdf",
     "4-arastirma_raporu-14.05.2026-bulls_yatirim.pdf",
-    "5-2026_1.ceyrek_degerlendirmesi-12.05.2026-pusula_yatirim.pdf"
+    "5-2026_1._ceyrek_degerlendirmesi-12.05.2026-pusula_yatirim.pdf"
   ],
   "YYLGD": [
     "1-gelecege_donuk_beklentiler-23.05.2025.pdf",
