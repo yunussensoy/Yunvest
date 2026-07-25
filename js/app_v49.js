@@ -4029,28 +4029,14 @@ const renderVeriler = (container) => {
                 <div style="display:flex; flex-direction:row; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
                     <style>
                         #upload-file { display: none; }
-                        .upload-file-label {
-                            background: var(--surface-border);
-                            color: var(--text-primary);
-                            padding: 0.3rem 0.8rem;
-                            border-radius: 6px;
-                            cursor: pointer;
-                            font-size: 12px;
-                            font-family: 'Inter', sans-serif;
-                            display: flex;
-                            align-items: center;
-                            gap: 0.5rem;
-                            white-space: nowrap;
-                        }
-                        .upload-file-label:hover { background: var(--overlay-bg); }
                     </style>
-                    <label for="upload-file" class="upload-file-label">
-                        <i class="fas fa-folder-open"></i> Bir Dosya Seç
+                    <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç">
+                        <i class="fas fa-folder-open"></i>
                     </label>
                     <input type="file" id="upload-file" accept="application/pdf" onchange="const f = this.files[0]; if(f) this.previousElementSibling.innerHTML = '<i class=\\'fas fa-file-pdf\\' style=\\'color:var(--danger-color);\\'></i> ' + (f.name.length > 15 ? f.name.substring(0,15)+'...' : f.name)">
                     
                     <div style="flex: 1; min-width: 80px;">
-                        <input type="text" id="upload-hisse" placeholder="Hisse" class="form-control" style="width: 100%; text-transform: uppercase; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+                        <input type="text" id="upload-hisse" placeholder="Hisse" class="form-control" list="bist-hisse-list" autocomplete="off" style="width: 100%; text-transform: uppercase; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
                     </div>
                     <div style="flex: 2; min-width: 120px;">
                         <input type="text" id="upload-ad" placeholder="Ad" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
