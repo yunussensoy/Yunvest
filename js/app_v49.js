@@ -4025,15 +4025,15 @@ const renderVeriler = (container) => {
 
             <!-- Rapor Yükle (Bulut) -->
             <div class="glass" style="padding: 8px 1rem; margin-top: 0; position: relative; z-index: 99;">
-                <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;"><i class="fas fa-cloud-upload-alt" style="margin-right: 0.5rem;"></i> Hisse Raporu Yükle</div>
+                <div style="font-size: 14px; font-weight: bold; color: var(--text-primary); text-align: left; margin-bottom: 0.5rem;">Hisse Raporu Yükle</div>
                 <div style="display:flex; flex-direction:row; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
                     <style>
                         #upload-file { display: none; }
                     </style>
-                    <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç">
-                        <i class="fas fa-folder-open"></i>
+                    <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç" style="padding: 3px 7px 3px 4px; background: #000000; color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; border: none; font-size: 13px;">
+                        <span class="fa-stack" style="font-size: 8px; width: 2em; height: 2em;"><i class="fas fa-folder-open fa-stack-2x" style="color: #ffffff;"></i></span>
                     </label>
-                    <input type="file" id="upload-file" accept="application/pdf" onchange="const f = this.files[0]; if(f) this.previousElementSibling.innerHTML = '<i class=\\'fas fa-file-pdf\\' style=\\'color:var(--danger-color);\\'></i> ' + (f.name.length > 15 ? f.name.substring(0,15)+'...' : f.name)">
+                    <input type="file" id="upload-file" accept="application/pdf" onchange="const f = this.files[0]; if(f) this.previousElementSibling.innerHTML = '<i class=\\'fas fa-file-pdf\\' style=\\'color:var(--danger-color); font-size: 14px;\\'></i> <span style=\\'color: #fff; margin-left: 5px;\\'>' + (f.name.length > 15 ? f.name.substring(0,15)+'...' : f.name) + '</span>'">
                     
                     <div style="flex: 1; min-width: 80px;">
                         <input type="text" id="upload-hisse" placeholder="Hisse" class="form-control" list="bist-hisse-list" autocomplete="off" style="width: 100%; text-transform: uppercase; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
@@ -4048,7 +4048,7 @@ const renderVeriler = (container) => {
                         <input type="text" id="upload-sirket" placeholder="Yatırım Şirketi" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
                     </div>
 
-                    <button class="btn btn-icon" style="padding: 4px; width: 32px; height: 32px; background: var(--accent-color); color: #fff; display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="window.uploadRapor()" title="Yükle"><i class="fas fa-upload" style="font-size: 14px;"></i></button>
+                    <button class="btn btn-icon" style="padding: 3px 7px 3px 4px; background: #000000; border: none; color: var(--accent-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="window.uploadRapor()" title="Yükle"><span class="fa-stack" style="font-size: 9.5px; width: 2em; height: 2em;"><i class="fas fa-cloud fa-stack-2x" style="color: var(--accent-color);"></i><i class="fas fa-arrow-up fa-stack-1x" style="color: #ffffff; margin-top: 2px;"></i></span></button>
                 </div>
                 <div id="upload-status" style="font-size: 13px; font-weight: 500; min-height: 0; width: 100%; margin-top: 0;"></div>
             </div>
@@ -4434,7 +4434,7 @@ window.setupCustomDropdown = (inputId, optionsList) => {
                 item.style.textAlign = 'left';
                 
                 if (val) {
-                    item.innerHTML = `<strong>${match.substr(0, val.length)}</strong>${match.substr(val.length)}`;
+                    item.innerHTML = `<strong style="color: var(--accent-color);">${match.substr(0, val.length)}</strong>${match.substr(val.length)}`;
                 } else {
                     item.innerHTML = match;
                 }
@@ -5751,8 +5751,8 @@ window.uploadRapor = async () => {
         if(status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Lütfen bir dosya seçin.'; }
         return;
     }
-    if (!hisse || !ad || !tarih || !sirket) {
-        if(status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Lütfen Hisse, Ad, Tarih ve Yatırım Şirketi bilgilerini doldurun.'; }
+    if (!hisse) {
+        if(status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Lütfen Hisse kodunu doldurun.'; }
         return;
     }
 
@@ -5762,13 +5762,19 @@ window.uploadRapor = async () => {
     
     // Format characters
     const formatStr = (str) => {
+        if (!str) return '';
         return str.toLowerCase()
             .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
             .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
             .replace(/\s+/g, '_');
     };
     
-    const newFileName = `${formatStr(ad)}-${formatStr(tarih)}-${formatStr(sirket)}.pdf`;
+    const parts = [];
+    if (ad) parts.push(formatStr(ad));
+    if (tarih) parts.push(formatStr(tarih));
+    if (sirket) parts.push(formatStr(sirket));
+
+    const newFileName = parts.length > 0 ? parts.join('-') + '.pdf' : file.name;
     
     const toBase64 = file => new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -5797,7 +5803,7 @@ window.uploadRapor = async () => {
         if (response.ok) {
             if(status) { 
                 status.style.color = 'var(--success-color)'; 
-                status.innerHTML = `<i class="fas fa-check-circle"></i> Başarılı! <b>${newFileName}</b> yüklendi. Vercel 1-2 dakika içinde güncelleyecektir.`; 
+                status.innerHTML = `<i class="fas fa-check-circle"></i> Dosyanız başarıyla yüklendi.`; 
             }
             // Clear inputs
             fileInput.value = '';
