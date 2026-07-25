@@ -5770,7 +5770,7 @@ window.uploadRapor = async () => {
         return;
     }
 
-    if(status) { status.style.color = 'var(--text-primary)'; status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> GitHub\\'a yükleniyor, lütfen bekleyin...'; }
+    if(status) { status.style.color = 'var(--text-primary)'; status.innerHTML = `<i class="fas fa-spinner fa-spin"></i> GitHub'a yükleniyor, lütfen bekleyin...`; }
 
     const file = fileInput.files[0];
     
