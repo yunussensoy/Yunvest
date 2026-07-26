@@ -1,4 +1,61 @@
 
+window.toggleExpandCard = function(btnElement) {
+    const card = btnElement.closest('.dash-card');
+    const titleText = card.querySelector('.dash-title span').innerText;
+    const canvasContainer = card.querySelector('canvas').parentElement;
+    
+    let modal = document.getElementById('chart-expand-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'chart-expand-modal';
+        modal.style.cssText = 'display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 20000;';
+        modal.innerHTML = `
+            <div class="glass" style="width: 85%; height: 60vh; min-height: 400px; max-height: 600px; padding: 2rem; position: relative; border-radius: 12px; display: flex; flex-direction: column; background: var(--overlay-bg); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 id="expanded-chart-title" style="color: white; margin: 0; font-size: 1.2rem; font-weight: 600;">Grafik</h3>
+                    <i class="fas fa-times" style="font-size: 1.5rem; cursor: pointer; color: #ccc; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#ccc'" onclick="window.closeExpandedChart()"></i>
+                </div>
+                <div id="expanded-chart-body" style="flex: 1; position: relative; min-height: 0; width: 100%;">
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        window.closeExpandedChart = function() {
+            const m = document.getElementById('chart-expand-modal');
+            if(m && window.currentExpandedChartPlaceholder) {
+                const body = document.getElementById('expanded-chart-body');
+                const content = body.children[0];
+                if (content) {
+                    window.currentExpandedChartPlaceholder.appendChild(content);
+                    const canvas = content.querySelector('canvas');
+                    if (canvas) {
+                        const chart = Chart.getChart(canvas.id);
+                        if (chart) chart.resize();
+                    }
+                }
+                m.style.display = 'none';
+                window.currentExpandedChartPlaceholder = null;
+            }
+        };
+    }
+    
+    window.currentExpandedChartPlaceholder = card;
+    const body = document.getElementById('expanded-chart-body');
+    document.getElementById('expanded-chart-title').innerText = titleText;
+    
+    body.appendChild(canvasContainer);
+    modal.style.display = 'flex';
+    
+    setTimeout(() => {
+        const canvas = canvasContainer.querySelector('canvas');
+        if (canvas) {
+            const chart = Chart.getChart(canvas.id);
+            if (chart) chart.resize();
+        }
+    }, 50);
+};
+
 window.loadRapor = (raporTipi, ext = 'pdf') => {
     const hisse = window.currentSelectedHisse;
     if (!hisse) return;
@@ -1745,7 +1802,7 @@ const renderHisseler = (container) => {
     window.currentSelectedHisse = selectedHisse; // sync it back
     const hName = selectedHisse || 'Hisse';
     
-    const validTabs = ['Özet Rapor', 'Akış', 'Değerleme'];
+    const validTabs = ['Özet Rapor', 'Akış', 'Değerleme', 'Gelir Tablosu'];
     let activeTab = window.currentHisseTab || 'Özet Rapor';
     if (!validTabs.includes(activeTab)) {
         activeTab = 'Özet Rapor';
@@ -1822,6 +1879,7 @@ const renderHisseler = (container) => {
             
             'Değerleme': 'fas fa-gem',
             'Gelir Tablosu': 'fas fa-file-invoice-dollar',
+            'Gelir Tablosu': 'fas fa-file-invoice-dollar',
             'Nakit Akım Tablosu': 'fas fa-water',
             'Rasyo Analiz Tablosu': 'fas fa-percentage',
             'Bilanço': 'fas fa-balance-scale'
@@ -1836,7 +1894,7 @@ const renderHisseler = (container) => {
                 </div>
             </div>`;
 
-        let tabsHtml = makeBtn('Özet Rapor') + makeBtn('Akış') + makeBtn('Değerleme');
+        let tabsHtml = makeBtn('Özet Rapor') + makeBtn('Akış') + makeBtn('Değerleme') + makeBtn('Gelir Tablosu');
                        
         let contentHtml = '';
 
@@ -1983,7 +2041,7 @@ const renderHisseler = (container) => {
             ];
             const tGuncelDynamic = genTable('Güncel Metrikler', ['Metrik', 'Değer'], gRows);
 
-            if (activeTab === hName || activeTab === 'Özet Rapor') {
+            if (activeTab === hName || activeTab === 'Özet Rapor' || activeTab === 'Gelir Tablosu') {
                 // FINTABLES STYLE SUMMARY DASHBOARD
                 
                 const fmtVal = (val) => {
@@ -2009,10 +2067,12 @@ const renderHisseler = (container) => {
                 let bilancoHtml = '';
                 let chartLabels = [];
                 let chartSatislar = [];
+                let chartBrutKar = [];
+                let chartFaaliyet = [];
                 let chartFavok = [];
                 let chartNetKar = [];
-                let chartYSatislar = []; let chartYFavok = []; let chartYNetKar = [];
-                let chartDSatislar = []; let chartDFavok = []; let chartDNetKar = [];
+                let chartYSatislar = []; let chartYBrutKar = []; let chartYFaaliyet = []; let chartYFavok = []; let chartYNetKar = [];
+                let chartDSatislar = []; let chartDBrutKar = []; let chartDFaaliyet = []; let chartDFavok = []; let chartDNetKar = [];
                 let chartBKM = []; let chartFKM = []; let chartNKM = [];
                 let chartYBKM = []; let chartYFKM = []; let chartYNKM = [];
                 let chartCari = []; let chartKaldirac = []; let chartROE = [];
@@ -2183,46 +2243,58 @@ const renderHisseler = (container) => {
                     const toplamVR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam varlıklar'));
                     const ozR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
 
-                    chartLabels = []; chartSatislar = []; chartFavok = []; chartNetKar = [];
-                    chartYSatislar = []; chartYFavok = []; chartYNetKar = [];
-                    chartDSatislar = []; chartDFavok = []; chartDNetKar = [];
+                    chartLabels = []; chartSatislar = []; chartBrutKar = []; chartFaaliyet = []; chartFavok = []; chartNetKar = [];
+                    chartYSatislar = []; chartYBrutKar = []; chartYFaaliyet = []; chartYFavok = []; chartYNetKar = [];
+                    chartDSatislar = []; chartDBrutKar = []; chartDFaaliyet = []; chartDFavok = []; chartDNetKar = [];
                     chartBKM = []; chartFKM = []; chartNKM = [];
                     chartYBKM = []; chartYFKM = []; chartYNKM = [];
                     chartCari = []; chartKaldirac = []; chartROE = [];
                     for (let i = limit; i >= 1; i--) {
                         chartLabels.push(headers[i]);
                         const sR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
+                        const faaliyetR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('esas faaliyet kar'));
                         const fR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
                         const nR = (sData.gelirDonemsel.rows || []).find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
                           
                           const cqSatis = getCQ(sR, i, headers);
                           const cqBrut = getCQ(brutR, i, headers);
+                          const cqFaaliyet = getCQ(faaliyetR, i, headers);
                           const cqFavok = getCQ(fR, i, headers);
                           const cqNetKar = getCQ(nR, i, headers);
                           
                         chartSatislar.push(cqSatis);
+                        chartBrutKar.push(cqBrut);
+                        chartFaaliyet.push(cqFaaliyet);
                         chartFavok.push(cqFavok);
                         chartNetKar.push(cqNetKar);
                         
                         const rawSatis = sR && sR[i] !== undefined ? parseTRNumber(sR[i]) : 0;
+                        const rawBrut = brutR && brutR[i] !== undefined ? parseTRNumber(brutR[i]) : 0;
+                        const rawFaaliyet = faaliyetR && faaliyetR[i] !== undefined ? parseTRNumber(faaliyetR[i]) : 0;
                         const rawFavok = fR && fR[i] !== undefined ? parseTRNumber(fR[i]) : 0;
                         const rawNetKar = nR && nR[i] !== undefined ? parseTRNumber(nR[i]) : 0;
                         chartDSatislar.push(rawSatis);
+                        chartDBrutKar.push(rawBrut);
+                        chartDFaaliyet.push(rawFaaliyet);
                         chartDFavok.push(rawFavok);
                         chartDNetKar.push(rawNetKar);
 
-                        let ySatis = 0, yFavok = 0, yNetKar = 0, yBrut = 0;
+                        let ySatis = 0, yFavok = 0, yNetKar = 0, yBrut = 0, yFaaliyet = 0;
                         if (sData.gelirYillik && sData.gelirYillik.rows) {
                             const ySR = sData.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
+                            const yFaaliyetR = sData.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('esas faaliyet kar'));
                             const yFR = sData.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
                             const yNR = sData.gelirYillik.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
                             const yBR = sData.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('brüt kar'));
                             if (ySR && ySR[i] !== undefined) ySatis = parseTRNumber(ySR[i]);
+                            if (yFaaliyetR && yFaaliyetR[i] !== undefined) yFaaliyet = parseTRNumber(yFaaliyetR[i]);
                             if (yFR && yFR[i] !== undefined) yFavok = parseTRNumber(yFR[i]);
                             if (yNR && yNR[i] !== undefined) yNetKar = parseTRNumber(yNR[i]);
                             if (yBR && yBR[i] !== undefined) yBrut = parseTRNumber(yBR[i]);
                         }
                         chartYSatislar.push(ySatis);
+                        chartYBrutKar.push(yBrut);
+                        chartYFaaliyet.push(yFaaliyet);
                         chartYFavok.push(yFavok);
                         chartYNetKar.push(yNetKar);
 
@@ -2428,20 +2500,6 @@ const renderHisseler = (container) => {
                             </div>
                         </div>
 
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Satışlar</div>
-                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-satislar"></canvas></div>
-                        </div>
-
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">FAVÖK</div>
-                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-favok"></canvas></div>
-                        </div>
-
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Net Kar</div>
-                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-netkar"></canvas></div>
-                        </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Brüt Kar Marjı</div>
@@ -2480,21 +2538,26 @@ const renderHisseler = (container) => {
                 window.dashboardChartData = {
                     labels: chartLabels,
                     satislar: chartSatislar,
+                    brutkar: chartBrutKar,
+                    faaliyet: chartFaaliyet,
                     favok: chartFavok,
                     netkar: chartNetKar,
                     ySatislar: chartYSatislar,
+                    yBrutkar: chartYBrutKar,
+                    yFaaliyet: chartYFaaliyet,
                     yFavok: chartYFavok,
                     yNetKar: chartYNetKar,
                     dSatislar: chartDSatislar,
+                    dBrutkar: chartDBrutKar,
+                    dFaaliyet: chartDFaaliyet,
                     dFavok: chartDFavok,
                     dNetKar: chartDNetKar,
                       bkm: chartBKM, fkm: chartFKM, nkm: chartNKM,
                       ybkm: chartYBKM, yfkm: chartYFKM, ynkm: chartYNKM,
                       cari: chartCari, kaldirac: chartKaldirac, roe: chartROE
                   };
-            } else if (activeTab === 'Gelir Tablosu') {
-                let tGelirDynamic = tGelirY;
-                if (sData.gelirYillik) tGelirDynamic = genTable('Gelir Tablosu (Yıllık)', sData.gelirYillik.headers, sData.gelirYillik.rows);
+            }
+            if (activeTab === 'Gelir Tablosu') {
                 contentHtml = `
                 <style>
                 .compact-table { table-layout: auto !important; width: 100%; }
@@ -2502,9 +2565,170 @@ const renderHisseler = (container) => {
                 .compact-card { padding: 1rem 0.5rem !important; }
                 </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
-                    ${tGelirDynamic}
+                    
+                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Satış Gelirleri (Çeyreklik)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-satislar"></canvas></div>
+                        </div>
+
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Satış Gelirleri (Dönemsel)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-satislar"></canvas></div>
+                        </div>
+
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Satış Gelirleri (Yıllıklandırılmış)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-yillik-satislar"></canvas></div>
+                        </div>
+                    </div>
+
+                    <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <span>Satış Gelirleri</span>
+                            <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                        </div>
+                        <div style="flex:1; min-height:400px; min-width: 0; position:relative;"><canvas id="chart-combined-satislar"></canvas></div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Brüt Kar (Çeyreklik)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-brut"></canvas></div>
+                        </div>
+
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Brüt Kar (Dönemsel)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-brut"></canvas></div>
+                        </div>
+
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Brüt Kar (Yıllıklandırılmış)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-yillik-brut"></canvas></div>
+                        </div>
+                    </div>
+
+                    <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <span>Brüt Kar</span>
+                            <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                        </div>
+                        <div style="flex:1; min-height:400px; min-width: 0; position:relative;"><canvas id="chart-combined-brut"></canvas></div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Esas Faaliyet Karı (Çeyreklik)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-faaliyet"></canvas></div>
+                        </div>
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Esas Faaliyet Karı (Dönemsel)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-faaliyet"></canvas></div>
+                        </div>
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Esas Faaliyet Karı (Yıllıklandırılmış)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-yillik-faaliyet"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <span>Esas Faaliyet Karı</span>
+                            <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                        </div>
+                        <div style="flex:1; min-height:400px; min-width: 0; position:relative;"><canvas id="chart-combined-faaliyet"></canvas></div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>FAVÖK (Çeyreklik)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-favok2"></canvas></div>
+                        </div>
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>FAVÖK (Dönemsel)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-favok"></canvas></div>
+                        </div>
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>FAVÖK (Yıllıklandırılmış)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-yillik-favok"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <span>FAVÖK</span>
+                            <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                        </div>
+                        <div style="flex:1; min-height:400px; min-width: 0; position:relative;"><canvas id="chart-combined-favok"></canvas></div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Net Kar (Çeyreklik)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-netkar2"></canvas></div>
+                        </div>
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Net Kar (Dönemsel)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-netkar"></canvas></div>
+                        </div>
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Net Kar (Yıllıklandırılmış)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-yillik-netkar"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <span>Net Kar</span>
+                            <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                        </div>
+                        <div style="flex:1; min-height:400px; min-width: 0; position:relative;"><canvas id="chart-combined-netkar"></canvas></div>
+                    </div>
                 </div>
                 `;
+                window.shouldRenderDashboardCharts = true;
             } else if (activeTab === 'Bilanço') {
                 let tBilancoTabDynamic = tBilanco;
                 if (sData.bilanco) tBilancoTabDynamic = genFintablesBilanco('Bilanço', sData.bilanco.headers, sData.bilanco.rows);
@@ -3336,137 +3560,231 @@ if (window.shouldRenderDashboardCharts) {
                     }
                 };
 
-                const ctxSatislar = document.getElementById('chart-ceyreklik-satislar');
-                if (ctxSatislar) {
-                    let exS = Chart.getChart(ctxSatislar); if (exS) exS.destroy();
-                    new Chart(ctxSatislar, {
-                        type: 'line',
+                const bgColors = labels.map(l => {
+                    if (l.includes('/3') || l.includes('/03') || l.includes('-3')) return 'rgba(255, 99, 132, 0.8)'; // Kırmızı
+                    if (l.includes('/6') || l.includes('/06') || l.includes('-6')) return 'rgba(75, 192, 192, 0.8)'; // Yeşil
+                    if (l.includes('/9') || l.includes('/09') || l.includes('-9')) return 'rgba(54, 162, 235, 0.8)'; // Mavi
+                    if (l.includes('/12') || l.includes('-12')) return 'rgba(255, 206, 86, 0.8)'; // Sarı
+                    return 'rgba(77, 166, 255, 0.8)';
+                });
+                const borderColors = labels.map(l => {
+                    if (l.includes('/3') || l.includes('/03') || l.includes('-3')) return 'rgb(255, 99, 132)';
+                    if (l.includes('/6') || l.includes('/06') || l.includes('-6')) return 'rgb(75, 192, 192)';
+                    if (l.includes('/9') || l.includes('/09') || l.includes('-9')) return 'rgb(54, 162, 235)';
+                    if (l.includes('/12') || l.includes('-12')) return 'rgb(255, 206, 86)';
+                    return 'rgb(77, 166, 255)';
+                });
+
+                const barOpts = {
+                    ...lineOpts,
+                    plugins: {
+                        ...lineOpts.plugins,
+                        legend: { display: false }
+                    }
+                };
+
+                const ctxSatislarYillik = document.getElementById('chart-yillik-satislar');
+                if (ctxSatislarYillik) {
+                    let ex = Chart.getChart(ctxSatislarYillik); if (ex) ex.destroy();
+                    new Chart(ctxSatislarYillik, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                data: dData.ySatislar,
+                                backgroundColor: bgColors,
+                                borderColor: borderColors,
+                                borderWidth: 1,
+                                borderRadius: 4
+                            }]
+                        },
+                        options: barOpts
+                    });
+                }
+
+                const ctxSatislarCeyreklik = document.getElementById('chart-ceyreklik-satislar');
+                if (ctxSatislarCeyreklik) {
+                    let ex = Chart.getChart(ctxSatislarCeyreklik); if (ex) ex.destroy();
+                    new Chart(ctxSatislarCeyreklik, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Satışlar',
+                                data: dData.satislar,
+                                backgroundColor: bgColors,
+                                borderColor: borderColors,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: barOpts
+                    });
+                }
+
+                const ctxSatislarDonemsel = document.getElementById('chart-donemsel-satislar');
+                if (ctxSatislarDonemsel) {
+                    let ex = Chart.getChart(ctxSatislarDonemsel); if (ex) ex.destroy();
+                    new Chart(ctxSatislarDonemsel, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Dönemsel Satışlar',
+                                data: dData.dSatislar,
+                                backgroundColor: bgColors,
+                                borderColor: borderColors,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: barOpts
+                    });
+                }
+
+                const ctxCombined = document.getElementById('chart-combined-satislar');
+                if (ctxCombined) {
+                    let ex = Chart.getChart(ctxCombined); if (ex) ex.destroy();
+                    new Chart(ctxCombined, {
+                        type: 'bar',
                         data: {
                             labels: labels,
                             datasets: [
                                 {
                                     label: 'Çeyreklik',
                                     data: dData.satislar,
-                                    borderColor: '#2ecc71',
-                                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
-                                    borderWidth: 2,
-                                    pointBackgroundColor: '#2ecc71',
-                                    pointRadius: 3,
-                                    tension: 0.1
-                                },
-                                {
-                                    label: 'Yıllıklandırılmış',
-                                    data: dData.ySatislar,
-                                    borderColor: '#4da6ff',
-                                    backgroundColor: 'rgba(77, 166, 255, 0.1)',
-                                    borderWidth: 2,
-                                    pointBackgroundColor: '#4da6ff',
-                                    pointRadius: 3,
-                                    tension: 0.1
+                                    backgroundColor: bgColors,
+                                    borderColor: borderColors,
+                                    borderWidth: 1,
+                                    borderRadius: 2
                                 },
                                 {
                                     label: 'Dönemsel',
                                     data: dData.dSatislar,
-                                    borderColor: '#f1c40f',
-                                    backgroundColor: 'rgba(241, 196, 15, 0.1)',
-                                    borderWidth: 2,
-                                    pointBackgroundColor: '#f1c40f',
-                                    pointRadius: 3,
-                                    tension: 0.1
-                                }
-                            ]
-                        },
-                        options: lineOpts
-                    });
-                }
-
-                const ctxFavok = document.getElementById('chart-ceyreklik-favok');
-                if (ctxFavok) {
-                    let exF = Chart.getChart(ctxFavok); if (exF) exF.destroy();
-                    new Chart(ctxFavok, {
-                        type: 'line',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                {
-                                    label: 'Çeyreklik',
-                                    data: dData.favok,
-                                    borderColor: '#2ecc71',
-                                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
-                                    borderWidth: 2,
-                                    pointBackgroundColor: '#2ecc71',
-                                    pointRadius: 3,
-                                    tension: 0.1
+                                    backgroundColor: bgColors,
+                                    borderColor: borderColors,
+                                    borderWidth: 1,
+                                    borderRadius: 2
                                 },
                                 {
                                     label: 'Yıllıklandırılmış',
-                                    data: dData.yFavok,
-                                    borderColor: '#4da6ff',
-                                    backgroundColor: 'rgba(77, 166, 255, 0.1)',
-                                    borderWidth: 2,
-                                    pointBackgroundColor: '#4da6ff',
-                                    pointRadius: 3,
-                                    tension: 0.1
-                                },
-                                {
-                                    label: 'Dönemsel',
-                                    data: dData.dFavok,
-                                    borderColor: '#f1c40f',
-                                    backgroundColor: 'rgba(241, 196, 15, 0.1)',
-                                    borderWidth: 2,
-                                    pointBackgroundColor: '#f1c40f',
-                                    pointRadius: 3,
-                                    tension: 0.1
+                                    data: dData.ySatislar,
+                                    backgroundColor: bgColors,
+                                    borderColor: borderColors,
+                                    borderWidth: 1,
+                                    borderRadius: 2
                                 }
                             ]
                         },
-                        options: lineOpts
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: function(c) {
+                                            let v = c.raw;
+                                            return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-');
+                                        }
+                                    }
+                                },
+                                datalabels: { display: false }
+                            },
+                            scales: {
+                                x: {
+                                    ticks: { color: '#ccc', font: { size: 10 } },
+                                    grid: { color: 'rgba(255,255,255,0.05)' }
+                                },
+                                y: {
+                                    ticks: { color: '#ccc', font: { size: 10 } },
+                                    grid: { color: 'rgba(255,255,255,0.05)' }
+                                }
+                            }
+                        }
                     });
                 }
 
-                const ctxNetKar = document.getElementById('chart-ceyreklik-netkar');
-                if (ctxNetKar) {
-                    let exN = Chart.getChart(ctxNetKar); if (exN) exN.destroy();
-                    new Chart(ctxNetKar, {
-                        type: 'line',
+                const ctxBrutCeyreklik = document.getElementById('chart-ceyreklik-brut');
+                if (ctxBrutCeyreklik) {
+                    let ex = Chart.getChart(ctxBrutCeyreklik); if (ex) ex.destroy();
+                    new Chart(ctxBrutCeyreklik, {
+                        type: 'bar',
+                        data: { labels: labels, datasets: [{ data: dData.brutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] },
+                        options: barOpts
+                    });
+                }
+
+                const ctxBrutDonemsel = document.getElementById('chart-donemsel-brut');
+                if (ctxBrutDonemsel) {
+                    let ex = Chart.getChart(ctxBrutDonemsel); if (ex) ex.destroy();
+                    new Chart(ctxBrutDonemsel, {
+                        type: 'bar',
+                        data: { labels: labels, datasets: [{ data: dData.dBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] },
+                        options: barOpts
+                    });
+                }
+
+                const ctxBrutYillik = document.getElementById('chart-yillik-brut');
+                if (ctxBrutYillik) {
+                    let ex = Chart.getChart(ctxBrutYillik); if (ex) ex.destroy();
+                    new Chart(ctxBrutYillik, {
+                        type: 'bar',
+                        data: { labels: labels, datasets: [{ data: dData.yBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] },
+                        options: barOpts
+                    });
+                }
+
+                const ctxBrutCombined = document.getElementById('chart-combined-brut');
+                if (ctxBrutCombined) {
+                    let ex = Chart.getChart(ctxBrutCombined); if (ex) ex.destroy();
+                    new Chart(ctxBrutCombined, {
+                        type: 'bar',
                         data: {
                             labels: labels,
                             datasets: [
-                                {
-                                    label: 'Çeyreklik',
-                                    data: dData.netkar,
-                                    borderColor: '#2ecc71',
-                                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
-                                    borderWidth: 2,
-                                    pointBackgroundColor: '#2ecc71',
-                                    pointRadius: 3,
-                                    tension: 0.1
-                                },
-                                {
-                                    label: 'Yıllıklandırılmış',
-                                    data: dData.yNetKar,
-                                    borderColor: '#4da6ff',
-                                    backgroundColor: 'rgba(77, 166, 255, 0.1)',
-                                    borderWidth: 2,
-                                    pointBackgroundColor: '#4da6ff',
-                                    pointRadius: 3,
-                                    tension: 0.1
-                                },
-                                {
-                                    label: 'Dönemsel',
-                                    data: dData.dNetKar,
-                                    borderColor: '#f1c40f',
-                                    backgroundColor: 'rgba(241, 196, 15, 0.1)',
-                                    borderWidth: 2,
-                                    pointBackgroundColor: '#f1c40f',
-                                    pointRadius: 3,
-                                    tension: 0.1
-                                }
+                                { label: 'Çeyreklik', data: dData.brutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 },
+                                { label: 'Dönemsel', data: dData.dBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 },
+                                { label: 'Yıllıklandırılmış', data: dData.yBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }
                             ]
                         },
-                        options: lineOpts
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } },
+                            scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } }
+                        }
                     });
                 }
+                // --- Faaliyet Karı ---
+                const ctxFaaliyetCeyreklik = document.getElementById('chart-ceyreklik-faaliyet');
+                if (ctxFaaliyetCeyreklik) { let ex = Chart.getChart(ctxFaaliyetCeyreklik); if (ex) ex.destroy(); new Chart(ctxFaaliyetCeyreklik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.faaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                const ctxFaaliyetDonemsel = document.getElementById('chart-donemsel-faaliyet');
+                if (ctxFaaliyetDonemsel) { let ex = Chart.getChart(ctxFaaliyetDonemsel); if (ex) ex.destroy(); new Chart(ctxFaaliyetDonemsel, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.dFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                const ctxFaaliyetYillik = document.getElementById('chart-yillik-faaliyet');
+                if (ctxFaaliyetYillik) { let ex = Chart.getChart(ctxFaaliyetYillik); if (ex) ex.destroy(); new Chart(ctxFaaliyetYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                const ctxFaaliyetCombined = document.getElementById('chart-combined-faaliyet');
+                if (ctxFaaliyetCombined) { let ex = Chart.getChart(ctxFaaliyetCombined); if (ex) ex.destroy(); new Chart(ctxFaaliyetCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.faaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+
+                // --- FAVÖK ---
+                const ctxFavokCeyreklik2 = document.getElementById('chart-ceyreklik-favok2');
+                if (ctxFavokCeyreklik2) { let ex = Chart.getChart(ctxFavokCeyreklik2); if (ex) ex.destroy(); new Chart(ctxFavokCeyreklik2, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.favok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                const ctxFavokDonemsel = document.getElementById('chart-donemsel-favok');
+                if (ctxFavokDonemsel) { let ex = Chart.getChart(ctxFavokDonemsel); if (ex) ex.destroy(); new Chart(ctxFavokDonemsel, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.dFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                const ctxFavokYillik = document.getElementById('chart-yillik-favok');
+                if (ctxFavokYillik) { let ex = Chart.getChart(ctxFavokYillik); if (ex) ex.destroy(); new Chart(ctxFavokYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                const ctxFavokCombined = document.getElementById('chart-combined-favok');
+                if (ctxFavokCombined) { let ex = Chart.getChart(ctxFavokCombined); if (ex) ex.destroy(); new Chart(ctxFavokCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.favok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+
+                // --- Net Kar ---
+                const ctxNetKarCeyreklik2 = document.getElementById('chart-ceyreklik-netkar2');
+                if (ctxNetKarCeyreklik2) { let ex = Chart.getChart(ctxNetKarCeyreklik2); if (ex) ex.destroy(); new Chart(ctxNetKarCeyreklik2, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.netkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                const ctxNetKarDonemsel = document.getElementById('chart-donemsel-netkar');
+                if (ctxNetKarDonemsel) { let ex = Chart.getChart(ctxNetKarDonemsel); if (ex) ex.destroy(); new Chart(ctxNetKarDonemsel, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.dNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                const ctxNetKarYillik = document.getElementById('chart-yillik-netkar');
+                if (ctxNetKarYillik) { let ex = Chart.getChart(ctxNetKarYillik); if (ex) ex.destroy(); new Chart(ctxNetKarYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                const ctxNetKarCombined = document.getElementById('chart-combined-netkar');
+                if (ctxNetKarCombined) { let ex = Chart.getChart(ctxNetKarCombined); if (ex) ex.destroy(); new Chart(ctxNetKarCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.netkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+
                 
     // Clear the temporary data
                 window.dashboardChartData = null;

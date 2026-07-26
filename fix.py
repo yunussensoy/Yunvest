@@ -1,72 +1,162 @@
 import sys
+import re
 
-file_path = r'e:\Yunvest\yunvest\www\js\app_v49.js'
-with open(file_path, 'r', encoding='utf-8') as f:
-    content = f.read()
+with open('js/app_v49.js', 'r', encoding='utf-8') as f:
+    code = f.read()
 
-# YouTube fix
-old_youtube = """                                    if (a.baglanti.includes('youtube.com') || a.baglanti.includes('youtu.be')) { text = a.baslik || 'YouTube Linki'; icon = 'fas fa-play" style="color:#fff; background:#FF0000; display:inline-flex; justify-content:center; align-items:center; width:16px; height:11px; border-radius:3px; border:1px solid #000; font-size:6px; padding-left:1px; margin-right:1px;'; }
-                                    else if (a.baglanti.includes('twitter.com') || a.baglanti.includes('x.com')) { text = a.baslik || 'X Linki'; icon = 'fa-brands fa-x-twitter" style="color: var(--text-primary); font-size: 11px;'; }
-                                    linkHtml = `<a href="${a.baglanti}" target="_blank" style="color: var(--accent-color); text-decoration: none; word-break: break-word;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'"><i class="${icon}"></i> ${text}</a>`;"""
-
-new_youtube = """                                    if (a.baglanti.includes('youtube.com') || a.baglanti.includes('youtu.be')) { text = a.baslik || 'YouTube Linki'; icon = 'fas fa-play" style="color:#fff; background:#FF0000; display:flex; justify-content:center; align-items:center; width:16px; height:11px; border-radius:3px; border:1px solid #000; font-size:6px; flex-shrink:0; margin-top:3px;'; }
-                                    else if (a.baglanti.includes('twitter.com') || a.baglanti.includes('x.com')) { text = a.baslik || 'X Linki'; icon = 'fa-brands fa-x-twitter" style="color: var(--text-primary); font-size: 12px; flex-shrink:0; margin-top:2px;'; }
-                                    linkHtml = `<a href="${a.baglanti}" target="_blank" style="color: var(--accent-color); text-decoration: none; word-break: break-word; display: flex; align-items: flex-start; gap: 5px;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'"><i class="${icon}"></i> <span style="line-height: 1.3;">${text}</span></a>`;"""
-
-content = content.replace(old_youtube, new_youtube)
-
-# Layout fix
-old_layout = """            stockHeaderHtml = `
-            <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 0 1rem 0 1rem; flex-shrink: 0;">
-                <div>
-                    <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; color: var(--text-primary);">${selectedHisse}</h1>
-                </div>
-                <div style="display: flex; align-items: baseline; gap: 0.8rem;">
-                    <div style="font-size: 1.2rem; font-weight: bold; color: var(--text-primary);">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)} â‚º</div>
-                    <div id="hisse-header-change" style="font-size: 0.9rem; font-weight: 600; color: ${hColor}; display: block;">
-                        <i class="fas fa-caret-${isPos ? 'up' : 'down'}"></i> %${initChangeStr}
+# 1. HTML Insertion
+html_to_add = """
+                    <!-- Faaliyet Karý -->
+                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Faaliyet Karý (Çeyreklik)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-faaliyet"></canvas></div>
+                        </div>
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Faaliyet Karý (Dönemsel)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-faaliyet"></canvas></div>
+                        </div>
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Faaliyet Karý (Yýllýklandýrýlmýþ)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-yillik-faaliyet"></canvas></div>
+                        </div>
                     </div>
-                </div>
-            </div>
-            `;
-        }
-
-        container.innerHTML = `
-            ${stockHeaderHtml}
-            <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--table-border); flex-wrap: wrap; align-items: center; background: var(--overlay-bg);">
-                ${tabsHtml}
-            </div>
-            <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0 1rem; padding-top: 0.5rem; flex: 1; overflow-y: auto;">
-                ${contentHtml}
-            </div>"""
-
-new_layout = """            stockHeaderHtml = `
-            <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-radius: 0; border-left: 5px solid ${hColor}; margin: 0; flex-shrink: 0;">
-                <div>
-                    <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; color: var(--text-primary);">${selectedHisse}</h1>
-                </div>
-                <div style="display: flex; align-items: baseline; gap: 0.8rem;">
-                    <div style="font-size: 1.2rem; font-weight: bold; color: var(--text-primary);">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)} â‚º</div>
-                    <div id="hisse-header-change" style="font-size: 0.9rem; font-weight: 600; color: ${hColor}; display: block;">
-                        <i class="fas fa-caret-${isPos ? 'up' : 'down'}"></i> %${initChangeStr}
+                    <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <span>Faaliyet Karý</span>
+                            <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                        </div>
+                        <div style="flex:1; min-height:400px; min-width: 0; position:relative;"><canvas id="chart-combined-faaliyet"></canvas></div>
                     </div>
-                </div>
-            </div>
-            `;
-        }
 
-        container.innerHTML = `
-            ${stockHeaderHtml}
-            <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--table-border); flex-wrap: wrap; align-items: center; background: var(--overlay-bg);">
-                ${tabsHtml}
-            </div>
-            <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem 0 1rem 0; flex: 1; overflow-y: auto;">
-                ${contentHtml}
-            </div>"""
+                    <!-- FAVÖK -->
+                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>FAVÖK (Çeyreklik)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-favok2"></canvas></div>
+                        </div>
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>FAVÖK (Dönemsel)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-favok"></canvas></div>
+                        </div>
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>FAVÖK (Yýllýklandýrýlmýþ)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-yillik-favok"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <span>FAVÖK</span>
+                            <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                        </div>
+                        <div style="flex:1; min-height:400px; min-width: 0; position:relative;"><canvas id="chart-combined-favok"></canvas></div>
+                    </div>
 
-content = content.replace(old_layout, new_layout)
+                    <!-- Net Kar -->
+                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Net Kar (Çeyreklik)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-netkar2"></canvas></div>
+                        </div>
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Net Kar (Dönemsel)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-netkar"></canvas></div>
+                        </div>
+                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
+                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                                <span>Net Kar (Yýllýklandýrýlmýþ)</span>
+                                <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                            </div>
+                            <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-yillik-netkar"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
+                        <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <span>Net Kar</span>
+                            <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
+                        </div>
+                        <div style="flex:1; min-height:400px; min-width: 0; position:relative;"><canvas id="chart-combined-netkar"></canvas></div>
+                    </div>
+"""
+target_html = '                        <div style="flex:1; min-height:400px; min-width: 0; position:relative;"><canvas id="chart-combined-brut"></canvas></div>\n                    </div>\n                </div>\n                ;'
+if target_html in code:
+    code = code.replace(target_html, '                        <div style="flex:1; min-height:400px; min-width: 0; position:relative;"><canvas id="chart-combined-brut"></canvas></div>\n                    </div>\n' + html_to_add + '                </div>\n                ;')
+else:
+    print("Failed to inject HTML")
 
-with open(file_path, 'w', encoding='utf-8') as f:
-    f.write(content)
+# 2. JS Initialization Insertion
+js_to_add = """
+                // --- Faaliyet Karý ---
+                const ctxFaaliyetCeyreklik = document.getElementById('chart-ceyreklik-faaliyet');
+                if (ctxFaaliyetCeyreklik) { let ex = Chart.getChart(ctxFaaliyetCeyreklik); if (ex) ex.destroy(); new Chart(ctxFaaliyetCeyreklik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.faaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
 
-print('Done')
+                const ctxFaaliyetDonemsel = document.getElementById('chart-donemsel-faaliyet');
+                if (ctxFaaliyetDonemsel) { let ex = Chart.getChart(ctxFaaliyetDonemsel); if (ex) ex.destroy(); new Chart(ctxFaaliyetDonemsel, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.dFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+
+                const ctxFaaliyetYillik = document.getElementById('chart-yillik-faaliyet');
+                if (ctxFaaliyetYillik) { let ex = Chart.getChart(ctxFaaliyetYillik); if (ex) ex.destroy(); new Chart(ctxFaaliyetYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+
+                const ctxFaaliyetCombined = document.getElementById('chart-combined-faaliyet');
+                if (ctxFaaliyetCombined) { let ex = Chart.getChart(ctxFaaliyetCombined); if (ex) ex.destroy(); new Chart(ctxFaaliyetCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.faaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yýllýklandýrýlmýþ', data: dData.yFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+
+                // --- FAVÖK ---
+                const ctxFavokCeyreklik2 = document.getElementById('chart-ceyreklik-favok2');
+                if (ctxFavokCeyreklik2) { let ex = Chart.getChart(ctxFavokCeyreklik2); if (ex) ex.destroy(); new Chart(ctxFavokCeyreklik2, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.favok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+
+                const ctxFavokDonemsel = document.getElementById('chart-donemsel-favok');
+                if (ctxFavokDonemsel) { let ex = Chart.getChart(ctxFavokDonemsel); if (ex) ex.destroy(); new Chart(ctxFavokDonemsel, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.dFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+
+                const ctxFavokYillik = document.getElementById('chart-yillik-favok');
+                if (ctxFavokYillik) { let ex = Chart.getChart(ctxFavokYillik); if (ex) ex.destroy(); new Chart(ctxFavokYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+
+                const ctxFavokCombined = document.getElementById('chart-combined-favok');
+                if (ctxFavokCombined) { let ex = Chart.getChart(ctxFavokCombined); if (ex) ex.destroy(); new Chart(ctxFavokCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.favok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yýllýklandýrýlmýþ', data: dData.yFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+
+                // --- Net Kar ---
+                const ctxNetKarCeyreklik2 = document.getElementById('chart-ceyreklik-netkar2');
+                if (ctxNetKarCeyreklik2) { let ex = Chart.getChart(ctxNetKarCeyreklik2); if (ex) ex.destroy(); new Chart(ctxNetKarCeyreklik2, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.netkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+
+                const ctxNetKarDonemsel = document.getElementById('chart-donemsel-netkar');
+                if (ctxNetKarDonemsel) { let ex = Chart.getChart(ctxNetKarDonemsel); if (ex) ex.destroy(); new Chart(ctxNetKarDonemsel, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.dNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+
+                const ctxNetKarYillik = document.getElementById('chart-yillik-netkar');
+                if (ctxNetKarYillik) { let ex = Chart.getChart(ctxNetKarYillik); if (ex) ex.destroy(); new Chart(ctxNetKarYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+
+                const ctxNetKarCombined = document.getElementById('chart-combined-netkar');
+                if (ctxNetKarCombined) { let ex = Chart.getChart(ctxNetKarCombined); if (ex) ex.destroy(); new Chart(ctxNetKarCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.netkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yýllýklandýrýlmýþ', data: dData.yNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+"""
+
+target_js = "                const ctxFavok = document.getElementById('chart-ceyreklik-favok');"
+if target_js in code:
+    code = code.replace(target_js, js_to_add + "\n" + target_js)
+else:
+    print("Failed to inject JS")
+
+with open('js/app_v49.js', 'w', encoding='utf-8') as f:
+    f.write(code)
+
+print("Done")

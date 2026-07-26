@@ -60,19 +60,56 @@ window.parseExcelData = (selectedHisse) => {
             };
 
             const numPeriods = Math.max(0, data[0].length - 1);
-            let result = { headers: [], rows: [] };
             
-            // Fintables has periods in data[0], starting from index 1
-            // Is Yatirim also has periods in data[0], starting from index 1
+            let rawHeaders = [];
             for (let i = 0; i <= numPeriods; i++) {
-                result.headers.push(data[0][i] || '');
+                rawHeaders.push(data[0][i] || '');
+            }
+            
+            let maxYear = 0;
+            for (let i = 1; i <= numPeriods; i++) {
+                const h = rawHeaders[i];
+                if (h) {
+                    const parts = h.split('/');
+                    if (parts.length > 0) {
+                        const year = parseInt(parts[0], 10);
+                        if (!isNaN(year) && year > maxYear) maxYear = year;
+                    }
+                }
+            }
+            
+            const cutoffYear = maxYear > 0 ? maxYear - 5 : 0;
+            let keepIndices = [0];
+            for (let i = 1; i <= numPeriods; i++) {
+                const h = rawHeaders[i];
+                if (h) {
+                    const parts = h.split('/');
+                    if (parts.length > 0) {
+                        const year = parseInt(parts[0], 10);
+                        if (!isNaN(year)) {
+                            if (year >= cutoffYear) keepIndices.push(i);
+                        } else {
+                            keepIndices.push(i);
+                        }
+                    } else {
+                        keepIndices.push(i);
+                    }
+                } else {
+                    keepIndices.push(i);
+                }
+            }
+            
+            let result = { headers: [], rows: [] };
+            for (let i of keepIndices) {
+                result.headers.push(rawHeaders[i]);
             }
 
             for (let i = 1; i < data.length; i++) {
                 if (!data[i] || !data[i][0]) continue;
                 let row = [data[i][0].toString()];
-                for (let j = 1; j <= numPeriods; j++) {
-                    let val = data[i][j];
+                for (let j = 1; j < keepIndices.length; j++) {
+                    let cIdx = keepIndices[j];
+                    let val = data[i][cIdx];
                     if (val === undefined) val = '-';
                     else if (typeof val === 'number') val = formatExcelNum(val);
                     row.push(val);
@@ -112,7 +149,8 @@ window.parseExcelData = (selectedHisse) => {
                 const rowFinBorc = ['Sistem_Fin_Borc_Eklemesi'];
                 const rowNetBorc = ['Sistem_Net_Borc_Eklemesi'];
 
-                for (let i = 1; i <= numPeriods; i++) {
+                for (let j = 1; j < keepIndices.length; j++) {
+                    let i = keepIndices[j];
                     const kisa = idxKisa !== -1 ? getValueFlex(idxKisa, i) : 0;
                     const kisa2 = idxKisa2 !== -1 ? getValueFlex(idxKisa2, i) : 0;
                     const uzun = idxUzun !== -1 ? getValueFlex(idxUzun, i) : 0;
