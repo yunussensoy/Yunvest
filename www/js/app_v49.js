@@ -5907,6 +5907,7 @@ window.renderNotlar = (container) => {
             card.style.cssText = `position: relative; display: flex; flex-direction: column; background: var(--surface-color); padding: 1.5rem; border-radius: 12px; border-left: 4px solid ${note.color || 'var(--accent-color)'}; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s;`;
             card.onmouseover = () => { card.style.transform = 'translateY(-3px)'; card.style.boxShadow = '0 8px 25px rgba(0,0,0,0.4)'; };
             card.onmouseout = () => { card.style.transform = 'none'; card.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)'; };
+            card.ondblclick = () => { window.editNote(note.id); };
             
             const dateStr = new Date(note.timestamp).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
             
@@ -5938,25 +5939,25 @@ window.renderNotlar = (container) => {
         modal.className = 'app-container';
         modal.style.cssText = 'display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; opacity: 0; transition: opacity 0.3s;';
         modal.innerHTML = `
-            <div class="glass" style="width: 90%; max-width: 500px; padding: 2rem; border-radius: 12px; position: relative; transform: scale(0.95); transition: transform 0.3s;">
-                <h3 id="note-modal-title" style="margin-top: 0; margin-bottom: 1.5rem; color: #fff; font-size: 1.3rem;">Yeni Not Ekle</h3>
+            <div class="glass" style="width: 90%; max-width: 500px; height: 700px; display: flex; flex-direction: column; padding: 1rem; border-radius: 8px; position: relative; transform: scale(0.95); transition: transform 0.3s;">
+                <h3 id="note-modal-title" style="margin-top: 0; margin-bottom: 0.8rem; color: #fff; font-size: calc(1.2rem - 3px); flex-shrink: 0;">Yeni Not Ekle</h3>
                 <input type="hidden" id="note-id-input" value="">
-                <input type="text" id="note-title-input" placeholder="Not Başlığı (İsteğe bağlı)" style="width: 100%; padding: 1rem; margin-bottom: 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; outline: none; font-size: 1rem;">
-                <textarea id="note-content-input" placeholder="Notunuzu buraya yazın..." style="width: 100%; padding: 1rem; margin-bottom: 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; outline: none; font-family: inherit; font-size: 0.95rem; height: 180px; resize: vertical; line-height: 1.5;"></textarea>
-                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center;">
-                    <label style="color: #ccc; font-size: 0.9rem;">Etiket Rengi:</label>
-                    <div style="display: flex; gap: 0.5rem;" id="note-color-picker">
-                        <div class="color-swatch active" data-color="#3498db" style="width:24px; height:24px; border-radius:50%; background:#3498db; cursor:pointer; border: 2px solid #fff;"></div>
-                        <div class="color-swatch" data-color="#2ecc71" style="width:24px; height:24px; border-radius:50%; background:#2ecc71; cursor:pointer; border: 2px solid transparent;"></div>
-                        <div class="color-swatch" data-color="#e74c3c" style="width:24px; height:24px; border-radius:50%; background:#e74c3c; cursor:pointer; border: 2px solid transparent;"></div>
-                        <div class="color-swatch" data-color="#f1c40f" style="width:24px; height:24px; border-radius:50%; background:#f1c40f; cursor:pointer; border: 2px solid transparent;"></div>
-                        <div class="color-swatch" data-color="#9b59b6" style="width:24px; height:24px; border-radius:50%; background:#9b59b6; cursor:pointer; border: 2px solid transparent;"></div>
+                <input type="text" id="note-title-input" placeholder="Not Başlığı (İsteğe bağlı)" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff; outline: none; font-size: calc(1.2rem - 3px); flex-shrink: 0;">
+                <textarea id="note-content-input" placeholder="Notunuzu buraya yazın..." style="width: 100%; flex: 1; padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff; outline: none; font-family: inherit; font-size: calc(0.95rem - 3px); resize: none; line-height: 1.4;"></textarea>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.8rem; align-items: center; flex-shrink: 0;">
+                    <label style="color: #ccc; font-size: calc(0.95rem - 3px);">Etiket Rengi:</label>
+                    <div style="display: flex; gap: 0.3rem;" id="note-color-picker">
+                        <div class="color-swatch active" data-color="#3498db" style="width:18px; height:18px; border-radius:50%; background:#3498db; cursor:pointer; border: 2px solid #fff;"></div>
+                        <div class="color-swatch" data-color="#2ecc71" style="width:18px; height:18px; border-radius:50%; background:#2ecc71; cursor:pointer; border: 2px solid transparent;"></div>
+                        <div class="color-swatch" data-color="#e74c3c" style="width:18px; height:18px; border-radius:50%; background:#e74c3c; cursor:pointer; border: 2px solid transparent;"></div>
+                        <div class="color-swatch" data-color="#f1c40f" style="width:18px; height:18px; border-radius:50%; background:#f1c40f; cursor:pointer; border: 2px solid transparent;"></div>
+                        <div class="color-swatch" data-color="#9b59b6" style="width:18px; height:18px; border-radius:50%; background:#9b59b6; cursor:pointer; border: 2px solid transparent;"></div>
                     </div>
                     <input type="hidden" id="note-color-input" value="#3498db">
                 </div>
-                <div style="display: flex; gap: 1rem;">
-                    <button class="btn" style="flex: 1; background: var(--success-color); padding: 0.8rem;" onclick="window.saveNote()"><i class="fas fa-check"></i> Kaydet</button>
-                    <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1); padding: 0.8rem;" onclick="window.closeNoteModal()">İptal</button>
+                <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
+                    <button class="btn" style="flex: 1; background: var(--success-color); padding: 0.4rem; font-size: calc(0.95rem - 3px);" onclick="window.saveNote()"><i class="fas fa-check"></i> Kaydet</button>
+                    <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1); padding: 0.4rem; font-size: calc(0.95rem - 3px);" onclick="window.closeNoteModal()">İptal</button>
                 </div>
             </div>
         `;
