@@ -598,7 +598,9 @@ const State = {
                         // Veya yerel zaman damgası daha yeniyse kurtar.
                         const useLocal = (localDataTs > fbDataTs) || (fbEkstreLen === 0 && localEkstreLen > 0);
 
-                        if (useLocal) {
+                        if (useLocal && !window._isRescuing) {
+                            window._isRescuing = true;
+                            setTimeout(() => { window._isRescuing = false; }, 10000); // 10 saniye cooldown
                             this.data = { ...this.data, ...parsedLocal };
                             this.save(); // Save rescued data back to Firebase
                             console.log("Rescued data from local system based on timestamp!");
@@ -1101,8 +1103,8 @@ const renderPortfoy = (container) => {
             if (p.menkul === 'PRY') {
                 fiyatHtml = `<td style="text-align: right !important;">
                     <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
-                        <span class="pry-text">${formatCurrency(p.guncelFiyat)}</span>
-                        <input type="number" step="0.000001" class="form-control glass-input inline-pry-input" style="display:none; width: 80px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${p.guncelFiyat}" onkeydown="if(event.key==='Enter') window.saveVarliklarEdit()">
+                        <span class="pry-text" style="cursor: pointer;" ondblclick="window.toggleVarliklarEdit()" title="Çift tıklayarak düzenleyin">${formatCurrency(p.guncelFiyat, 6)}</span>
+                        <input type="text" inputmode="decimal" class="form-control glass-input inline-pry-input" style="display:none; width: 80px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px; outline: none;" value="${p.guncelFiyat}">
                     </div>
                 </td>`;
             } else {
@@ -1215,10 +1217,6 @@ const renderPortfoy = (container) => {
                 <div class="table-container glass" style="margin-bottom: 0;">
                     <div class="table-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Portföy Bilgileri</span>
-                        <div>
-                            <button id="portfoy-edit-btn" class="btn btn-icon" style="color: var(--accent-color); font-size: 14px; padding: 4px;" onclick="window.togglePortfoyEdit()" title="Düzenle"><i class="fas fa-edit"></i></button>
-                            <button id="portfoy-save-btn" class="btn btn-icon" style="color: var(--success-color); font-size: 14px; padding: 4px; display: none;" onclick="window.savePortfoyEdit()" title="Kaydet"><i class="fas fa-save"></i></button>
-                        </div>
                     </div>
                 <div class="flex-row" style="align-items: flex-start; gap: 1rem;">
                     <div style="flex: 2; overflow-x: auto;">
@@ -1228,13 +1226,8 @@ const renderPortfoy = (container) => {
                                     <td style="text-align:left !important; width:25%;">Nakit</td>
                                     <td style="text-align:right !important; width:25%; border-right: 1px solid rgba(255, 255, 255, 0.03);">
                                         <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
-                                    <td style="text-align:right !important; width:25%; border-right: 1px solid rgba(255, 255, 255, 0.03);">
-                                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
-                                            <span id="nakit-text">${formatCurrency(guncelNakitTutar)}</span>
-                                            <input type="number" step="0.01" id="inline-nakit-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${State.data.manuelNakitTutar || 0}" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
-                                        </div>
-                                    </td>
-                                            <input type="number" step="0.01" id="inline-nakit-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${State.data.manuelNakitTutar || 0}" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
+                                            <span id="nakit-text" style="cursor: pointer;" ondblclick="window.togglePortfoyEdit('nakit')" title="Çift tıklayarak düzenleyin">${formatCurrency(guncelNakitTutar)}</span>
+                                            <input type="text" inputmode="decimal" id="inline-nakit-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px; outline: none;" value="${State.data.manuelNakitTutar || 0}">
                                         </div>
                                     </td>
                                     <td style="text-align:left !important; width:25%; padding-left: 1rem;">Reel Getiri Oranı (Enflasyon)</td>
@@ -1270,13 +1263,8 @@ const renderPortfoy = (container) => {
                                     <td style="text-align:left !important; padding-left: 1rem;">Hedef Portföy</td>
                                     <td style="text-align:right !important;">
                                         <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
-                                    <td style="text-align:right !important;">
-                                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
-                                            <span id="hedef-text">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span>
-                                            <input type="number" id="inline-hedef-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${portfoyBilgileri.hedefPortfoy}" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
-                                        </div>
-                                    </td>
-                                            <input type="number" id="inline-hedef-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${portfoyBilgileri.hedefPortfoy}" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
+                                            <span id="hedef-text" style="cursor: pointer;" ondblclick="window.togglePortfoyEdit('hedef')" title="Çift tıklayarak düzenleyin">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span>
+                                            <input type="text" inputmode="numeric" id="inline-hedef-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px; outline: none;" value="${portfoyBilgileri.hedefPortfoy}">
                                         </div>
                                     </td>
                                 </tr>
@@ -1326,10 +1314,6 @@ const renderPortfoy = (container) => {
                 <div class="table-container glass" style="margin-bottom: 0;">
                     <div class="table-header" style="display: flex; justify-content: space-between; align-items: center;">
                         <span>Varlıklarım</span>
-                        <div>
-                            <button id="varliklar-edit-btn" class="btn btn-icon" style="color: var(--accent-color); font-size: 14px; padding: 4px;" onclick="window.toggleVarliklarEdit()" title="Düzenle"><i class="fas fa-edit"></i></button>
-                            <button id="varliklar-save-btn" class="btn btn-icon" style="color: var(--success-color); font-size: 14px; padding: 4px; display: none;" onclick="window.saveVarliklarEdit()" title="Kaydet"><i class="fas fa-save"></i></button>
-                        </div>
                     </div>
                 <div class="flex-row" style="align-items: center; gap: 1rem;">
                     <div style="flex: 2.5; overflow-x: auto;">
@@ -1388,60 +1372,99 @@ const renderPortfoy = (container) => {
     container.innerHTML = html;
 
 
-    window.togglePortfoyEdit = () => {
-        const isEditing = document.getElementById('portfoy-save-btn').style.display !== 'none';
+    window.togglePortfoyEdit = (field) => {
+        let textEl, inputEl;
+        if (field === 'nakit') {
+            textEl = document.getElementById('nakit-text');
+            inputEl = document.getElementById('inline-nakit-input');
+        } else if (field === 'hedef') {
+            textEl = document.getElementById('hedef-text');
+            inputEl = document.getElementById('inline-hedef-input');
+        }
         
-        document.getElementById('nakit-text').style.display = isEditing ? 'inline' : 'none';
-        document.getElementById('inline-nakit-input').style.display = isEditing ? 'none' : 'inline-block';
-        
-        document.getElementById('hedef-text').style.display = isEditing ? 'inline' : 'none';
-        document.getElementById('inline-hedef-input').style.display = isEditing ? 'none' : 'inline-block';
-        
-        document.getElementById('portfoy-edit-btn').style.display = isEditing ? 'inline-block' : 'none';
-        document.getElementById('portfoy-save-btn').style.display = isEditing ? 'none' : 'inline-block';
-        
-        if (!isEditing) {
-            document.getElementById('inline-nakit-input').focus();
+        if (textEl && inputEl) {
+            textEl.style.display = 'none';
+            inputEl.style.display = 'inline-block';
+            inputEl.focus();
+            
+            const handleSave = (e) => {
+                if (e.type === 'keydown') {
+                    if (e.key !== 'Enter') return;
+                    e.preventDefault();
+                }
+                
+                inputEl.removeEventListener('blur', handleSave);
+                inputEl.removeEventListener('keydown', handleSave);
+                
+                let changed = false;
+                const val = inputEl.value;
+                if (val !== '') {
+                    const num = parseFloat(val.replace(',', '.')) || 0;
+                    if (field === 'nakit' && State.data.manuelNakitTutar !== num) {
+                        State.data.manuelNakitTutar = num;
+                        changed = true;
+                    } else if (field === 'hedef' && State.data.hedefPortfoyTL !== num) {
+                        State.data.hedefPortfoyTL = num;
+                        changed = true;
+                    }
+                }
+                
+                if (changed) {
+                    State.save();
+                    if (typeof renderPage === "function") renderPage();
+                } else {
+                    inputEl.style.display = 'none';
+                    textEl.style.display = 'inline';
+                }
+            };
+            
+            inputEl.addEventListener('blur', handleSave);
+            inputEl.addEventListener('keydown', handleSave);
         }
     };
     
-    window.savePortfoyEdit = () => {
-        const nakitVal = document.getElementById('inline-nakit-input').value;
-        const hedefVal = document.getElementById('inline-hedef-input').value;
-        
-        if (nakitVal !== '') State.data.manuelNakitTutar = parseFloat(nakitVal) || 0;
-        if (hedefVal !== '') State.data.hedefPortfoyTL = parseFloat(hedefVal) || 0;
-        
-        State.save();
-        if (typeof renderPage === "function") renderPage();
-    };
+    window.savePortfoyEdit = () => {};
 
     window.toggleVarliklarEdit = () => {
-        const isEditing = document.getElementById('varliklar-save-btn').style.display !== 'none';
+        const textEl = document.querySelector('.pry-text');
+        const inputEl = document.querySelector('.inline-pry-input');
         
-        const pryText = document.querySelector('.pry-text');
-        const pryInput = document.querySelector('.inline-pry-input');
-        
-        if (pryText && pryInput) {
-            pryText.style.display = isEditing ? 'inline' : 'none';
-            pryInput.style.display = isEditing ? 'none' : 'inline-block';
-        }
-        
-        document.getElementById('varliklar-edit-btn').style.display = isEditing ? 'inline-block' : 'none';
-        document.getElementById('varliklar-save-btn').style.display = isEditing ? 'none' : 'inline-block';
-        
-        if (!isEditing && pryInput) {
-            pryInput.focus();
-        }
-    };
-    
-    window.saveVarliklarEdit = () => {
-        const pryInput = document.querySelector('.inline-pry-input');
-        if (pryInput && pryInput.value !== '') {
-            State.data.manuelFonFiyatlari = State.data.manuelFonFiyatlari || {};
-            State.data.manuelFonFiyatlari['PRY'] = parseFloat(pryInput.value.replace(',', '.'));
-            State.save();
-            if (typeof renderPage === "function") renderPage();
+        if (textEl && inputEl) {
+            textEl.style.display = 'none';
+            inputEl.style.display = 'inline-block';
+            inputEl.focus();
+            
+            const handleSave = (e) => {
+                if (e.type === 'keydown') {
+                    if (e.key !== 'Enter') return;
+                    e.preventDefault();
+                }
+                
+                inputEl.removeEventListener('blur', handleSave);
+                inputEl.removeEventListener('keydown', handleSave);
+                
+                let changed = false;
+                const val = inputEl.value;
+                if (val !== '') {
+                    const num = parseFloat(val.replace(',', '.')) || 0;
+                    State.data.manuelFonFiyatlari = State.data.manuelFonFiyatlari || {};
+                    if (State.data.manuelFonFiyatlari['PRY'] !== num) {
+                        State.data.manuelFonFiyatlari['PRY'] = num;
+                        changed = true;
+                    }
+                }
+                
+                if (changed) {
+                    State.save();
+                    if (typeof renderPage === "function") renderPage();
+                } else {
+                    inputEl.style.display = 'none';
+                    textEl.style.display = 'inline';
+                }
+            };
+            
+            inputEl.addEventListener('blur', handleSave);
+            inputEl.addEventListener('keydown', handleSave);
         }
     };
 
@@ -5943,6 +5966,18 @@ window.goToAnasayfa = () => {
 };
 
 const renderPage = () => {
+    const now = Date.now();
+    if (window._lastRenderTime && (now - window._lastRenderTime < 500)) {
+        if (!window._pendingRender) {
+            window._pendingRender = setTimeout(() => {
+                window._pendingRender = null;
+                renderPage();
+            }, 500);
+        }
+        return;
+    }
+    window._lastRenderTime = now;
+
     // update active nav
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     const activeBtn = document.querySelector(`.nav-btn[data-target="${currentPage}"]`);

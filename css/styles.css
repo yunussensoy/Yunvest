@@ -252,6 +252,12 @@ tbody tr {
     box-shadow: 0 0 0 2px var(--accent-glow);
 }
 
+.glass-input:focus {
+    outline: none !important;
+    border-color: var(--surface-border) !important;
+    box-shadow: none !important;
+}
+
 /* Tarayıcıların otomatik doldurma (autofill) yaparken arka planı beyaz yapmasını engellemek için */
 .form-control:-webkit-autofill,
 .form-control:-webkit-autofill:hover, 
