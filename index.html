@@ -60,6 +60,7 @@
             
             <button class="nav-btn" data-target="hisse_islemleri"><i class="fas fa-receipt"></i> <span class="nav-text">Ekstreler</span></button>
             <button class="nav-btn" data-target="veriler"><i class="fas fa-chart-line"></i> <span class="nav-text">Enflasyon Verileri</span></button>
+            <button class="nav-btn" data-target="notlar"><i class="fas fa-sticky-note"></i> <span class="nav-text">Notlar</span></button>
         </nav>
         <!-- User Profile -->
         <div style="margin-top: auto; padding: 1rem; border-top: 1px solid var(--surface-border);">
@@ -144,6 +145,10 @@
             <button class="nav-btn bottom-nav-btn" data-target="veriler">
                 <i class="fas fa-database"></i>
                 <span>Veriler</span>
+            </button>
+            <button class="nav-btn bottom-nav-btn" data-target="notlar">
+                <i class="fas fa-sticky-note"></i>
+                <span>Notlar</span>
             </button>
         </nav>
     </div>
@@ -284,7 +289,10 @@ window.showAnalizEkleModal = function(hisse) {
         });
     </script>
 
-    <script src="js/stock_data_compiled.js?v=20260726-2"></script>
+    <!-- Global Data -->
+    <script src="js/stock_data_compiled.js"></script>
+    <script src="js/prices_compiled.js"></script>
+    <!-- App Logic -->
     <script src="js/excel_parser_v2.js?v=20260726-1"></script>
     <script src="js/import_data.js"></script>
     <script src="js/custom_autocomplete.js?v=2"></script>

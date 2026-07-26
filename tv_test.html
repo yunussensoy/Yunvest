@@ -1,0 +1,17 @@
+<html>
+<body>
+    <div id="result"></div>
+    <script>
+        fetch('https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/Common/Data.aspx/HisseTekil?hisse=AKSA&startdate=01-01-2026&enddate=26-07-2026', {
+            headers: { 'Accept': 'application/json' }
+        })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('result').innerText = 'SUCCESS: ' + data.chart.result[0].meta.symbol;
+            })
+            .catch(err => {
+                document.getElementById('result').innerText = 'ERROR: ' + err.message;
+            });
+    </script>
+</body>
+</html>

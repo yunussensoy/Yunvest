@@ -1876,9 +1876,7 @@ const renderHisseler = (container) => {
     const renderUI = () => {
         const tabIcons = {
             'Özet Rapor': 'fas fa-chart-pie',
-            
             'Değerleme': 'fas fa-gem',
-            'Gelir Tablosu': 'fas fa-file-invoice-dollar',
             'Gelir Tablosu': 'fas fa-file-invoice-dollar',
             'Nakit Akım Tablosu': 'fas fa-water',
             'Rasyo Analiz Tablosu': 'fas fa-percentage',
@@ -2248,9 +2246,41 @@ const renderHisseler = (container) => {
                     chartDSatislar = []; chartDBrutKar = []; chartDFaaliyet = []; chartDFavok = []; chartDNetKar = [];
                     chartBKM = []; chartFKM = []; chartNKM = [];
                     chartYBKM = []; chartYFKM = []; chartYNKM = [];
+                    chartCari = []; chartKaldirac = []; chartROE = []; chartPD = [];
+                    
+                    const getPDForHeader = (header, hisseKodu) => {
+                        if (!window.stockPrices || !window.stockPrices[hisseKodu]) return null;
+                        const parts = header.split('/');
+                        if (parts.length !== 2) return null;
+                        const year = parseInt(parts[0]);
+                        const month = parseInt(parts[1]);
+                        let day = 30;
+                        if (month === 3 || month === 12) day = 31;
+                        if (month === 2) day = 28;
+                        const targetDate = new Date(year, month - 1, day);
+                        
+                        const prices = window.stockPrices[hisseKodu];
+                        let closestPD = null;
+                        let minDiff = Infinity;
+                        
+                        for (const dateStr in prices) {
+                            const dParts = dateStr.split('-');
+                            if (dParts.length !== 3) continue;
+                            const d = new Date(parseInt(dParts[2]), parseInt(dParts[1]) - 1, parseInt(dParts[0]));
+                            const diff = Math.abs(targetDate.getTime() - d.getTime());
+                            
+                            // 30 gunluk sapma payi kabul edilebilir (finansal rapor tarihlerinde gecikme vs.)
+                            if (diff < minDiff && diff < 1000 * 60 * 60 * 24 * 35) {
+                                minDiff = diff;
+                                closestPD = prices[dateStr].pd;
+                            }
+                        }
+                        return closestPD;
+                    };
                     chartCari = []; chartKaldirac = []; chartROE = [];
                     for (let i = limit; i >= 1; i--) {
                         chartLabels.push(headers[i]);
+                        chartPD.push(getPDForHeader(headers[i], selectedHisse));
                         const sR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
                         const faaliyetR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('esas faaliyet kar'));
                         const fR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
@@ -2523,7 +2553,11 @@ const renderHisseler = (container) => {
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Kaldıraç Oranı</div>
-                            <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-kaldirac"></canvas></div>
+                            <div style="padding: 2rem; border-radius: var(--border-radius); text-align: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);">
+                                <i class="fas fa-external-link-alt" style="font-size: 2rem; color: var(--accent-color); margin-bottom: 0.5rem;"></i>
+                                <div style="font-weight: 600; margin-bottom: 0.5rem;">Kaldıraç Detayları</div>
+                                <button class="btn btn-sm btn-primary" onclick="window.open('https://www.kap.org.tr/tr/sirket-bilgileri/ozet/' + (window.currentSelectedHisse || ''), '_blank')">KAP'ta İncele</button>
+                            </div>
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
@@ -2554,7 +2588,8 @@ const renderHisseler = (container) => {
                     dNetKar: chartDNetKar,
                       bkm: chartBKM, fkm: chartFKM, nkm: chartNKM,
                       ybkm: chartYBKM, yfkm: chartYFKM, ynkm: chartYNKM,
-                      cari: chartCari, kaldirac: chartKaldirac, roe: chartROE
+                      cari: chartCari, kaldirac: chartKaldirac, roe: chartROE,
+                      pd: chartPD
                   };
             }
             if (activeTab === 'Gelir Tablosu') {
@@ -2769,11 +2804,33 @@ const renderHisseler = (container) => {
             } else if (['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler'].includes(activeTab)) {
                 contentHtml = `<div style="display:flex; justify-content:center; align-items:center; height:200px; opacity:0.5; font-style:italic;">${activeTab} sayfası henüz yapım aşamasındadır.</div>`;
              } else if (activeTab === 'Değerleme') {
+                // Preserve scroll helper
+                window.preserveScrollRender = (targetId) => {
+                    const scrollContainer = document.getElementById('main-content') || document.documentElement;
+                    const scrollPos = scrollContainer.scrollTop;
+                    
+                    if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
+                    
+                    const setScroll = () => {
+                        if (targetId) {
+                            const el = document.getElementById(targetId);
+                            if (el) { el.scrollIntoView({ behavior: 'auto', block: 'center' }); return; }
+                        }
+                        const newContainer = document.getElementById('main-content') || document.documentElement;
+                        if (newContainer) newContainer.scrollTop = scrollPos;
+                    };
+                    
+                    setScroll(); // synchronous attempt
+                    setTimeout(setScroll, 10);
+                    setTimeout(setScroll, 50);
+                    setTimeout(setScroll, 150);
+                };
+
                 // Initialize default edit modes if not present
                 if (!window.degerlemeEditMode) window.degerlemeEditMode = { '2026': false, '2027': false, '2028': false, '2029': false, '2030': false };
                 window.toggleDegerlemeEdit = (y) => {
                     window.degerlemeEditMode[y] = !window.degerlemeEditMode[y];
-                    if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
+                    window.preserveScrollRender('yil-sonu-table-card');
                 };
 
                 // Read saved target price data for this hisse
@@ -2787,7 +2844,7 @@ const renderHisseler = (container) => {
                     if (!State.data.degerleme[hisse][year]) State.data.degerleme[hisse][year] = {};
                     State.data.degerleme[hisse][year][field] = value;
                     State.save();
-                    if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
+                    window.preserveScrollRender('yil-sonu-table-card');
                 };
 
                 window.saveDegerlemeNot = (hisse) => {
@@ -2806,8 +2863,8 @@ const renderHisseler = (container) => {
                 });
                 headerHtml += `</tr>`;
 
-                let html = `<div class="dash-card" style="display:flex; flex-direction:column;">
-                    <div class="dash-title">Geleceğe İlişkin Beklentileriniz</div>
+                let html = `<div class="dash-card" id="yil-sonu-table-card" style="display:flex; flex-direction:column;">
+                    <div class="dash-title">Yıl Sonu Bilanço Beklentileriniz</div>
                     <div style="overflow-x:auto;">
                     <table class="dash-table compact-table" style="min-width: 1000px;">
                             <thead>${headerHtml}</thead>
@@ -2855,8 +2912,8 @@ const renderHisseler = (container) => {
                     { key: 'ciro', label: 'Satış Gelirleri', type: 'currency' },
                     { key: 'favok_marji', label: 'FAVÖK Marjı', type: 'percent' },
                     { key: 'net_kar_marji', label: 'Net Kar Marjı', type: 'percent' },
-                    { key: 'favok', label: 'FAVÖK', readonly: true, type: 'currency' },
-                    { key: 'net_kar', label: 'Net Kar', readonly: true, type: 'currency' },
+                    { key: 'favok', label: 'FAVÖK', type: 'currency' },
+                    { key: 'net_kar', label: 'Net Kar', type: 'currency' },
                     { key: 'ozkaynaklar', label: 'Özkaynaklar', type: 'currency' },
                     { key: 'fd_favok', label: 'FD/FAVÖK', type: 'decimal' },
                     { key: 'f_k', label: 'F/K', type: 'decimal' },
@@ -2891,9 +2948,15 @@ const renderHisseler = (container) => {
                         if (d.ciro !== undefined && d.ciro !== '' && d.favok_marji !== undefined && d.favok_marji !== '') {
                             favok = ciro * (favokMarji / 100);
                             hasFavok = true;
+                        } else if (d.favok !== undefined && d.favok !== '') {
+                            favok = parseFloat(d.favok) || 0;
+                            hasFavok = true;
                         }
                         if (d.ciro !== undefined && d.ciro !== '' && d.net_kar_marji !== undefined && d.net_kar_marji !== '') {
                             net_kar = ciro * (netKarMarji / 100);
+                            hasNetKar = true;
+                        } else if (d.net_kar !== undefined && d.net_kar !== '') {
+                            net_kar = parseFloat(d.net_kar) || 0;
                             hasNetKar = true;
                         }
                         
@@ -3014,7 +3077,7 @@ const renderHisseler = (container) => {
                             </select>
                             <i class="fas fa-edit" style="cursor:pointer; color:var(--accent-color);" onclick="window.toggleDegerlemeEdit('${y}')" title="Düzenle"></i>
                             <i class="fas fa-save" style="cursor:pointer; color:var(--success-color); background:#000000; border-radius:3px; padding:2px 3px; font-size:12px;" onclick="window.toggleDegerlemeEdit('${y}')" title="Kaydet"></i>
-                            <i class="fas fa-trash-alt" style="cursor:pointer; color:var(--danger-color); background:#000000; border-radius:3px; padding:2px 3px; font-size:12px;" onclick="if(confirm('${y} verilerini silmek istediğinize emin misiniz?')){ delete State.data.degerleme['${selectedHisse}']['${y}']; State.save(); if(typeof renderUI === 'function') renderUI(); else if(typeof renderPage === 'function') renderPage(); }" title="Sil"></i>
+                            <i class="fas fa-trash-alt" style="cursor:pointer; color:var(--danger-color); background:#000000; border-radius:3px; padding:2px 3px; font-size:12px;" onclick="if(confirm('${y} verilerini silmek istediğinize emin misiniz?')){ delete State.data.degerleme['${selectedHisse}']['${y}']; State.save(); window.preserveScrollRender(); }" title="Sil"></i>
                         </div>
                     </td>`;
                 });
@@ -3032,6 +3095,294 @@ const renderHisseler = (container) => {
                     </div>
                 </div>`; // End of dash-card
                 contentHtml += html;
+
+                // ====== ARA BİLANÇO BEKLENTİLERİ ======
+                if (!window.araDegerlemeEditMode) window.araDegerlemeEditMode = {};
+                window.toggleAraDegerlemeEdit = (p) => {
+                    window.araDegerlemeEditMode[p] = !window.araDegerlemeEditMode[p];
+                    window.preserveScrollRender('ara-bilanco-table-card');
+                };
+                window.updateAraDegerlemeInput = (hisse, period, field, value) => {
+                    if (!State.data.araDegerleme) State.data.araDegerleme = {};
+                    if (!State.data.araDegerleme[hisse]) State.data.araDegerleme[hisse] = {};
+                    if (!State.data.araDegerleme[hisse][period]) State.data.araDegerleme[hisse][period] = {};
+                    State.data.araDegerleme[hisse][period][field] = value;
+                    State.save();
+                    window.preserveScrollRender('ara-bilanco-table-card');
+                };
+
+                const bilancoHeaders = (sData && sData.bilanco && sData.bilanco.headers) ? sData.bilanco.headers : [];
+                let pastPeriods = [];
+                let pastIndices = [];
+                for (let i = 1; i <= Math.min(3, bilancoHeaders.length - 1); i++) {
+                    pastPeriods.push(bilancoHeaders[i]);
+                    pastIndices.push(i);
+                }
+                pastPeriods.reverse();
+                pastIndices.reverse();
+
+                let nextPeriod = "Gelecek";
+                if (pastPeriods.length > 0) {
+                    const latest = pastPeriods[pastPeriods.length - 1];
+                    if (latest.includes('/')) {
+                        let parts = latest.split('/');
+                        let y = parseInt(parts[0]);
+                        let m = parseInt(parts[1]);
+                        m += 3;
+                        if (m > 12) {
+                            m = m % 12 || 12;
+                            y += 1;
+                        }
+                        nextPeriod = y + '/' + m;
+                    }
+                }
+                const araPeriods = [...pastPeriods, nextPeriod];
+
+                let araHeaderHtml = `<tr><th>Kalem</th>`;
+                araPeriods.forEach(p => {
+                    araHeaderHtml += `<th style="font-size: 14px; text-align:center;">
+                        <div>${p}</div>
+                    </th>`;
+                });
+                araHeaderHtml += `</tr>`;
+
+                let araHtml = `<div class="dash-card" id="ara-bilanco-table-card" style="display:flex; flex-direction:column; margin-top: 1.5rem;">
+                    <div class="dash-title">Ara Bilanço Beklentileriniz</div>
+                    <div style="overflow-x:auto;">
+                    <table class="dash-table compact-table" style="min-width: 1000px;">
+                        <thead>${araHeaderHtml}</thead>
+                        <tbody>`;
+
+                if (!State.data.araDegerleme) State.data.araDegerleme = {};
+                if (!State.data.araDegerleme[selectedHisse]) State.data.araDegerleme[selectedHisse] = {};
+                const araStateData = State.data.araDegerleme[selectedHisse];
+
+                const parseTRNumberForAra = (str) => {
+                    if (str === undefined || str === null || str === '') return 0;
+                    if (typeof str === 'number') return str;
+                    return parseFloat(str.replace(/\./g, '').replace(/,/g, '.')) || 0;
+                };
+                const fetchHistVal = (key, idx) => {
+                    if (!sData) return '';
+                    let r = null;
+                    let val = '';
+                    if (key === 'ciro') {
+                        if (sData.gelirDonemsel && sData.gelirDonemsel.rows) {
+                            r = sData.gelirDonemsel.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
+                        }
+                    } else if (key === 'favok') {
+                        if (sData.gelirDonemsel && sData.gelirDonemsel.rows) {
+                            r = sData.gelirDonemsel.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
+                        }
+                    } else if (key === 'net_kar') {
+                        if (sData.gelirDonemsel && sData.gelirDonemsel.rows) {
+                            r = sData.gelirDonemsel.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                        }
+                    } else if (key === 'ozkaynaklar') {
+                        if (sData.bilanco && sData.bilanco.rows) {
+                            r = sData.bilanco.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
+                        }
+                    }
+                    if (r && r[idx] !== undefined && r[idx] !== '') {
+                        if (key === 'ozkaynaklar') {
+                            val = parseTRNumberForAra(r[idx]);
+                        } else {
+                            const headers = sData.gelirDonemsel.headers;
+                            const currentHeader = headers[idx];
+                            val = parseTRNumberForAra(r[idx]);
+                            if (currentHeader && !currentHeader.endsWith('/3')) {
+                                if (idx + 1 < r.length) {
+                                    const prevHeader = headers[idx+1];
+                                    if (prevHeader && prevHeader.split('/')[0] === currentHeader.split('/')[0]) {
+                                        val = val - parseTRNumberForAra(r[idx+1]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return val;
+                };
+
+                rows.forEach(r => {
+                    araHtml += `<tr><td style="text-align:left !important; font-weight:bold;">${r.label}</td>`;
+                    araPeriods.forEach((p, pIndex) => {
+                        const isPast = pIndex < pastPeriods.length;
+                        const pIdx = isPast ? pastIndices[pIndex] : -1;
+                        
+                        let d = {};
+                        if (isPast) {
+                            const ciro = fetchHistVal('ciro', pIdx);
+                            const favok = fetchHistVal('favok', pIdx);
+                            const net_kar = fetchHistVal('net_kar', pIdx);
+                            const ozkaynaklar = fetchHistVal('ozkaynaklar', pIdx);
+                            
+                            d.ciro = ciro;
+                            d.favok = favok;
+                            d.net_kar = net_kar;
+                            d.ozkaynaklar = ozkaynaklar;
+                            d.favok_marji = (ciro !== '' && ciro !== 0 && favok !== '') ? (favok / ciro) * 100 : '';
+                            d.net_kar_marji = (ciro !== '' && ciro !== 0 && net_kar !== '') ? (net_kar / ciro) * 100 : '';
+                            d.fd_favok = '';
+                            d.f_k = '';
+                            d.pd_dd = '';
+                            d.hedef_fiyat = '';
+                            d.potansiyel = '';
+                        } else {
+                            d = araStateData[p] || {};
+                        }
+
+                        const editMode = !isPast && window.araDegerlemeEditMode && window.araDegerlemeEditMode[p];
+                        const curCurrency = d.currency || 'TRY';
+                        let currencySymbol = '₺';
+                        if (curCurrency === 'USD') currencySymbol = '$';
+                        if (curCurrency === 'EUR') currencySymbol = '€';
+                        
+                        let val = d[r.key] !== undefined ? d[r.key] : '';
+                        let displayVal = val;
+                        
+                        if (isPast && ['fd_favok', 'f_k', 'pd_dd', 'hedef_fiyat', 'potansiyel'].includes(r.key)) {
+                            displayVal = val = '---';
+                        } else if (!isPast) {
+                            const ciro = parseFloat(d.ciro) || 0;
+                            const favokMarji = parseFloat(d.favok_marji) || 0;
+                            const netKarMarji = parseFloat(d.net_kar_marji) || 0;
+                            
+                            let favok = 0;
+                            let net_kar = 0;
+                            let hasFavok = false;
+                            let hasNetKar = false;
+                            
+                            if (d.ciro !== undefined && d.ciro !== '' && d.favok_marji !== undefined && d.favok_marji !== '') {
+                                favok = ciro * (favokMarji / 100);
+                                hasFavok = true;
+                            } else if (d.favok !== undefined && d.favok !== '') {
+                                favok = parseFloat(d.favok) || 0;
+                                hasFavok = true;
+                            }
+                            if (d.ciro !== undefined && d.ciro !== '' && d.net_kar_marji !== undefined && d.net_kar_marji !== '') {
+                                net_kar = ciro * (netKarMarji / 100);
+                                hasNetKar = true;
+                            } else if (d.net_kar !== undefined && d.net_kar !== '') {
+                                net_kar = parseFloat(d.net_kar) || 0;
+                                hasNetKar = true;
+                            }
+                            
+                            if (r.key === 'favok') displayVal = val = hasFavok ? favok : '---';
+                            if (r.key === 'net_kar') displayVal = val = hasNetKar ? net_kar : '---';
+                            
+                            let validPDs = [];
+                            let currentNetBorc = netBorc;
+                            if (curCurrency === 'USD') currentNetBorc = netBorc / usdKuru;
+                            else if (curCurrency === 'EUR') currentNetBorc = netBorc / eurKuru;
+
+                            let pastFavokSum = 0;
+                            let pastNetKarSum = 0;
+                            pastIndices.forEach(pIdx => {
+                                pastFavokSum += parseFloat(fetchHistVal('favok', pIdx)) || 0;
+                                pastNetKarSum += parseFloat(fetchHistVal('net_kar', pIdx)) || 0;
+                            });
+                            
+                            let ttmFavok = favok + pastFavokSum;
+                            let ttmNetKar = net_kar + pastNetKarSum;
+
+                            if (hasFavok && d.fd_favok !== undefined && d.fd_favok !== '') {
+                                validPDs.push((ttmFavok * (parseFloat(d.fd_favok) || 0)) - currentNetBorc);
+                            }
+                            if (hasNetKar && d.f_k !== undefined && d.f_k !== '') {
+                                validPDs.push(ttmNetKar * (parseFloat(d.f_k) || 0));
+                            }
+                            if (d.ozkaynaklar !== undefined && d.ozkaynaklar !== '' && d.pd_dd !== undefined && d.pd_dd !== '') {
+                                validPDs.push((parseFloat(d.ozkaynaklar) || 0) * (parseFloat(d.pd_dd) || 0));
+                            }
+                            
+                            let avgPD = 0;
+                            if (validPDs.length > 0) avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
+                            
+                            let hedefFiyatTL = 0;
+                            let hasHedef = false;
+                            
+                            let currentOdenmisSermaye = odenmisSermaye;
+                            if (d.sermaye !== undefined && d.sermaye !== '') currentOdenmisSermaye = parseFloat(d.sermaye) || currentOdenmisSermaye;
+                            
+                            if (validPDs.length > 0 && currentOdenmisSermaye > 0) {
+                                let hedefFiyatForeign = avgPD / currentOdenmisSermaye;
+                                if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
+                                else if (curCurrency === 'EUR') hedefFiyatTL = hedefFiyatForeign * eurKuru;
+                                else hedefFiyatTL = hedefFiyatForeign;
+                                hasHedef = true;
+                            }
+                            
+                            if (r.key === 'hedef_fiyat') displayVal = val = hasHedef ? hedefFiyatTL : '---';
+                            
+                            let potansiyelNum = 0;
+                            if (hasHedef && guncelFiyat > 0) potansiyelNum = ((hedefFiyatTL - guncelFiyat) / guncelFiyat) * 100;
+
+                            if (r.key === 'potansiyel') {
+                                if (hasHedef && guncelFiyat > 0) displayVal = val = potansiyelNum;
+                                else displayVal = val = '---';
+                            }
+                        }
+
+                        if (displayVal !== '---' && displayVal !== '') {
+                            let numVal = parseFloat(displayVal);
+                            if (!isNaN(numVal)) {
+                                if (r.type === 'target') displayVal = '₺' + new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(numVal);
+                                else if (r.type === 'currency') displayVal = currencySymbol === '€' ? new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(numVal) + '€' : currencySymbol + new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(numVal);
+                                else if (r.type === 'percent') {
+                                    let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(Math.abs(numVal));
+                                    displayVal = numVal < 0 ? '%-' + formatted : '%' + formatted;
+                                } else if (r.type === 'percent_target') {
+                                    let formatted = new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(Math.abs(numVal));
+                                    displayVal = numVal < 0 ? '%-' + formatted : '%' + formatted;
+                                } else if (r.type === 'decimal') {
+                                    displayVal = new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(numVal);
+                                }
+                            }
+                        }
+                        
+                        let extraStyle = '';
+                        if (!isPast && r.isTarget && displayVal !== '---') {
+                            const numPot = ((parseFloat(String(displayVal).replace('₺','').replace(/\./g,'').replace(',','.')) - guncelFiyat) / guncelFiyat) * 100;
+                            extraStyle = numPot > 0 ? 'color: #2ecc71 !important; font-weight: bold; font-size:1.1rem;' : 'color: #e74c3c !important; font-weight: bold; font-size:1.1rem;';
+                        }
+                        if (!isPast && r.key === 'potansiyel' && val !== '---') {
+                            extraStyle = val > 0 ? 'color: #2ecc71 !important; font-weight: bold;' : 'color: #e74c3c !important; font-weight: bold;';
+                        }
+                        
+                        if (editMode && !r.readonly) {
+                            araHtml += `<td style="text-align: right !important;"><input type="number" step="any" style="width:100%; background:var(--input-bg); color:var(--text-primary); border:1px solid var(--accent-color); padding:4px; text-align:right; border-radius:4px;" value="${val !== '---' ? val : ''}" onblur="window.updateAraDegerlemeInput('${selectedHisse}', '${p}', '${r.key}', this.value)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); window.araDegerlemeEditMode['${p}'] = false; this.blur(); }"></td>`;
+                        } else {
+                            araHtml += `<td style="text-align: right !important; ${extraStyle}">${displayVal === '' ? '---' : displayVal}</td>`;
+                        }
+                    });
+                    araHtml += `</tr>`;
+                });
+
+                araHtml += `<tr><td style="text-align:left; font-weight:bold; color:var(--text-secondary);"></td>`;
+                araPeriods.forEach((p, pIndex) => {
+                    const isPast = pIndex < pastPeriods.length;
+                    if (isPast) {
+                        araHtml += `<td style="text-align: center;"></td>`;
+                    } else {
+                        const d = araStateData[p] || {};
+                        const curCurrency = d.currency || 'TRY';
+                        araHtml += `<td style="text-align: center;">
+                            <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem; padding-top: 5px;">
+                                <select style="background:var(--input-bg); color:var(--text-primary); border:1px solid var(--surface-border); border-radius:4px; padding:2px 4px; font-size:0.8rem;" onchange="window.updateAraDegerlemeInput('${selectedHisse}', '${p}', 'currency', this.value)">
+                                    <option value="TRY" ${curCurrency === 'TRY' ? 'selected' : ''}>₺</option>
+                                    <option value="USD" ${curCurrency === 'USD' ? 'selected' : ''}>$</option>
+                                    <option value="EUR" ${curCurrency === 'EUR' ? 'selected' : ''}>€</option>
+                                </select>
+                                <i class="fas fa-edit" style="cursor:pointer; color:var(--accent-color);" onclick="window.toggleAraDegerlemeEdit('${p}')" title="Düzenle"></i>
+                                <i class="fas fa-save" style="cursor:pointer; color:var(--success-color); background:#000000; border-radius:3px; padding:2px 3px; font-size:12px;" onclick="window.toggleAraDegerlemeEdit('${p}')" title="Kaydet"></i>
+                                <i class="fas fa-trash-alt" style="cursor:pointer; color:var(--danger-color); background:#000000; border-radius:3px; padding:2px 3px; font-size:12px;" onclick="if(confirm('${p} verilerini silmek istediğinize emin misiniz?')){ delete State.data.araDegerleme['${selectedHisse}']['${p}']; State.save(); window.preserveScrollRender(); }" title="Sil"></i>
+                            </div>
+                        </td>`;
+                    }
+                });
+                araHtml += `</tr>`;
+                araHtml += `</tbody></table></div></div>`;
+                contentHtml += araHtml;
             } else if (activeTab === 'Akış') {
                 let analizler = State.data.analizler || [];
                 analizler = analizler.filter(a => (a.hisse || '').toUpperCase() === selectedHisse.toUpperCase());
@@ -3745,14 +4096,11 @@ if (window.shouldRenderDashboardCharts) {
                             datasets: [
                                 { label: 'Çeyreklik', data: dData.brutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 },
                                 { label: 'Dönemsel', data: dData.dBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 },
-                                { label: 'Yıllıklandırılmış', data: dData.yBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }
+                                { label: 'Yıllıklandırılmış', data: dData.yBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 },
+                                pdDataset
                             ]
                         },
-                        options: {
-                            responsive: true, maintainAspectRatio: false,
-                            plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } },
-                            scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } }
-                        }
+                        options: dualOpts
                     });
                 }
                 // --- Faaliyet Karı ---
@@ -3763,7 +4111,7 @@ if (window.shouldRenderDashboardCharts) {
                 const ctxFaaliyetYillik = document.getElementById('chart-yillik-faaliyet');
                 if (ctxFaaliyetYillik) { let ex = Chart.getChart(ctxFaaliyetYillik); if (ex) ex.destroy(); new Chart(ctxFaaliyetYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
                 const ctxFaaliyetCombined = document.getElementById('chart-combined-faaliyet');
-                if (ctxFaaliyetCombined) { let ex = Chart.getChart(ctxFaaliyetCombined); if (ex) ex.destroy(); new Chart(ctxFaaliyetCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.faaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+                if (ctxFaaliyetCombined) { let ex = Chart.getChart(ctxFaaliyetCombined); if (ex) ex.destroy(); new Chart(ctxFaaliyetCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.faaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, pdDataset] }, options: dualOpts }); }
 
                 // --- FAVÖK ---
                 const ctxFavokCeyreklik2 = document.getElementById('chart-ceyreklik-favok2');
@@ -3773,7 +4121,7 @@ if (window.shouldRenderDashboardCharts) {
                 const ctxFavokYillik = document.getElementById('chart-yillik-favok');
                 if (ctxFavokYillik) { let ex = Chart.getChart(ctxFavokYillik); if (ex) ex.destroy(); new Chart(ctxFavokYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
                 const ctxFavokCombined = document.getElementById('chart-combined-favok');
-                if (ctxFavokCombined) { let ex = Chart.getChart(ctxFavokCombined); if (ex) ex.destroy(); new Chart(ctxFavokCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.favok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+                if (ctxFavokCombined) { let ex = Chart.getChart(ctxFavokCombined); if (ex) ex.destroy(); new Chart(ctxFavokCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.favok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, pdDataset] }, options: dualOpts }); }
 
                 // --- Net Kar ---
                 const ctxNetKarCeyreklik2 = document.getElementById('chart-ceyreklik-netkar2');
@@ -3783,7 +4131,7 @@ if (window.shouldRenderDashboardCharts) {
                 const ctxNetKarYillik = document.getElementById('chart-yillik-netkar');
                 if (ctxNetKarYillik) { let ex = Chart.getChart(ctxNetKarYillik); if (ex) ex.destroy(); new Chart(ctxNetKarYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
                 const ctxNetKarCombined = document.getElementById('chart-combined-netkar');
-                if (ctxNetKarCombined) { let ex = Chart.getChart(ctxNetKarCombined); if (ex) ex.destroy(); new Chart(ctxNetKarCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.netkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+                if (ctxNetKarCombined) { let ex = Chart.getChart(ctxNetKarCombined); if (ex) ex.destroy(); new Chart(ctxNetKarCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.netkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, pdDataset] }, options: dualOpts }); }
 
                 
     // Clear the temporary data
@@ -5616,6 +5964,7 @@ const renderPage = () => {
         case 'hisse_islemleri': renderHisseIslemleri(container); break;
         case 'nakit_islemleri': renderNakitIslemleri(container); break;
         case 'veriler': renderVeriler(container); break;
+        case 'notlar': renderNotlar(container); break;
         case 'analizler': renderAnalizler(container); break;
         case 'hisse_detay': renderHisseler(container); break;
         case 'ayarlar': renderAyarlar(container); break;
@@ -5623,8 +5972,228 @@ const renderPage = () => {
     }
 };
 
+// --- NOTLAR SAYFASI ---
+window.renderNotlar = (container) => {
+    container.innerHTML = `
+        <div class="header-section" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0px;">
+            <h2 style="margin: 0; font-size: 1.8rem; font-weight: 700; background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Notlarım</h2>
+            <button class="btn" style="background: var(--accent-color); color: #fff;" onclick="window.openNoteModal()"><i class="fas fa-plus"></i> Yeni Not Ekle</button>
+        </div>
+        <div id="notes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; align-items: start;">
+        </div>
+    `;
+
+    const grid = document.getElementById('notes-grid');
+    const notes = State.data.notlar || [];
+    
+    if (notes.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 4rem 1rem; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1);">
+            <i class="fas fa-sticky-note" style="font-size: 3rem; opacity: 0.5; margin-bottom: 1rem;"></i><br>
+            Henüz hiç not eklemediniz.<br>
+            <span style="font-size: 0.9rem; opacity: 0.7;">Fikirlerinizi, al-sat stratejilerinizi veya hatırlatıcılarınızı buraya kaydedebilirsiniz.</span>
+        </div>`;
+    } else {
+        notes.sort((a,b) => b.timestamp - a.timestamp).forEach(note => {
+            const card = document.createElement('div');
+            card.className = 'dash-card';
+            card.style.cssText = `position: relative; display: flex; flex-direction: column; background: var(--surface-color); padding: 1.5rem; border-radius: 12px; border-left: 4px solid ${note.color || 'var(--accent-color)'}; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s;`;
+            card.onmouseover = () => { card.style.transform = 'translateY(-3px)'; card.style.boxShadow = '0 8px 25px rgba(0,0,0,0.4)'; };
+            card.onmouseout = () => { card.style.transform = 'none'; card.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)'; };
+            
+            const dateStr = new Date(note.timestamp).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            
+            const urlRegex = /(https?:\/\/[^\s<]+)/g;
+            const formattedContent = (note.content || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>').replace(urlRegex, '<a href="$1" target="_blank" style="color: #3498db; text-decoration: underline;">$1</a>');
+            const formattedTitle = (note.title || 'Başlıksız').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; font-size: calc(1.2rem - 3px); font-weight: 600; color: #fff; word-break: break-word;">${formattedTitle}</h3>
+                    <div style="position: relative; margin-top: -0.2rem; margin-right: -0.5rem;">
+                        <button class="btn" style="background: transparent; color: var(--text-secondary); padding: 0.2rem 0.5rem; font-size: calc(1rem - 3px);" onclick="window.toggleNoteMenu('${note.id}', event)" title="Seçenekler"><i class="fas fa-ellipsis-v"></i></button>
+                        <div id="note-menu-${note.id}" style="display: none; position: absolute; left: 0; top: 100%; background: #2c2c2e; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.7); z-index: 10; min-width: 130px; overflow: hidden;">
+                            <div style="padding: 0.8rem 1rem; cursor: pointer; color: #fff; font-size: calc(0.95rem - 3px); border-bottom: 1px solid rgba(255,255,255,0.05);" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'" onclick="window.editNote('${note.id}')">Notu düzenle</div>
+                            <div style="padding: 0.8rem 1rem; cursor: pointer; color: var(--danger-color); font-size: calc(0.95rem - 3px);" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'" onclick="window.deleteNote('${note.id}')">Notu sil</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="flex: 1; color: var(--text-secondary); font-size: calc(0.95rem - 3px); line-height: 1.6; word-break: break-word; margin-bottom: 6px;">${formattedContent}</div>
+                <div style="font-size: 0.75rem; color: #777; text-align: right; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-bottom: -0.5rem;"><i class="far fa-clock"></i> ${dateStr}</div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    if(!document.getElementById('note-modal')) {
+        const modal = document.createElement('div');
+        modal.id = 'note-modal';
+        modal.className = 'app-container';
+        modal.style.cssText = 'display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; opacity: 0; transition: opacity 0.3s;';
+        modal.innerHTML = `
+            <div class="glass" style="width: 90%; max-width: 500px; padding: 2rem; border-radius: 12px; position: relative; transform: scale(0.95); transition: transform 0.3s;">
+                <h3 id="note-modal-title" style="margin-top: 0; margin-bottom: 1.5rem; color: #fff; font-size: 1.3rem;">Yeni Not Ekle</h3>
+                <input type="hidden" id="note-id-input" value="">
+                <input type="text" id="note-title-input" placeholder="Not Başlığı (İsteğe bağlı)" style="width: 100%; padding: 1rem; margin-bottom: 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; outline: none; font-size: 1rem;">
+                <textarea id="note-content-input" placeholder="Notunuzu buraya yazın..." style="width: 100%; padding: 1rem; margin-bottom: 1rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; outline: none; font-family: inherit; font-size: 0.95rem; height: 180px; resize: vertical; line-height: 1.5;"></textarea>
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: center;">
+                    <label style="color: #ccc; font-size: 0.9rem;">Etiket Rengi:</label>
+                    <div style="display: flex; gap: 0.5rem;" id="note-color-picker">
+                        <div class="color-swatch active" data-color="#3498db" style="width:24px; height:24px; border-radius:50%; background:#3498db; cursor:pointer; border: 2px solid #fff;"></div>
+                        <div class="color-swatch" data-color="#2ecc71" style="width:24px; height:24px; border-radius:50%; background:#2ecc71; cursor:pointer; border: 2px solid transparent;"></div>
+                        <div class="color-swatch" data-color="#e74c3c" style="width:24px; height:24px; border-radius:50%; background:#e74c3c; cursor:pointer; border: 2px solid transparent;"></div>
+                        <div class="color-swatch" data-color="#f1c40f" style="width:24px; height:24px; border-radius:50%; background:#f1c40f; cursor:pointer; border: 2px solid transparent;"></div>
+                        <div class="color-swatch" data-color="#9b59b6" style="width:24px; height:24px; border-radius:50%; background:#9b59b6; cursor:pointer; border: 2px solid transparent;"></div>
+                    </div>
+                    <input type="hidden" id="note-color-input" value="#3498db">
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn" style="flex: 1; background: var(--success-color); padding: 0.8rem;" onclick="window.saveNote()"><i class="fas fa-check"></i> Kaydet</button>
+                    <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1); padding: 0.8rem;" onclick="window.closeNoteModal()">İptal</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        document.querySelectorAll('#note-color-picker .color-swatch').forEach(sw => {
+            sw.addEventListener('click', (e) => {
+                document.querySelectorAll('#note-color-picker .color-swatch').forEach(s => s.style.border = '2px solid transparent');
+                e.target.style.border = '2px solid #fff';
+                document.getElementById('note-color-input').value = e.target.getAttribute('data-color');
+            });
+        });
+    }
+};
+
+window.openNoteModal = () => {
+    document.getElementById('note-modal-title').innerText = 'Yeni Not Ekle';
+    document.getElementById('note-id-input').value = '';
+    document.getElementById('note-title-input').value = '';
+    document.getElementById('note-content-input').value = '';
+    
+    const swatches = document.querySelectorAll('#note-color-picker .color-swatch');
+    if (swatches.length > 0) {
+        swatches.forEach(s => s.style.border = '2px solid transparent');
+        swatches[0].style.border = '2px solid #fff';
+        document.getElementById('note-color-input').value = swatches[0].getAttribute('data-color');
+    }
+    
+    const modal = document.getElementById('note-modal');
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        modal.style.opacity = '1';
+        modal.querySelector('.glass').style.transform = 'scale(1)';
+        document.getElementById('note-content-input').focus();
+    }, 10);
+};
+
+window.editNote = (id) => {
+    const note = (State.data.notlar || []).find(n => n.id === id);
+    if (!note) return;
+    
+    document.getElementById('note-modal-title').innerText = 'Notu Düzenle';
+    document.getElementById('note-id-input').value = note.id;
+    document.getElementById('note-title-input').value = note.title || '';
+    document.getElementById('note-content-input').value = note.content || '';
+    
+    const targetColor = note.color || '#3498db';
+    document.getElementById('note-color-input').value = targetColor;
+    
+    const swatches = document.querySelectorAll('#note-color-picker .color-swatch');
+    swatches.forEach(s => s.style.border = '2px solid transparent');
+    const activeSwatch = Array.from(swatches).find(s => s.getAttribute('data-color') === targetColor) || swatches[0];
+    if (activeSwatch) activeSwatch.style.border = '2px solid #fff';
+    
+    const modal = document.getElementById('note-modal');
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        modal.style.opacity = '1';
+        modal.querySelector('.glass').style.transform = 'scale(1)';
+        document.getElementById('note-content-input').focus();
+    }, 10);
+};
+
+window.closeNoteModal = () => {
+    const modal = document.getElementById('note-modal');
+    modal.style.opacity = '0';
+    modal.querySelector('.glass').style.transform = 'scale(0.95)';
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300);
+};
+
+window.saveNote = () => {
+    const id = document.getElementById('note-id-input').value;
+    const title = document.getElementById('note-title-input').value.trim();
+    const content = document.getElementById('note-content-input').value.trim();
+    const color = document.getElementById('note-color-input').value;
+
+    if (!content) { 
+        const contentInput = document.getElementById('note-content-input');
+        contentInput.style.borderColor = 'var(--danger-color)';
+        setTimeout(() => contentInput.style.borderColor = 'rgba(255,255,255,0.1)', 2000);
+        return; 
+    }
+
+    if (!State.data.notlar) State.data.notlar = [];
+    
+    if (id) {
+        const existing = State.data.notlar.find(n => n.id === id);
+        if (existing) {
+            existing.title = title;
+            existing.content = content;
+            existing.color = color;
+            existing.timestamp = Date.now();
+        }
+    } else {
+        State.data.notlar.push({
+            id: 'note_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+            title: title,
+            content: content,
+            color: color,
+            timestamp: Date.now()
+        });
+    }
+    
+    State.save();
+    window.closeNoteModal();
+    if(currentPage === 'notlar') {
+        setTimeout(() => renderPage(), 300);
+    }
+};
+
+window.deleteNote = (id) => {
+    if(!confirm('Bu notu silmek istediğinize emin misiniz?')) return;
+    if(State.data.notlar) {
+        State.data.notlar = State.data.notlar.filter(n => n.id !== id);
+        State.save();
+        if(currentPage === 'notlar') renderPage();
+    }
+};
+
+window.toggleNoteMenu = (id, event) => {
+    event.stopPropagation();
+    const menu = document.getElementById('note-menu-' + id);
+    if (!menu) return;
+    const isVisible = menu.style.display === 'block';
+    
+    document.querySelectorAll('[id^="note-menu-"]').forEach(m => m.style.display = 'none');
+    
+    if (!isVisible) {
+        menu.style.display = 'block';
+    }
+};
+
+if(!window.noteMenuListenerAdded) {
+    document.addEventListener('click', (e) => {
+        if(!e.target.closest('[id^="note-menu-"]') && !e.target.closest('button[onclick^="window.toggleNoteMenu"]')) {
+            document.querySelectorAll('[id^="note-menu-"]').forEach(m => m.style.display = 'none');
+        }
+    });
+    window.noteMenuListenerAdded = true;
+}
 
 // --- TICKER DATA ---
+
 window.fetchTickerData = async () => {
     try {
         let tData = {};
@@ -5794,15 +6363,26 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
-    const name = document.getElementById('auth-name').value;
-    const phone = document.getElementById('auth-phone').value;
+    
+    const errorDiv = document.getElementById('auth-error');
+    if(errorDiv) { errorDiv.style.display = 'none'; errorDiv.innerText = ''; }
+    const btn = document.getElementById('auth-submit-btn');
+    const originalBtnText = btn.innerText;
+    btn.innerText = 'Bekleyiniz...';
+    btn.disabled = true;
 
     if (isLoginMode) {
-        auth.signInWithEmailAndPassword(email, password).catch(err => alert(err.message));
+        auth.signInWithEmailAndPassword(email, password).catch(err => {
+            if(errorDiv) { errorDiv.style.display = 'block'; errorDiv.innerText = "Hata: " + err.message; }
+            else alert(err.message);
+            btn.innerText = originalBtnText;
+            btn.disabled = false;
+        });
     } else {
-        alert("Yeni üye alımı güvenlik nedeniyle kapatılmıştır.");
-                btn.innerText = originalBtnText;
-                btn.disabled = false;
+        if(errorDiv) { errorDiv.style.display = 'block'; errorDiv.innerText = "Yeni üye alımı güvenlik nedeniyle kapatılmıştır."; }
+        else alert("Yeni üye alımı güvenlik nedeniyle kapatılmıştır.");
+        btn.innerText = originalBtnText;
+        btn.disabled = false;
     }
 });
 
