@@ -972,9 +972,16 @@ window.fetchGuncelFiyatlar = async () => {
                         if (!yfResponse.ok) continue;
                         const yfData = await yfResponse.json();
                         if (yfData && yfData.chart && yfData.chart.result && yfData.chart.result.length > 0) {
-                            const fiyat = yfData.chart.result[0].meta.regularMarketPrice;
+                            const meta = yfData.chart.result[0].meta;
+                            const fiyat = meta.regularMarketPrice;
                             if (fiyat) {
                                 State.updateFiyat(menkul, fiyat, true);
+                                window.tickerData = window.tickerData || {};
+                                let degisim = 0;
+                                if (meta.previousClose && meta.previousClose > 0) {
+                                    degisim = ((fiyat - meta.previousClose) / meta.previousClose) * 100;
+                                }
+                                window.tickerData[menkul] = { c: fiyat, chp: degisim };
                                 break;
                             }
                         }
@@ -1890,10 +1897,10 @@ const renderHisseler = (container) => {
             'Bilanço': 'fas fa-balance-scale'
         };
 
-        const makeBtn = (t) => `<button class="nav-btn ${activeTab === t ? 'active' : ''}" style="margin:0; font-size:14px; font-weight:bold; padding:0.4rem 0.8rem; white-space:nowrap;" onclick="window.setHisseTab('${t}')"><i class="${tabIcons[t] || 'fas fa-file'}" style="margin-right:4px;"></i>${t}</button>`;
+        const makeBtn = (t) => `<button class="nav-btn ${activeTab === t ? 'active' : ''}" style="margin:0; font-size:13px; font-weight:bold; padding:0.4rem 0.8rem; white-space:nowrap;" onclick="window.setHisseTab('${t}')"><i class="${tabIcons[t] || 'fas fa-file'}" style="margin-right:4px;"></i>${t}</button>`;
         const makeDropdown = (title, items) => `
             <div class="nav-dropdown">
-                <button class="nav-btn ${items.includes(activeTab) ? 'active' : ''}" style="margin:0; font-size:14px; font-weight:bold; padding:0.4rem 0.8rem; white-space:nowrap;"><i class="fas fa-caret-down" style="margin-right:4px;"></i>${title}</button>
+                <button class="nav-btn ${items.includes(activeTab) ? 'active' : ''}" style="margin:0; font-size:13px; font-weight:bold; padding:0.4rem 0.8rem; white-space:nowrap;"><i class="fas fa-caret-down" style="margin-right:4px;"></i>${title}</button>
                 <div class="nav-dropdown-content">
                     ${items.map(t => `<a onclick="window.setHisseTab('${t}')">${t}</a>`).join('')}
                 </div>
@@ -3585,11 +3592,11 @@ const renderHisseler = (container) => {
             stockHeaderHtml = `
             <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 0; flex-shrink: 0;">
                 <div>
-                    <h1 style="margin: 0; font-size: 1.5rem; font-weight: 800; letter-spacing: 1px; color: var(--text-primary);">${selectedHisse}</h1>
+                    <h1 style="margin: 0; font-size: 16px; font-weight: 800; letter-spacing: 1px; color: var(--text-primary);">${selectedHisse}</h1>
                 </div>
                 <div style="display: flex; align-items: baseline; gap: 0.8rem;">
-                    <div style="font-size: 1.2rem; font-weight: bold; color: var(--text-primary);">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)} ₺</div>
-                    <div id="hisse-header-change" style="font-size: 0.9rem; font-weight: 600; color: ${hColor}; display: block;">
+                    <div style="font-size: 16px; font-weight: bold; color: var(--text-primary);">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)} ₺</div>
+                    <div id="hisse-header-change" style="font-size: 13px; font-weight: 600; color: ${hColor}; display: block;">
                         <i class="fas fa-caret-${isPos ? 'up' : 'down'}"></i> %${initChangeStr}
                     </div>
                 </div>
@@ -3598,12 +3605,14 @@ const renderHisseler = (container) => {
         }
 
         container.innerHTML = `
-            ${stockHeaderHtml}
-            <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--table-border); border-radius: 12px; flex-wrap: wrap; align-items: center; background: var(--overlay-bg);">
-                ${tabsHtml}
-            </div>
-            <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem 0 1rem 0; flex: 1; overflow-y: auto;">
-                ${contentHtml}
+            <div style="display: flex; flex-direction: column; gap: 1rem; height: 100%;">
+                ${stockHeaderHtml}
+                <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--table-border); border-radius: 12px; flex-wrap: wrap; align-items: center; background: var(--overlay-bg); flex-shrink: 0;">
+                    ${tabsHtml}
+                </div>
+                <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0; flex: 1; overflow-y: auto;">
+                    ${contentHtml}
+                </div>
             </div>
         `;
 
@@ -5357,8 +5366,8 @@ window.removeHisseFromTakip = (hisseKodu) => {
             modal.style.display = 'block';
             if (event && event.target) {
                 const rect = (btn ? btn.getBoundingClientRect() : event.target.getBoundingClientRect());
-                glass.style.top = (rect.bottom + 10) + 'px';
-                glass.style.left = (rect.right - 250) + 'px';
+                glass.style.top = (rect.bottom) + 'px';
+                glass.style.left = (rect.right - 195) + 'px';
                 glass.style.bottom = '20px';
             }
             if (btn) {
@@ -5441,6 +5450,12 @@ const getTakipSortIcon = (col) => {
 };
 
 const renderAnasayfa = (container) => {
+    window.takipTab = window.takipTab || 'degerleme';
+    window.setTakipTab = window.setTakipTab || ((tab) => {
+        window.takipTab = tab;
+        if (typeof renderPage === 'function') renderPage();
+    });
+
     if (window.recalculateHedefFiyatlar) window.recalculateHedefFiyatlar();
     let takipList = State.data.takipListesi ? [...State.data.takipListesi] : [];
     
@@ -5452,16 +5467,28 @@ const renderAnasayfa = (container) => {
         if (val >= 1000000) return (val / 1000000).toFixed(2) + ' M';
         return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(val));
     };
+    const fmtFullNum = (val) => {
+        if (val === 0 || isNaN(val) || !val) return '-';
+        return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(val));
+    };
+    const fmtCurrency = (val, symbol) => {
+        if (val === 0 || isNaN(val) || !val) return '-';
+        return symbol + ' ' + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(val));
+    };
     const fmtMet = (val) => {
         if (val === 0 || isNaN(val) || !val || !isFinite(val)) return '-';
         return fmtDec(val);
     };
 
+    const dolarKuru = State.getFiyat('DOLAR') || 1;
+
     let takipDataList = takipList.map(hisse => {
         let fiyat = 0;
+        let gunlukYuzde = null;
         const td = window.tickerData && window.tickerData[hisse];
         if (td) {
             fiyat = td.c || 0;
+            gunlukYuzde = td.chp;
         } else {
             fiyat = State.getFiyat(hisse);
         }
@@ -5470,7 +5497,8 @@ const renderAnasayfa = (container) => {
             try { window.parseExcelData(hisse); } catch(e) {}
         }
         
-        let piyasaDegeri = 0, fdFavok = 0, fk = 0, pdDd = 0;
+        let piyasaDegeri = 0, fdFavok = 0, fk = 0, pdDd = 0, firmaDegeri = 0;
+        let araHedefFiyat = -Infinity, araPotansiyel = -Infinity;
         const sData = (window.stockData && window.stockData[hisse]) ? window.stockData[hisse] : null;
         
         if (sData) {
@@ -5512,7 +5540,7 @@ const renderAnasayfa = (container) => {
                 });
             }
             const netBorc = finansalBorclarTotal - nakitTotal;
-            const firmaDegeri = piyasaDegeri + netBorc;
+            firmaDegeri = piyasaDegeri + netBorc;
 
             let favok = 0;
             if (sData.gelirYillik && sData.gelirYillik.rows) {
@@ -5543,6 +5571,62 @@ const renderAnasayfa = (container) => {
             }
             if (anaOrtaklikOzkaynaklar === 0) anaOrtaklikOzkaynaklar = getVal(sData.bilanco, 'Özkaynaklar');
             pdDd = anaOrtaklikOzkaynaklar !== 0 ? (piyasaDegeri / anaOrtaklikOzkaynaklar) : 0;
+            
+            if (State.data.araDegerleme && State.data.araDegerleme[hisse]) {
+                const bilancoHeaders = (sData.bilanco && sData.bilanco.headers) ? sData.bilanco.headers : [];
+                let nextPeriod = "Gelecek";
+                if (bilancoHeaders.length > 1) {
+                    const latest = bilancoHeaders[1];
+                    if (latest && latest.includes('/')) {
+                        let parts = latest.split('/');
+                        let y = parseInt(parts[0]);
+                        let m = parseInt(parts[1]);
+                        m += 3;
+                        if (m > 12) { m = m % 12 || 12; y += 1; }
+                        nextPeriod = y + '/' + m;
+                    }
+                }
+                const d = State.data.araDegerleme[hisse][nextPeriod] || {};
+                const curCurrency = d.currency || 'TRY';
+                const ciro = parseFloat(d.ciro) || 0;
+                const favokMarji = parseFloat(d.favok_marji) || 0;
+                const netKarMarji = parseFloat(d.net_kar_marji) || 0;
+                
+                let favok_calc = 0, net_kar_calc = 0;
+                let hasFavok = false, hasNetKar = false;
+                if (d.ciro !== undefined && d.ciro !== '' && d.favok_marji !== undefined && d.favok_marji !== '') {
+                    favok_calc = ciro * (favokMarji / 100);
+                    hasFavok = true;
+                }
+                if (d.ciro !== undefined && d.ciro !== '' && d.net_kar_marji !== undefined && d.net_kar_marji !== '') {
+                    net_kar_calc = ciro * (netKarMarji / 100);
+                    hasNetKar = true;
+                }
+                
+                let validPDs = [];
+                let currentNetBorc = netBorc || 0;
+                if (curCurrency === 'USD') currentNetBorc = currentNetBorc / dolarKuru;
+                else if (curCurrency === 'EUR') currentNetBorc = currentNetBorc / (State.getFiyat('EURO') || 1);
+                
+                if (hasFavok && d.fd_favok !== undefined && d.fd_favok !== '') validPDs.push((favok_calc * (parseFloat(d.fd_favok) || 0)) - currentNetBorc);
+                if (hasNetKar && d.f_k !== undefined && d.f_k !== '') validPDs.push(net_kar_calc * (parseFloat(d.f_k) || 0));
+                if (d.ozkaynaklar !== undefined && d.ozkaynaklar !== '' && d.pd_dd !== undefined && d.pd_dd !== '') validPDs.push((parseFloat(d.ozkaynaklar) || 0) * (parseFloat(d.pd_dd) || 0));
+                
+                let avgPD = 0;
+                if (validPDs.length > 0) avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
+                
+                let currentOdenmisSermaye = odenmisSermaye || 0;
+                if (d.sermaye !== undefined && d.sermaye !== '') currentOdenmisSermaye = parseFloat(d.sermaye) || currentOdenmisSermaye;
+                
+                if (validPDs.length > 0 && currentOdenmisSermaye > 0) {
+                    let hfForeign = avgPD / currentOdenmisSermaye;
+                    if (curCurrency === 'USD') araHedefFiyat = hfForeign * dolarKuru;
+                    else if (curCurrency === 'EUR') araHedefFiyat = hfForeign * (State.getFiyat('EURO') || 1);
+                    else araHedefFiyat = hfForeign;
+                    
+                    if (fiyat > 0) araPotansiyel = (araHedefFiyat - fiyat) / fiyat;
+                }
+            }
         }
 
         const getPot = (year) => {
@@ -5553,7 +5637,8 @@ const renderAnasayfa = (container) => {
         };
 
         return {
-            hisse, fiyat, piyasaDegeri, fdFavok, fk, pdDd,
+            hisse, fiyat, gunlukYuzde, piyasaDegeri, piyasaDegeriUsd: piyasaDegeri / dolarKuru, firmaDegeri, fdFavok, fk, pdDd,
+            araHedefFiyat, araPotansiyel,
             pot2026: getPot('2026'), pot2027: getPot('2027'),
             pot2028: getPot('2028'), pot2029: getPot('2029'), pot2030: getPot('2030')
         };
@@ -5562,6 +5647,7 @@ const renderAnasayfa = (container) => {
     window.takipSort = window.takipSort || { col: null, asc: true };
     takipDataList.sort((a, b) => {
         if (!window.takipSort.col) {
+            if (b.araPotansiyel !== a.araPotansiyel && b.araPotansiyel !== -Infinity && a.araPotansiyel !== -Infinity) return b.araPotansiyel - a.araPotansiyel;
             if (b.pot2026 !== a.pot2026) return b.pot2026 - a.pot2026;
             if (b.pot2027 !== a.pot2027) return b.pot2027 - a.pot2027;
             if (b.pot2028 !== a.pot2028) return b.pot2028 - a.pot2028;
@@ -5583,8 +5669,16 @@ const renderAnasayfa = (container) => {
 
     let rowsHtml = '';
     takipDataList.forEach((item, i) => {
-        const { hisse, fiyat, piyasaDegeri, fdFavok, fk, pdDd, pot2026, pot2027, pot2028, pot2029, pot2030 } = item;
+        const { hisse, fiyat, gunlukYuzde, piyasaDegeri, piyasaDegeriUsd, firmaDegeri, fdFavok, fk, pdDd, araHedefFiyat, araPotansiyel, pot2026, pot2027, pot2028, pot2029, pot2030 } = item;
         
+        const formatGunluk = (val) => {
+            if (val === null || val === undefined || isNaN(val)) return `<td style="text-align: right !important;">-</td>`;
+            const color = val > 0 ? '#2ecc71' : (val < 0 ? '#e74c3c' : 'var(--text-primary)');
+            const formatted = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(val));
+            const prefix = val > 0 ? '%+' : (val < 0 ? '%-' : '%');
+            return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${prefix}${formatted}</td>`;
+        };
+
         const hData = State.data.hedefFiyatlar && State.data.hedefFiyatlar[hisse] ? State.data.hedefFiyatlar[hisse] : null;
         const renderCell = (year) => {
             if (!hData || !hData[year]) return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
@@ -5592,26 +5686,46 @@ const renderAnasayfa = (container) => {
             return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtDec(hData[year].hedefFiyat)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
         };
         
-        rowsHtml += `
-            <tr>
-                <td style="text-align: center !important;">${i + 1}</td>
-                <td class="takip-hisse-link" style="text-align: left !important;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
-                <td style="text-align: right !important;">${fmtDec(fiyat)}</td>
-                <td style="text-align: right !important;">${fmtNum(piyasaDegeri)}</td>
+        const renderAraCell = (hf, pot) => {
+            if (hf === -Infinity || pot === -Infinity) return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
+            const color = pot > 0 ? '#2ecc71' : '#e74c3c';
+            return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtDec(hf)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(pot)}</td>`;
+        };
+        
+        const oranlarHtml = `
+                <td style="text-align: right !important;">${fmtCurrency(piyasaDegeri, '₺')}</td>
+                <td style="text-align: right !important;">${fmtCurrency(piyasaDegeriUsd, '$')}</td>
+                <td style="text-align: right !important;">${fmtCurrency(firmaDegeri, '₺')}</td>
                 <td style="text-align: right !important;">${fmtMet(fdFavok)}</td>
                 <td style="text-align: right !important;">${fmtMet(fk)}</td>
                 <td style="text-align: right !important;">${fmtMet(pdDd)}</td>
+        `;
+        
+        const degerlemeHtml = `
+                ${renderAraCell(araHedefFiyat, araPotansiyel)}
                 ${renderCell('2026')}
                 ${renderCell('2027')}
                 ${renderCell('2028')}
                 ${renderCell('2029')}
                 ${renderCell('2030')}
+        `;
+        
+        const restHtml = window.takipTab === 'degerleme' ? degerlemeHtml : oranlarHtml;
+
+        rowsHtml += `
+            <tr>
+                <td style="text-align: center !important;">${i + 1}</td>
+                <td class="takip-hisse-link" style="text-align: left !important;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
+                <td style="text-align: right !important;">${fmtDec(fiyat)}</td>
+                ${formatGunluk(gunlukYuzde)}
+                ${restHtml}
             </tr>
         `;
     });
 
     if (takipList.length === 0) {
-        rowsHtml = `<tr><td colspan="17" style="text-align: center; padding: 2rem;">Takip listeniz boş. Kalem simgesine tıklayarak hisse ekleyebilirsiniz.</td></tr>`;
+        const colspan = window.takipTab === 'degerleme' ? 14 : 10;
+        rowsHtml = `<tr><td colspan="${colspan}" style="text-align: center; padding: 2rem;">Takip listeniz boş. Kalem simgesine tıklayarak hisse ekleyebilirsiniz.</td></tr>`;
     }
 
     container.innerHTML = `
@@ -5624,32 +5738,49 @@ const renderAnasayfa = (container) => {
         <div class="page-section active" style="display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 0px;">
 
             <!-- Takip Listesi Tablosu -->
-            <div class="glass" style="flex: 1; overflow-y: auto; padding: 0.5rem 1rem 1rem 1rem;">
-                <div class="table-header" style="position: relative; font-size:14px; display:flex; align-items:center; font-weight: 700; color: #ffffff !important; justify-content: center; width: 100%;">
+            <div class="glass" style="display: flex; flex-direction: column; flex: 1; overflow: hidden; padding: 0.5rem 1rem 1rem 1rem;">
+                <div class="table-header" style="position: relative; font-size:15px !important; display:flex; align-items:center; font-weight: 700; color: #ffffff !important; justify-content: center; width: 100%; margin-bottom: 0px !important;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">Takip Listesi</div>
-                    <span id="takip-edit-btn" class="fas fa-pen" style="position: absolute; right: 0; color: var(--text-secondary); cursor: pointer; font-size: 13px; padding: 4px;" onclick="window.toggleTakipEditModal(event)"></span>
                 </div>
-                <div style="overflow-x: auto;">
-                    <table class="dash-table compact-table takip-table" style="text-align: center;">
-                        <thead>
+                
+                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 0.5rem 0;" />
+
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: 0.5rem;">
+                        <span style="cursor: pointer; font-size: 13px !important; font-weight: normal; padding: 4px 8px; border-radius: 4px; background: ${window.takipTab === 'degerleme' ? 'rgba(255,255,255,0.2)' : 'transparent'}" onclick="window.setTakipTab('degerleme')">Değerleme</span>
+                        <span style="cursor: pointer; font-size: 13px !important; font-weight: normal; padding: 4px 8px; border-radius: 4px; background: ${window.takipTab === 'oranlar' ? 'rgba(255,255,255,0.2)' : 'transparent'}" onclick="window.setTakipTab('oranlar')">Oranlar</span>
+                    </div>
+                    <span id="takip-edit-btn" class="fas fa-pen" style="color: var(--text-secondary); cursor: pointer; font-size: 13px; padding: 4px;" onclick="window.toggleTakipEditModal(event)"></span>
+                </div>
+                <div style="flex: 1; overflow: auto; min-height: 0; border-radius: 8px;">
+                    <table class="dash-table compact-table takip-table" style="text-align: center; border-collapse: separate; border-spacing: 0;">
+                        <thead style="position: sticky; top: 0; z-index: 10; background: var(--bg-card, #1e293b);">
                             <tr>
                                 <th style="text-align: center;">S.N</th>
                                 <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('hisse')">Hisse${getTakipSortIcon('hisse')}</th>
                                 <th style="text-align: center;">Fiyat</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('gunlukYuzde')">Gün %${getTakipSortIcon('gunlukYuzde')}</th>
+                                ${window.takipTab === 'degerleme' ? `
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('araHedefFiyat')" title="Gelecek Bilanço Hedef Fiyat">G. B. H. F.${getTakipSortIcon('araHedefFiyat')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('araPotansiyel')" title="Gelecek Bilanço Potansiyel">G. B. Pot.${getTakipSortIcon('araPotansiyel')}</th>
+                                <th style="text-align: center;" title="2026 Hedef Fiyat">2026 H. F.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2026')" title="2026 Potansiyel">2026 Pot.${getTakipSortIcon('pot2026')}</th>
+                                <th style="text-align: center;" title="2027 Hedef Fiyat">2027 H. F.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2027')" title="2027 Potansiyel">2027 Pot.${getTakipSortIcon('pot2027')}</th>
+                                <th style="text-align: center;" title="2028 Hedef Fiyat">2028 H. F.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2028')" title="2028 Potansiyel">2028 Pot.${getTakipSortIcon('pot2028')}</th>
+                                <th style="text-align: center;" title="2029 Hedef Fiyat">2029 H. F.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2029')" title="2029 Potansiyel">2029 Pot.${getTakipSortIcon('pot2029')}</th>
+                                <th style="text-align: center;" title="2030 Hedef Fiyat">2030 H. F.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2030')" title="2030 Potansiyel">2030 Pot.${getTakipSortIcon('pot2030')}</th>
+                                ` : `
                                 <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('piyasaDegeri')">Piyasa Değeri${getTakipSortIcon('piyasaDegeri')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('piyasaDegeriUsd')">Piyasa Değeri $${getTakipSortIcon('piyasaDegeriUsd')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('firmaDegeri')">Firma Değeri${getTakipSortIcon('firmaDegeri')}</th>
                                 <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('fdFavok')">FD/FAVÖK${getTakipSortIcon('fdFavok')}</th>
                                 <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('fk')">F/K${getTakipSortIcon('fk')}</th>
                                 <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pdDd')">PD/DD${getTakipSortIcon('pdDd')}</th>
-                                <th style="text-align: center;">2026 H.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2026')">2026 P.${getTakipSortIcon('pot2026')}</th>
-                                <th style="text-align: center;">2027 H.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2027')">2027 P.${getTakipSortIcon('pot2027')}</th>
-                                <th style="text-align: center;">2028 H.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2028')">2028 P.${getTakipSortIcon('pot2028')}</th>
-                                <th style="text-align: center;">2029 H.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2029')">2029 P.${getTakipSortIcon('pot2029')}</th>
-                                <th style="text-align: center;">2030 H.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2030')">2030 P.${getTakipSortIcon('pot2030')}</th>
+                                `}
                             </tr>
                         </thead>
                         <tbody>
