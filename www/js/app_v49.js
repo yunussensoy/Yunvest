@@ -648,8 +648,10 @@ const State = {
             if (callback && isInitialLoad) {
                 callback();
             } else if (!isInitialLoad && typeof renderPage === 'function') {
-                // Sadece veriler güncellendiğinde sayfayı yeniden çiz, tüm uygulamayı (ticker vs.) baştan başlatma!
-                renderPage();
+                // Kendi yaptığımız değişikliklerden sonra Firebase'in döndürdüğü yankıları (echo) 1.5 saniye boyunca yoksay
+                if (Date.now() - (this.lastSaveTime || 0) > 1500) {
+                    renderPage();
+                }
             }
             if (isInitialLoad) {
                 isInitialLoad = false;
@@ -688,7 +690,8 @@ const State = {
             // HACK: Eski web versiyonunun (cache'te kalmış eski kodun) veriyi ezmesini önlemek için
             // lastUpdated değerini suni olarak çok yüksek (yıl 2030) yapıyoruz.
             // Böylece eski kod her halükarda Firebase verisini kendi verisinden daha "yeni" sanıp kabul edecek.
-            this.data.lastUpdated = Date.now() + (1000 * 60 * 60 * 24 * 365 * 10); 
+            this.data.lastUpdated = Date.now() + (1000 * 60 * 60 * 24 * 365 * 10);
+            this.lastSaveTime = Date.now();
             
             // ROLLING BACKUP SYSTEM
             try {
@@ -1439,7 +1442,9 @@ const renderPortfoy = (container) => {
         const pryInput = document.querySelector('.inline-pry-input');
         if (pryInput && pryInput.value !== '') {
             State.data.manuelFonFiyatlari = State.data.manuelFonFiyatlari || {};
-            State.data.manuelFonFiyatlari['PRY'] = parseFloat(pryInput.value.replace(',', '.'));
+            const newVal = parseFloat(pryInput.value.replace(',', '.'));
+            State.data.manuelFonFiyatlari['PRY'] = newVal;
+            State.updateFiyat('PRY', newVal);
             State.save();
             if (typeof renderPage === "function") renderPage();
         }
@@ -1913,7 +1918,7 @@ const renderHisseler = (container) => {
                         <div style="display:flex; gap: 4px;">
                             ${colors.map(col => `<div onclick="window.changeGenelNotColor('${not.id}', '${col}')" style="width:15px; height:15px; border-radius:50%; background:${col}; cursor:pointer; border: 1px solid rgba(0,0,0,0.2);"></div>`).join('')}
                         </div>
-                        <button class="btn btn-icon" style="padding: 2px; background: #000000; color: var(--danger-color); display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; border: none;" onclick="window.deleteGenelNot('${not.id}')"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
+                        <button class="btn btn-icon" style="padding: 2px; background: transparent; color: #888888; border: none;" onclick="window.deleteGenelNot('${not.id}')"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -3014,7 +3019,7 @@ const renderHisseler = (container) => {
                             </select>
                             <i class="fas fa-edit" style="cursor:pointer; color:var(--accent-color);" onclick="window.toggleDegerlemeEdit('${y}')" title="Düzenle"></i>
                             <i class="fas fa-save" style="cursor:pointer; color:var(--success-color); background:#000000; border-radius:3px; padding:2px 3px; font-size:12px;" onclick="window.toggleDegerlemeEdit('${y}')" title="Kaydet"></i>
-                            <i class="fas fa-trash-alt" style="cursor:pointer; color:var(--danger-color); background:#000000; border-radius:3px; padding:2px 3px; font-size:12px;" onclick="if(confirm('${y} verilerini silmek istediğinize emin misiniz?')){ delete State.data.degerleme['${selectedHisse}']['${y}']; State.save(); if(typeof renderUI === 'function') renderUI(); else if(typeof renderPage === 'function') renderPage(); }" title="Sil"></i>
+                            <i class="fas fa-trash-alt" style="cursor:pointer; color:var(--text-secondary); background:transparent; padding:2px 3px; font-size:12px;" onclick="if(confirm('${y} verilerini silmek istediğinize emin misiniz?')){ delete State.data.degerleme['${selectedHisse}']['${y}']; State.save(); if(typeof renderUI === 'function') renderUI(); else if(typeof renderPage === 'function') renderPage(); }" title="Sil"></i>
                         </div>
                     </td>`;
                 });
@@ -3280,7 +3285,7 @@ const renderHisseler = (container) => {
                                 </select>
                                 <i class="fas fa-edit" style="cursor:pointer; color:var(--accent-color);" onclick="window.toggleAraDegerlemeEdit('${p}')" title="Düzenle"></i>
                                 <i class="fas fa-save" style="cursor:pointer; color:var(--success-color); background:#000000; border-radius:3px; padding:2px 3px; font-size:12px;" onclick="window.toggleAraDegerlemeEdit('${p}')" title="Kaydet"></i>
-                                <i class="fas fa-trash-alt" style="cursor:pointer; color:var(--danger-color); background:#000000; border-radius:3px; padding:2px 3px; font-size:12px;" onclick="if(confirm('${p} verilerini silmek istediğinize emin misiniz?')){ delete State.data.araDegerleme['${selectedHisse}']['${p}']; State.save(); if(typeof renderUI === 'function') renderUI(); else if(typeof renderPage === 'function') renderPage(); }" title="Sil"></i>
+                                <i class="fas fa-trash-alt" style="cursor:pointer; color:var(--text-secondary); background:transparent; padding:2px 3px; font-size:12px;" onclick="if(confirm('${p} verilerini silmek istediğinize emin misiniz?')){ delete State.data.araDegerleme['${selectedHisse}']['${p}']; State.save(); if(typeof renderUI === 'function') renderUI(); else if(typeof renderPage === 'function') renderPage(); }" title="Sil"></i>
                             </div>
                         </td>`;
                     }
@@ -3520,7 +3525,7 @@ const renderHisseler = (container) => {
                                     <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
                                     <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
                                         <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
-                                        <button class="btn btn-icon" style="background: #000000; color: var(--danger-color); padding: 2px !important; font-size: 14px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
+                                        <button class="btn btn-icon" style="background: transparent; color: #888888; padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                                     </td>
                                 </tr>
                                 `;
@@ -3542,7 +3547,7 @@ const renderHisseler = (container) => {
                                     <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
                                     <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
                                         <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
-                                        <button class="btn btn-icon" style="background: #000000; color: var(--danger-color); padding: 2px !important; font-size: 14px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
+                                        <button class="btn btn-icon" style="background: transparent; color: #888888; padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                                     </td>
                                 </tr>
                                 `;
@@ -4271,7 +4276,7 @@ const renderHisseIslemleri = (container) => {
                         <td>${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}</td>
                         <td>
                             <button class="btn" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditEkstre('${e.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
-                            <button class="btn btn-danger" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
+                            <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; color: #888888; border: none;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     </tr>`;
                 }
@@ -4501,7 +4506,7 @@ const renderNakitIslemleri = (container, append = false) => {
             <td>${i+1}</td><td style="text-align: right;">${formatDate(n.tarih)}</td><td class="${n.tutar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(n.tutar, 0)}</td><td>${formatNumber(n.bist100)}</td><td>${formatNumber(n.dolar)}</td><td>${formatNumber(n.gramAltin)}</td><td>${formatNumber(n.pry, 6)}</td>
             <td>
                 <button class="btn" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditNakit('${n.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
-                <button class="btn btn-danger" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
+                <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; color: #888888; border: none;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
             </td>
         </tr>`;
     }).join('');
@@ -4750,7 +4755,7 @@ window.renderEnflasyonData = () => {
                 <td style="text-align:right; color:${color}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', {maximumFractionDigits:2}).format(pct)}%</td>
                 <td style="text-align:right; color:${cumColor}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', {maximumFractionDigits:2}).format(cumMap[item.tarih])}%</td>
                 <td style="text-align:center;">
-                    <button class="btn btn-danger" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteEnflasyon('${item.id}')" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
+                    <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; color: #888888; border: none;" onclick="window.deleteEnflasyon('${item.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                 </td>
             </tr>`;
         });
@@ -5098,7 +5103,7 @@ const renderAnalizler = (container) => {
                 <td style="text-align: center; white-space: nowrap; width: 90px;">
                     <div style="display: flex; gap: 0.5rem; justify-content: center;">
                         <button class="btn btn-icon" style="color: var(--accent-color);" onclick="window.editAnaliz(${a.id})" title="Düzenle"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-icon" style="background: #000000; color: var(--danger-color); padding: 2px; font-size: 14px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.deleteAnaliz(${a.id})" title="Sil"><i class="fas fa-trash-alt" style="color: var(--danger-color) !important;"></i></button>
+                        <button class="btn btn-icon" style="background: transparent; color: #888888; padding: 2px; font-size: 14px; border: none;" onclick="window.deleteAnaliz(${a.id})" title="Sil"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </td>
             </tr>
@@ -5258,7 +5263,7 @@ const renderHedef = (container) => {
 
             rowsHtml += `<tr>
                 <td style="text-align: center !important;">${sn++}</td>
-                <td style="text-align: left !important; font-weight:bold; cursor:pointer; color:var(--accent-color); text-decoration:underline;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
+                <td class="takip-hisse-link" style="text-align: left !important;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
                 <td style="text-align: right !important;">${fmtDec(guncelFiyat)}</td>
                 ${renderCell('2026')}
                 ${renderCell('2027')}
@@ -5324,32 +5329,98 @@ window.openHisseFromDropdown = (h) => {
     if (typeof renderPage === 'function') renderPage();
     window.scrollTo(0,0);
 };
-window.addHisseToTakip = () => {
-    const input = document.getElementById('anasayfa-arama-input');
-    if (!input) return;
-    const hisseKodu = input.value.trim().toUpperCase();
-    if (hisseKodu) {
-        if (!State.data.takipListesi) State.data.takipListesi = [];
-        if (!State.data.takipListesi.includes(hisseKodu)) {
-            State.data.takipListesi.push(hisseKodu);
-            State.save();
-            input.value = '';
-            if(currentPage === 'anasayfa') renderPage();
-        } else {
-            alert('Bu hisse zaten takip listesinde.');
-        }
-    }
-};
 
 window.removeHisseFromTakip = (hisseKodu) => {
-    document.getElementById('theme-confirm-message').innerText = hisseKodu + ' takip listesinden çikarilacak. Emin misiniz?';
-    window.themeConfirmAction = () => {
-        State.removeTakip(hisseKodu);
-        if(currentPage === 'anasayfa') renderPage();
-        if(window.updateSecondarySidebar) window.updateSecondarySidebar();
+      document.getElementById('theme-confirm-message').innerText = hisseKodu + ' takip listesinden çıkarılacak. Emin misiniz?';
+      window.themeConfirmAction = () => {
+          State.removeTakip(hisseKodu);
+          if(currentPage === 'anasayfa') renderPage();
+          document.getElementById('hisse-sil-modal').style.display = 'none';
+      };
+      document.getElementById('theme-confirm-modal').style.display = 'flex';
+  };
+
+  // Takip Listesi Modal Functions
+  window.toggleTakipEditModal = (event) => {
+        const modal = document.getElementById('takip-edit-modal');
+        const glass = document.getElementById('takip-edit-glass');
+        const btn = document.getElementById('takip-edit-btn');
+        
+        if (modal.style.display === 'block') {
+            modal.style.display = 'none';
+            if (btn) {
+                btn.className = 'fas fa-pen';
+                btn.innerHTML = '';
+            }
+        } else {
+            modal.style.display = 'block';
+            if (event && event.target) {
+                const rect = (btn ? btn.getBoundingClientRect() : event.target.getBoundingClientRect());
+                glass.style.top = (rect.bottom + 10) + 'px';
+                glass.style.left = (rect.right - 250) + 'px';
+                glass.style.bottom = '20px';
+            }
+            if (btn) {
+                btn.className = '';
+                btn.innerHTML = 'Kaydet';
+                btn.style.fontSize = '11px';
+            }
+            document.getElementById('takip-edit-arama-input').value = '';
+            document.getElementById('takip-edit-autocomplete-list').style.display = 'none';
+            window.renderTakipEditList();
+            setTimeout(() => document.getElementById('takip-edit-arama-input').focus(), 100);
+        }
     };
-    document.getElementById('theme-confirm-modal').style.display = 'flex';
-};
+
+  window.renderTakipEditList = () => {
+      const container = document.getElementById('takip-edit-list-container');
+      if (!container) return;
+      const list = (State.data.takipListesi || []).slice().sort((a,b) => a.localeCompare(b));
+      
+      if (list.length === 0) {
+          container.innerHTML = '<div style="text-align:center; color:var(--text-secondary); padding:1rem; font-size:13px;">Takip listeniz boş.</div>';
+          return;
+      }
+
+      container.innerHTML = list.map(hisse => `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.15rem 0.25rem; border-bottom: 1px solid var(--surface-border);">
+              <span style="color: var(--text-secondary); font-weight: 500; font-size: 12px;">${hisse}</span>
+                <i class="fas fa-trash-alt" style="cursor: pointer; color: var(--text-secondary); font-size: 12px; padding: 4px;" onclick="window.removeHisseFromTakipModal('${hisse}')"></i>
+          </div>
+      `).join('');
+  };
+
+  window.addHisseToTakipFromModal = () => {
+      const input = document.getElementById('takip-edit-arama-input');
+      if (!input) return;
+      let val = input.value.trim().toUpperCase();
+      if (!val) return;
+      
+      const validStocks = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : (window.defaultStocksArray || []);
+      if (!validStocks.includes(val)) {
+          alert('Geçersiz hisse kodu: ' + val);
+          return;
+      }
+      
+      if (!State.data.takipListesi) State.data.takipListesi = [];
+      if (!State.data.takipListesi.includes(val)) {
+          State.data.takipListesi.push(val);
+          input.value = '';
+          document.getElementById('takip-edit-autocomplete-list').style.display = 'none';
+          State.save();
+          window.renderTakipEditList();
+          if(currentPage === 'anasayfa') renderPage();
+      } else {
+          alert('Bu hisse zaten takip listesinde.');
+      }
+  };
+
+  window.removeHisseFromTakipModal = (hisse) => {
+      State.removeTakip(hisse);
+      State.save();
+      window.renderTakipEditList();
+      if(currentPage === 'anasayfa') renderPage();
+  };
 
 window.toggleTakipSort = (col) => {
     if (!window.takipSort) window.takipSort = { col: null, asc: true };
@@ -5523,7 +5594,7 @@ const renderAnasayfa = (container) => {
         rowsHtml += `
             <tr>
                 <td style="text-align: center !important;">${i + 1}</td>
-                <td style="text-align: left !important; font-weight: bold; color: var(--accent-color); cursor: pointer;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
+                <td class="takip-hisse-link" style="text-align: left !important;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
                 <td style="text-align: right !important;">${fmtDec(fiyat)}</td>
                 <td style="text-align: right !important;">${fmtNum(piyasaDegeri)}</td>
                 <td style="text-align: right !important;">${fmtMet(fdFavok)}</td>
@@ -5534,15 +5605,12 @@ const renderAnasayfa = (container) => {
                 ${renderCell('2028')}
                 ${renderCell('2029')}
                 ${renderCell('2030')}
-                <td style="text-align: center !important;" onclick="event.stopPropagation()">
-                    <button class="btn btn-icon" style="padding: 1px; width: 18px; height: 18px; background: #000000; color: var(--danger-color); display: inline-flex; margin: 0 auto; align-items: center; justify-content: center; border-radius: 4px;" onclick="window.removeHisseFromTakip('${hisse}')"><i class="fas fa-trash-alt" style="font-size: 10px; color: var(--danger-color) !important;"></i></button>
-                </td>
             </tr>
         `;
     });
 
     if (takipList.length === 0) {
-        rowsHtml = `<tr><td colspan="10" style="text-align: center; padding: 2rem;">Takip listeniz boş. Yukarıdan hisse ekleyebilirsiniz.</td></tr>`;
+        rowsHtml = `<tr><td colspan="17" style="text-align: center; padding: 2rem;">Takip listeniz boş. Kalem simgesine tıklayarak hisse ekleyebilirsiniz.</td></tr>`;
     }
 
     container.innerHTML = `
@@ -5556,7 +5624,10 @@ const renderAnasayfa = (container) => {
 
             <!-- Takip Listesi Tablosu -->
             <div class="glass" style="flex: 1; overflow-y: auto; padding: 0.5rem 1rem 1rem 1rem;">
-                <div class="table-header" style="font-size:1.2rem; display:flex; align-items:center; gap:0.5rem;">Takip Listesi</div>
+                <div class="table-header" style="position: relative; font-size:15px; display:flex; align-items:center; font-weight: 700; color: #ffffff !important; justify-content: center; width: 100%;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">Takip Listesi</div>
+                    <span id="takip-edit-btn" class="fas fa-pen" style="position: absolute; right: 0; color: var(--text-secondary); cursor: pointer; font-size: 13px; padding: 4px;" onclick="window.toggleTakipEditModal(event)"></span>
+                </div>
                 <div style="overflow-x: auto;">
                     <table class="dash-table compact-table takip-table" style="text-align: center;">
                         <thead>
@@ -5578,7 +5649,6 @@ const renderAnasayfa = (container) => {
                                 <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2029')">2029 P.${getTakipSortIcon('pot2029')}</th>
                                 <th style="text-align: center;">2030 H.</th>
                                 <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2030')">2030 P.${getTakipSortIcon('pot2030')}</th>
-                                <th style="text-align: center;">İşlem</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -5850,7 +5920,15 @@ window.goToAnasayfa = () => {
     if (typeof renderPage === 'function') renderPage();
 };
 
+let renderPageTimer = null;
 const renderPage = () => {
+    if (renderPageTimer) cancelAnimationFrame(renderPageTimer);
+    renderPageTimer = requestAnimationFrame(() => {
+        _renderPageActual();
+    });
+};
+
+const _renderPageActual = () => {
     // update active nav
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     const activeBtn = document.querySelector(`.nav-btn[data-target="${currentPage}"]`);
@@ -6154,14 +6232,14 @@ window.fetchTickerData = async () => {
                         const color = change > 0 ? 'var(--success-color)' : (change < 0 ? 'var(--danger-color)' : 'var(--text-secondary)');
                         let displayChange = change.toFixed(2).replace('.', ',');
                         if (change > 0 && !displayChange.startsWith('+')) displayChange = '+' + displayChange;
-                        changeHtml = `<span style="font-size: 13px; font-weight: 400; color: ${color}; margin-left: 0.3rem;">%${displayChange}</span>`;
+                        changeHtml = `<span style="font-size: 12px; font-weight: 400; color: ${color}; margin-left: 0.3rem;">%${displayChange}</span>`;
                     }
 
                     const val = item.data.Selling || item.data.Buying || 0;
                     
                     return `<div style="display: flex; flex-direction: column; align-items: flex-start; min-width: 100px; flex: 1; justify-content: center;">
-                        <span style="color: var(--text-secondary); font-size: 13px; font-weight: 500; margin-bottom: 0.1rem; letter-spacing: 0.5px;">${item.label}</span>
-                        <div style="font-size: 13px; font-weight: 400; color: var(--text-primary);">
+                        <span style="color: var(--text-secondary); font-size: 12px; font-weight: 500; margin-bottom: 0.1rem; letter-spacing: 0.5px;">${item.label}</span>
+                        <div style="font-size: 12px; font-weight: 400; color: #ffffff;">
                             ${val} ${changeHtml}
                         </div>
                     </div>`;
@@ -6351,8 +6429,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Setup Custom Autocomplete for Search Box
 const setupSearchAutocomplete = () => {
-    const input = document.getElementById('anasayfa-arama-input');
-    const list = document.getElementById('search-autocomplete-list');
+    const input = document.getElementById('takip-edit-arama-input');
+    const list = document.getElementById('takip-edit-autocomplete-list');
     if(!input || !list) return;
     
     input.addEventListener('input', function() {
@@ -6363,8 +6441,7 @@ const setupSearchAutocomplete = () => {
             return;
         }
         
-        window.defaultStocksArray = ["HLGYO","KAYSE","OZRDN","FONET","AVGYO","METRO","DARDL","GOODY","CATES","KRGYO","CIMSA","MPARK","ARASE","AVTUR","BRSAN","IHAAS","ZRE20","ARFYE","MERKO","TDGYO","OFSYM","EGSER","AEFES","TCKRC","VERTU","HTTBT","RUZYE","EDIP","BIGCH","ISYAT","BALAT","MEYSU","TRGYO","KUTPO","SEGMN","BJKAS","INTEK","VBTYZ","AVPGY","GLBMD","IEYHO","BEYAZ","GENIL","PAMEL","MERIT","ISBIR","ARMGD","CEOEM","EUHOL","ALARK","HUNER","OPTGY","OZYSR","SODSN","SELEC","BARMA","UNLU","ENTRA","EDATA","TMSN","DURDO","LXGYO","EKSUN","KUYAS","ISCTR","ARCLK","DITAS","TSGYO","EKIZ","ACSEL","AKMGY","ADEL","GLCVY","AKSEN","RODRG","ETYAT","YONGA","PRKAB","ISMEN","VESTL","INFO","PNLSN","MAKIM","KCHOL","EKGYO","AYEN","GLYHO","AVOD","ALGYO","BRKVY","CLEBI","DOFER","AKHAN","BRISA","RUBNS","VAKBN","ISGYO","GLRMK","OSMEN","SUNTK","BASCM","GMTAS","BRMEN","SUWEN","AGESA","BULGS","GWIND","VKING","VERUS","MARTI","SMRTG","TRHOL","YATAS","CMENT","DMSAS","TUCLK","KARTN","CWENE","ZERGY","SKBNK","KRDMD","BANVT","ALKA","PINSU","TGSAS","KOPOL","FADE","TKFEN","SONME","PRKME","SELVA","AKSGY","LYDHO","EUPWR","PEKGY","EKOS","AYCES","QNBTR","ADGYO","TERA","YESIL","BIGTK","A1YEN","ASGYO","ESCAR","CRDFA","MARMR","VAKKO","KFEIN","KLSER","SVGYO","AYGAZ","KZGYO","AHGAZ","OYAKC","PSDTC","PKART","BALSU","EGEEN","LMKDC","BAKAB","DOCO","HATSN","ALCTL","LIDER","DIRIT","MHRGY","SURGY","EREGL","KRTEK","MOBTL","TEZOL","NATEN","BESTE","LOGO","GEDIK","DENGE","VKGYO","ISKPL","LILAK","AKFIS","HEDEF","PNSUT","MERCN","ALKLC","TURGG","PAPIL","ENPRA","BURVA","OYAYO","BEGYO","YKSLN","VAKFN","TLMAN","BESLR","UCAYM","POLTK","MSGYO","MAVI","EUKYO","ORCAY","CASA","AKYHO","TATGD","FORTE","HRKET","NETAS","KMPUR","BIOEN","ADESE","KAPLM","AYDEM","ULUFA","HATEK","ODAS","ANELE","KRVGD","ZPT10","OPX30","GOZDE","AGYO","PSGYO","GLDTR","PAHOL","GARFA","ULUUN","DURKN","ONRYT","SEKFK","DSTKF","KOCMT","INGRM","BSOKE","EUREN","GENKM","MEDTR","SNPAM","KUVVA","SANKO","AZTEK","SKTAS","KENT","JANTS","MEGAP","ULAS","OZKGY","VAKFA","FMIZP","AGROT","ANHYT","VRGYO","GENTS","BRKO","CEMZY","AKCNS","EGEPO","OPT25","AFYON","MIATK","GOKNR","TSKB","GRNYO","KONKA","SAMAT","LKMNH","LINK","ECOGR","BTCIM","ALBRK","TARKM","TRALT","KBORU","REEDR","FLAP","GUNDG","KTSKR","EGPRO","IHEVA","CVKMD","KLYPV","BOSSA","KOTON","ISFIN","DGGYO","GEDZA","GRTHO","VANGD","DOFRB","YGGYO","IZINV","KRPLS","TEHOL","TUPRS","AGHOL","APBDL","TMPOL","KONTR","NUGYO","TTRAK","HEKTS","AKBNK","DMLKT","IZFAS","PRZMA","TRMET","NIBAS","MARKA","OZSUB","FORMT","BAGFS","RNPOL","MNDRS","AKFYE","ALVES","LYDYE","QUAGR","SKYLP","RYSAS","KORDS","VSNMD","ARDYZ","ONCSM","ORMA","OYLUM","ZPBDL","GEREL","ENJSA","KRONT","BINHO","CANTE","FZLGY","TABGD","PENGD","ATAKP","BINBN","BAHKM","GARAN","FENER","RALYH","GMSTR","ARSAN","BASGZ","RYGYO","AVHOL","AHSGY","USDTR","ICUGS","MACKO","Z30KP","DUNYH","OBAMS","EBEBK","NTGAZ","DGNMO","SUMAS","AYES","DOGUB","SKYMD","MANAS","ISKUR","PARSN","HKTM","YIGIT","ARZUM","EMPAE","ZRGYO","DOAS","KATMR","TURSG","KLGYO","KLRHO","PASEU","KRDMB","TNZTP","BORLS","TAVHL","BRKSN","ULKER","KERVN","INVES","FRMPL","A1CAP","OTTO","BERA","BFREN","IZENR","KLSYN","YUNSA","TOASO","PKENT","SEYKM","EGEGY","ASTOR","PETKM","MZHLD","BNTAS","PENTA","ALTNY","DYOBY","GUBRF","ENDAE","MAGEN","TSPOR","CRFSA","ASUZU","CUSAN","ISSEN","ZEDUR","CMBTN","GESAN","LUKSK","KSTUR","ICBCT","ATEKS","PAGYO","EMKEL","ERBOS","KAREL","ODINE","YYAPI","TBORG","OPK30","MTRYO","APX30","MEPET","SEKUR","TCELL","BIGEN","QNBFK","ZGYO","ISDMR","AKFGY","INVEO","ISGLK","OBASE","DCTTR","YEOTK","LRSHO","SASA","KLNMA","ENERY","TRILC","IHYAY","SAYAS","SISE","INDES","KLMSN","TKNSA","MTRKS","ECZYT","CELHA","ANGEN","CONSE","SANEL","HURGZ","IHGZT","ESCOM","OTKAR","CGCAM","YAPRK","HOROZ","SAHOL","UFUK","EYGYO","CEMTS","RAYSG","SNICA","USAK","GZNMI","SERNT","PLTUR","SOKM","ALKIM","BAYRK","MRGYO","DMRGD","YYLGD","NUHCM","ATSYH","GRSEL","SEGYO","MNDTR","COSMO","ENSRI","ERCB","ENKAI","FRIGO","MMCAS","ASELS","KRSTL","KNFRT","ARENA","MOGAN","BUCIM","Z30KE","IDGYO","PRDGS","DOHOL","ALCAR","EGGUB","DNISI","ZPLIB","KCAER","QTEMZ","SDTTR","YBTAS","BIENY","MAKTK","BURCE","ISBTR","DAPGM","BRYAT","KRDMA","MEGMT","TUREX","BYDNR","BVSAN","ATAGY","GOLTS","BIMAS","ETILR","AKSUE","ANSGR","BIZIM","MARBL","YAYLA","EFOR","EMNIS","HDFGS","SAFKR","DERHL","TATEN","TTKOM","SRVGY","MRSHL","CEMAS","NETCD","KGYO","ZOREN","VESBE","BLUME","IMASM","POLHO","ALTIN","SNGYO","FROTO","TRCAS","ORGE","ALFAS","SILVR","MEKAG","GSDHO","PATEK","HALKB","SARKY","ATLAS","ARTMS","TUKAS","AAGYO","IHLAS","KONYA","GIPTA","MCARD","PCILT","ATATR","RGYAS","TEKTU","SMART","EUYO","SMRVA","AKSA","ELITE","YKBNK","KIMMR","BMSTL","BOBET","AKENR","ULUSE","KZBGY","INTEM","BRLSM","CCOLA","OZGYO","BMSCH","DEVA","GSDDE","DESPC","DESA","ERSU","MAALT","DAGI","IZMDC","KTLEV","PETUN","OSTIM","RTALB","DZGYO","IHLGM","OPTLR","MOPAS","PGSUS","DGATE","NTHOL","ZGOLD","SOKE","EKDMR","SANFM","ATATP","MGROS","ECILC","KARSN","GLRYH","OYYAT","LIDFA","OZATD","THYAO","DERIM","ZSR25","DOKTA","HUBVC","VKFYO","EPLAS","GATEG","GSRAY","AKGRT","KLKIM","TRENJ","BORSK","ESEN","ISGSY","BLCYT"];
-        const validStocks = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : defaultStocks;
+        const validStocks = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : (window.defaultStocksArray || []);
         
         let matches = validStocks.filter(s => s.startsWith(val));
         if (matches.length === 0) {
@@ -6372,19 +6449,19 @@ const setupSearchAutocomplete = () => {
             return;
         }
         
-        // limit to 15 suggestions
-        matches.slice(0, 15).forEach(hisse => {
+        matches.slice(0, 10).forEach(hisse => {
             let div = document.createElement('div');
-            div.innerHTML = `<strong style="color: var(--accent-color);">${hisse.substr(0, val.length)}</strong>${hisse.substr(val.length)}`;
+            div.innerHTML = `<strong style="color: #ffffff;">${hisse.substr(0, val.length)}</strong>${hisse.substr(val.length)}`;
             div.style.padding = '0.5rem 1rem';
             div.style.cursor = 'pointer';
             div.style.fontSize = '12px';
-            div.style.color = '#fff';
+            div.style.color = 'var(--text-secondary)';
             div.className = 'autocomplete-item';
             div.onmouseover = () => div.style.background = 'rgba(255,255,255,0.1)';
             div.onmouseout = () => div.style.background = 'transparent';
             
-            div.addEventListener('click', function(e) {
+            div.addEventListener('mousedown', function(e) {
+                e.stopPropagation();
                 input.value = hisse;
                 list.style.display = 'none';
             });
@@ -6660,3 +6737,29 @@ window.uploadRapor = async () => {
         }
     }
 };
+
+// Takip listesi linkleri icin ozel CSS
+(function() {
+    if (!document.getElementById('takip-link-style')) {
+        const style = document.createElement('style');
+        style.id = 'takip-link-style';
+        style.textContent = `
+            table td.takip-hisse-link[onclick] {
+                color: var(--text-muted) !important;
+                font-weight: normal !important;
+                cursor: pointer !important;
+                text-decoration: none !important;
+                transition: color 0.2s ease, text-shadow 0.2s ease !important;
+            }
+            table td.takip-hisse-link[onclick]:hover {
+                color: #ffffff !important;
+                text-decoration: none !important;
+                text-shadow: 0 0 8px rgba(255,255,255,0.3) !important;
+            }
+            .takip-table th {
+                color: #ffffff !important;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+})();

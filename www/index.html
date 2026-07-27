@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <link rel="stylesheet" href="css/styles.css?v=20260726-1">
+    <link rel="stylesheet" href="css/styles.css?v=20260727-03">
     
     <!-- PWA Setup -->
     <link rel="manifest" href="manifest.json">
@@ -63,16 +63,12 @@
             <button class="nav-btn" data-target="notlar"><i class="fas fa-sticky-note"></i> <span class="nav-text">Notlar</span></button>
         </nav>
         <!-- User Profile -->
-        <div style="margin-top: auto; padding: 1rem; border-top: 1px solid var(--surface-border);">
+        <div style="margin-top: auto; padding: 0.5rem; border-top: 1px solid var(--surface-border);">
             <div class="nav-dropdown" style="position: relative; display: block; width: 100%;" onmouseover="this.querySelector('.dropdown-content').style.display='flex'" onmouseleave="this.querySelector('.dropdown-content').style.display='none'">
-                <button id="user-name-btn" class="nav-btn" style="color: var(--text-secondary); font-weight: 600; font-size: 14px; width: 100%; justify-content: flex-start; padding: 0.5rem;"><i class="fas fa-user-circle" style="width: 20px; font-size: 16px;"></i> <span id="user-name" class="nav-text">Kullanıcı</span> <i class="fas fa-chevron-up nav-text" style="font-size: 0.7em; margin-left: auto;"></i></button>
-                <div class="dropdown-content glass" style="display: none; position: absolute; bottom: 100%; left: 0; min-width: 180px; z-index: 1000; flex-direction: column; padding: 0.5rem; border-radius: var(--border-radius); box-shadow: 0 -4px 15px rgba(0,0,0,0.5);">
-                    <button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; display: flex; align-items: center; font-size: 14px; padding: 0.8rem 1rem;" onclick="if(window.goToAyarlar) window.goToAyarlar(); else document.querySelector('.nav-btn[data-target=\'ayarlar\']').click()"><span><i class="fas fa-cog" style="width: 20px;"></i> Hesap Ayarları</span></button>
-                    
-                    
-
-                    <div style="height: 1px; background: var(--surface-border); margin: 0.5rem 0;"></div>
-                    <button id="logout-btn" class="nav-btn" style="color: var(--danger-color); text-align: left; width: 100%; border-radius: 4px; font-size: 14px; padding: 0.8rem 1rem;"><i class="fas fa-sign-out-alt" style="width: 20px;"></i> Çıkış</button>
+                <button id="user-name-btn" class="nav-btn" style="color: var(--text-secondary); font-weight: 600; font-size: 13px; width: 100%; justify-content: flex-start; padding: 0.5rem; gap: 0.5rem;"><i class="fas fa-user-circle" style="width: 20px; font-size: 16px;"></i> <span id="user-name" class="nav-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kullanıcı</span> <i class="fas fa-chevron-up nav-text" style="font-size: 0.7em; margin-left: auto;"></i></button>
+                <div class="dropdown-content glass" style="display: none; position: absolute; bottom: 100%; left: 0; min-width: 160px; z-index: 1000; flex-direction: column; padding: 0.5rem 0; border-radius: var(--border-radius); box-shadow: 0 -4px 15px rgba(0,0,0,0.5);">
+                    <div style="cursor: pointer; padding: 0.5rem 1rem; font-size: 13px; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'" onclick="if(window.goToAyarlar) window.goToAyarlar(); else document.querySelector('.nav-btn[data-target=\'ayarlar\']').click()"><i class="fas fa-cog" style="width: 16px;"></i> Hesap Ayarları</div>
+                    <div id="logout-btn" style="cursor: pointer; padding: 0.5rem 1rem; font-size: 13px; color: var(--danger-color); display: flex; align-items: center; gap: 0.5rem;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'"><i class="fas fa-sign-out-alt" style="width: 16px;"></i> Çıkış</div>
                 </div>
             </div>
         </div>
@@ -95,7 +91,7 @@
 
     <div class="main-wrapper" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative;">
         <!-- Topbar -->
-        <div class="top-bar glass" style="display: flex; justify-content: space-between; padding: 0.5rem 1rem; align-items: center; border-radius: 0; border-bottom: 1px solid var(--surface-border); gap: 1rem; position: relative; z-index: 9999; width: 100%;">
+        <div class="top-bar glass" style="display: flex; justify-content: space-between; padding: 0.5rem 1rem; align-items: center; border-radius: 15px; gap: 1rem; position: relative; z-index: 9999; margin: 20px 20px 0 20px;">
             
             <!-- Mobile Sidebar Toggle -->
             <button class="btn btn-icon mobile-sidebar-toggle" style="display: none; padding: 0.3rem 0.5rem;" onclick="window.toggleSidebar()">
@@ -109,16 +105,7 @@
                 </div>
             </div>
 
-            <!-- Search Box -->
-            <div style="position: relative; display: flex; gap: 0.5rem; align-items: center; background: var(--surface-border); padding: 0.3rem 0.8rem; border-radius: 20px; border: 1px solid var(--overlay-bg); margin-left: auto; margin-right: 1rem;">
-                <i class="fas fa-search" style="color: var(--text-secondary); font-size: 12px;"></i>
-                <input type="text" id="anasayfa-arama-input" placeholder="Hisse (Örn: THYAO)" autocomplete="off" style="background: transparent; border: none; color: var(--btn-text); width: 130px; font-size: 12px; outline: none; text-transform: uppercase;" onkeydown="if(event.key==='Enter') { window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none'; }">
-                <button style="background: var(--warning-color); border: none; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; color: var(--btn-text); cursor: pointer;" onclick="window.addHisseToTakip(); document.getElementById('search-autocomplete-list').style.display='none';"><i class="fas fa-plus" style="font-size: 12px;"></i></button>
-                
-                <!-- Custom Autocomplete Dropdown -->
-                <div id="search-autocomplete-list" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; max-height: 250px; overflow-y: auto; flex-direction: column; padding: 0.5rem 0; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); margin-top: 5px; z-index: 2000; background: var(--surface-color); border: 1px solid var(--surface-border);">
-                </div>
-            </div>
+
 
 
         </div>
@@ -289,11 +276,14 @@ window.showAnalizEkleModal = function(hisse) {
         });
     </script>
 
-    <script src="js/stock_data_compiled.js?v=20260726-2"></script>
+    <!-- Global Data -->
+    <script src="js/stock_data_compiled.js"></script>
+    <script src="js/prices_compiled.js"></script>
+    <!-- App Logic -->
     <script src="js/excel_parser_v2.js?v=20260726-1"></script>
     <script src="js/import_data.js"></script>
     <script src="js/custom_autocomplete.js?v=2"></script>
-    <script src="js/app_v49.js?v=20260726-21"></script>
+    <script src="js/app_v50.js?v=20260727-20"></script>
 
     <!-- Register Service Worker for PWA -->
     <script>
@@ -342,5 +332,31 @@ window.showAnalizEkleModal = function(hisse) {
         });
     </script>
     <datalist id="analiz-borsaci-list"></datalist>
+
+    <!-- Takip Düzenle Modal -->
+    <div id="takip-edit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: transparent; z-index: 10000;" onclick="if(event.target === this) { this.style.display='none'; const btn = document.getElementById('takip-edit-btn'); if(btn) { btn.className='fas fa-pen'; btn.innerHTML=''; } }">
+        <div id="takip-edit-glass" class="glass" style="padding: 1.5rem; width: 220px; max-width: 90%; border-radius: var(--border-radius); position: absolute; display: flex; flex-direction: column; gap: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+
+            
+            <style>
+                #takip-edit-arama-input:focus {
+                    border-color: var(--accent-color) !important;
+                    box-shadow: 0 0 0 1px var(--accent-color) !important;
+                }
+            </style>
+            <h3 style="margin: 0; color: #ffffff; font-size: 14px;">Takip Listesi Düzenle</h3>
+            
+            <div style="position: relative; display: flex; gap: 0.5rem;">
+                <input type="text" id="takip-edit-arama-input" class="form-control" placeholder="Hisse ara (Örn: THYAO)..." style="flex: 1; font-size: 12px; text-transform: uppercase; background: var(--table-header-bg); border: 1px solid var(--surface-border); color: #fff; padding: 5px 10px; border-radius: 4px;">
+                <i class="fas fa-plus" style="padding: 0 0.5rem; cursor: pointer; color: var(--text-secondary); font-size: 12px; display: flex; align-items: center;" onclick="window.addHisseToTakipFromModal()"></i>
+                <div id="takip-edit-autocomplete-list" style="display:none; position:absolute; top:100%; left:0; right:40px; background:var(--surface-color); border:1px solid var(--surface-border); border-top:none; z-index:1001; max-height:200px; overflow-y:auto; flex-direction:column; border-radius: 0 0 8px 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);"></div>
+            </div>
+
+            <div id="takip-edit-list-container" style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1; overflow-y: auto; padding-right: 5px; margin-top: 0.5rem;">
+                <!-- Hisse listesi JS ile dolacak -->
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

@@ -5351,6 +5351,7 @@ window.removeHisseFromTakip = (hisseKodu) => {
             if (btn) {
                 btn.className = 'fas fa-pen';
                 btn.innerHTML = '';
+                btn.style.fontSize = '13px';
             }
         } else {
             modal.style.display = 'block';
@@ -5361,9 +5362,9 @@ window.removeHisseFromTakip = (hisseKodu) => {
                 glass.style.bottom = '20px';
             }
             if (btn) {
-                btn.className = '';
-                btn.innerHTML = 'Kaydet';
-                btn.style.fontSize = '11px';
+                btn.className = 'fas fa-pen';
+                btn.innerHTML = '';
+                btn.style.fontSize = '13px';
             }
             document.getElementById('takip-edit-arama-input').value = '';
             document.getElementById('takip-edit-autocomplete-list').style.display = 'none';
@@ -5624,7 +5625,7 @@ const renderAnasayfa = (container) => {
 
             <!-- Takip Listesi Tablosu -->
             <div class="glass" style="flex: 1; overflow-y: auto; padding: 0.5rem 1rem 1rem 1rem;">
-                <div class="table-header" style="position: relative; font-size:15px; display:flex; align-items:center; font-weight: 700; color: #ffffff !important; justify-content: center; width: 100%;">
+                <div class="table-header" style="position: relative; font-size:14px; display:flex; align-items:center; font-weight: 700; color: #ffffff !important; justify-content: center; width: 100%;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">Takip Listesi</div>
                     <span id="takip-edit-btn" class="fas fa-pen" style="position: absolute; right: 0; color: var(--text-secondary); cursor: pointer; font-size: 13px; padding: 4px;" onclick="window.toggleTakipEditModal(event)"></span>
                 </div>

@@ -6,8 +6,8 @@
     --table-border: rgba(255, 255, 255, 0.03);
     --text-primary: #f0f2f5;
     --text-secondary: #a0aab2;
-    --accent-color: #4facfe;
-    --accent-glow: rgba(79, 172, 254, 0.4);
+    --accent-color: #1d4ed8;
+    --accent-glow: rgba(29, 78, 216, 0.4);
     --success-color: #00e676;
     --danger-color: #ff1744;
     --warning-color: #ffc107;
@@ -90,16 +90,16 @@ body {
 
 #main-nav {
     display: flex;
-    gap: 1rem;
+    gap: 0;
 }
 
 .nav-btn {
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    font-size: 17px;
+    font-size: 15px;
     font-weight: 500;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 5px;
     cursor: pointer;
     border-radius: 8px;
     transition: var(--transition);
@@ -112,25 +112,17 @@ body {
 }
 
 .nav-btn.active {
-    color: var(--accent-color);
-    background: rgba(79, 172, 254, 0.1);
+    color: #ffffff;
+    background: var(--overlay-bg);
 }
 
 .nav-btn.active::after {
-    content: '';
-    position: absolute;
-    bottom: -15px;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: var(--accent-color);
-    border-radius: 3px 3px 0 0;
-    box-shadow: 0 -2px 10px var(--accent-glow);
+    display: none;
 }
 
 /* Content Area */
 .content-area {
-    padding: 20px;
+    padding: 20px 20px 10px 20px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -252,6 +244,12 @@ tbody tr {
     box-shadow: 0 0 0 2px var(--accent-glow);
 }
 
+.glass-input:focus {
+    outline: none !important;
+    border-color: var(--surface-border) !important;
+    box-shadow: none !important;
+}
+
 /* Tarayıcıların otomatik doldurma (autofill) yaparken arka planı beyaz yapmasını engellemek için */
 .form-control:-webkit-autofill,
 .form-control:-webkit-autofill:hover, 
@@ -367,7 +365,7 @@ tbody tr {
 }
 
 .glass-sidebar.expanded {
-    width: 220px;
+    width: 200px;
 }
 
 .glass-sidebar.collapsed {
@@ -391,15 +389,15 @@ tbody tr {
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0;
     padding: 1rem 0;
 }
 
 .glass-sidebar .nav-btn {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 0.8rem 1.5rem;
+    gap: 0.8rem;
+    padding: 10px 1rem;
     width: 100%;
     text-align: left;
     border-radius: 0;
@@ -408,19 +406,26 @@ tbody tr {
 
 .glass-sidebar.collapsed .nav-btn {
     justify-content: center;
-    padding: 0.8rem 0;
+    padding: 10px 0;
 }
 
 .glass-sidebar .nav-btn i {
     width: 20px;
     text-align: center;
     font-size: 16px;
+    flex-shrink: 0;
+}
+
+.nav-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .glass-sidebar .nav-btn.active {
     background: var(--overlay-bg);
-    border-left-color: var(--accent-color);
-    color: var(--accent-color);
+    border-left-color: #ffffff;
+    color: #ffffff;
 }
 
 .btn-icon {
@@ -554,7 +559,7 @@ table .total-row td, .std-table .total-row td, .dash-table .total-row td {
 
 /* İkon Renkleri */
 i.fa-save, i.fa-check { color: var(--success-color) !important; }
-i.fa-trash, i.fa-trash-alt { color: var(--danger-color) !important; }
+i.fa-trash, i.fa-trash-alt { color: #888888 !important; }
 i.fa-edit { color: var(--accent-color) !important; }
 
 /* Tüm tablolardaki link hücreleri */
@@ -602,7 +607,7 @@ input[type="file"]::file-selector-button {
     transition: var(--transition);
 }
 input[type="file"]::file-selector-button:hover {
-    background: rgba(79, 172, 254, 0.8);
+    background: rgba(29, 78, 216, 0.8);
     transform: translateY(-1px);
 }
 input[type="file"]::-webkit-file-upload-button {
@@ -619,7 +624,7 @@ input[type="file"]::-webkit-file-upload-button {
     transition: var(--transition);
 }
 input[type="file"]::-webkit-file-upload-button:hover {
-    background: rgba(79, 172, 254, 0.8);
+    background: rgba(29, 78, 216, 0.8);
     transform: translateY(-1px);
 }
 
@@ -667,7 +672,7 @@ input[type="file"]::-webkit-file-upload-button:hover {
 }
 
 .bottom-nav-btn.active {
-    color: var(--accent-color) !important;
+    color: #ffffff !important;
 }
 
 .bottom-nav-btn.active::after {
@@ -727,3 +732,10 @@ input[type="file"]::-webkit-file-upload-button:hover {
         display: block !important;
     }
 }
+
+ 
+ . t a k i p - h i s s e - l i n k   {   c o l o r :   v a r ( - - t e x t - s e c o n d a r y )   ! i m p o r t a n t ;   f o n t - w e i g h t :   3 0 0   ! i m p o r t a n t ;   c u r s o r :   p o i n t e r ;   t e x t - d e c o r a t i o n :   n o n e   ! i m p o r t a n t ;   t r a n s i t i o n :   c o l o r   0 . 2 s   e a s e ;   } 
+ 
+ . t a k i p - h i s s e - l i n k : h o v e r   {   c o l o r :   v a r ( - - t e x t - p r i m a r y )   ! i m p o r t a n t ;   t e x t - d e c o r a t i o n :   n o n e   ! i m p o r t a n t ;   } 
+ 
+ 
