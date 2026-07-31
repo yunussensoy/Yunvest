@@ -4297,60 +4297,73 @@ const renderHisseIslemleri = (container) => {
         fonDatalistOptions += `<option value="${fon}">`;
     });
 
-    container.innerHTML = `
-        <datalist id="fon-list">${fonDatalistOptions}</datalist>
-        <div class="page-section active">
-            <div class="table-container glass" style="overflow-x: auto; margin-bottom: 0;">
-                <div class="table-header">
-                    <span>Hisse ve Fon İşlemleri</span>
-                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--warning-color); color: #fff;" onclick="window.toggleInlineForm('hisse')">+</button>
-                </div>
-                
-                <div id="hisse-ekle-section" style="display: none; margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 1rem;">
-                    <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
-                        <thead>
-                            <tr>
-                                <th style="width: 5%;">S.N.</th>
-                                <th style="width: 8%; text-align: left;">Tür</th>
-                                <th style="width: 12%; text-align: left;">Menkul</th>
-                                <th style="width: 15%; text-align: right;">Tarih</th>
-                                <th style="width: 14%;">Fiyat</th>
-                                <th style="width: 15%;">Adet</th>
-                                <th style="width: 13%;">Tutar</th>
-                                <th style="width: 18%;">İşlem</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr style="background: rgba(0,0,0,0.4);">
-                                <td style="text-align: center;">-</td>
-                                <td>
-                                    <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px;" onchange="window.updateInlineDatalist()">
-                                        <option value="Hisse" selected>Hisse</option>
-                                        <option value="Fon">Fon</option>
-                                    </select>
-                                </td>
-                                <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                                <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                                <td><input type="number" step="0.000001" id="i-fiyat" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Fiyat" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                                <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Adet" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                                <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" disabled></td>
-                                <td>
-                                    <button class="btn" id="i-submit-btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineHisse()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
-                                    <button class="btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('hisse')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+    window.ekstreTab = window.ekstreTab || 'hisse';
+    window.setEkstreTab = window.setEkstreTab || ((tab) => {
+        window.ekstreTab = tab;
+        if (typeof renderPage === 'function') renderPage();
+    });
+    const getTabBg = (tab) => window.ekstreTab === tab ? 'rgba(255,255,255,0.1)' : 'transparent';
+    const getTabColor = (tab) => window.ekstreTab === tab ? '#ffffff' : 'var(--text-secondary)';
 
-                <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
+    container.innerHTML = `
+        <style>
+            .ekstre-table th, .ekstre-table td {
+                font-size: 12px !important;
+                font-weight: normal !important;
+            }
+            .ekstre-table thead, .ekstre-table thead tr, .ekstre-table thead th {
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                background: var(--bg-card, #1e293b) !important;
+            }
+        </style>
+        <datalist id="fon-list">${fonDatalistOptions}</datalist>
+        <div class="page-section active" style="margin-bottom: 0px;">
+            <div class="glass" style="padding: 0.5rem 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center; overflow-x: auto; white-space: nowrap;">
+                        <span style="cursor: pointer; font-size: 13px !important; font-weight: normal; padding: 4px 8px; border-radius: 4px; background: ${getTabBg('hisse')}; color: ${getTabColor('hisse')};" onclick="window.setEkstreTab('hisse')">Hisse ve Fon İşlemleri</span>
+                        <span style="cursor: pointer; font-size: 13px !important; font-weight: normal; padding: 4px 8px; border-radius: 4px; background: ${getTabBg('nakit')}; color: ${getTabColor('nakit')};" onclick="window.setEkstreTab('nakit')">Nakit İşlemleri</span>
+                    </div>
+                    <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: #888888; border: none; box-shadow: none;" onclick="window.toggleInlineForm(window.ekstreTab)"><i class="fas fa-plus" style="font-size: 15px;"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="ekstreler-tables-wrapper" style="flex: 1;">
+            <div class="page-section ${window.ekstreTab === 'hisse' ? 'active' : ''}" style="${window.ekstreTab === 'hisse' ? '' : 'display: none !important;'} margin-top: 0;">
+                <div class="table-container glass" style="overflow-x: auto; padding: 0;">
+                
+                <table class="dash-table compact-table ekstre-table" style="table-layout: fixed; width: 100%;">
                     <thead>
                         <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleHisseTableCollapse()"><i class="fas ${window.hisseTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 8%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tur')">Tür${getHisseSortIcon('tur')}</th><th style="width: 12%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('menkul')">Menkul${getHisseSortIcon('menkul')}</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tarih')">Tarih${getHisseSortIcon('tarih')}</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tutar')">Tutar${getHisseSortIcon('tutar')}</th><th style="width: 18%;">İşlem</th></tr>
                     </thead>
+                    <tbody id="hisse-ekle-section" style="display: none;">
+                        <tr style="background: rgba(0,0,0,0.4);">
+                            <td style="text-align: center;">-</td>
+                            <td>
+                                <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px;" onchange="window.updateInlineDatalist()">
+                                    <option value="Hisse" selected>Hisse</option>
+                                    <option value="Fon">Fon</option>
+                                </select>
+                            </td>
+                            <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                            <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                            <td><input type="number" step="0.000001" id="i-fiyat" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Fiyat" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                            <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Adet" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                            <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" disabled></td>
+                            <td>
+                                <button class="btn" id="i-submit-btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineHisse()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
+                                <button class="btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('hisse')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
                     <tbody id="hisse-tbody" style="${window.hisseTableCollapsed ? 'display: none;' : ''}">
                         ${ekstreRows}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     `;
@@ -4400,13 +4413,13 @@ const renderHisseIslemleri = (container) => {
 
     window.toggleInlineForm = (type) => {
         const section = document.getElementById(`${type}-ekle-section`);
-        if(section) section.style.display = section.style.display === 'none' ? 'block' : 'none';
+        if(section) section.style.display = section.style.display === 'none' ? '' : 'none';
         
         if (type === 'nakit' && typeof window.cancelNakitEdit === 'function') window.cancelNakitEdit();
         else if (typeof window.cancelEdit === 'function') window.cancelEdit();
         
         // focus the first input if opening
-        if(section && section.style.display === 'block') {
+        if(section && section.style.display === '') {
             const firstInput = section.querySelector('input, select');
             if(firstInput) firstInput.focus();
         }
@@ -4514,58 +4527,40 @@ const renderNakitIslemleri = (container, append = false) => {
     const todayStr = new Date().toISOString().split('T')[0];
 
     const htmlContent = `
-        <div class="page-section active">
-            <div class="table-container glass" style="overflow-x: auto;">
-                <div class="table-header">
-                    <span>Nakit İşlemleri</span>
-                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--warning-color); color: #fff;" onclick="window.toggleInlineForm('nakit')">+</button>
-                </div>
+        <div class="page-section ${window.ekstreTab === 'nakit' ? 'active' : ''}" style="${window.ekstreTab === 'nakit' ? '' : 'display: none !important;'} margin-top: 0;">
+            <div class="table-container glass" style="overflow-x: auto; padding: 0;">
                 
-                <div id="nakit-ekle-section" style="display: none; margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 1rem;">
-                    <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
-                        <thead>
-                            <tr>
-                                <th style="width: 5%;">S.N.</th>
-                                <th style="width: 15%; text-align: right;">Tarih</th>
-                                <th style="width: 15%;">Tutar</th>
-                                <th style="width: 15%;">XU100</th>
-                                <th style="width: 15%;">USDTRY</th>
-                                <th style="width: 15%;">GRAMALTIN</th>
-                                <th style="width: 15%;">PRY</th>
-                                <th style="width: 20%;">İşlem</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr style="background: rgba(0,0,0,0.4);">
-                                <td style="text-align: center;">-</td>
-                                <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                                <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                                <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="XU100" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                                <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Dolar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                                <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                                <td><input type="text" inputmode="decimal" id="n-pry" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="PRY" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                                <td>
-                                    <button class="btn" id="n-submit-btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineNakitEntry()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
-                                    <button class="btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('nakit')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
+                <table class="dash-table compact-table ekstre-table" style="table-layout: fixed; width: 100%;">
                     <thead>
                         <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleNakitTableCollapse()"><i class="fas ${window.nakitTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tarih')">Tarih${getNakitSortIcon('tarih')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tutar')">Tutar${getNakitSortIcon('tutar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('bist100')">XU100${getNakitSortIcon('bist100')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('dolar')">USDTRY${getNakitSortIcon('dolar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('gramAltin')">GRAMALTIN${getNakitSortIcon('gramAltin')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('pry')">PRY${getNakitSortIcon('pry')}</th><th style="width: 20%;">İşlem</th></tr>
                     </thead>
+                    <tbody id="nakit-ekle-section" style="display: none;">
+                        <tr style="background: rgba(0,0,0,0.4);">
+                            <td style="text-align: center;">-</td>
+                            <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="XU100" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Dolar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="text" inputmode="decimal" id="n-pry" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="PRY" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td>
+                                <button class="btn" id="n-submit-btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineNakitEntry()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
+                                <button class="btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('nakit')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
                     <tbody id="nakit-tbody" style="${window.nakitTableCollapsed ? 'display: none;' : ''}">
                         ${nakitRows}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     `;
     if (append) {
-        container.insertAdjacentHTML('beforeend', htmlContent);
+        const wrapper = container.querySelector('#ekstreler-tables-wrapper');
+        if (wrapper) wrapper.insertAdjacentHTML('beforeend', htmlContent);
+        else container.insertAdjacentHTML('beforeend', htmlContent);
     } else {
         container.innerHTML = htmlContent;
     }
@@ -4573,13 +4568,13 @@ const renderNakitIslemleri = (container, append = false) => {
     window.toggleInlineForm = (type) => {
         const section = document.getElementById(`${type}-ekle-section`);
         if(section) {
-            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+            section.style.display = section.style.display === 'none' ? '' : 'none';
         }
         if (type === 'nakit' && typeof window.cancelNakitEdit === 'function') window.cancelNakitEdit();
         else if (typeof window.cancelEdit === 'function') window.cancelEdit();
         
         // focus the first input if opening
-        if(section && section.style.display === 'block') {
+        if(section && section.style.display === '') {
             const firstInput = section.querySelector('input, select');
             if(firstInput) firstInput.focus();
         }

@@ -1057,6 +1057,12 @@ window.fetchGuncelFiyatlar = async () => {
 
 // --- PAGES ---
 const renderPortfoy = (container) => {
+
+    window.portfoyTab = window.portfoyTab || 'bilgiler';
+    window.setPortfoyTab = window.setPortfoyTab || ((tab) => {
+        window.portfoyTab = tab;
+        if (typeof renderPage === 'function') renderPage();
+    });
     const { portfoyList, arsivList, portfoyBilgileri } = calculatePortfoy(State.data.ekstre, (m) => State.getFiyat(m), State.data.nakitHareketleri);
     
     let totalOdenen = 0, totalGuncel = 0, totalKar = 0;
@@ -1216,98 +1222,109 @@ const renderPortfoy = (container) => {
 
     
     
-    const html = `
-        <div class="page-section active" style="display: flex; flex-direction: column; gap: 40px;">
-            
-            
+        const getTabBg = (tab) => window.portfoyTab === tab ? 'var(--overlay-bg)' : 'transparent';
+        const getTabColor = (tab) => window.portfoyTab === tab ? '#ffffff' : 'var(--text-secondary)';
+    const tabsHtml = `
+        <style>
+            .portfoy-tab-btn:hover { color: #ffffff !important; background: var(--overlay-bg) !important; }
+        </style>
+        <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-start; overflow-x: auto; white-space: nowrap; width: 100%;">
+            <span class="portfoy-tab-btn" style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 6px 12px; border-radius: 4px; background: ${getTabBg('bilgiler')}; color: ${getTabColor('bilgiler')}; transition: color 0.2s;" onclick="window.setPortfoyTab('bilgiler')">Portföy Bilgileri</span>
+            <span class="portfoy-tab-btn" style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 6px 12px; border-radius: 4px; background: ${getTabBg('gecmis')}; color: ${getTabColor('gecmis')}; transition: color 0.2s;" onclick="window.setPortfoyTab('gecmis')">Günlük Portföy Değişimi</span>
+            <span class="portfoy-tab-btn" style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 6px 12px; border-radius: 4px; background: ${getTabBg('varliklar')}; color: ${getTabColor('varliklar')}; transition: color 0.2s;" onclick="window.setPortfoyTab('varliklar')">Varlıklarım</span>
+            ${!(window.Capacitor && window.Capacitor.isNative) ? `<span class="portfoy-tab-btn" style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 6px 12px; border-radius: 4px; background: ${getTabBg('arsiv')}; color: ${getTabColor('arsiv')}; transition: color 0.2s;" onclick="window.setPortfoyTab('arsiv')">Arşiv</span>` : ''}
+        </div>
+    `;
 
+    let tabContentHtml = '';
+    
+    if (window.portfoyTab === 'bilgiler') {
+        tabContentHtml = `
             <div id="portfoy-bilgiler" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
-                <div class="table-container glass" style="margin-bottom: 0;">
-                    <div class="table-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Portföy Bilgileri</span>
-                        <div>
-                            <button id="portfoy-edit-btn" class="btn btn-icon" style="color: var(--accent-color); font-size: 14px; padding: 4px;" onclick="window.togglePortfoyEdit()" title="Düzenle"><i class="fas fa-edit"></i></button>
-                            <button id="portfoy-save-btn" class="btn btn-icon" style="color: var(--success-color); font-size: 14px; padding: 4px; display: none;" onclick="window.savePortfoyEdit()" title="Kaydet"><i class="fas fa-save"></i></button>
-                        </div>
-                    </div>
-                <div class="flex-row" style="align-items: flex-start; gap: 1rem;">
-                    <div style="flex: 2; overflow-x: auto;">
-                        <table class="dash-table compact-table" style="width: 100%;">
+                <div class="flex-row" style="align-items: flex-start; gap: 2rem; flex-wrap: wrap;">
+                    <div class="table-container glass" style="margin-bottom: 0; width: max-content; overflow-x: auto; padding: 0.5rem;">
+                        <table class="dash-table compact-table" style="width: max-content; white-space: nowrap;">
                             <tbody>
                                 <tr>
-                                    <td style="text-align:left !important; width:25%;">Nakit</td>
-                                    <td style="text-align:right !important; width:25%; border-right: 1px solid rgba(255, 255, 255, 0.03);">
-                                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
-                                    <td style="text-align:right !important; width:25%; border-right: 1px solid rgba(255, 255, 255, 0.03);">
+                                    <td style="text-align:left !important; width:50%;">Nakit</td>
+                                    <td style="text-align:right !important; width:50%; border-right: 1px solid rgba(255, 255, 255, 0.03); cursor: pointer;" ondblclick="window.togglePortfoyEdit()" title="Düzenlemek için çift tıklayın">
                                         <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
                                             <span id="nakit-text">${formatCurrency(guncelNakitTutar)}</span>
-                                            <input type="number" step="0.01" id="inline-nakit-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${State.data.manuelNakitTutar || 0}" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
+                                            <input type="number" step="0.01" id="inline-nakit-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${State.data.manuelNakitTutar || 0}" onblur="window.savePortfoyEdit()" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
                                         </div>
                                     </td>
-                                            <input type="number" step="0.01" id="inline-nakit-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${State.data.manuelNakitTutar || 0}" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
-                                        </div>
-                                    </td>
-                                    <td style="text-align:left !important; width:25%; padding-left: 1rem;">Reel Getiri Oranı (Enflasyon)</td>
-                                    <td style="text-align:right !important; width:25%;" class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Hisse Portföyü</td>
                                     <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(hissePortfoyTutar)}</td>
-                                    <td style="text-align:left !important; padding-left: 1rem;">BIST 100'e Göre Reel Getiri Oranı</td>
-                                    <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriBist >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriBist)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Fon Portföyü</td>
                                     <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(fonPortfoyTutar)}</td>
-                                    <td style="text-align:left !important; padding-left: 1rem;">Dolar Kuruna Göre Reel Getiri Oranı</td>
-                                    <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriDolar >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriDolar)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Toplam Portföy</td>
                                     <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.toplamPortfoy)}</td>
-                                    <td style="text-align:left !important; padding-left: 1rem;">Gram Altına Göre Reel Getiri Oranı</td>
-                                    <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriAltin >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriAltin)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Anapara</td>
                                     <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.anapara)}</td>
-                                    <td style="text-align:left !important; padding-left: 1rem;">PRY Fonuna Göre Reel Getiri Oranı</td>
-                                    <td style="text-align:right !important;" class="${portfoyBilgileri.reelGetiriPry >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriPry)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Kar</td>
                                     <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.kar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(portfoyBilgileri.kar)}</td>
-                                    <td style="text-align:left !important; padding-left: 1rem;">Hedef Portföy</td>
-                                    <td style="text-align:right !important;">
-                                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
-                                    <td style="text-align:right !important;">
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                    <td style="text-align:left !important;">Nominal Getiri Oranı</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.nominalGetiri >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.nominalGetiri)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left !important;">Reel Getiri Oranı (Enflasyon)</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left !important;">BIST 100'e Göre Reel Getiri Oranı</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.reelGetiriBist >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriBist)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left !important;">Dolar Kuruna Göre Reel Getiri Oranı</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.reelGetiriDolar >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriDolar)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left !important;">Gram Altına Göre Reel Getiri Oranı</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.reelGetiriAltin >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriAltin)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left !important;">PRY Fonuna Göre Reel Getiri Oranı</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.reelGetiriPry >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriPry)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left !important;">Hedef Portföy</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03); cursor: pointer;" ondblclick="window.togglePortfoyEdit()" title="Düzenlemek için çift tıklayın">
                                         <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
                                             <span id="hedef-text">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span>
-                                            <input type="number" id="inline-hedef-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${portfoyBilgileri.hedefPortfoy}" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
-                                        </div>
-                                    </td>
-                                            <input type="number" id="inline-hedef-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${portfoyBilgileri.hedefPortfoy}" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
+                                            <input type="number" id="inline-hedef-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${portfoyBilgileri.hedefPortfoy}" onblur="window.savePortfoyEdit()" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
                                         </div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td style="text-align:left !important;">Nominal Getiri Oranı</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.nominalGetiri >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.nominalGetiri)}</td>
-                                    <td style="text-align:left !important; padding-left: 1rem;">Hedefe Ulaşmak İçin Gereken Artış %</td>
-                                    <td style="text-align:right !important;">${formatPercent(portfoyBilgileri.hedefArtis, 0)}</td>
+                                    <td style="text-align:left !important;">Hedefe Ulaşmak İçin Gereken Artış %</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatPercent(portfoyBilgileri.hedefArtis, 0)}</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div style="width: 180px; height: 180px; display: flex; justify-content: center; align-items: center; padding-left: 1rem;">
+                    <div class="glass" style="width: 380px; height: 380px; display: flex; justify-content: center; align-items: center; padding: 1rem;">
                         <canvas id="chart-ozet"></canvas>
                     </div>
                 </div>
             </div>
-            
-            <div class="table-container glass" style="margin-bottom: 0;">
-                <div class="table-header">Günlük Portföy Değişimi</div>
-                <div style="padding: 0 1rem; margin-top: 0.5rem;">
+        `;
+    } else if (window.portfoyTab === 'gecmis') {
+        tabContentHtml = `
+            <div class="glass" style="display: flex; flex-direction: column; width: 100%; min-height: 350px; margin-bottom: 0;">
+                <div class="table-header" style="padding: 1rem 1rem 0.5rem 1rem; border-bottom: 1px solid var(--surface-border);">Günlük Portföy Değişimi</div>
+                <div style="padding: 1rem 1rem 0 1rem;">
                     <div id="portfoy-chart-filters" style="display:flex; gap:0.5rem; font-size:13px; color:var(--text-primary);">
                         <span class="chart-filter" data-range="1H" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('1H')">1H</span>
                         <span class="chart-filter" data-range="1A" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('1A')">1A</span>
@@ -1318,24 +1335,17 @@ const renderPortfoy = (container) => {
                         <span class="chart-filter" data-range="MAX" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('MAX')">Maks.</span>
                     </div>
                 </div>
-                <div style="width: 100%; height: 250px; position: relative; padding: 1rem;">
+                <div style="width: 100%; height: 300px; position: relative; padding: 1rem;">
                     <canvas id="chart-portfoy-gecmisi"></canvas>
                 </div>
             </div>
-
-            </div>
-            </div>
-
+        `;
+    } else if (window.portfoyTab === 'varliklar') {
+        tabContentHtml = `
             <div id="portfoy-varliklar" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
-                <style>
-                    .varliklar-table th, .varliklar-table td, .varliklar-table .total-row td {
-                        font-size: 12px !important;
-                        font-weight: normal !important;
-                    }
-                </style>
-                <div class="table-container glass" style="margin-bottom: 0;">
-                    <div class="table-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Varlıklarım</span>
+
+                <div class="table-container glass" style="margin-bottom: 0; overflow-x: auto;">
+                    <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.5rem;">
                         <div>
                             <button id="varliklar-edit-btn" class="btn btn-icon" style="color: var(--accent-color); font-size: 14px; padding: 4px;" onclick="window.toggleVarliklarEdit()" title="Düzenle"><i class="fas fa-edit"></i></button>
                             <button id="varliklar-save-btn" class="btn btn-icon" style="color: var(--success-color); font-size: 14px; padding: 4px; display: none;" onclick="window.saveVarliklarEdit()" title="Kaydet"><i class="fas fa-save"></i></button>
@@ -1343,8 +1353,8 @@ const renderPortfoy = (container) => {
                     </div>
                 <div class="flex-row" style="align-items: center; gap: 1rem;">
                     <div style="flex: 2.5; overflow-x: auto;">
-                        <table class="dash-table compact-table varliklar-table">
-                            <thead>
+                        <table class="dash-table compact-table varliklar-table" style="text-align: center; border-collapse: separate; border-spacing: 0;">
+                            <thead style="position: sticky; top: 0; z-index: 10; background: var(--bg-card, #1e293b);">
                                 <tr><th>S.N.</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('menkul')">Menkul${getVarliklarSortIcon('menkul')}</th><th>Tür</th><th>Güncel<br>Fiyat</th><th>Adet</th><th>Güncel<br>Maliyet</th><th>Net<br>Maliyet</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('odenenTutar')">Ödenen<br>Tutar${getVarliklarSortIcon('odenenTutar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('guncelTutar')">Güncel<br>Tutar${getVarliklarSortIcon('guncelTutar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('kar')">Kar/Zarar${getVarliklarSortIcon('kar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('karYuzde')">Kar/Zarar <br> %${getVarliklarSortIcon('karYuzde')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('portfoyOrani')">Portföy<br>Oranı${getVarliklarSortIcon('portfoyOrani')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('ilkAlimTarihi')">İlk Alım<br>Tarihi${getVarliklarSortIcon('ilkAlimTarihi')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('gecenSure')">Geçen<br>Süre${getVarliklarSortIcon('gecenSure')}</th></tr>
                             </thead>
                             <tbody>
@@ -1365,50 +1375,63 @@ const renderPortfoy = (container) => {
                         <canvas id="chart-varliklar"></canvas>
                     </div>
                 </div>
+                </div>
             </div>
-
-            </div>
-            </div>
-
-            ${!(window.Capacitor && window.Capacitor.isNative) ? `
+        `;
+    } else if (window.portfoyTab === 'arsiv') {
+        tabContentHtml = `
             <div id="portfoy-arsiv" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
-                <div class="table-container glass" style="margin-bottom: 0;">
-                    <div class="table-header">Arşiv</div>
-<table class="dash-table compact-table" style="min-width: 1000px;">
-                    <thead>
-                        <tr><th style="font-size: 14px;">S.N.</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('menkul')">Menkul${getArsivSortIcon('menkul')}</th><th>Güncel<br>Fiyat</th><th>Adet</th><th>Alış Fiyatı</th><th>Satış Fiyatı</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('kar')">Kar / Zarar${getArsivSortIcon('kar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('karYuzde')">Kar / Zarar %${getArsivSortIcon('karYuzde')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('ilkAlimTarihi')">İlk Alım Tarihi${getArsivSortIcon('ilkAlimTarihi')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('sonSatimTarihi')">Son Satım Tarihi${getArsivSortIcon('sonSatimTarihi')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('tasimaSuresi')">Taşıma Süresi${getArsivSortIcon('tasimaSuresi')}</th></tr>
-                    </thead>
-                    <tbody>
-                        ${arsivHtml}
-                        <tr class="total-row">
-                            <td style="text-align: center !important;"></td>
-                            <td style="text-align: left !important;">TOPLAM</td>
-                            <td colspan="4" style="text-align: right !important;"></td>
-                            <td class="${arsivKarTotal >= 0 ? 'text-success' : 'text-danger'}" style="text-align: right !important;">${formatCurrency(arsivKarTotal, 0)}</td>
-                            <td colspan="4" style="text-align: right !important;"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            </div>
-            ` : ''}
+                <div class="table-container glass" style="margin-bottom: 0; overflow-x: auto;">
 
+                    <table class="dash-table compact-table" style="min-width: 1000px; text-align: center; border-collapse: separate; border-spacing: 0;">
+                        <thead style="position: sticky; top: 0; z-index: 10; background: var(--bg-card, #1e293b);">
+                            <tr><th style="font-size: 14px;">S.N.</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('menkul')">Menkul${getArsivSortIcon('menkul')}</th><th>Güncel<br>Fiyat</th><th>Adet</th><th>Alış Fiyatı</th><th>Satış Fiyatı</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('kar')">Kar / Zarar${getArsivSortIcon('kar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('karYuzde')">Kar / Zarar %${getArsivSortIcon('karYuzde')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('ilkAlimTarihi')">İlk Alım Tarihi${getArsivSortIcon('ilkAlimTarihi')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('sonSatimTarihi')">Son Satım Tarihi${getArsivSortIcon('sonSatimTarihi')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('tasimaSuresi')">Taşıma Süresi${getArsivSortIcon('tasimaSuresi')}</th></tr>
+                        </thead>
+                        <tbody>
+                            ${arsivHtml}
+                            <tr class="total-row">
+                                <td style="text-align: center !important;"></td>
+                                <td style="text-align: left !important;">TOPLAM</td>
+                                <td colspan="4" style="text-align: right !important;"></td>
+                                <td class="${arsivKarTotal >= 0 ? 'text-success' : 'text-danger'}" style="text-align: right !important;">${formatCurrency(arsivKarTotal, 0)}</td>
+                                <td colspan="4" style="text-align: right !important;"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    const html = `
+        <style>
+            .portfoy-tab-content table th, .portfoy-tab-content table td {
+                font-size: 12px !important;
+                font-weight: normal !important;
+            }
+        </style>
+        <div class="page-section active" style="display: flex; flex-direction: column; padding: 0px; gap: 1rem;">
+            <div class="glass" style="display: flex; flex-direction: column; padding: 0.5rem 1rem;">
+                ${tabsHtml}
+            </div>
+            
+            <div style="display: flex; flex-direction: column; width: 100%;">
+                ${tabContentHtml}
+            </div>
         </div>
     `;
     container.innerHTML = html;
 
 
     window.togglePortfoyEdit = () => {
-        const isEditing = document.getElementById('portfoy-save-btn').style.display !== 'none';
+        const nakitText = document.getElementById('nakit-text');
+        const isEditing = nakitText.style.display === 'none';
         
-        document.getElementById('nakit-text').style.display = isEditing ? 'inline' : 'none';
+        nakitText.style.display = isEditing ? 'inline' : 'none';
         document.getElementById('inline-nakit-input').style.display = isEditing ? 'none' : 'inline-block';
         
         document.getElementById('hedef-text').style.display = isEditing ? 'inline' : 'none';
         document.getElementById('inline-hedef-input').style.display = isEditing ? 'none' : 'inline-block';
-        
-        document.getElementById('portfoy-edit-btn').style.display = isEditing ? 'inline-block' : 'none';
-        document.getElementById('portfoy-save-btn').style.display = isEditing ? 'none' : 'inline-block';
         
         if (!isEditing) {
             document.getElementById('inline-nakit-input').focus();
@@ -1475,7 +1498,58 @@ const renderPortfoy = (container) => {
 
         const ctxOzet = document.getElementById('chart-ozet');
         if (ctxOzet) {
-            window.chartOzetInstance = new Chart(ctxOzet, {
+            
+const pieLinesPlugin = {
+    id: 'pieLines',
+    afterDraw(chart) {
+        const ctx = chart.ctx;
+        chart.data.datasets.forEach((dataset, i) => {
+            chart.getDatasetMeta(i).data.forEach((arc, index) => {
+                const dataVal = dataset.data[index];
+                if (dataVal <= 0) return;
+                
+                const centerPoint = arc.tooltipPosition();
+                const chartCenter = { x: chart.chartArea.left + chart.chartArea.width/2, y: chart.chartArea.top + chart.chartArea.height/2 };
+                
+                let angle = Math.atan2(centerPoint.y - chartCenter.y, centerPoint.x - chartCenter.x);
+                if (index === 1 && Math.sin(angle) > 0.8) {
+                    angle = Math.PI - 0.4;
+                }
+                const radius = arc.outerRadius;
+                
+                const startX = chartCenter.x + Math.cos(angle) * radius;
+                const startY = chartCenter.y + Math.sin(angle) * radius;
+                
+                const endX = startX + Math.cos(angle) * 15;
+                const endY = startY + Math.sin(angle) * 15;
+                
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(endX, endY);
+                
+                const lineLen = 10;
+                const finalX = endX + (Math.cos(angle) >= 0 ? lineLen : -lineLen);
+                ctx.lineTo(finalX, endY);
+                ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+                ctx.stroke();
+                
+                ctx.fillStyle = '#fff';
+                ctx.font = '12px Arial';
+                ctx.textBaseline = 'middle';
+                ctx.textAlign = Math.cos(angle) >= 0 ? 'left' : 'right';
+                
+                let sum = 0;
+                dataset.data.forEach(d => sum+=d);
+                const text = (dataVal * 100 / sum).toFixed(0) + '%';
+                ctx.fillText(text, finalX + (Math.cos(angle) >= 0 ? 3 : -3), endY);
+                ctx.restore();
+            });
+        });
+    }
+};
+
+window.chartOzetInstance = new Chart(ctxOzet, {
                 type: 'doughnut',
                 data: {
                     labels: ['Nakit', 'Hisse', 'Fon'],
@@ -1486,6 +1560,7 @@ const renderPortfoy = (container) => {
                     }]
                 },
                 options: {
+                    layout: { padding: 40 },
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
@@ -1493,24 +1568,18 @@ const renderPortfoy = (container) => {
                             position: 'bottom', 
                             labels: { 
                                 color: '#fff',
-                                font: { size: 9 },
+                                font: { size: 12 },
                                 boxWidth: 10,
                                 boxHeight: 10,
                                 padding: 15
                             } 
                         },
                         datalabels: {
-                            color: '#fff',
-                            font: { size: 9 },
-                            formatter: (value, ctx) => {
-                                let sum = 0;
-                                ctx.chart.data.datasets[0].data.forEach(d => sum += d);
-                                if (sum === 0 || value === 0) return '';
-                                return (value * 100 / sum).toFixed(0) + '%';
-                            }
+                            display: false
                         }
                     }
-                }
+                },
+                plugins: [pieLinesPlugin]
             });
         }
 
@@ -1537,6 +1606,7 @@ const renderPortfoy = (container) => {
                     }]
                 },
                 options: {
+                    layout: { padding: 40 },
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { 
@@ -1544,7 +1614,7 @@ const renderPortfoy = (container) => {
                             position: 'bottom', 
                             labels: { 
                                 color: '#fff', 
-                                font: { size: 9 },
+                                font: { size: 12 },
                                 boxWidth: 10,
                                 boxHeight: 10,
                                 padding: 10
@@ -1552,7 +1622,7 @@ const renderPortfoy = (container) => {
                         },
                         datalabels: {
                             color: '#fff',
-                            font: { size: 9 },
+                            font: { size: 12 },
                             formatter: (value, ctx) => {
                                 let sum = 0;
                                 ctx.chart.data.datasets[0].data.forEach(d => sum += d);
@@ -1562,7 +1632,8 @@ const renderPortfoy = (container) => {
                             }
                         }
                     }
-                }
+                },
+                plugins: [pieLinesPlugin]
             });
         }
 
@@ -1758,6 +1829,7 @@ const renderPortfoy = (container) => {
                     ]
                 },
                 options: {
+                    layout: { padding: 40 },
                     responsive: true,
                     maintainAspectRatio: false,
                     interaction: {
@@ -1793,8 +1865,11 @@ const renderPortfoy = (container) => {
                             }
                         }
                     }
-                }
+                },
+                plugins: [pieLinesPlugin]
             });
+        } else {
+            ctxPortfoyGecmisi.parentElement.innerHTML = '<div style="padding: 3rem 1rem; text-align: center; color: var(--text-secondary);">Henüz geçmiş veri bulunmuyor. Yeni bir portföy değeri kaydedildiğinde grafik burada oluşturulacaktır.</div>';
         }
     }
 };
@@ -1897,10 +1972,10 @@ const renderHisseler = (container) => {
             'Bilanço': 'fas fa-balance-scale'
         };
 
-        const makeBtn = (t) => `<button class="nav-btn ${activeTab === t ? 'active' : ''}" style="margin:0; font-size:13px; font-weight:bold; padding:0.4rem 0.8rem; white-space:nowrap;" onclick="window.setHisseTab('${t}')"><i class="${tabIcons[t] || 'fas fa-file'}" style="margin-right:4px;"></i>${t}</button>`;
+        const makeBtn = (t) => `<button class="nav-btn ${activeTab === t ? 'active' : ''}" style="margin:0; font-size:12px; font-weight:normal; padding:0.4rem 0.8rem; white-space:nowrap;" onclick="window.setHisseTab('${t}')"><i class="${tabIcons[t] || 'fas fa-file'}" style="margin-right:4px;"></i>${t}</button>`;
         const makeDropdown = (title, items) => `
             <div class="nav-dropdown">
-                <button class="nav-btn ${items.includes(activeTab) ? 'active' : ''}" style="margin:0; font-size:13px; font-weight:bold; padding:0.4rem 0.8rem; white-space:nowrap;"><i class="fas fa-caret-down" style="margin-right:4px;"></i>${title}</button>
+                <button class="nav-btn ${items.includes(activeTab) ? 'active' : ''}" style="margin:0; font-size:12px; font-weight:normal; padding:0.4rem 0.8rem; white-space:nowrap;"><i class="fas fa-caret-down" style="margin-right:4px;"></i>${title}</button>
                 <div class="nav-dropdown-content">
                     ${items.map(t => `<a onclick="window.setHisseTab('${t}')">${t}</a>`).join('')}
                 </div>
@@ -2142,7 +2217,7 @@ const renderHisseler = (container) => {
                             <td style="text-align:left !important;">${item.label}</td>
                             <td style="text-align:right !important;">${fmtVal(vals.v1)}</td>
                             <td style="text-align:right !important;">${fmtVal(vals.v2)}</td>
-                            <td style="color: ${pct.color} !important; font-weight:bold; text-align:right !important;">${pct.text}</td>
+                            <td style="color: ${pct.color} !important; font-weight:normal; text-align:right !important;">${pct.text}</td>
                         </tr>`;
                     });
                     gelirHtml += `</tbody></table>`;
@@ -2225,7 +2300,7 @@ const renderHisseler = (container) => {
                             <td style="text-align:left !important;" title="${vals.debug || ''}">${item.label}</td>
                             <td style="text-align:right !important;" title="${vals.debug || ''}">${fmtVal(vals.v1)}</td>
                             <td style="text-align:right !important;">${fmtVal(vals.v2)}</td>
-                            <td style="color: ${pct.color} !important; font-weight:bold; text-align:right !important;">${pct.text}</td>
+                            <td style="color: ${pct.color} !important; font-weight:normal; text-align:right !important;">${pct.text}</td>
                         </tr>`;
                     });
                     bilancoHtml += `</tbody></table>`;
@@ -2414,19 +2489,19 @@ const renderHisseler = (container) => {
                 <style>
                 .compact-table { table-layout: auto !important; width: 100%; border-collapse: collapse; }
                 .compact-table th, .compact-table td { padding: 0.6rem 0.5rem !important; white-space: nowrap; }
-                .compact-table th { font-size: 0.85rem !important; font-weight: 600 !important; color: var(--text-primary) !important; height: 39px; }
-                .compact-table td:first-child { font-size: 0.85rem !important; font-weight: 500 !important; color: #cccccc !important; }
+                .compact-table th { font-size: 12px !important; font-weight: normal !important; color: var(--text-primary) !important; height: 39px; }
+                .compact-table td:first-child { font-size: 12px !important; font-weight: normal !important; color: #cccccc !important; }
                 .compact-table tr { height: 39px !important; }
-                .compact-table td { font-size: 0.85rem !important; font-weight: 500 !important; color: #cccccc; height: 34px !important; line-height: 1 !important; }
+                .compact-table td { font-size: 12px !important; font-weight: normal !important; color: #cccccc; height: 34px !important; line-height: 1 !important; }
                 /* nav-btn override removed to protect main sidebar */
-                .nav-dropdown-content a { font-size: 0.85rem !important; font-weight: 600 !important; }
-                .dash-title { font-size: 0.85rem !important; font-weight: 600 !important; color: var(--text-primary) !important; }
+                .nav-dropdown-content a { font-size: 12px !important; font-weight: normal !important; }
+                .dash-title { font-size: 12px !important; font-weight: normal !important; color: var(--text-primary) !important; }
                 .compact-card { padding: 1.2rem !important; }
                 .gauge-container { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 80px; height: 50px; }
                 .gauge-bg { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid rgba(255,255,255,0.1); border-bottom: none; box-sizing: border-box; }
                 .gauge-fill { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid #2ecc71; border-bottom: none; box-sizing: border-box; transform-origin: bottom center; transform: rotate(0deg); transition: transform 1s; }
-                .gauge-text { position: absolute; bottom: 0; font-size: 1.1rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
-                .gauge-label { font-size: 0.7rem; color: #aaa; margin-top: 4px; text-align: center; }
+                .gauge-text { position: absolute; bottom: 0; font-size: 12px; font-weight: normal; color: var(--text-primary); line-height: 1; }
+                .gauge-label { font-size: 12px; font-weight: normal; color: #aaa; margin-top: 4px; text-align: center; }
                 </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
                         
@@ -2445,7 +2520,7 @@ const renderHisseler = (container) => {
                             
                             <!-- Çarpanlar -->
                             <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
-                                <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;">Çarpanlar</div>
+                                <div class="dash-title" style="font-size: 12px; font-weight: normal; margin-bottom: 1rem;">Çarpanlar</div>
                                 <table class="dash-table compact-table" style="flex: 1;">
                                     <tbody>
                                         <tr style="border-bottom: 1px solid var(--table-border);">
@@ -2471,14 +2546,14 @@ const renderHisseler = (container) => {
 
                             <!-- Kaynak Dağılımı -->
                             <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
-                                <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 0.8rem;">Kaynak Dağılımı</div>
+                                <div class="dash-title" style="font-size: 12px; font-weight: normal; margin-bottom: 0.8rem;">Kaynak Dağılımı</div>
                                 <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
                                     <div style="display:flex; height: 12px; border-radius: 6px; overflow:hidden; margin-bottom: 1.5rem;">
                                         <div style="width:${pctOz}%; background:#6c5ce7;" title="Özkaynaklar: %${pctOz}"></div>
                                         <div style="width:${pctKisa}%; background:#fd79a8;" title="Kısa Vade Yükümlülükler: %${pctKisa}"></div>
                                         <div style="width:${pctUzun}%; background:#636e72;" title="Uzun Vade Yükümlülükler: %${pctUzun}"></div>
                                     </div>
-                                    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 1rem; font-size: 13px; color:#aaa;">
+                                    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 1rem; font-size: 12px; font-weight: normal; color:#aaa;">
                                         <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#6c5ce7;"></div>Özkaynaklar: %${pctOz}</div>
                                         <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#fd79a8;"></div>Kısa Vade Yük.: %${pctKisa}</div>
                                         <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#636e72;"></div>Uzun Vade Yük.: %${pctUzun}</div>
@@ -2488,7 +2563,7 @@ const renderHisseler = (container) => {
 
                             <!-- Şirket Detayları -->
                             <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
-                                <div class="dash-title" style="font-size: 0.85rem; font-weight: 500; margin-bottom: 1rem;">Şirket Detayları</div>
+                                <div class="dash-title" style="font-size: 12px; font-weight: normal; margin-bottom: 1rem;">Şirket Detayları</div>
                                 <table class="dash-table compact-table" style="flex: 1;">
                                     <tbody>
                                         <tr style="border-bottom: 1px solid var(--table-border);">
@@ -2514,32 +2589,32 @@ const renderHisseler = (container) => {
 
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Brüt Kar Marjı</div>
+                            <div class="dash-title" style="font-size: 12px; font-weight: normal;">Brüt Kar Marjı</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-bkm"></canvas></div>
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">FAVÖK Marjı</div>
+                            <div class="dash-title" style="font-size: 12px; font-weight: normal;">FAVÖK Marjı</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-fkm"></canvas></div>
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Net Kar Marjı</div>
+                            <div class="dash-title" style="font-size: 12px; font-weight: normal;">Net Kar Marjı</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-nkm"></canvas></div>
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Cari Oran</div>
+                            <div class="dash-title" style="font-size: 12px; font-weight: normal;">Cari Oran</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-cari"></canvas></div>
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Kaldıraç Oranı</div>
+                            <div class="dash-title" style="font-size: 12px; font-weight: normal;">Kaldıraç Oranı</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-kaldirac"></canvas></div>
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 0.85rem; font-weight: 500;">Özkaynak Karlılığı</div>
+                            <div class="dash-title" style="font-size: 12px; font-weight: normal;">Özkaynak Karlılığı</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-roe"></canvas></div>
                         </div>
                     </div>
@@ -2580,7 +2655,7 @@ const renderHisseler = (container) => {
                     
                     <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>Satış Gelirleri (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2588,7 +2663,7 @@ const renderHisseler = (container) => {
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>Satış Gelirleri (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2596,7 +2671,7 @@ const renderHisseler = (container) => {
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>Satış Gelirleri (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2605,7 +2680,7 @@ const renderHisseler = (container) => {
                     </div>
 
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                             <span>Satış Gelirleri</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -2614,7 +2689,7 @@ const renderHisseler = (container) => {
 
                     <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>Brüt Kar (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2622,7 +2697,7 @@ const renderHisseler = (container) => {
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>Brüt Kar (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2630,7 +2705,7 @@ const renderHisseler = (container) => {
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>Brüt Kar (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2639,7 +2714,7 @@ const renderHisseler = (container) => {
                     </div>
 
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                             <span>Brüt Kar</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -2648,21 +2723,21 @@ const renderHisseler = (container) => {
 
                     <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>Esas Faaliyet Karı (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-faaliyet"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>Esas Faaliyet Karı (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-faaliyet"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>Esas Faaliyet Karı (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2670,7 +2745,7 @@ const renderHisseler = (container) => {
                         </div>
                     </div>
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                             <span>Esas Faaliyet Karı</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -2679,21 +2754,21 @@ const renderHisseler = (container) => {
 
                     <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>FAVÖK (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-favok2"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>FAVÖK (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-favok"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>FAVÖK (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2701,7 +2776,7 @@ const renderHisseler = (container) => {
                         </div>
                     </div>
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                             <span>FAVÖK</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -2710,21 +2785,21 @@ const renderHisseler = (container) => {
 
                     <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>Net Kar (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-netkar2"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>Net Kar (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-netkar"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                                 <span>Net Kar (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2732,7 +2807,7 @@ const renderHisseler = (container) => {
                         </div>
                     </div>
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 0.85rem; font-weight: 500; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 12px; font-weight: normal; padding-right: 20px;">
                             <span>Net Kar</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -2781,6 +2856,8 @@ const renderHisseler = (container) => {
             } else if (['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler'].includes(activeTab)) {
                 contentHtml = `<div style="display:flex; justify-content:center; align-items:center; height:200px; opacity:0.5; font-style:italic;">${activeTab} sayfası henüz yapım aşamasındadır.</div>`;
              } else if (activeTab === 'Değerleme') {
+                if (!window.degerlemeTab) window.degerlemeTab = 'ara';
+                window.setDegerlemeTab = (tab) => { window.degerlemeTab = tab; if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage(); };
                 // Initialize default edit modes if not present
                 if (!window.degerlemeEditMode) window.degerlemeEditMode = { '2026': false, '2027': false, '2028': false, '2029': false, '2030': false };
                 window.toggleDegerlemeEdit = (y) => {
@@ -2792,6 +2869,8 @@ const renderHisseler = (container) => {
                 if(!State.data.degerleme) State.data.degerleme = {};
                 if(!State.data.degerleme[selectedHisse]) State.data.degerleme[selectedHisse] = {};
                 const stateData = State.data.degerleme[selectedHisse];
+                const savedNotYil = stateData.genelNotYil !== undefined ? stateData.genelNotYil : (stateData.genelNot || '');
+                const savedNotAra = stateData.genelNotAra || '';
                 const years = ['2026', '2027', '2028', '2029', '2030'];
                 
                 window.updateDegerlemeInput = (hisse, year, field, value) => {
@@ -2802,62 +2881,79 @@ const renderHisseler = (container) => {
                     if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
                 };
 
-                window.saveDegerlemeNot = (hisse) => {
+                window.saveDegerlemeNot = (hisse, type) => {
                     if (!State.data.degerleme[hisse]) State.data.degerleme[hisse] = {};
                     const input = document.getElementById('degerleme-not-input');
+                    if (!input) return;
                     const val = input.value;
-                    State.data.degerleme[hisse].genelNot = val;
+                    if (type === 'yil') {
+                        State.data.degerleme[hisse].genelNotYil = val;
+                    } else {
+                        State.data.degerleme[hisse].genelNotAra = val;
+                    }
                     State.save();
                 };
 
+
+                
+                let tabUI = `
+                    <div style="display: flex; gap: 15px; margin-bottom: 5px; padding-bottom: 0px; overflow-x: auto;">
+                        <span style="cursor: pointer; font-size: 12px; font-weight: normal; color: ${window.degerlemeTab === 'ara' ? '#ffffff' : 'var(--text-secondary)'}; background: ${window.degerlemeTab === 'ara' ? 'var(--overlay-bg)' : 'transparent'}; padding: 5px 10px; border-radius: 4px; transition: 0.2s;" onclick="window.setDegerlemeTab('ara')">Ara Bilançolara Göre</span>
+                        <span style="cursor: pointer; font-size: 12px; font-weight: normal; color: ${window.degerlemeTab === 'yil' ? '#ffffff' : 'var(--text-secondary)'}; background: ${window.degerlemeTab === 'yil' ? 'var(--overlay-bg)' : 'transparent'}; padding: 5px 10px; border-radius: 4px; transition: 0.2s;" onclick="window.setDegerlemeTab('yil')">Yıl Sonu Bilançolara Göre</span>
+                    </div>
+                `;
+                
+    
                 let headerHtml = `<tr><th>Kalem</th>`;
                 years.forEach(y => {
-                    headerHtml += `<th style="font-size: 14px; text-align:center;">
+                    headerHtml += `<th style="font-size: 12px; text-align:center;">
                         <div>${y}</div>
                     </th>`;
                 });
                 headerHtml += `</tr>`;
 
                 let html = `<div class="dash-card" style="display:flex; flex-direction:column;">
-                    <div class="dash-title">Yıl Sonu Bilanço Beklentileriniz</div>
+${tabUI}
+                    <style>.degerleme-table td, .degerleme-table th, .degerleme-table input { color: #cccccc !important; }</style>
+                    
                     <div style="overflow-x:auto;">
-                    <table class="dash-table compact-table" style="min-width: 1000px;">
+                    <table class="dash-table compact-table degerleme-table" style="min-width: 1000px;">
                             <thead>${headerHtml}</thead>
                             <tbody>`;
                 
                 // Get Odenmis Sermaye dynamically
-                let odenmisSermaye = 0;
-                const sData = window.stockData && window.stockData[selectedHisse] ? window.stockData[selectedHisse] : null;
-                if (sData && sData.bilanco && sData.bilanco.rows) {
-                    const osRow = sData.bilanco.rows.find(r => r[0] && r[0].toLowerCase().includes('ödenmiş sermaye'));
-                    if (osRow && osRow.length > 1) {
-                        odenmisSermaye = parseFloat(String(osRow[1]).replace(/\./g, '').replace(/,/g, '.')) || 0;
+                let odenmisSermayeDeg = 0;
+                const sDataDeg = window.stockData && window.stockData[selectedHisse] ? window.stockData[selectedHisse] : null;
+                if (sDataDeg && sDataDeg.bilanco && sDataDeg.bilanco.rows) {
+                    const osRow_deg = sDataDeg.bilanco.rows.find(r => r[0] && r[0].toLowerCase().includes('ödenmiş sermaye'));
+                    if (osRow_deg && osRow_deg.length > 1) {
+                        odenmisSermayeDeg = parseFloat(String(osRow_deg[1]).replace(/\./g, '').replace(/,/g, '.')) || 0;
                     }
                 }
-                let netBorc = 0;
-                if (sData && sData.bilanco && sData.bilanco.rows) {
-                    let finansalBorclarTotal = 0;
-                    let nakitTotal = 0;
-                    let finYatTotal = 0;
+                let netBorc_deg = 0;
+                if (sDataDeg && sDataDeg.bilanco && sDataDeg.bilanco.rows) {
+                    let finansalBorclarTotal_deg = 0;
+                    let nakitTotal_deg = 0;
+                    let finYatTotal_deg = 0;
                     let inDuran = false;
-                    sData.bilanco.rows.forEach(r => {
+                    sDataDeg.bilanco.rows.forEach(r => {
                         if (!r[0]) return;
                         const rName = r[0].toLocaleLowerCase('tr-TR');
                         if (rName.trim() === 'duran varlıklar') inDuran = true;
-                        if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
+                        if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sDataDeg.bilanco.rows.length || sDataDeg.bilanco.rows.indexOf(r) < sDataDeg.bilanco.rows.length - 2)) {
                             const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                            finansalBorclarTotal += val;
+                            finansalBorclarTotal_deg += val;
                         }
                         if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
                             const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                            nakitTotal += val;
+                            nakitTotal_deg += val;
                         }
                         if (rName.includes('finansal yatırımlar') && !inDuran) {
                             const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                            finYatTotal += val;
+                            finYatTotal_deg += val;
                         }
                     });
-                    netBorc = finansalBorclarTotal - nakitTotal - finYatTotal;
+                    netBorc_deg = finansalBorclarTotal_deg - nakitTotal_deg - finYatTotal_deg;
                 }
                 const guncelFiyat = parseFloat(State.getFiyat ? State.getFiyat(selectedHisse) : (window.fiyatlar ? window.fiyatlar[selectedHisse] : 0)) || 0;
                 const usdKuru = (State.getFiyat ? parseFloat(State.getFiyat('USDTRY')) : null) || window.dolarKuru || 46.99;
@@ -2869,7 +2965,7 @@ const renderHisseler = (container) => {
                     { key: 'net_kar_marji', label: 'Net Kar Marjı', type: 'percent' },
                     { key: 'favok', label: 'FAVÖK', readonly: true, type: 'currency' },
                     { key: 'net_kar', label: 'Net Kar', readonly: true, type: 'currency' },
-                    { key: 'ozkaynaklar', label: 'Özkaynaklar', type: 'currency' },
+                    { key: 'ozkaynaklar_deg', label: 'Özkaynaklar', type: 'currency' },
                     { key: 'fd_favok', label: 'FD/FAVÖK', type: 'decimal' },
                     { key: 'f_k', label: 'F/K', type: 'decimal' },
                     { key: 'pd_dd', label: 'PD/DD', type: 'decimal' },
@@ -2878,7 +2974,7 @@ const renderHisseler = (container) => {
                 ];
                 
                 rows.forEach(r => {
-                    html += `<tr><td style="text-align:left !important; font-weight:bold;">${r.label}</td>`;
+                    html += `<tr><td style="text-align:left !important; font-weight:normal;">${r.label}</td>`;
                     years.forEach(y => {
                         const d = stateData[y] || {};
                         const editMode = window.degerlemeEditMode[y];
@@ -2919,9 +3015,9 @@ const renderHisseler = (container) => {
                         // Calculate PDs
                         let validPDs = [];
                         
-                        let currentNetBorc = netBorc;
-                        if (curCurrency === 'USD') currentNetBorc = netBorc / usdKuru;
-                        else if (curCurrency === 'EUR') currentNetBorc = netBorc / eurKuru;
+                        let currentNetBorc = netBorc_deg;
+                        if (curCurrency === 'USD') currentNetBorc = netBorc_deg / usdKuru;
+                        else if (curCurrency === 'EUR') currentNetBorc = netBorc_deg / eurKuru;
 
                         if (hasFavok && d.fd_favok !== undefined && d.fd_favok !== '') {
                             validPDs.push((favok * (parseFloat(d.fd_favok) || 0)) - currentNetBorc);
@@ -2929,8 +3025,8 @@ const renderHisseler = (container) => {
                         if (hasNetKar && d.f_k !== undefined && d.f_k !== '') {
                             validPDs.push(net_kar * (parseFloat(d.f_k) || 0));
                         }
-                        if (d.ozkaynaklar !== undefined && d.ozkaynaklar !== '' && d.pd_dd !== undefined && d.pd_dd !== '') {
-                            validPDs.push((parseFloat(d.ozkaynaklar) || 0) * (parseFloat(d.pd_dd) || 0));
+                        if (d.ozkaynaklar_deg !== undefined && d.ozkaynaklar_deg !== '' && d.pd_dd !== undefined && d.pd_dd !== '') {
+                            validPDs.push((parseFloat(d.ozkaynaklar_deg) || 0) * (parseFloat(d.pd_dd) || 0));
                         }
                         
                         let avgPD = 0;
@@ -2941,7 +3037,7 @@ const renderHisseler = (container) => {
                         let hedefFiyatTL = 0;
                         let hasHedef = false;
                         
-                        let currentOdenmisSermaye = odenmisSermaye;
+                        let currentOdenmisSermaye = odenmisSermayeDeg;
                         if (d.sermaye !== undefined && d.sermaye !== '') {
                             currentOdenmisSermaye = parseFloat(d.sermaye) || currentOdenmisSermaye;
                         }
@@ -2971,7 +3067,7 @@ const renderHisseler = (container) => {
                             }
                         }
                         if (r.key === 'sermaye' && !editMode && (d.sermaye === undefined || d.sermaye === '')) {
-                            displayVal = odenmisSermaye;
+                            displayVal = odenmisSermayeDeg;
                         }
 
                         
@@ -2997,10 +3093,10 @@ const renderHisseler = (container) => {
                         
                         let extraStyle = '';
                         if (r.isTarget && hasHedef) {
-                            extraStyle = potansiyelNum > 0 ? 'color: #2ecc71 !important; font-weight: bold; font-size:1.1rem;' : 'color: #e74c3c !important; font-weight: bold; font-size:1.1rem;';
+                            extraStyle = potansiyelNum > 0 ? 'color: #2ecc71 !important; font-weight: normal; font-size:1.1rem;' : 'color: #e74c3c !important; font-weight: normal; font-size:1.1rem;';
                         }
                         if (r.key === 'potansiyel' && val !== '---') {
-                            extraStyle = val > 0 ? 'color: #2ecc71 !important; font-weight: bold;' : 'color: #e74c3c !important; font-weight: bold;';
+                            extraStyle = val > 0 ? 'color: #2ecc71 !important; font-weight: normal;' : 'color: #e74c3c !important; font-weight: normal;';
                         }
                         
                         if (editMode && !r.readonly) {
@@ -3013,7 +3109,7 @@ const renderHisseler = (container) => {
                 });
                 
                 // Add actions row at the bottom
-                html += `<tr><td style="text-align:left; font-weight:bold; color:var(--text-secondary);"></td>`;
+                html += `<tr><td style="text-align:left; font-weight:normal; color:var(--text-secondary);"></td>`;
                 years.forEach(y => {
                     const d = stateData[y] || {};
                     const curCurrency = d.currency || 'TRY';
@@ -3024,26 +3120,22 @@ const renderHisseler = (container) => {
                                 <option value="USD" ${curCurrency === 'USD' ? 'selected' : ''}>$</option>
                                 <option value="EUR" ${curCurrency === 'EUR' ? 'selected' : ''}>€</option>
                             </select>
-                            <i class="fas fa-edit" style="cursor:pointer; color:var(--accent-color);" onclick="window.toggleDegerlemeEdit('${y}')" title="Düzenle"></i>
-                            <i class="fas fa-save" style="cursor:pointer; color:var(--success-color); background:#000000; border-radius:3px; padding:2px 3px; font-size:12px;" onclick="window.toggleDegerlemeEdit('${y}')" title="Kaydet"></i>
-                            <i class="fas fa-trash-alt" style="cursor:pointer; color:var(--text-secondary); background:transparent; padding:2px 3px; font-size:12px;" onclick="if(confirm('${y} verilerini silmek istediğinize emin misiniz?')){ delete State.data.degerleme['${selectedHisse}']['${y}']; State.save(); if(typeof renderUI === 'function') renderUI(); else if(typeof renderPage === 'function') renderPage(); }" title="Sil"></i>
+                            <i class="fas fa-edit" style="cursor:pointer; color:#cccccc; font-size:12px;" onclick="window.toggleDegerlemeEdit('${y}')" title="Düzenle"></i>
+                            <i class="fas fa-save" style="cursor:pointer; color:#cccccc; font-size:12px;" onclick="window.toggleDegerlemeEdit('${y}')" title="Kaydet"></i>
+                            <i class="fas fa-trash-alt" style="cursor:pointer; color:#cccccc; font-size:12px;" onclick="if(confirm('${y} verilerini silmek istediğinize emin misiniz?')){ delete State.data.degerleme['${selectedHisse}']['${y}']; State.save(); if(typeof renderUI === 'function') renderUI(); else if(typeof renderPage === 'function') renderPage(); }" title="Sil"></i>
                         </div>
                     </td>`;
                 });
                 html += `</tr>`;
                 
-                const savedNot = stateData.genelNot || '';
+                
                 html += `</tbody></table></div>`; // End of table wrapper
                 html += `
                     <div style="margin-top: 1rem; border-top: 1px solid var(--surface-border); padding-top: 1rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <div style="font-size: 13px; font-weight: bold; color: var(--text-primary);">Değerleme Notları</div>
-                            <button class="btn" style="padding: 0.3rem 0.8rem; font-size: 13px; font-weight: bold; background: var(--success-color);" onclick="window.saveDegerlemeNot('${selectedHisse}')">Kaydet</button>
-                        </div>
-                        <textarea id="degerleme-not-input" class="form-control" style="width: 100%; height: 80px; resize: vertical; font-size: 12px; font-family: inherit; margin-bottom: 0.5rem;" placeholder="Bu hisse için değerleme notlarınızı buraya yazabilirsiniz...">${savedNot}</textarea>
+                        <textarea id="degerleme-not-input" class="form-control" style="width: 100%; height: 44px; resize: vertical; font-size: 12px; font-family: inherit; margin-bottom: 0.5rem;" placeholder="Bu hisse için değerleme notlarınızı buraya yazabilirsiniz..." onblur="window.saveDegerlemeNot('${selectedHisse}', 'yil')">${savedNotYil}</textarea>
                     </div>
                 </div>`; // End of dash-card
-                contentHtml += html;
+                if (window.degerlemeTab === 'yil') contentHtml += html;
 
                 // ====== ARA BİLANÇO BEKLENTİLERİ ======
                 if (!window.araDegerlemeEditMode) window.araDegerlemeEditMode = {};
@@ -3060,7 +3152,7 @@ const renderHisseler = (container) => {
                     if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
                 };
 
-                const bilancoHeaders = (sData && sData.bilanco && sData.bilanco.headers) ? sData.bilanco.headers : [];
+                const bilancoHeaders = (sDataDeg && sDataDeg.bilanco && sDataDeg.bilanco.headers) ? sDataDeg.bilanco.headers : [];
                 let pastPeriods = [];
                 let pastIndices = [];
                 for (let i = 1; i <= Math.min(3, bilancoHeaders.length - 1); i++) {
@@ -3089,16 +3181,18 @@ const renderHisseler = (container) => {
 
                 let araHeaderHtml = `<tr><th>Kalem</th>`;
                 araPeriods.forEach(p => {
-                    araHeaderHtml += `<th style="font-size: 14px; text-align:center;">
+                    araHeaderHtml += `<th style="font-size: 12px; text-align:center;">
                         <div>${p}</div>
                     </th>`;
                 });
                 araHeaderHtml += `</tr>`;
 
-                let araHtml = `<div class="dash-card" style="display:flex; flex-direction:column; margin-top: 1.5rem;">
-                    <div class="dash-title">Ara Bilanço Beklentileriniz</div>
+                let araHtml = `<div class="dash-card" style="display:flex; flex-direction:column; margin-top: 0;">
+${tabUI}
+                    <style>.degerleme-table td, .degerleme-table th, .degerleme-table input { color: #cccccc !important; }</style>
+                    
                     <div style="overflow-x:auto;">
-                    <table class="dash-table compact-table" style="min-width: 1000px;">
+                    <table class="dash-table compact-table degerleme-table" style="min-width: 1000px;">
                         <thead>${araHeaderHtml}</thead>
                         <tbody>`;
 
@@ -3116,20 +3210,20 @@ const renderHisseler = (container) => {
                     let r = null;
                     let val = '';
                     if (key === 'ciro') {
-                        if (sData.gelirYillik && sData.gelirYillik.rows) {
-                            r = sData.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
+                        if (sDataDeg.gelirYillik && sDataDeg.gelirYillik.rows) {
+                            r = sDataDeg.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
                         }
                     } else if (key === 'favok') {
-                        if (sData.gelirYillik && sData.gelirYillik.rows) {
-                            r = sData.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
+                        if (sDataDeg.gelirYillik && sDataDeg.gelirYillik.rows) {
+                            r = sDataDeg.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
                         }
                     } else if (key === 'net_kar') {
-                        if (sData.gelirYillik && sData.gelirYillik.rows) {
-                            r = sData.gelirYillik.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                        if (sDataDeg.gelirYillik && sDataDeg.gelirYillik.rows) {
+                            r = sDataDeg.gelirYillik.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
                         }
-                    } else if (key === 'ozkaynaklar') {
-                        if (sData.bilanco && sData.bilanco.rows) {
-                            r = sData.bilanco.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
+                    } else if (key === 'ozkaynaklar_deg') {
+                        if (sDataDeg.bilanco && sDataDeg.bilanco.rows) {
+                            r = sDataDeg.bilanco.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
                         }
                     }
                     if (r && r[idx] !== undefined && r[idx] !== '') val = parseTRNumberForAra(r[idx]);
@@ -3137,7 +3231,7 @@ const renderHisseler = (container) => {
                 };
 
                 rows.forEach(r => {
-                    araHtml += `<tr><td style="text-align:left !important; font-weight:bold;">${r.label}</td>`;
+                    araHtml += `<tr><td style="text-align:left !important; font-weight:normal;">${r.label}</td>`;
                     araPeriods.forEach((p, pIndex) => {
                         const isPast = pIndex < pastPeriods.length;
                         const pIdx = isPast ? pastIndices[pIndex] : -1;
@@ -3147,12 +3241,12 @@ const renderHisseler = (container) => {
                             const ciro = fetchHistVal('ciro', pIdx);
                             const favok = fetchHistVal('favok', pIdx);
                             const net_kar = fetchHistVal('net_kar', pIdx);
-                            const ozkaynaklar = fetchHistVal('ozkaynaklar', pIdx);
+                            const ozkaynaklar_deg = fetchHistVal('ozkaynaklar_deg', pIdx);
                             
                             d.ciro = ciro;
                             d.favok = favok;
                             d.net_kar = net_kar;
-                            d.ozkaynaklar = ozkaynaklar;
+                            d.ozkaynaklar_deg = ozkaynaklar_deg;
                             d.favok_marji = (ciro !== '' && ciro !== 0 && favok !== '') ? (favok / ciro) * 100 : '';
                             d.net_kar_marji = (ciro !== '' && ciro !== 0 && net_kar !== '') ? (net_kar / ciro) * 100 : '';
                             d.fd_favok = '';
@@ -3198,9 +3292,9 @@ const renderHisseler = (container) => {
                             if (r.key === 'net_kar') displayVal = val = hasNetKar ? net_kar : '---';
                             
                             let validPDs = [];
-                            let currentNetBorc = netBorc;
-                            if (curCurrency === 'USD') currentNetBorc = netBorc / usdKuru;
-                            else if (curCurrency === 'EUR') currentNetBorc = netBorc / eurKuru;
+                            let currentNetBorc = netBorc_deg;
+                            if (curCurrency === 'USD') currentNetBorc = netBorc_deg / usdKuru;
+                            else if (curCurrency === 'EUR') currentNetBorc = netBorc_deg / eurKuru;
 
                             if (hasFavok && d.fd_favok !== undefined && d.fd_favok !== '') {
                                 validPDs.push((favok * (parseFloat(d.fd_favok) || 0)) - currentNetBorc);
@@ -3208,8 +3302,8 @@ const renderHisseler = (container) => {
                             if (hasNetKar && d.f_k !== undefined && d.f_k !== '') {
                                 validPDs.push(net_kar * (parseFloat(d.f_k) || 0));
                             }
-                            if (d.ozkaynaklar !== undefined && d.ozkaynaklar !== '' && d.pd_dd !== undefined && d.pd_dd !== '') {
-                                validPDs.push((parseFloat(d.ozkaynaklar) || 0) * (parseFloat(d.pd_dd) || 0));
+                            if (d.ozkaynaklar_deg !== undefined && d.ozkaynaklar_deg !== '' && d.pd_dd !== undefined && d.pd_dd !== '') {
+                                validPDs.push((parseFloat(d.ozkaynaklar_deg) || 0) * (parseFloat(d.pd_dd) || 0));
                             }
                             
                             let avgPD = 0;
@@ -3218,7 +3312,7 @@ const renderHisseler = (container) => {
                             let hedefFiyatTL = 0;
                             let hasHedef = false;
                             
-                            let currentOdenmisSermaye = odenmisSermaye;
+                            let currentOdenmisSermaye = odenmisSermayeDeg;
                             if (d.sermaye !== undefined && d.sermaye !== '') currentOdenmisSermaye = parseFloat(d.sermaye) || currentOdenmisSermaye;
                             
                             if (validPDs.length > 0 && currentOdenmisSermaye > 0) {
@@ -3260,10 +3354,10 @@ const renderHisseler = (container) => {
                         let extraStyle = '';
                         if (!isPast && r.isTarget && displayVal !== '---') {
                             const numPot = ((parseFloat(String(displayVal).replace('₺','').replace(/\./g,'').replace(',','.')) - guncelFiyat) / guncelFiyat) * 100;
-                            extraStyle = numPot > 0 ? 'color: #2ecc71 !important; font-weight: bold; font-size:1.1rem;' : 'color: #e74c3c !important; font-weight: bold; font-size:1.1rem;';
+                            extraStyle = numPot > 0 ? 'color: #2ecc71 !important; font-weight: normal; font-size:1.1rem;' : 'color: #e74c3c !important; font-weight: normal; font-size:1.1rem;';
                         }
                         if (!isPast && r.key === 'potansiyel' && val !== '---') {
-                            extraStyle = val > 0 ? 'color: #2ecc71 !important; font-weight: bold;' : 'color: #e74c3c !important; font-weight: bold;';
+                            extraStyle = val > 0 ? 'color: #2ecc71 !important; font-weight: normal;' : 'color: #e74c3c !important; font-weight: normal;';
                         }
                         
                         if (editMode && !r.readonly) {
@@ -3275,7 +3369,7 @@ const renderHisseler = (container) => {
                     araHtml += `</tr>`;
                 });
 
-                araHtml += `<tr><td style="text-align:left; font-weight:bold; color:var(--text-secondary);"></td>`;
+                araHtml += `<tr><td style="text-align:left; font-weight:normal; color:var(--text-secondary);"></td>`;
                 araPeriods.forEach((p, pIndex) => {
                     const isPast = pIndex < pastPeriods.length;
                     if (isPast) {
@@ -3290,16 +3384,21 @@ const renderHisseler = (container) => {
                                     <option value="USD" ${curCurrency === 'USD' ? 'selected' : ''}>$</option>
                                     <option value="EUR" ${curCurrency === 'EUR' ? 'selected' : ''}>€</option>
                                 </select>
-                                <i class="fas fa-edit" style="cursor:pointer; color:var(--accent-color);" onclick="window.toggleAraDegerlemeEdit('${p}')" title="Düzenle"></i>
-                                <i class="fas fa-save" style="cursor:pointer; color:var(--success-color); background:#000000; border-radius:3px; padding:2px 3px; font-size:12px;" onclick="window.toggleAraDegerlemeEdit('${p}')" title="Kaydet"></i>
-                                <i class="fas fa-trash-alt" style="cursor:pointer; color:var(--text-secondary); background:transparent; padding:2px 3px; font-size:12px;" onclick="if(confirm('${p} verilerini silmek istediğinize emin misiniz?')){ delete State.data.araDegerleme['${selectedHisse}']['${p}']; State.save(); if(typeof renderUI === 'function') renderUI(); else if(typeof renderPage === 'function') renderPage(); }" title="Sil"></i>
+                                <i class="fas fa-edit" style="cursor:pointer; color:#cccccc; font-size:12px;" onclick="window.toggleAraDegerlemeEdit('${p}')" title="Düzenle"></i>
+                                <i class="fas fa-save" style="cursor:pointer; color:#cccccc; font-size:12px;" onclick="window.toggleAraDegerlemeEdit('${p}')" title="Kaydet"></i>
+                                <i class="fas fa-trash-alt" style="cursor:pointer; color:#cccccc; font-size:12px;" onclick="if(confirm('${p} verilerini silmek istediğinize emin misiniz?')){ delete State.data.araDegerleme['${selectedHisse}']['${p}']; State.save(); if(typeof renderUI === 'function') renderUI(); else if(typeof renderPage === 'function') renderPage(); }" title="Sil"></i>
                             </div>
                         </td>`;
                     }
                 });
                 araHtml += `</tr>`;
-                araHtml += `</tbody></table></div></div>`;
-                contentHtml += araHtml;
+                araHtml += `</tbody></table></div>`; // End of table wrapper
+                araHtml += `
+                    <div style="margin-top: 1rem; border-top: 1px solid var(--surface-border); padding-top: 1rem;">
+                        <textarea id="degerleme-not-input" class="form-control" style="width: 100%; height: 44px; resize: vertical; font-size: 12px; font-family: inherit; margin-bottom: 0.5rem;" placeholder="Bu hisse için değerleme notlarınızı buraya yazabilirsiniz..." onblur="window.saveDegerlemeNot('${selectedHisse}', 'ara')">${savedNotAra}</textarea>
+                    </div>
+                </div>`; // End of dash-card
+                if (window.degerlemeTab === 'ara') contentHtml += araHtml;
             } else if (activeTab === 'Akış') {
                 let analizler = State.data.analizler || [];
                 analizler = analizler.filter(a => (a.hisse || '').toUpperCase() === selectedHisse.toUpperCase());
@@ -3405,8 +3504,8 @@ const renderHisseler = (container) => {
                 let tableHtml = `
                 <div class="dash-card" style="padding-bottom: 20px;">
                     <div style="display: flex; align-items: center; justify-content: center; padding: 3px 5px; border-bottom: 1px solid var(--table-border); position: relative;">
-                        <div style="font-size: 18px; font-weight: bold; color: var(--accent-color); text-align: center;">Akış</div>
-                        <button class="btn" style="background: var(--warning-color); padding: 3px 8px; font-size: 12px; position: absolute; right: 5px;" onclick="window.toggleInlineAnaliz()" title="Yeni Not Ekle"><i class="fas fa-plus" style="font-size: 11px;"></i></button>
+                        <div style="font-size: 13px; font-weight: normal; color: #ffffff; text-align: center;">Akış</div>
+                        <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: #888888; border: none; box-shadow: none; position: absolute; right: 5px;" onclick="window.toggleInlineAnaliz()" title="Yeni Not Ekle"><i class="fas fa-plus" style="font-size: 15px;"></i></button>
                     </div>
                     
                       <div id="inline-analiz-row" class="glass" style="display: none; flex-direction: column; gap: 1rem; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--accent-color);">
@@ -3426,28 +3525,28 @@ const renderHisseler = (container) => {
     
     <div id="analiz-detay-alanlari" style="display: flex; gap: 1rem; flex-wrap: wrap;">
         <div style="flex: 1; min-width: 150px;">
-            <label style="font-size: 0.8rem; color: var(--text-secondary);">Tarih</label>
+            <label style="font-size: 0.8rem; color: #cccccc;">Tarih</label>
             <input type="date" id="analiz-tarih" class="form-control" style="width:100%; color-scheme: dark;" value="${today}">
         </div>
         <div style="flex: 1; min-width: 150px;">
-            <label style="font-size: 0.8rem; color: var(--text-secondary);">Analist/Şirket</label>
+            <label style="font-size: 0.8rem; color: #cccccc;">Analist/Şirket</label>
             <input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%;" placeholder="Örn: Ak Yatırım">
         </div>
         <input type="hidden" id="analiz-hisse" value="${selectedHisse || ''}">
         <div style="flex: 1; min-width: 150px;">
-            <label style="font-size: 0.8rem; color: var(--text-secondary);">Başlık (Opsiyonel)</label>
+            <label style="font-size: 0.8rem; color: #cccccc;">Başlık (Opsiyonel)</label>
             <input type="text" id="analiz-baslik" class="form-control" style="width:100%;" placeholder="Rapor/Video Başlığı">
         </div>
         <div style="flex: 1; min-width: 150px;">
-            <label style="font-size: 0.8rem; color: var(--text-secondary);">Bağlantı Linki</label>
+            <label style="font-size: 0.8rem; color: #cccccc;">Bağlantı Linki</label>
             <input type="text" id="analiz-baglanti" class="form-control" style="width:100%;" placeholder="https://...">
         </div>
     </div>
     
     <div id="analiz-alt-alanlar" style="display: flex; flex-direction: column; width: 100%;">
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <label style="font-size: 0.8rem; color: var(--text-secondary);">Notunuz</label>
-            <textarea id="analiz-not" class="form-control" style="width:100%; min-height: 80px; resize: vertical;" placeholder="Notlarınızı buraya yazın..."></textarea>
+            <label style="font-size: 0.8rem; color: #cccccc;">Notunuz</label>
+            <textarea id="analiz-not" class="form-control" style="width:100%; min-height: 44px; resize: vertical;" placeholder="Notlarınızı buraya yazın..."></textarea>
         </div>
         <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 0.5rem;">
             <button class="btn" style="background: var(--danger-color); color: #fff; padding: 6px 16px;" onclick="window.toggleInlineAnaliz()">İptal</button>
@@ -3459,29 +3558,29 @@ const renderHisseler = (container) => {
         <style>
             #upload-file { display: none; }
         </style>
-        <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç" style="padding: 3px 7px 3px 4px; background: #000000; color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; border: none; font-size: 13px;">
+        <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç" style="padding: 3px 7px 3px 4px; background: #000000; color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; border: none; font-size: 12px; font-weight: normal;">
             <span class="fa-stack" style="font-size: 8px; width: 2em; height: 2em;"><i class="fas fa-folder-open fa-stack-2x" style="color: #ffffff;"></i></span>
         </label>
         <input type="file" id="upload-file" accept="application/pdf" onchange="const f = this.files[0]; if(f) this.previousElementSibling.innerHTML = '<i class=\'fas fa-file-pdf\' style=\'color:var(--danger-color); font-size: 14px;\'></i> <span style=\'color: #fff; margin-left: 5px;\'>' + (f.name.length > 15 ? f.name.substring(0,15)+'...' : f.name) + '</span>'">
         
         
         <div style="flex: 1; min-width: 60px; max-width: 80px;">
-            <input type="number" id="upload-sn" placeholder="S.N." class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+            <input type="number" id="upload-sn" placeholder="S.N." class="form-control" style="width: 100%; padding: 0.3rem; font-size: 12px; font-weight: normal; color: #cccccc;" onkeydown="if(event.key==='Enter') window.uploadRapor()">
         </div>
         <div style="flex: 2; min-width: 120px;">
-            <input type="text" id="upload-ad" placeholder="Ad" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+            <input type="text" id="upload-ad" placeholder="Ad" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 12px; font-weight: normal; color: #cccccc;" onkeydown="if(event.key==='Enter') window.uploadRapor()">
         </div>
         <div style="flex: 1; min-width: 90px;">
-            <input type="text" id="upload-tarih" placeholder="Tarih" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+            <input type="text" id="upload-tarih" placeholder="Tarih" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 12px; font-weight: normal; color: #cccccc;" onkeydown="if(event.key==='Enter') window.uploadRapor()">
         </div>
         <div style="flex: 2; min-width: 120px;">
-            <input type="text" id="upload-sirket" placeholder="Yatırım Şirketi" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key==='Enter') window.uploadRapor()">
+            <input type="text" id="upload-sirket" placeholder="Yatırım Şirketi" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 12px; font-weight: normal; color: #cccccc;" onkeydown="if(event.key==='Enter') window.uploadRapor()">
         </div>
 
         <button class="btn btn-icon" style="padding: 3px 7px 3px 4px; background: #000000; border: none; color: var(--accent-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="window.uploadRapor()" title="Yükle"><span class="fa-stack" style="font-size: 9.5px; width: 2em; height: 2em;"><i class="fas fa-cloud fa-stack-2x" style="color: var(--accent-color);"></i><i class="fas fa-arrow-up fa-stack-1x" style="color: #ffffff; margin-top: 2px;"></i></span></button>
         <button class="btn btn-icon" style="width: 30px; height: 25px; padding: 0; background: #000000; border: none; color: var(--danger-color); display: flex; align-items: center; justify-content: center; border-radius: 4px; margin-left: 0.2rem;" onclick="window.toggleInlineAnaliz()" title="İptal"><i class="fas fa-times" style="font-size: 22px; color: var(--danger-color);"></i></button>
     </div>
-    <div id="upload-status" style="font-size: 13px; font-weight: 500; min-height: 0; width: 100%; margin-top: 0.5rem; display: none;"></div>
+    <div id="upload-status" style="font-size: 12px; font-weight: normal; min-height: 0; width: 100%; margin-top: 0.5rem; display: none;"></div>
 </div>
                       <div style="overflow-x:auto;">
                       <table class="dash-table compact-table" style="width:100%; min-width:800px; border-collapse:collapse;">
@@ -3508,15 +3607,15 @@ const renderHisseler = (container) => {
                             let filePath = 'Hisseler/' + selectedHisse + '/' + r.file;
                             tableHtml += `
                             <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">
-                                    <a href="${filePath}" target="_blank" style="color: var(--text-primary); text-decoration: none; font-weight: normal; word-break: break-word;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
+                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">
+                                    <a href="${filePath}" target="_blank" style="color:#cccccc; text-decoration: none; font-weight: normal; word-break: break-word; transition: color 0.2s;" onmouseover="this.style.color='#ffffff';" onmouseout="this.style.color='#cccccc';">
                                         <i class="fas fa-file-pdf" style="color: #3b82f6;"></i> ${r.name !== '-' ? r.name : r.file}
                                     </a>
                                 </td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${item.gosterimTarih}</td>
-                                <td style="font-size:12px; font-weight:bold; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${r.company !== '-' ? r.company : '-'}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">-</td>
+                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${item.gosterimTarih}</td>
+                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${r.company !== '-' ? r.company : '-'}</td>
+                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">-</td>
                                 <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;"></td>
                             </tr>
                             `;
@@ -3525,11 +3624,11 @@ const renderHisseler = (container) => {
                             if (a.isKisiselNot) {
                                 tableHtml += `
                                 <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
-                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">-</td>
-                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">-</td>
-                                    <td style="font-size:12px; font-weight:bold; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">Yunus Şensoy</td>
-                                    <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
+                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
+                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">-</td>
+                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">-</td>
+                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">Yunus Şensoy</td>
+                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
                                     <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
                                         <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
                                         <button class="btn btn-icon" style="background: transparent; color: #888888; padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
@@ -3542,16 +3641,16 @@ const renderHisseler = (container) => {
                                     let text = a.baslik || 'Dış Bağlantı';
                                     let icon = 'fas fa-external-link-alt';
                                     if (a.baglanti.includes('youtube.com') || a.baglanti.includes('youtu.be')) { text = a.baslik || 'YouTube Linki'; icon = 'fas fa-play" style="color:#fff; background:#FF0000; display:flex; justify-content:center; align-items:center; width:16px; height:11px; border-radius:3px; border:1px solid #000; font-size:6px; flex-shrink:0; margin-top:3px;'; }
-                                    else if (a.baglanti.includes('twitter.com') || a.baglanti.includes('x.com')) { text = a.baslik || 'X Linki'; icon = 'fa-brands fa-x-twitter" style="color: var(--text-primary); font-size: 12px; flex-shrink:0; margin-top:2px;'; }
-                                    linkHtml = `<a href="${a.baglanti}" target="_blank" style="color: var(--accent-color); text-decoration: none; word-break: break-word; display: flex; align-items: flex-start; gap: 5px;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'"><i class="${icon}"></i> <span style="line-height: 1.3;">${text}</span></a>`;
+                                    else if (a.baglanti.includes('twitter.com') || a.baglanti.includes('x.com')) { text = a.baslik || 'X Linki'; icon = 'fa-brands fa-x-twitter" style="color: var(--text-primary); font-size: 10px; flex-shrink:0; margin-top:3px;'; }
+                                    linkHtml = `<a href="${a.baglanti}" target="_blank" style="color:#cccccc; text-decoration: none; word-break: break-word; display: flex; align-items: flex-start; gap: 5px; transition: color 0.2s;" onmouseover="this.style.color='#ffffff';" onmouseout="this.style.color='#cccccc';"><i class="${icon}"></i> <span style="line-height: 1.3;">${text}</span></a>`;
                                 }
                                 tableHtml += `
                                 <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
-                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">${linkHtml}</td>
-                                    <td style="font-size:12px; font-weight:normal; color:var(--text-secondary); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${item.gosterimTarih}</td>
-                                    <td style="font-size:12px; font-weight:bold; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${a.borsaci || '-'}</td>
-                                    <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
+                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
+                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">${linkHtml}</td>
+                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${item.gosterimTarih}</td>
+                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${a.borsaci || '-'}</td>
+                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
                                     <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
                                         <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
                                         <button class="btn btn-icon" style="background: transparent; color: #888888; padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
@@ -4306,60 +4405,73 @@ const renderHisseIslemleri = (container) => {
         fonDatalistOptions += `<option value="${fon}">`;
     });
 
-    container.innerHTML = `
-        <datalist id="fon-list">${fonDatalistOptions}</datalist>
-        <div class="page-section active">
-            <div class="table-container glass" style="overflow-x: auto; margin-bottom: 0;">
-                <div class="table-header">
-                    <span>Hisse ve Fon İşlemleri</span>
-                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--warning-color); color: #fff;" onclick="window.toggleInlineForm('hisse')">+</button>
-                </div>
-                
-                <div id="hisse-ekle-section" style="display: none; margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 1rem;">
-                    <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
-                        <thead>
-                            <tr>
-                                <th style="width: 5%;">S.N.</th>
-                                <th style="width: 8%; text-align: left;">Tür</th>
-                                <th style="width: 12%; text-align: left;">Menkul</th>
-                                <th style="width: 15%; text-align: right;">Tarih</th>
-                                <th style="width: 14%;">Fiyat</th>
-                                <th style="width: 15%;">Adet</th>
-                                <th style="width: 13%;">Tutar</th>
-                                <th style="width: 18%;">İşlem</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr style="background: rgba(0,0,0,0.4);">
-                                <td style="text-align: center;">-</td>
-                                <td>
-                                    <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px;" onchange="window.updateInlineDatalist()">
-                                        <option value="Hisse" selected>Hisse</option>
-                                        <option value="Fon">Fon</option>
-                                    </select>
-                                </td>
-                                <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                                <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                                <td><input type="number" step="0.000001" id="i-fiyat" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Fiyat" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                                <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Adet" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                                <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" disabled></td>
-                                <td>
-                                    <button class="btn" id="i-submit-btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineHisse()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
-                                    <button class="btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('hisse')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+    window.ekstreTab = window.ekstreTab || 'hisse';
+    window.setEkstreTab = window.setEkstreTab || ((tab) => {
+        window.ekstreTab = tab;
+        if (typeof renderPage === 'function') renderPage();
+    });
+    const getTabBg = (tab) => window.ekstreTab === tab ? 'rgba(255,255,255,0.1)' : 'transparent';
+    const getTabColor = (tab) => window.ekstreTab === tab ? '#ffffff' : 'var(--text-secondary)';
 
-                <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
+    container.innerHTML = `
+        <style>
+            .ekstre-table th, .ekstre-table td {
+                font-size: 12px !important;
+                font-weight: normal !important;
+            }
+            .ekstre-table thead, .ekstre-table thead tr, .ekstre-table thead th {
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                background: var(--bg-card, #1e293b) !important;
+            }
+        </style>
+        <datalist id="fon-list">${fonDatalistOptions}</datalist>
+        <div class="page-section active" style="margin-bottom: 0px;">
+            <div class="glass" style="padding: 0.5rem 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: 0.5rem; align-items: center; overflow-x: auto; white-space: nowrap;">
+                        <span style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 4px 8px; border-radius: 4px; background: ${getTabBg('hisse')}; color: ${getTabColor('hisse')};" onclick="window.setEkstreTab('hisse')">Hisse ve Fon İşlemleri</span>
+                        <span style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 4px 8px; border-radius: 4px; background: ${getTabBg('nakit')}; color: ${getTabColor('nakit')};" onclick="window.setEkstreTab('nakit')">Nakit İşlemleri</span>
+                    </div>
+                    <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: #888888; border: none; box-shadow: none;" onclick="window.toggleInlineForm(window.ekstreTab)"><i class="fas fa-plus" style="font-size: 15px;"></i></button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="ekstreler-tables-wrapper" style="flex: 1;">
+            <div class="page-section ${window.ekstreTab === 'hisse' ? 'active' : ''}" style="${window.ekstreTab === 'hisse' ? '' : 'display: none !important;'} margin-top: 0;">
+                <div class="table-container glass" style="overflow-x: auto; padding: 0;">
+                
+                <table class="dash-table compact-table ekstre-table" style="table-layout: fixed; width: 100%;">
                     <thead>
                         <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleHisseTableCollapse()"><i class="fas ${window.hisseTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 8%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tur')">Tür${getHisseSortIcon('tur')}</th><th style="width: 12%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('menkul')">Menkul${getHisseSortIcon('menkul')}</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tarih')">Tarih${getHisseSortIcon('tarih')}</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tutar')">Tutar${getHisseSortIcon('tutar')}</th><th style="width: 18%;">İşlem</th></tr>
                     </thead>
+                    <tbody id="hisse-ekle-section" style="display: none;">
+                        <tr style="background: rgba(0,0,0,0.4);">
+                            <td style="text-align: center;">-</td>
+                            <td>
+                                <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px;" onchange="window.updateInlineDatalist()">
+                                    <option value="Hisse" selected>Hisse</option>
+                                    <option value="Fon">Fon</option>
+                                </select>
+                            </td>
+                            <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                            <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                            <td><input type="number" step="0.000001" id="i-fiyat" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Fiyat" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                            <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Adet" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                            <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" disabled></td>
+                            <td>
+                                <button class="btn" id="i-submit-btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineHisse()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
+                                <button class="btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('hisse')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
                     <tbody id="hisse-tbody" style="${window.hisseTableCollapsed ? 'display: none;' : ''}">
                         ${ekstreRows}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     `;
@@ -4409,13 +4521,13 @@ const renderHisseIslemleri = (container) => {
 
     window.toggleInlineForm = (type) => {
         const section = document.getElementById(`${type}-ekle-section`);
-        if(section) section.style.display = section.style.display === 'none' ? 'block' : 'none';
+        if(section) section.style.display = section.style.display === 'none' ? '' : 'none';
         
         if (type === 'nakit' && typeof window.cancelNakitEdit === 'function') window.cancelNakitEdit();
         else if (typeof window.cancelEdit === 'function') window.cancelEdit();
         
         // focus the first input if opening
-        if(section && section.style.display === 'block') {
+        if(section && section.style.display === '') {
             const firstInput = section.querySelector('input, select');
             if(firstInput) firstInput.focus();
         }
@@ -4523,58 +4635,40 @@ const renderNakitIslemleri = (container, append = false) => {
     const todayStr = new Date().toISOString().split('T')[0];
 
     const htmlContent = `
-        <div class="page-section active">
-            <div class="table-container glass" style="overflow-x: auto;">
-                <div class="table-header">
-                    <span>Nakit İşlemleri</span>
-                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--warning-color); color: #fff;" onclick="window.toggleInlineForm('nakit')">+</button>
-                </div>
+        <div class="page-section ${window.ekstreTab === 'nakit' ? 'active' : ''}" style="${window.ekstreTab === 'nakit' ? '' : 'display: none !important;'} margin-top: 0;">
+            <div class="table-container glass" style="overflow-x: auto; padding: 0;">
                 
-                <div id="nakit-ekle-section" style="display: none; margin-bottom: 1rem; border-bottom: 1px solid var(--surface-border); padding-bottom: 1rem;">
-                    <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
-                        <thead>
-                            <tr>
-                                <th style="width: 5%;">S.N.</th>
-                                <th style="width: 15%; text-align: right;">Tarih</th>
-                                <th style="width: 15%;">Tutar</th>
-                                <th style="width: 15%;">XU100</th>
-                                <th style="width: 15%;">USDTRY</th>
-                                <th style="width: 15%;">GRAMALTIN</th>
-                                <th style="width: 15%;">PRY</th>
-                                <th style="width: 20%;">İşlem</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr style="background: rgba(0,0,0,0.4);">
-                                <td style="text-align: center;">-</td>
-                                <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                                <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                                <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="XU100" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                                <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Dolar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                                <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                                <td><input type="text" inputmode="decimal" id="n-pry" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="PRY" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                                <td>
-                                    <button class="btn" id="n-submit-btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineNakitEntry()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
-                                    <button class="btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('nakit')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <table class="dash-table compact-table" style="table-layout: fixed; width: 100%;">
+                <table class="dash-table compact-table ekstre-table" style="table-layout: fixed; width: 100%;">
                     <thead>
                         <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleNakitTableCollapse()"><i class="fas ${window.nakitTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tarih')">Tarih${getNakitSortIcon('tarih')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tutar')">Tutar${getNakitSortIcon('tutar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('bist100')">XU100${getNakitSortIcon('bist100')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('dolar')">USDTRY${getNakitSortIcon('dolar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('gramAltin')">GRAMALTIN${getNakitSortIcon('gramAltin')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('pry')">PRY${getNakitSortIcon('pry')}</th><th style="width: 20%;">İşlem</th></tr>
                     </thead>
+                    <tbody id="nakit-ekle-section" style="display: none;">
+                        <tr style="background: rgba(0,0,0,0.4);">
+                            <td style="text-align: center;">-</td>
+                            <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="XU100" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Dolar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="text" inputmode="decimal" id="n-pry" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="PRY" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td>
+                                <button class="btn" id="n-submit-btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineNakitEntry()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
+                                <button class="btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('nakit')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
+                            </td>
+                        </tr>
+                    </tbody>
                     <tbody id="nakit-tbody" style="${window.nakitTableCollapsed ? 'display: none;' : ''}">
                         ${nakitRows}
                     </tbody>
                 </table>
+                </div>
             </div>
         </div>
     `;
     if (append) {
-        container.insertAdjacentHTML('beforeend', htmlContent);
+        const wrapper = container.querySelector('#ekstreler-tables-wrapper');
+        if (wrapper) wrapper.insertAdjacentHTML('beforeend', htmlContent);
+        else container.insertAdjacentHTML('beforeend', htmlContent);
     } else {
         container.innerHTML = htmlContent;
     }
@@ -4582,13 +4676,13 @@ const renderNakitIslemleri = (container, append = false) => {
     window.toggleInlineForm = (type) => {
         const section = document.getElementById(`${type}-ekle-section`);
         if(section) {
-            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+            section.style.display = section.style.display === 'none' ? '' : 'none';
         }
         if (type === 'nakit' && typeof window.cancelNakitEdit === 'function') window.cancelNakitEdit();
         else if (typeof window.cancelEdit === 'function') window.cancelEdit();
         
         // focus the first input if opening
-        if(section && section.style.display === 'block') {
+        if(section && section.style.display === '') {
             const firstInput = section.querySelector('input, select');
             if(firstInput) firstInput.focus();
         }
@@ -4652,7 +4746,7 @@ const renderVeriler = (container) => {
         const pFiyat = State.getFiyat(fon);
         fonHtml += `
             <div style="display:flex; gap: 0.5rem; width: 100%;">
-                <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100%; text-align:right; padding: 0.3rem; font-size: 13px; color: var(--text-secondary);" onkeydown="if(event.key === 'Enter') { State.updateFiyat('${fon}', this.value); this.blur(); }">
+                <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100%; text-align:right; padding: 0.3rem; font-size: 12px; font-weight: normal; color: var(--text-secondary);" onkeydown="if(event.key === 'Enter') { State.updateFiyat('${fon}', this.value); this.blur(); }">
                 <button class="btn" style="padding: 0; width: 26px; height: 26px; background: #000000; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value);" title="Kaydet"><i class="fas fa-save" style="font-size: 18px; color: var(--success-color) !important;"></i></button>
             </div>
         `;
@@ -4668,18 +4762,18 @@ const renderVeriler = (container) => {
             <!-- Enflasyon -->
             <div class="table-container glass" style="margin-bottom: 0;">
                 <div class="table-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>Aylık Enflasyon Verileri</span>
-                    <button class="btn btn-icon" style="color: var(--accent-color); font-size: 14px; padding: 4px;" onclick="window.toggleEnfForm()" title="Ekle"><i class="fas fa-plus"></i></button>
+                    <span style="font-size: 13px; color: #ffffff;">Aylık Enflasyon Verileri</span>
+                    <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: #888888; border: none; box-shadow: none;" onclick="window.toggleEnfForm()" title="Ekle"><i class="fas fa-plus" style="font-size: 14px;"></i></button>
                 </div>
                 
                 <div style="max-height: 400px; overflow-y: auto; margin-bottom: 0;">
                     <table class="dash-table compact-table" style="width: 100%;">
                         <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 10;">
-                            <tr>
-                                <th style="text-align:center;">Dönem (Yıl-Ay)</th>
-                                <th style="text-align:right;">Aylık Enflasyon (%)</th>
-                                <th style="text-align:right;">Kümülatif Enflasyon (%)</th>
-                                <th style="text-align:center; width: 80px;">İşlem</th>
+                            <tr style="font-size: 12px; font-weight: normal;">
+                                <th style="text-align:center; font-size: 12px; font-weight: normal;">Dönem (Yıl-Ay)</th>
+                                <th style="text-align:right; font-size: 12px; font-weight: normal;">Aylık Enflasyon (%)</th>
+                                <th style="text-align:right; font-size: 12px; font-weight: normal;">Kümülatif Enflasyon (%)</th>
+                                <th style="text-align:center; width: 80px; font-size: 12px; font-weight: normal;">İşlem</th>
                             </tr>
                         </thead>
                         <tbody id="enf-form-tbody">
@@ -4693,8 +4787,8 @@ const renderVeriler = (container) => {
                                 <td style="text-align:right; color: var(--text-secondary);">-</td>
                                 <td style="text-align:center;">
                                     <div style="display:flex; gap:0.2rem; justify-content:center;">
-                                        <div style="background: #000000; width: 24px !important; height: 24px !important; max-width: 24px !important; max-height: 24px !important; min-width: 24px !important; min-height: 24px !important; padding: 0 !important; margin: 0 !important; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; box-sizing: border-box !important; line-height: 1 !important;" onclick="window.addEnflasyon(event)" title="Kaydet"><i class="fas fa-save" style="font-size: 13px; color: var(--success-color) !important;"></i></div>
-                                        <div style="background: var(--danger-color); width: 24px !important; height: 24px !important; max-width: 24px !important; max-height: 24px !important; min-width: 24px !important; min-height: 24px !important; padding: 0 !important; margin: 0 !important; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; box-sizing: border-box !important; line-height: 1 !important;" onclick="window.toggleEnfForm()" title="İptal"><i class="fas fa-times" style="font-size: 13px; color: #ffffff !important;"></i></div>
+                                        <button class="btn btn-icon" style="color: var(--success-color); font-size: 14px; padding: 4px; border: none; background: transparent;" onclick="window.addEnflasyon(event)" title="Ekle"><i class="fas fa-check"></i></button>
+                                        <button class="btn btn-icon" style="color: var(--danger-color); font-size: 14px; padding: 4px; border: none; background: transparent;" onclick="window.toggleEnfForm()" title="İptal"><i class="fas fa-times"></i></button>
                                     </div>
                                 </td>
                             </tr>
@@ -4740,6 +4834,16 @@ window.renderEnflasyonData = () => {
     if (!tbody) return;
     
     let html = '';
+        if (!State.data.enflasyonListesi || State.data.enflasyonListesi.length === 0) {
+        State.data.enflasyonListesi = [
+            { id: 'enf_1719792000005', tarih: '2026-06', oran: 1.64 },
+            { id: 'enf_1719792000004', tarih: '2026-05', oran: 3.37 },
+            { id: 'enf_1719792000003', tarih: '2026-04', oran: 3.18 },
+            { id: 'enf_1719792000002', tarih: '2026-03', oran: 3.16 },
+            { id: 'enf_1719792000001', tarih: '2026-02', oran: 4.53 },
+            { id: 'enf_1719792000000', tarih: '2026-01', oran: 6.70 }
+        ];
+    }
     const list = State.data.enflasyonListesi || [];
     
     if (list.length === 0) {
@@ -5647,6 +5751,7 @@ const renderAnasayfa = (container) => {
     window.takipSort = window.takipSort || { col: null, asc: true };
     takipDataList.sort((a, b) => {
         if (!window.takipSort.col) {
+            if (b.araPotansiyel !== a.araPotansiyel && b.araPotansiyel !== -Infinity && a.araPotansiyel !== -Infinity) return b.araPotansiyel - a.araPotansiyel;
             if (b.pot2026 !== a.pot2026) return b.pot2026 - a.pot2026;
             if (b.pot2027 !== a.pot2027) return b.pot2027 - a.pot2027;
             if (b.pot2028 !== a.pot2028) return b.pot2028 - a.pot2028;
@@ -5685,6 +5790,12 @@ const renderAnasayfa = (container) => {
             return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtDec(hData[year].hedefFiyat)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
         };
         
+        const renderAraCell = (hf, pot) => {
+            if (hf === -Infinity || pot === -Infinity) return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
+            const color = pot > 0 ? '#2ecc71' : '#e74c3c';
+            return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtDec(hf)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(pot)}</td>`;
+        };
+        
         const oranlarHtml = `
                 <td style="text-align: right !important;">${fmtCurrency(piyasaDegeri, '₺')}</td>
                 <td style="text-align: right !important;">${fmtCurrency(piyasaDegeriUsd, '$')}</td>
@@ -5704,12 +5815,6 @@ const renderAnasayfa = (container) => {
         `;
         
         const restHtml = window.takipTab === 'degerleme' ? degerlemeHtml : oranlarHtml;
-
-        const renderAraCell = (hf, pot) => {
-            if (hf === -Infinity || pot === -Infinity) return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
-            const color = pot > 0 ? '#2ecc71' : '#e74c3c';
-            return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtDec(hf)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(pot)}</td>`;
-        };
 
         rowsHtml += `
             <tr>
@@ -5738,11 +5843,6 @@ const renderAnasayfa = (container) => {
 
             <!-- Takip Listesi Tablosu -->
             <div class="glass" style="display: flex; flex-direction: column; flex: 1; overflow: hidden; padding: 0.5rem 1rem 1rem 1rem;">
-                <div class="table-header" style="position: relative; font-size:15px !important; display:flex; align-items:center; font-weight: 700; color: #ffffff !important; justify-content: center; width: 100%; margin-bottom: 0px !important;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">Takip Listesi</div>
-                </div>
-                
-                <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 0.5rem 0;" />
 
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; justify-content: space-between; align-items: center;">
                     <div style="display: flex; gap: 0.5rem;">

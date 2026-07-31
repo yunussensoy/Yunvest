@@ -491,20 +491,20 @@ table, .std-table, .dash-table, .compact-table {
 }
 
 table th, .std-table th, .dash-table th, .compact-table th {
-    font-size: 13px !important;
-    font-weight: bold !important;
+    font-size: 12px !important;
+    font-weight: normal !important;
     color: var(--text-primary) !important;
     text-align: center !important;
     vertical-align: middle !important;
     padding: 5px !important;
-    background: var(--table-header-bg) !important;
+    background: #1e293b !important;
     border-bottom: 1px solid var(--table-border) !important;
     border-right: 1px solid var(--table-border) !important;
     white-space: nowrap;
 }
 
 table td, .std-table td, .dash-table td, .compact-table td {
-    font-size: 13px !important;
+    font-size: 12px !important;
     font-weight: normal !important;
     color: var(--text-muted) !important;
     text-align: center !important;
@@ -563,12 +563,12 @@ i.fa-trash, i.fa-trash-alt { color: #888888 !important; }
 i.fa-edit { color: var(--accent-color) !important; }
 
 /* Tüm tablolardaki link hücreleri */
-table td[onclick]:not(:has(button)), table td a {
+table td[onclick]:not(:has(button)) {
     color: var(--text-primary) !important;
     font-weight: normal !important;
     cursor: pointer;
 }
-table td[onclick]:not(:has(button)):hover, table td a:hover {
+table td[onclick]:not(:has(button)):hover {
     text-decoration: underline !important;
 }
 
