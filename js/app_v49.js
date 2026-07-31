@@ -191,7 +191,7 @@ const degerlemeRows = [
 ];
 const tDegerleme = genTable('Değerleme', ['Kalem', '2026', '2027', '2028'], degerlemeRows);
 
-const qHeaders = ['Kalem', '2023/12', '2024/3', '2024/6', '2024/9'];
+const qHeaders = ['Kalem', '2024/3', '2024/6', '2024/9', '2024/12'];
 const qRows = [
     ['Satış Gelirleri', '450.000', '480.000', '520.000', '580.000'],
     ['Brüt Kar', '120.000', '135.000', '150.000', '175.000'],
@@ -2224,7 +2224,9 @@ const renderHisseler = (container) => {
                     bilancoHtml += `</tbody></table>`;
 
                     // Chart Data
-                    const limit = headers.length - 1;
+                    let limit = headers.length - 1;
+                      const idx20243 = headers.indexOf('2024/3');
+                      if (idx20243 !== -1) limit = idx20243;
                     
                     const getCQ = (array, i, headers) => {
                         if (!array || !array[i]) return 0;

@@ -559,7 +559,7 @@ table .total-row td, .std-table .total-row td, .dash-table .total-row td {
 
 /* İkon Renkleri */
 i.fa-save, i.fa-check { color: var(--success-color) !important; }
-i.fa-trash, i.fa-trash-alt { color: #888888 !important; }
+i.fa-trash, i.fa-trash-alt { color: var(--danger-color) !important; }
 i.fa-edit { color: var(--accent-color) !important; }
 
 /* Tüm tablolardaki link hücreleri */
@@ -732,10 +732,3 @@ input[type="file"]::-webkit-file-upload-button:hover {
         display: block !important;
     }
 }
-
- 
- . t a k i p - h i s s e - l i n k   {   c o l o r :   v a r ( - - t e x t - s e c o n d a r y )   ! i m p o r t a n t ;   f o n t - w e i g h t :   3 0 0   ! i m p o r t a n t ;   c u r s o r :   p o i n t e r ;   t e x t - d e c o r a t i o n :   n o n e   ! i m p o r t a n t ;   t r a n s i t i o n :   c o l o r   0 . 2 s   e a s e ;   } 
- 
- . t a k i p - h i s s e - l i n k : h o v e r   {   c o l o r :   v a r ( - - t e x t - p r i m a r y )   ! i m p o r t a n t ;   t e x t - d e c o r a t i o n :   n o n e   ! i m p o r t a n t ;   } 
- 
- 
