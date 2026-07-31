@@ -5187,7 +5187,10 @@ window.setupCustomDropdown = (inputId, optionsList) => {
     input.addEventListener('focus', handler);
     input.addEventListener('click', (e) => { e.stopPropagation(); handler.call(input); });
     
-    document.addEventListener('click', (e) => {
+    if (window['dropdown_listener_' + inputId]) {
+        document.removeEventListener('click', window['dropdown_listener_' + inputId]);
+    }
+    window['dropdown_listener_' + inputId] = (e) => {
         if (e.target !== input && !list.contains(e.target)) {
             list.style.display = 'none';
             const tableContainer = input.closest('.table-container');
@@ -5197,7 +5200,8 @@ window.setupCustomDropdown = (inputId, optionsList) => {
                 tableContainer.style.overflowY = 'auto';
             }
         }
-    });
+    };
+    document.addEventListener('click', window['dropdown_listener_' + inputId]);
 };
 
 const renderAnalizler = (container) => {
@@ -6734,11 +6738,15 @@ const setupSearchAutocomplete = () => {
     });
 
     // Hide when clicking outside
-    document.addEventListener('click', function(e) {
+    if (window.takipEditListener) {
+        document.removeEventListener('click', window.takipEditListener);
+    }
+    window.takipEditListener = function(e) {
         if (e.target !== input && e.target !== list) {
             list.style.display = 'none';
         }
-    });
+    };
+    document.addEventListener('click', window.takipEditListener);
 };
 
 setTimeout(setupSearchAutocomplete, 1000);
