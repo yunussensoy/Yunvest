@@ -1384,8 +1384,8 @@ const renderPortfoy = (container) => {
         `;
     } else if (window.portfoyTab === 'arsiv') {
         tabContentHtml = `
-            <div id="portfoy-arsiv" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
-                <div class="table-container" style="margin-bottom: 0; overflow-x: auto;">
+            <div id="portfoy-arsiv" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0; flex: 1; height: calc(100vh - 140px);">
+                <div class="table-container custom-scroll" style="margin-bottom: 0; overflow-x: auto; overflow-y: auto; height: 100%;">
 
                     <table class="dash-table compact-table" style="min-width: 1000px; text-align: center; border-collapse: separate; border-spacing: 0;">
                         <thead style="position: sticky; top: 0; z-index: 10; background: var(--bg-card, #1e293b);">
@@ -3589,9 +3589,9 @@ ${tabUI}
     </div>
     <div id="upload-status" style="font-size: 12px; font-weight: normal; min-height: 0; width: 100%; margin-top: 0.5rem; display: none;"></div>
 </div>
-                      <div style="overflow-x:auto;">
+                      <div class="table-container custom-scroll" style="overflow-x: auto; overflow-y: auto; height: calc(100vh - 240px);">
                       <table class="dash-table compact-table" style="width:100%; min-width:800px; border-collapse:collapse;">
-                          <thead>
+                          <thead style="position: sticky; top: 0; z-index: 10; background: var(--bg-card, #1e293b);">
                             <tr style="border-bottom:1px solid var(--table-border); background:var(--table-header-bg);">
                                 <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">S.N.</th>
                                 <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">Ad</th>
