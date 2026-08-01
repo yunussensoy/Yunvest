@@ -287,7 +287,6 @@ tbody tr {
 
 .page-section {
     display: none;
-    animation: fadeIn 0.4s ease forwards;
 }
 
 .page-section.active {
