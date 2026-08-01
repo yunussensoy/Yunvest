@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         .custom-autocomplete-item {
             padding: 0.5rem 1rem;
-            color: var(--text-primary, #fff);
+            color: #cccccc;
             font-size: 13px;
             cursor: pointer;
             transition: background 0.2s;
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const div = document.createElement('div');
             div.className = 'custom-autocomplete-item';
             if (val && item.toUpperCase().startsWith(val.toUpperCase())) {
-                div.innerHTML = `<strong style="color: var(--accent-color);">${item.substr(0, val.length)}</strong>${item.substr(val.length)}`;
+                div.innerHTML = `<strong style="color: #ffffff;">${item.substr(0, val.length)}</strong>${item.substr(val.length)}`;
             } else {
                 div.textContent = item;
             }
