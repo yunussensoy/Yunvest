@@ -235376,6 +235376,2648 @@ window.stockData = {
         ]
       ]
     }
+  },
+  "BETAE": {
+    "bilanco": {
+      "headers": [
+        "Kalem",
+        "2026/3",
+        "2025/12",
+        "2024/12",
+        "2023/12"
+      ],
+      "rows": [
+        [
+          "Dönen Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Nakit ve Nakit Benzerleri",
+          "293.388.053",
+          "338.365.399",
+          "60.631.912",
+          "136.239.150"
+        ],
+        [
+          "    Gayrimenkul Projeleri Kapsamında Açılan Nakit Hesapları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finansal Yatırımlar",
+          "75.293.188",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Teminata Verilen Finansal Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ticari Alacaklar",
+          "740.152.470",
+          "867.890.669",
+          "931.669.720",
+          "943.758.828"
+        ],
+        [
+          "    Finans Sektörü Faaliyetlerinden Alacaklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Türkiye Cumhuriyet Merkez Bankası Hesabı",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Alacaklar",
+          "314.877.160",
+          "281.760.570",
+          "549.254.986",
+          "382.143.639"
+        ],
+        [
+          "    Müşteri Sözleşmelerinden Doğan Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    İmtiyaz Sözleşmelerine İlişkin Finansal Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Türev Araçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Stoklar",
+          "2.036.866.674",
+          "1.651.131.543",
+          "1.338.823.251",
+          "1.308.125.341"
+        ],
+        [
+          "    Proje Halindeki Stoklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Canlı Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Peşin Ödenmiş Giderler",
+          "1.352.175.015",
+          "1.325.269.225",
+          "457.387.170",
+          "325.375.349"
+        ],
+        [
+          "    Ertelenmiş Sigortacılık Üretim Giderleri",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Cari Dönem Vergisiyle İlgili Varlıklar",
+          "6.323.367",
+          "8.104.857",
+          "10.402.660",
+          "-"
+        ],
+        [
+          "    Nakit Dışı Serbest Kullanılabilir Teminatlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Dönen Varlıklar",
+          "104.050.153",
+          "119.312.195",
+          "167.938.230",
+          "25.642.724"
+        ],
+        [
+          "    Satış Amacıyla Elde Tutulan Duran Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ortaklara Dağıtılmak Üzere Elde Tutulan Duran Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Toplam Dönen Varlıklar",
+          "4.923.126.080",
+          "4.591.834.458",
+          "3.516.107.929",
+          "3.121.285.031"
+        ],
+        [
+          "Duran Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finansal Yatırımlar",
+          "5.099.371",
+          "5.611.460",
+          "1.718.893",
+          "1.067.603"
+        ],
+        [
+          "    İştirakler, İş Ortaklıkları ve Bağlı Ortaklıklardaki Yatırımlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ticari Alacaklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finans Sektörü Faaliyetlerinden Alacaklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Alacaklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Müşteri Sözleşmelerinden Doğan Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    İmtiyaz Sözleşmelerine İlişkin Finansal Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Türev Araçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Stoklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Özkaynak Yöntemiyle Değerlenen Yatırımlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Canlı Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Yatırım Amaçlı Gayrimenkuller",
+          "11.244.608",
+          "11.309.086",
+          "11.566.998",
+          "11.803.446"
+        ],
+        [
+          "    Proje Halindeki Yatırım Amaçlı Gayrimenkuller",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Maddi Duran Varlıklar",
+          "4.847.386.521",
+          "4.507.892.995",
+          "2.339.847.784",
+          "1.557.834.778"
+        ],
+        [
+          "    Kullanım Hakkı Varlıkları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Maddi Olmayan Duran Varlıklar",
+          "482.521.308",
+          "450.405.187",
+          "228.462.625",
+          "163.674.567"
+        ],
+        [
+          "    Peşin Ödenmiş Giderler",
+          "341.036.359",
+          "251.616.468",
+          "271.283.522",
+          "304.132.148"
+        ],
+        [
+          "    Ertelenmiş Vergi Varlığı",
+          "557.021.942",
+          "548.467.740",
+          "510.085.137",
+          "357.603.383"
+        ],
+        [
+          "    Cari Dönem Vergisiyle İlgili Duran Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Nakit Dışı Serbest Kullanılabilir Teminatlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Duran Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Toplam Duran Varlıklar",
+          "6.244.310.109",
+          "5.775.302.936",
+          "3.362.964.959",
+          "2.396.115.925"
+        ],
+        [
+          "    Toplam Varlıklar",
+          "11.167.436.189",
+          "10.367.137.394",
+          "6.879.072.888",
+          "5.517.400.956"
+        ],
+        [
+          "Kısa Vadeli Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finansal Borçlar",
+          "2.324.083.333",
+          "2.146.891.103",
+          "1.759.540.831",
+          "895.693.322"
+        ],
+        [
+          "    Diğer Finansal Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ticari Borçlar",
+          "1.486.081.594",
+          "1.697.320.984",
+          "930.105.012",
+          "788.371.707"
+        ],
+        [
+          "    Finans Sektörü Faaliyetlerinden Borçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Çalışanlara Sağlanan Faydalar Kapsamında Borçlar",
+          "84.781.391",
+          "56.101.603",
+          "60.306.929",
+          "35.345.166"
+        ],
+        [
+          "    Diğer Borçlar",
+          "54.813.697",
+          "112.653.452",
+          "-",
+          "-"
+        ],
+        [
+          "    Müşteri Sözleşmelerinden Doğan Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Özkaynak Yöntemiyle Değerlenen Yatırımlardan Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Türev Araçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Devlet Teşvik ve Yardımları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ertelenmiş Gelirler",
+          "594.043.691",
+          "539.620.414",
+          "514.210.740",
+          "396.347.419"
+        ],
+        [
+          "    Dönem Karı Vergi Yükümlülüğü",
+          "2.527.559",
+          "-",
+          "-",
+          "1.677.494"
+        ],
+        [
+          "    Kısa Vadeli Karşılıklar",
+          "44.951.958",
+          "21.579.831",
+          "12.626.217",
+          "7.120.154"
+        ],
+        [
+          "    Diğer Kısa Vadeli Yükümlülükler",
+          "11.578.760",
+          "24.504.233",
+          "53.121.517",
+          "25.137.324"
+        ],
+        [
+          "    Satış Amaçlı Sınıflandırılan Varlık Gruplarına İlişkin Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ortaklara Dağıtılmak Üzere Elde Tutulan Varlık Gruplarına İlişkin Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Toplam Kısa Vadeli Yükümlülükler",
+          "4.602.861.983",
+          "4.598.671.620",
+          "3.329.911.246",
+          "2.149.692.586"
+        ],
+        [
+          "Uzun Vadeli Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finansal Borçlar",
+          "2.478.389.590",
+          "1.806.217.832",
+          "668.816.188",
+          "562.180.695"
+        ],
+        [
+          "    Diğer Finansal Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ticari Borçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finans Sektörü Faaliyetlerinden Borçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Çalışanlara Sağlanan Faydalar Kapsamında Borçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Borçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Müşteri Sözleşmelerinden Doğan Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Devlet Teşvik ve Yardımları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Özkaynak Yöntemiyle Değerlenen Yatırımlardan Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Türev Araçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Devlet Teşvik ve Yardımları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ertelenmiş Gelirler",
+          "20.521",
+          "-",
+          "1.166.965",
+          "4.573.163"
+        ],
+        [
+          "    Uzun vadeli Karşılıklar",
+          "53.958.127",
+          "49.391.052",
+          "32.491.725",
+          "39.997.699"
+        ],
+        [
+          "    Cari Dönem Vergisiyle İlgili Borçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ertelenmiş Vergi Yükümlülüğü",
+          "623.211.798",
+          "546.274.749",
+          "481.004.208",
+          "430.432.778"
+        ],
+        [
+          "    Diğer Uzun Vadeli Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Toplam Uzun Vadeli Yükümlülükler",
+          "3.155.580.036",
+          "2.401.883.633",
+          "1.183.479.086",
+          "1.037.184.335"
+        ],
+        [
+          "Özkaynaklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ana Ortaklığa Ait Özkaynaklar",
+          "3.408.994.170",
+          "3.366.582.141",
+          "2.365.682.556",
+          "2.330.524.035"
+        ],
+        [
+          "    Ödenmiş Sermaye",
+          "350.000.000",
+          "350.000.000",
+          "350.000.000",
+          "250.000.000"
+        ],
+        [
+          "    Sermaye Düzeltme Farkları",
+          "940.386.712",
+          "940.386.712",
+          "940.386.712",
+          "865.222.949"
+        ],
+        [
+          "    Birleşme Denkleştirme Hesabı",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Pay Sahiplerinin İlave Sermaye Katkıları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Sermaye Avansı",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Geri Alınmış Paylar (-)",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Karşılıklı İştirak Sermaye Düzeltmesi (-)",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Paylara İlişkin Primler (İskontolar)",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ortak Kontrole Tabi Teşebbüs veya İşletmeleri İçeren Birleşmelerin Etkisi",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Pay Bazlı Ödemeler (-)",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Kar veya Zararda Yeniden Sınıflandırılmayacak Birikmiş Diğer Kapsamlı Gelirler (Giderler)",
+          "-28.455.589",
+          "-28.322.787",
+          "-20.619.103",
+          "-13.057.276"
+        ],
+        [
+          "    Kar veya Zararda Yeniden Sınıflandırılacak Birikmiş Diğer Kapsamlı Gelirler (Giderler)",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Kardan Ayrılan Kısıtlanmış Yedekler",
+          "50.803.230",
+          "50.803.230",
+          "45.996.810",
+          "44.868.696"
+        ],
+        [
+          "    Diğer Özkaynak Payları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Yedekler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ödenen Kar Payı Avansları (Net) (-)",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Geçmiş Yıllar Kar/Zararları",
+          "2.053.714.986",
+          "1.045.111.717",
+          "1.007.197.789",
+          "-179.346.856"
+        ],
+        [
+          "    Dönem Net Kar/Zararı",
+          "42.544.831",
+          "1.008.603.269",
+          "42.720.348",
+          "1.362.836.522"
+        ],
+        [
+          "    Azınlık Payları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Toplam Özkaynaklar",
+          "3.408.994.170",
+          "3.366.582.141",
+          "2.365.682.556",
+          "2.330.524.035"
+        ],
+        [
+          "    Toplam Kaynaklar",
+          "11.167.436.189",
+          "10.367.137.394",
+          "6.879.072.888",
+          "5.517.400.956"
+        ],
+        [
+          "    Hedge Dahil Net Yabancı Para Pozisyonu",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "Sistem_Fin_Borc_Eklemesi",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "Sistem_Net_Borc_Eklemesi",
+          "-368.681.241",
+          "-338.365.399",
+          "-60.631.912",
+          "-136.239.150"
+        ]
+      ]
+    },
+    "gelirDonemsel": {
+      "headers": [
+        "Kalem",
+        "2026/3",
+        "2025/12",
+        "2025/3",
+        "2024/12",
+        "2023/12"
+      ],
+      "rows": [
+        [
+          "    Satış Gelirleri",
+          "704.024.223",
+          "4.691.069.376",
+          "1.041.323.842",
+          "4.303.209.791",
+          "5.241.189.118"
+        ],
+        [
+          "    Toplam Hasılat",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Yurt İçi Satışlar",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Yurt Dışı Satışlar",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Satışların Maliyeti (-)",
+          "-545.941.814",
+          "-3.188.117.293",
+          "-727.733.772",
+          "-2.853.327.888",
+          "-3.235.953.333"
+        ],
+        [
+          "    Ticari Faaliyetlerden Brüt Kar (Zarar)",
+          "158.082.409",
+          "1.502.952.083",
+          "313.590.070",
+          "1.449.881.903",
+          "2.005.235.785"
+        ],
+        [
+          "    Faiz, Ücret, Prim, Komisyon ve Diğer Gelirler",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Faiz, Ücret, Prim, Komisyon ve Diğer Giderler (-)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finans Sektörü Faaliyetlerinden Brüt Kar (Zarar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Canlı Varlıklar Gerçeğe Uygun Değer Farkları",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Brüt Kar (Zarar)",
+          "158.082.409",
+          "1.502.952.083",
+          "313.590.070",
+          "1.449.881.903",
+          "2.005.235.785"
+        ],
+        [
+          "    Genel Yönetim Giderleri (-)",
+          "-59.924.090",
+          "-262.681.187",
+          "-72.416.262",
+          "-205.714.687",
+          "-127.059.068"
+        ],
+        [
+          "    Pazarlama, Satış ve Dağıtım Giderleri (-)",
+          "-36.674.887",
+          "-212.480.544",
+          "-39.665.911",
+          "-210.000.682",
+          "-109.064.179"
+        ],
+        [
+          "    Araştırma ve Geliştirme Giderleri (-)",
+          "-48.083.617",
+          "-124.559.369",
+          "-24.157.761",
+          "-75.601.997",
+          "-59.606.860"
+        ],
+        [
+          "    Diğer Faaliyet Gelirleri",
+          "41.045.938",
+          "118.094.835",
+          "74.868.088",
+          "813.262.060",
+          "596.829.972"
+        ],
+        [
+          "    Diğer Faaliyet Giderleri (-)",
+          "-33.092.906",
+          "-99.786.357",
+          "-110.443.781",
+          "-844.252.537",
+          "-969.660.747"
+        ],
+        [
+          "    Diğer Kazançlar (Kayıplar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Faaliyet Karı (Zararı)",
+          "21.352.847",
+          "921.539.461",
+          "141.774.443",
+          "927.574.060",
+          "1.336.674.903"
+        ],
+        [
+          "    Ödenecek Kar Paylarının Defter Değeri ile Dağıtılan Nakit Dışı Varlıkların Değeri Arasındaki Fark",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    İtfa Edilmiş Maliyetinden Ölçülen Finansal Varlıkların Finansal Tablo Dışı Bırakılmasından Kaynaklanan Kazançlar (Kayıplar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Yatırım Faaliyetlerinden Gelirler",
+          "80.998.151",
+          "-",
+          "-",
+          "29.045",
+          "12.730.758"
+        ],
+        [
+          "    Yatırım Faaliyetlerinden Giderler (-)",
+          "-",
+          "-1.012.526",
+          "-",
+          "-1.461.808",
+          "-"
+        ],
+        [
+          "    TFRS 9 Uyarınca Belirlenen Değer Düşüklüğü Kazançları (Zararları) ve Değer Düşüklüğü Zararlarının İptalleri",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Özkaynak Yöntemiyle Değerlenen Yatırımların Karlarından (Zararlarından) Paylar",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    İştirakler, Müşterek Kontrol Edilen İşletmeler ve Bağlı Ortaklıklardan Diğer Gelirler (Giderler)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    İtfa Edilmiş Maliyetinden Ölçülen Finansal Varlıkların Gerçeğe Uygun Değer Farkı Kar veya Zarara Yansıtılan Olarak Sınıflandırılmasından Kazançlar (Kayıplar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Gerçeğe Uygun Değer Farkı Diğer Kapsamlı Gelire Yansıtılan Finansal Varlıkların Gerçeğe Uygun Değer Farkı Kar veya Zarara Yansıtılan Olarak Sınıflandırılmasından Kazançlar (Kayıplar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Risk Pozisyonlarını Netleştiren Kalemler Grubuna Yönelik Finansal Riskten Korunma Kazançları (Kayıpları)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finansman Geliri (Gideri) Öncesi Faaliyet Karı (Zararı)",
+          "102.350.998",
+          "920.526.935",
+          "141.774.443",
+          "926.141.297",
+          "1.349.405.661"
+        ],
+        [
+          "    (Esas Faaliyet Dışı) Finansal Gelirler",
+          "-106.180.672",
+          "-262.678.322",
+          "-65.216.102",
+          "-642.931.119",
+          "-302.447.146"
+        ],
+        [
+          "    (Esas Faaliyet Dışı) Finansal Giderler (-)",
+          "33.878.918",
+          "68.063.375",
+          "21.923.827",
+          "166.026.773",
+          "74.970.409"
+        ],
+        [
+          "    Net Parasal Pozisyon Kazançları (Kayıpları)",
+          "83.415.987",
+          "323.245.475",
+          "109.671.607",
+          "-486.372.983",
+          "282.497.433"
+        ],
+        [
+          "    Sürdürülen Faaliyetler Vergi Öncesi Karı (Zararı)",
+          "113.465.231",
+          "1.049.157.463",
+          "208.153.775",
+          "-37.136.032",
+          "1.404.426.357"
+        ],
+        [
+          "    Sürdürülen Faaliyetler Vergi Geliri (Gideri)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Dönem Vergi Geliri (Gideri)",
+          "-2.527.559",
+          "-11.098.362",
+          "-6.116.176",
+          "-19.533.334",
+          "-42.621.308"
+        ],
+        [
+          "    Ertelenmiş Vergi Geliri (Gideri)",
+          "-68.392.841",
+          "-29.455.832",
+          "-69.452.666",
+          "99.389.714",
+          "1.031.473"
+        ],
+        [
+          "    Sürdürülen Faaliyetler Dönem Karı/Zararı",
+          "113.465.231",
+          "1.049.157.463",
+          "208.153.775",
+          "-37.136.032",
+          "1.404.426.357"
+        ],
+        [
+          "    Durdurulan Faaliyetler Dönem Karı/Zararı",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Dönem Karı (Zararı)",
+          "42.544.831",
+          "1.008.603.269",
+          "132.584.934",
+          "42.720.348",
+          "1.362.836.522"
+        ],
+        [
+          "    Azınlık Payları",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ana Ortaklık Payları",
+          "42.544.831",
+          "1.008.603.269",
+          "132.584.934",
+          "42.720.348",
+          "1.362.836.522"
+        ],
+        [
+          "    Amortisman",
+          "152.265.064",
+          "167.555.833",
+          "37.065.315",
+          "138.039.143",
+          "120.348.909"
+        ],
+        [
+          "FAVÖK",
+          "165.664.879",
+          "1.070.786.816",
+          "214.415.451",
+          "1.096.603.680",
+          "1.829.854.587"
+        ],
+        [
+          "Esas Faaliyet Karı",
+          "13.399.815",
+          "903.230.983",
+          "177.350.136",
+          "958.564.537",
+          "1.709.505.678"
+        ]
+      ]
+    },
+    "gelirYillik": {
+      "headers": [
+        "Kalem",
+        "2026/3",
+        "2025/12",
+        "2025/3",
+        "2024/12",
+        "2023/12"
+      ],
+      "rows": [
+        [
+          "    Satış Gelirleri",
+          "4.353.769.757",
+          "4.691.069.376",
+          "-",
+          "4.303.209.791",
+          "5.241.189.118"
+        ],
+        [
+          "    Toplam Hasılat",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Yurt İçi Satışlar",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Yurt Dışı Satışlar",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Satışların Maliyeti (-)",
+          "-3.006.325.335",
+          "-3.188.117.293",
+          "-",
+          "-2.853.327.888",
+          "-3.235.953.333"
+        ],
+        [
+          "    Ticari Faaliyetlerden Brüt Kar (Zarar)",
+          "1.347.444.422",
+          "1.502.952.083",
+          "-",
+          "1.449.881.903",
+          "2.005.235.785"
+        ],
+        [
+          "    Faiz, Ücret, Prim, Komisyon ve Diğer Gelirler",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Faiz, Ücret, Prim, Komisyon ve Diğer Giderler (-)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finans Sektörü Faaliyetlerinden Brüt Kar (Zarar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Canlı Varlıklar Gerçeğe Uygun Değer Farkları",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Brüt Kar (Zarar)",
+          "1.347.444.422",
+          "1.502.952.083",
+          "-",
+          "1.449.881.903",
+          "2.005.235.785"
+        ],
+        [
+          "    Genel Yönetim Giderleri (-)",
+          "-250.189.015",
+          "-262.681.187",
+          "-",
+          "-205.714.687",
+          "-127.059.068"
+        ],
+        [
+          "    Pazarlama, Satış ve Dağıtım Giderleri (-)",
+          "-209.489.520",
+          "-212.480.544",
+          "-",
+          "-210.000.682",
+          "-109.064.179"
+        ],
+        [
+          "    Araştırma ve Geliştirme Giderleri (-)",
+          "-148.485.225",
+          "-124.559.369",
+          "-",
+          "-75.601.997",
+          "-59.606.860"
+        ],
+        [
+          "    Diğer Faaliyet Gelirleri",
+          "84.272.685",
+          "118.094.835",
+          "-",
+          "813.262.060",
+          "596.829.972"
+        ],
+        [
+          "    Diğer Faaliyet Giderleri (-)",
+          "-22.435.482",
+          "-99.786.357",
+          "-",
+          "-844.252.537",
+          "-969.660.747"
+        ],
+        [
+          "    Diğer Kazançlar (Kayıplar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Faaliyet Karı (Zararı)",
+          "801.117.865",
+          "921.539.461",
+          "-",
+          "927.574.060",
+          "1.336.674.903"
+        ],
+        [
+          "    Ödenecek Kar Paylarının Defter Değeri ile Dağıtılan Nakit Dışı Varlıkların Değeri Arasındaki Fark",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    İtfa Edilmiş Maliyetinden Ölçülen Finansal Varlıkların Finansal Tablo Dışı Bırakılmasından Kaynaklanan Kazançlar (Kayıplar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Yatırım Faaliyetlerinden Gelirler",
+          "-",
+          "-",
+          "-",
+          "29.045",
+          "12.730.758"
+        ],
+        [
+          "    Yatırım Faaliyetlerinden Giderler (-)",
+          "-",
+          "-1.012.526",
+          "-",
+          "-1.461.808",
+          "-"
+        ],
+        [
+          "    TFRS 9 Uyarınca Belirlenen Değer Düşüklüğü Kazançları (Zararları) ve Değer Düşüklüğü Zararlarının İptalleri",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Özkaynak Yöntemiyle Değerlenen Yatırımların Karlarından (Zararlarından) Paylar",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    İştirakler, Müşterek Kontrol Edilen İşletmeler ve Bağlı Ortaklıklardan Diğer Gelirler (Giderler)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    İtfa Edilmiş Maliyetinden Ölçülen Finansal Varlıkların Gerçeğe Uygun Değer Farkı Kar veya Zarara Yansıtılan Olarak Sınıflandırılmasından Kazançlar (Kayıplar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Gerçeğe Uygun Değer Farkı Diğer Kapsamlı Gelire Yansıtılan Finansal Varlıkların Gerçeğe Uygun Değer Farkı Kar veya Zarara Yansıtılan Olarak Sınıflandırılmasından Kazançlar (Kayıplar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Risk Pozisyonlarını Netleştiren Kalemler Grubuna Yönelik Finansal Riskten Korunma Kazançları (Kayıpları)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finansman Geliri (Gideri) Öncesi Faaliyet Karı (Zararı)",
+          "881.103.490",
+          "920.526.935",
+          "-",
+          "926.141.297",
+          "1.349.405.661"
+        ],
+        [
+          "    (Esas Faaliyet Dışı) Finansal Gelirler",
+          "-303.642.892",
+          "-262.678.322",
+          "-",
+          "-642.931.119",
+          "-302.447.146"
+        ],
+        [
+          "    (Esas Faaliyet Dışı) Finansal Giderler (-)",
+          "80.018.466",
+          "68.063.375",
+          "-",
+          "166.026.773",
+          "74.970.409"
+        ],
+        [
+          "    Net Parasal Pozisyon Kazançları (Kayıpları)",
+          "296.989.855",
+          "323.245.475",
+          "-",
+          "-486.372.983",
+          "282.497.433"
+        ],
+        [
+          "    Sürdürülen Faaliyetler Vergi Öncesi Karı (Zararı)",
+          "954.468.919",
+          "1.049.157.463",
+          "-",
+          "-37.136.032",
+          "1.404.426.357"
+        ],
+        [
+          "    Sürdürülen Faaliyetler Vergi Geliri (Gideri)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Dönem Vergi Geliri (Gideri)",
+          "-7.509.745",
+          "-11.098.362",
+          "-",
+          "-19.533.334",
+          "-42.621.308"
+        ],
+        [
+          "    Ertelenmiş Vergi Geliri (Gideri)",
+          "-28.396.007",
+          "-29.455.832",
+          "-",
+          "99.389.714",
+          "1.031.473"
+        ],
+        [
+          "    Sürdürülen Faaliyetler Dönem Karı/Zararı",
+          "954.468.919",
+          "1.049.157.463",
+          "-",
+          "-37.136.032",
+          "1.404.426.357"
+        ],
+        [
+          "    Durdurulan Faaliyetler Dönem Karı/Zararı",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Dönem Karı (Zararı)",
+          "918.563.166",
+          "1.008.603.269",
+          "-",
+          "42.720.348",
+          "1.362.836.522"
+        ],
+        [
+          "    Azınlık Payları",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ana Ortaklık Payları",
+          "918.563.166",
+          "1.008.603.269",
+          "-",
+          "42.720.348",
+          "1.362.836.522"
+        ],
+        [
+          "    Amortisman",
+          "282.755.582",
+          "167.555.833",
+          "-",
+          "138.039.143",
+          "120.348.909"
+        ],
+        [
+          "FAVÖK",
+          "1.022.036.244",
+          "1.070.786.816",
+          "0",
+          "1.096.603.680",
+          "1.829.854.587"
+        ],
+        [
+          "Esas Faaliyet Karı",
+          "739.280.662",
+          "903.230.983",
+          "0",
+          "958.564.537",
+          "1.709.505.678"
+        ]
+      ]
+    },
+    "gelirCeyrek": {
+      "headers": [
+        "Kalem",
+        "2026/3",
+        "2025/12",
+        "2025/3",
+        "2024/12",
+        "2023/12"
+      ],
+      "rows": [
+        [
+          "    Satış Gelirleri",
+          "704.024.223",
+          "-",
+          "1.041.323.842",
+          "-",
+          "-"
+        ],
+        [
+          "    Toplam Hasılat",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Yurt İçi Satışlar",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Yurt Dışı Satışlar",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Satışların Maliyeti (-)",
+          "-545.941.814",
+          "-",
+          "-727.733.772",
+          "-",
+          "-"
+        ],
+        [
+          "    Ticari Faaliyetlerden Brüt Kar (Zarar)",
+          "158.082.409",
+          "-",
+          "313.590.070",
+          "-",
+          "-"
+        ],
+        [
+          "    Faiz, Ücret, Prim, Komisyon ve Diğer Gelirler",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Faiz, Ücret, Prim, Komisyon ve Diğer Giderler (-)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finans Sektörü Faaliyetlerinden Brüt Kar (Zarar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Canlı Varlıklar Gerçeğe Uygun Değer Farkları",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Brüt Kar (Zarar)",
+          "158.082.409",
+          "-",
+          "313.590.070",
+          "-",
+          "-"
+        ],
+        [
+          "    Genel Yönetim Giderleri (-)",
+          "-59.924.090",
+          "-",
+          "-72.416.262",
+          "-",
+          "-"
+        ],
+        [
+          "    Pazarlama, Satış ve Dağıtım Giderleri (-)",
+          "-36.674.887",
+          "-",
+          "-39.665.911",
+          "-",
+          "-"
+        ],
+        [
+          "    Araştırma ve Geliştirme Giderleri (-)",
+          "-48.083.617",
+          "-",
+          "-24.157.761",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Faaliyet Gelirleri",
+          "41.045.938",
+          "-",
+          "74.868.088",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Faaliyet Giderleri (-)",
+          "-33.092.906",
+          "-",
+          "-110.443.781",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Kazançlar (Kayıplar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Faaliyet Karı (Zararı)",
+          "21.352.847",
+          "-",
+          "141.774.443",
+          "-",
+          "-"
+        ],
+        [
+          "    Ödenecek Kar Paylarının Defter Değeri ile Dağıtılan Nakit Dışı Varlıkların Değeri Arasındaki Fark",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    İtfa Edilmiş Maliyetinden Ölçülen Finansal Varlıkların Finansal Tablo Dışı Bırakılmasından Kaynaklanan Kazançlar (Kayıplar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Yatırım Faaliyetlerinden Gelirler",
+          "80.998.151",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Yatırım Faaliyetlerinden Giderler (-)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    TFRS 9 Uyarınca Belirlenen Değer Düşüklüğü Kazançları (Zararları) ve Değer Düşüklüğü Zararlarının İptalleri",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Özkaynak Yöntemiyle Değerlenen Yatırımların Karlarından (Zararlarından) Paylar",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    İştirakler, Müşterek Kontrol Edilen İşletmeler ve Bağlı Ortaklıklardan Diğer Gelirler (Giderler)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    İtfa Edilmiş Maliyetinden Ölçülen Finansal Varlıkların Gerçeğe Uygun Değer Farkı Kar veya Zarara Yansıtılan Olarak Sınıflandırılmasından Kazançlar (Kayıplar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Gerçeğe Uygun Değer Farkı Diğer Kapsamlı Gelire Yansıtılan Finansal Varlıkların Gerçeğe Uygun Değer Farkı Kar veya Zarara Yansıtılan Olarak Sınıflandırılmasından Kazançlar (Kayıplar)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Risk Pozisyonlarını Netleştiren Kalemler Grubuna Yönelik Finansal Riskten Korunma Kazançları (Kayıpları)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finansman Geliri (Gideri) Öncesi Faaliyet Karı (Zararı)",
+          "102.350.998",
+          "-",
+          "141.774.443",
+          "-",
+          "-"
+        ],
+        [
+          "    (Esas Faaliyet Dışı) Finansal Gelirler",
+          "-106.180.672",
+          "-",
+          "-65.216.102",
+          "-",
+          "-"
+        ],
+        [
+          "    (Esas Faaliyet Dışı) Finansal Giderler (-)",
+          "33.878.918",
+          "-",
+          "21.923.827",
+          "-",
+          "-"
+        ],
+        [
+          "    Net Parasal Pozisyon Kazançları (Kayıpları)",
+          "83.415.987",
+          "-",
+          "109.671.607",
+          "-",
+          "-"
+        ],
+        [
+          "    Sürdürülen Faaliyetler Vergi Öncesi Karı (Zararı)",
+          "113.465.231",
+          "-",
+          "208.153.775",
+          "-",
+          "-"
+        ],
+        [
+          "    Sürdürülen Faaliyetler Vergi Geliri (Gideri)",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Dönem Vergi Geliri (Gideri)",
+          "-2.527.559",
+          "-",
+          "-6.116.176",
+          "-",
+          "-"
+        ],
+        [
+          "    Ertelenmiş Vergi Geliri (Gideri)",
+          "-68.392.841",
+          "-",
+          "-69.452.666",
+          "-",
+          "-"
+        ],
+        [
+          "    Sürdürülen Faaliyetler Dönem Karı/Zararı",
+          "113.465.231",
+          "-",
+          "208.153.775",
+          "-",
+          "-"
+        ],
+        [
+          "    Durdurulan Faaliyetler Dönem Karı/Zararı",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Dönem Karı (Zararı)",
+          "42.544.831",
+          "-",
+          "132.584.934",
+          "-",
+          "-"
+        ],
+        [
+          "    Azınlık Payları",
+          "-",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ana Ortaklık Payları",
+          "42.544.831",
+          "-",
+          "132.584.934",
+          "-",
+          "-"
+        ],
+        [
+          "    Amortisman",
+          "152.265.064",
+          "-",
+          "37.065.315",
+          "-",
+          "-"
+        ],
+        [
+          "FAVÖK",
+          "165.664.879",
+          "0",
+          "214.415.451",
+          "0",
+          "0"
+        ],
+        [
+          "Esas Faaliyet Karı",
+          "13.399.815",
+          "0",
+          "177.350.136",
+          "0",
+          "0"
+        ]
+      ]
+    },
+    "nakitAkim": {
+      "headers": [
+        "Kalem",
+        "2026/3",
+        "2025/12",
+        "2024/12",
+        "2023/12"
+      ],
+      "rows": [
+        [
+          "Dönen Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Nakit ve Nakit Benzerleri",
+          "293.388.053",
+          "338.365.399",
+          "60.631.912",
+          "136.239.150"
+        ],
+        [
+          "    Gayrimenkul Projeleri Kapsamında Açılan Nakit Hesapları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finansal Yatırımlar",
+          "75.293.188",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Teminata Verilen Finansal Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ticari Alacaklar",
+          "740.152.470",
+          "867.890.669",
+          "931.669.720",
+          "943.758.828"
+        ],
+        [
+          "    Finans Sektörü Faaliyetlerinden Alacaklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Türkiye Cumhuriyet Merkez Bankası Hesabı",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Alacaklar",
+          "314.877.160",
+          "281.760.570",
+          "549.254.986",
+          "382.143.639"
+        ],
+        [
+          "    Müşteri Sözleşmelerinden Doğan Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    İmtiyaz Sözleşmelerine İlişkin Finansal Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Türev Araçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Stoklar",
+          "2.036.866.674",
+          "1.651.131.543",
+          "1.338.823.251",
+          "1.308.125.341"
+        ],
+        [
+          "    Proje Halindeki Stoklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Canlı Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Peşin Ödenmiş Giderler",
+          "1.352.175.015",
+          "1.325.269.225",
+          "457.387.170",
+          "325.375.349"
+        ],
+        [
+          "    Ertelenmiş Sigortacılık Üretim Giderleri",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Cari Dönem Vergisiyle İlgili Varlıklar",
+          "6.323.367",
+          "8.104.857",
+          "10.402.660",
+          "-"
+        ],
+        [
+          "    Nakit Dışı Serbest Kullanılabilir Teminatlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Dönen Varlıklar",
+          "104.050.153",
+          "119.312.195",
+          "167.938.230",
+          "25.642.724"
+        ],
+        [
+          "    Satış Amacıyla Elde Tutulan Duran Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ortaklara Dağıtılmak Üzere Elde Tutulan Duran Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Toplam Dönen Varlıklar",
+          "4.923.126.080",
+          "4.591.834.458",
+          "3.516.107.929",
+          "3.121.285.031"
+        ],
+        [
+          "Duran Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finansal Yatırımlar",
+          "5.099.371",
+          "5.611.460",
+          "1.718.893",
+          "1.067.603"
+        ],
+        [
+          "    İştirakler, İş Ortaklıkları ve Bağlı Ortaklıklardaki Yatırımlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ticari Alacaklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finans Sektörü Faaliyetlerinden Alacaklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Alacaklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Müşteri Sözleşmelerinden Doğan Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    İmtiyaz Sözleşmelerine İlişkin Finansal Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Türev Araçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Stoklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Özkaynak Yöntemiyle Değerlenen Yatırımlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Canlı Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Yatırım Amaçlı Gayrimenkuller",
+          "11.244.608",
+          "11.309.086",
+          "11.566.998",
+          "11.803.446"
+        ],
+        [
+          "    Proje Halindeki Yatırım Amaçlı Gayrimenkuller",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Maddi Duran Varlıklar",
+          "4.847.386.521",
+          "4.507.892.995",
+          "2.339.847.784",
+          "1.557.834.778"
+        ],
+        [
+          "    Kullanım Hakkı Varlıkları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Maddi Olmayan Duran Varlıklar",
+          "482.521.308",
+          "450.405.187",
+          "228.462.625",
+          "163.674.567"
+        ],
+        [
+          "    Peşin Ödenmiş Giderler",
+          "341.036.359",
+          "251.616.468",
+          "271.283.522",
+          "304.132.148"
+        ],
+        [
+          "    Ertelenmiş Vergi Varlığı",
+          "557.021.942",
+          "548.467.740",
+          "510.085.137",
+          "357.603.383"
+        ],
+        [
+          "    Cari Dönem Vergisiyle İlgili Duran Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Nakit Dışı Serbest Kullanılabilir Teminatlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Duran Varlıklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Toplam Duran Varlıklar",
+          "6.244.310.109",
+          "5.775.302.936",
+          "3.362.964.959",
+          "2.396.115.925"
+        ],
+        [
+          "    Toplam Varlıklar",
+          "11.167.436.189",
+          "10.367.137.394",
+          "6.879.072.888",
+          "5.517.400.956"
+        ],
+        [
+          "Kısa Vadeli Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finansal Borçlar",
+          "2.324.083.333",
+          "2.146.891.103",
+          "1.759.540.831",
+          "895.693.322"
+        ],
+        [
+          "    Diğer Finansal Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ticari Borçlar",
+          "1.486.081.594",
+          "1.697.320.984",
+          "930.105.012",
+          "788.371.707"
+        ],
+        [
+          "    Finans Sektörü Faaliyetlerinden Borçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Çalışanlara Sağlanan Faydalar Kapsamında Borçlar",
+          "84.781.391",
+          "56.101.603",
+          "60.306.929",
+          "35.345.166"
+        ],
+        [
+          "    Diğer Borçlar",
+          "54.813.697",
+          "112.653.452",
+          "-",
+          "-"
+        ],
+        [
+          "    Müşteri Sözleşmelerinden Doğan Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Özkaynak Yöntemiyle Değerlenen Yatırımlardan Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Türev Araçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Devlet Teşvik ve Yardımları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ertelenmiş Gelirler",
+          "594.043.691",
+          "539.620.414",
+          "514.210.740",
+          "396.347.419"
+        ],
+        [
+          "    Dönem Karı Vergi Yükümlülüğü",
+          "2.527.559",
+          "-",
+          "-",
+          "1.677.494"
+        ],
+        [
+          "    Kısa Vadeli Karşılıklar",
+          "44.951.958",
+          "21.579.831",
+          "12.626.217",
+          "7.120.154"
+        ],
+        [
+          "    Diğer Kısa Vadeli Yükümlülükler",
+          "11.578.760",
+          "24.504.233",
+          "53.121.517",
+          "25.137.324"
+        ],
+        [
+          "    Satış Amaçlı Sınıflandırılan Varlık Gruplarına İlişkin Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ortaklara Dağıtılmak Üzere Elde Tutulan Varlık Gruplarına İlişkin Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Toplam Kısa Vadeli Yükümlülükler",
+          "4.602.861.983",
+          "4.598.671.620",
+          "3.329.911.246",
+          "2.149.692.586"
+        ],
+        [
+          "Uzun Vadeli Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finansal Borçlar",
+          "2.478.389.590",
+          "1.806.217.832",
+          "668.816.188",
+          "562.180.695"
+        ],
+        [
+          "    Diğer Finansal Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ticari Borçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Finans Sektörü Faaliyetlerinden Borçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Çalışanlara Sağlanan Faydalar Kapsamında Borçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Borçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Müşteri Sözleşmelerinden Doğan Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Devlet Teşvik ve Yardımları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Özkaynak Yöntemiyle Değerlenen Yatırımlardan Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Türev Araçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Devlet Teşvik ve Yardımları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ertelenmiş Gelirler",
+          "20.521",
+          "-",
+          "1.166.965",
+          "4.573.163"
+        ],
+        [
+          "    Uzun vadeli Karşılıklar",
+          "53.958.127",
+          "49.391.052",
+          "32.491.725",
+          "39.997.699"
+        ],
+        [
+          "    Cari Dönem Vergisiyle İlgili Borçlar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ertelenmiş Vergi Yükümlülüğü",
+          "623.211.798",
+          "546.274.749",
+          "481.004.208",
+          "430.432.778"
+        ],
+        [
+          "    Diğer Uzun Vadeli Yükümlülükler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Toplam Uzun Vadeli Yükümlülükler",
+          "3.155.580.036",
+          "2.401.883.633",
+          "1.183.479.086",
+          "1.037.184.335"
+        ],
+        [
+          "Özkaynaklar",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ana Ortaklığa Ait Özkaynaklar",
+          "3.408.994.170",
+          "3.366.582.141",
+          "2.365.682.556",
+          "2.330.524.035"
+        ],
+        [
+          "    Ödenmiş Sermaye",
+          "350.000.000",
+          "350.000.000",
+          "350.000.000",
+          "250.000.000"
+        ],
+        [
+          "    Sermaye Düzeltme Farkları",
+          "940.386.712",
+          "940.386.712",
+          "940.386.712",
+          "865.222.949"
+        ],
+        [
+          "    Birleşme Denkleştirme Hesabı",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Pay Sahiplerinin İlave Sermaye Katkıları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Sermaye Avansı",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Geri Alınmış Paylar (-)",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Karşılıklı İştirak Sermaye Düzeltmesi (-)",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Paylara İlişkin Primler (İskontolar)",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ortak Kontrole Tabi Teşebbüs veya İşletmeleri İçeren Birleşmelerin Etkisi",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Pay Bazlı Ödemeler (-)",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Kar veya Zararda Yeniden Sınıflandırılmayacak Birikmiş Diğer Kapsamlı Gelirler (Giderler)",
+          "-28.455.589",
+          "-28.322.787",
+          "-20.619.103",
+          "-13.057.276"
+        ],
+        [
+          "    Kar veya Zararda Yeniden Sınıflandırılacak Birikmiş Diğer Kapsamlı Gelirler (Giderler)",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Kardan Ayrılan Kısıtlanmış Yedekler",
+          "50.803.230",
+          "50.803.230",
+          "45.996.810",
+          "44.868.696"
+        ],
+        [
+          "    Diğer Özkaynak Payları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Diğer Yedekler",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Ödenen Kar Payı Avansları (Net) (-)",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Geçmiş Yıllar Kar/Zararları",
+          "2.053.714.986",
+          "1.045.111.717",
+          "1.007.197.789",
+          "-179.346.856"
+        ],
+        [
+          "    Dönem Net Kar/Zararı",
+          "42.544.831",
+          "1.008.603.269",
+          "42.720.348",
+          "1.362.836.522"
+        ],
+        [
+          "    Azınlık Payları",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "    Toplam Özkaynaklar",
+          "3.408.994.170",
+          "3.366.582.141",
+          "2.365.682.556",
+          "2.330.524.035"
+        ],
+        [
+          "    Toplam Kaynaklar",
+          "11.167.436.189",
+          "10.367.137.394",
+          "6.879.072.888",
+          "5.517.400.956"
+        ],
+        [
+          "    Hedge Dahil Net Yabancı Para Pozisyonu",
+          "-",
+          "-",
+          "-",
+          "-"
+        ],
+        [
+          "Sistem_Fin_Borc_Eklemesi",
+          "0",
+          "0",
+          "0",
+          "0"
+        ],
+        [
+          "Sistem_Net_Borc_Eklemesi",
+          "-368.681.241",
+          "-338.365.399",
+          "-60.631.912",
+          "-136.239.150"
+        ]
+      ]
+    }
   }
 };
 window.stockReports = {

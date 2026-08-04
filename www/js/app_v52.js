@@ -1,9 +1,9 @@
 
-window.toggleExpandCard = function(btnElement) {
+window.toggleExpandCard = function (btnElement) {
     const card = btnElement.closest('.dash-card');
     const titleText = card.querySelector('.dash-title span').innerText;
     const canvasContainer = card.querySelector('canvas').parentElement;
-    
+
     let modal = document.getElementById('chart-expand-modal');
     if (!modal) {
         modal = document.createElement('div');
@@ -20,10 +20,10 @@ window.toggleExpandCard = function(btnElement) {
             </div>
         `;
         document.body.appendChild(modal);
-        
-        window.closeExpandedChart = function() {
+
+        window.closeExpandedChart = function () {
             const m = document.getElementById('chart-expand-modal');
-            if(m && window.currentExpandedChartPlaceholder) {
+            if (m && window.currentExpandedChartPlaceholder) {
                 const body = document.getElementById('expanded-chart-body');
                 const content = body.children[0];
                 if (content) {
@@ -39,14 +39,14 @@ window.toggleExpandCard = function(btnElement) {
             }
         };
     }
-    
+
     window.currentExpandedChartPlaceholder = card;
     const body = document.getElementById('expanded-chart-body');
     document.getElementById('expanded-chart-title').innerText = titleText;
-    
+
     body.appendChild(canvasContainer);
     modal.style.display = 'flex';
-    
+
     setTimeout(() => {
         const canvas = canvasContainer.querySelector('canvas');
         if (canvas) {
@@ -59,35 +59,35 @@ window.toggleExpandCard = function(btnElement) {
 window.loadRapor = (raporTipi, ext = 'pdf') => {
     const hisse = window.currentSelectedHisse;
     if (!hisse) return;
-    
+
     let folderName = '';
     if (raporTipi === 'Araştırma Raporu') folderName = 'Arastirma_Raporu';
     else if (raporTipi === 'Finansal Rapor') folderName = 'Finansal_Rapor';
     else if (raporTipi === 'Faaliyet Raporu') folderName = 'Faaliyet_Raporu';
     else if (raporTipi === 'Yatırımcı Sunumu') folderName = 'Yatirimci_Sunumu';
     else return;
-    
+
     const container = document.getElementById('rapor-viewer-container');
     if (!container) return;
-    
+
     try {
         const fs = require('fs');
         const path = require('path');
-        
+
         let appRoot = __dirname;
         if (appRoot.endsWith('js') || appRoot.endsWith('js\\') || appRoot.endsWith('js/')) {
             appRoot = path.join(appRoot, '..');
         }
-        
+
         const relPath = `Hisse_Verileri/${folderName}/${hisse}.${ext}`;
         const absPath = path.join(appRoot, relPath);
-        
+
         if (fs.existsSync(absPath)) {
             container.innerHTML = `<embed src="${relPath}" width="100%" height="100%" type="application/pdf">`;
         } else {
             container.innerHTML = `<div style="flex:1; display:flex; justify-content:center; align-items:center; opacity:0.5; font-style:italic; font-size:1.2rem;">${hisse} ${raporTipi.toLowerCase()} bulunamadı.</div>`;
         }
-    } catch(e) {
+    } catch (e) {
         container.innerHTML = `<div style="flex:1; display:flex; justify-content:center; align-items:center; opacity:0.5; font-style:italic; font-size:1.2rem;">Sistem hatası: ${e.message}</div>`;
     }
 };
@@ -111,7 +111,7 @@ const genFintablesBilanco = (title, headers, rows) => {
                 <thead>
                     <tr style="background:#111216; border-bottom:1px solid var(--table-border);">
                         <th style="text-align:left; padding:16px; font-size:15px; font-weight:700;  white-space:nowrap;">Bilanço Kalemleri</th>`;
-    
+
     headers.forEach((h, i) => {
         if (i === 0) return;
         let arrowL = i === 1 ? `<span style="margin-right:8px; vertical-align:middle;">${leftArrow}</span>` : '';
@@ -122,14 +122,14 @@ const genFintablesBilanco = (title, headers, rows) => {
     html += `</tr></thead><tbody>`;
 
     const mainCategories = ['dönen varlıklar', 'duran varlıklar', 'toplam varlıklar', 'kısa vadeli yükümlülükler', 'uzun vadeli yükümlülükler', 'özkaynaklar', 'toplam kaynaklar'];
-    
+
     rows.forEach(r => {
         const rowName = r[0] ? r[0].trim() : '';
         const isMainCat = mainCategories.includes(rowName.toLocaleLowerCase('tr-TR'));
-        
+
         let trStyle = isMainCat ? `background:rgba(255,255,255,0.03); font-weight:600;` : `transition: background 0.2s;`;
         html += `<tr style="${trStyle} border-bottom:1px solid rgba(255,255,255,0.03);" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='${isMainCat ? 'rgba(255,255,255,0.03)' : 'transparent'}'">`;
-        
+
         r.forEach((cell, i) => {
             if (i === 0) {
                 let cellColor = isMainCat ? '#fff' : '#aaa';
@@ -140,7 +140,7 @@ const genFintablesBilanco = (title, headers, rows) => {
         });
         html += `</tr>`;
     });
-    
+
     html += `</tbody></table></div></div>`;
     return html;
 };
@@ -148,13 +148,13 @@ const genFintablesBilanco = (title, headers, rows) => {
 const genTable = (title, headers, rows) => {
     let html = `<div class="dash-card" style="display:flex; flex-direction:column; height:100%;"><div class="dash-title">${title}</div><div style="flex:1; display:flex; flex-direction:column; justify-content:center;"><table class="dash-table compact-table" style="height:100%;"><thead><tr>`;
     headers.forEach((h, i) => {
-        html += `<th style="text-align:${i===0 ? 'left' : 'center'}; font-weight: 500;">${h}</th>`;
+        html += `<th style="text-align:${i === 0 ? 'left' : 'center'}; font-weight: 500;">${h}</th>`;
     });
     html += `</tr></thead><tbody>`;
     rows.forEach(r => {
         html += `<tr>`;
         r.forEach((cell, i) => {
-            let align = i===0 ? 'left' : 'right';
+            let align = i === 0 ? 'left' : 'right';
             if (cell && cell.toString().includes('%')) align = 'center';
             html += `<td style="text-align:${align};">${cell}</td>`;
         });
@@ -200,7 +200,7 @@ const qRows = [
     ['Net Dönem Karı', '65.000', '78.000', '88.000', '110.000']
 ];
 const tGelirQ = genTable('Gelir Tablosu (Çeyreklik)', qHeaders, qRows);
-const tGelirY = genTable('Gelir Tablosu (Yıllıklandırılmış)', qHeaders, qRows.map(r => [r[0], r[1]+' (Y)', r[2]+' (Y)', r[3]+' (Y)', r[4]+' (Y)']));
+const tGelirY = genTable('Gelir Tablosu (Yıllıklandırılmış)', qHeaders, qRows.map(r => [r[0], r[1] + ' (Y)', r[2] + ' (Y)', r[3] + ' (Y)', r[4] + ' (Y)']));
 
 const bRows = [
     ['Dönen Varlıklar', '1.200.000', '1.350.000', '1.500.000', '1.750.000'],
@@ -223,12 +223,12 @@ const chartsHtml = `
 
 // --- FIREBASE SETUP ---
 const firebaseConfig = {
-  apiKey: "AIzaSyBfGArrNWxZT02JkeWqNZ0PqqZaGTyIJjU",
-  authDomain: "exchangepro-48000.firebaseapp.com",
-  projectId: "exchangepro-48000",
-  storageBucket: "exchangepro-48000.firebasestorage.app",
-  messagingSenderId: "361891852133",
-  appId: "1:361891852133:web:96d08eb68a47ab935afb8c"
+    apiKey: "AIzaSyBfGArrNWxZT02JkeWqNZ0PqqZaGTyIJjU",
+    authDomain: "exchangepro-48000.firebaseapp.com",
+    projectId: "exchangepro-48000",
+    storageBucket: "exchangepro-48000.firebasestorage.app",
+    messagingSenderId: "361891852133",
+    appId: "1:361891852133:web:96d08eb68a47ab935afb8c"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -245,7 +245,7 @@ const formatNumber = (val, decimals = 2) => {
 };
 
 const formatCurrency = (val, decimals = 2, symbol = '₺') => {
-    if (val === null || val === undefined || isNaN(val)) return decimals === 0 ? (symbol === '€' ? '0'+symbol : symbol+'0') : (symbol === '€' ? '0,00'+symbol : symbol+'0,00');
+    if (val === null || val === undefined || isNaN(val)) return decimals === 0 ? (symbol === '€' ? '0' + symbol : symbol + '0') : (symbol === '€' ? '0,00' + symbol : symbol + '0,00');
     const isNegative = val < 0;
     const absVal = Math.abs(val);
     const numStr = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(absVal);
@@ -255,7 +255,7 @@ const formatPercent = (val, decimals = 2) => new Intl.NumberFormat('tr-TR', { mi
 const formatDate = (dateStr) => {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    if(isNaN(d)) return dateStr;
+    if (isNaN(d)) return dateStr;
     const day = d.getDate().toString().padStart(2, '0');
     const month = (d.getMonth() + 1).toString().padStart(2, '0');
     const year = d.getFullYear().toString().slice(-2);
@@ -264,7 +264,7 @@ const formatDate = (dateStr) => {
 const calcDaysBetween = (date1, date2) => {
     const d1 = new Date(date1);
     const d2 = date2 ? new Date(date2) : new Date();
-    return Math.max(0, Math.ceil(Math.abs(d2 - d1) / (1000 * 60 * 60 * 24))); 
+    return Math.max(0, Math.ceil(Math.abs(d2 - d1) / (1000 * 60 * 60 * 24)));
 };
 
 // --- CALCULATIONS ---
@@ -334,17 +334,17 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
         if (menkul.includes('NAK')) return; // Nakit artk bamsz hesaplanyor
         const h = historyByMenkul[menkul];
         const isNakit = false;
-        
+
         // Aktif portföyde olanlar (0'dan büyükler) ve NAKİT
         if (h.kalanAdet > 0.0001 || isNakit) {
             const guncelFiyat = getFiyat(menkul);
             const guncelTutar = isNakit ? h.kalanAdet : (h.kalanAdet * guncelFiyat);
-            
+
             toplamGuncelTutar += guncelTutar;
 
             let guncelMaliyet = 0;
             let netMaliyet = 0;
-            
+
             if (!isNakit) {
                 if (h.alisToplamAdet > 0) guncelMaliyet = h.alisToplamTutar / h.alisToplamAdet;
                 if (h.kalanAdet > 0) netMaliyet = (h.alisToplamTutar - h.satisToplamTutar) / h.kalanAdet;
@@ -356,7 +356,7 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
             const odenenTutar = h.kalanAdet * guncelMaliyet;
             const kar = isNakit ? 0 : guncelTutar - odenenTutar;
             const karYuzde = isNakit ? 0 : (odenenTutar > 0 ? kar / odenenTutar : 0);
-            
+
             portfoyList.push({
                 menkul,
                 guncelFiyat,
@@ -415,7 +415,7 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
     (nakitHareketleri || []).forEach(n => {
         const tutar = parseFloat(n.tutar);
         anapara += tutar;
-        
+
         let compoundingFactor = 1;
         const [y, m, d] = n.tarih.split('-');
         let nakitTarih = new Date(y, m - 1, 1);
@@ -429,7 +429,7 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
                 }
             });
         }
-        
+
         const enfAdjustedTutar = tutar * compoundingFactor;
 
         if (tutar > 0) {
@@ -536,7 +536,7 @@ const State = {
             if (localData) {
                 try {
                     this.data = { ...DEFAULT_STATE, ...JSON.parse(localData) };
-                } catch(e) {
+                } catch (e) {
                     this.data = JSON.parse(JSON.stringify(DEFAULT_STATE));
                 }
             } else {
@@ -551,7 +551,7 @@ const State = {
         this.unsubscribe = db.collection('app_data').doc(currentUser.uid).onSnapshot((doc) => {
             if (doc.exists) {
                 this.data = { ...DEFAULT_STATE, ...doc.data() };
-                
+
                 // AUTO-RESCUE: If Firebase is empty but local storage or filesystem has data, rescue it!
                 let rescuedStr = null;
                 try {
@@ -563,8 +563,8 @@ const State = {
                             rescuedStr = fs.readFileSync(backupPath, 'utf8');
                         }
                     }
-                } catch(e) {}
-                
+                } catch (e) { }
+
                 if (!rescuedStr) rescuedStr = localStorage.getItem('borsa_app_data');
 
                 // ACİL KURTARMA: Eğer veriler silindiyse, en dolu yedeği bul
@@ -581,7 +581,7 @@ const State = {
                                     rescuedStr = bStr;
                                 }
                             }
-                        } catch(e) {}
+                        } catch (e) { }
                     }
                 }
 
@@ -590,10 +590,10 @@ const State = {
                         const parsedLocal = JSON.parse(rescuedStr);
                         const localEkstreLen = parsedLocal.ekstre ? parsedLocal.ekstre.length : 0;
                         const fbEkstreLen = this.data.ekstre ? this.data.ekstre.length : 0;
-                        
+
                         const localDataTs = parsedLocal.dataUpdated || parsedLocal.lastUpdated || 0;
                         const fbDataTs = this.data.dataUpdated || this.data.lastUpdated || 0;
-                        
+
                         // KURTARMA ŞARTI: Firebase tamamen boşsa (ekstre yok) ve yerelde ekstre varsa DİREKT KURTAR.
                         // Veya yerel zaman damgası daha yeniyse kurtar.
                         const useLocal = (localDataTs > fbDataTs) || (fbEkstreLen === 0 && localEkstreLen > 0);
@@ -603,12 +603,12 @@ const State = {
                             this.save(); // Save rescued data back to Firebase
                             console.log("Rescued data from local system based on timestamp!");
                         }
-                    } catch(e) {}
+                    } catch (e) { }
                 }
-                
+
                 if (window.IMPORT_EKSTRE_DATA && window.IMPORT_EKSTRE_DATA.length > 0) {
                     this.data.ekstre = window.IMPORT_EKSTRE_DATA;
-                    this.data.takipListesi = Array.from(new Set([...(this.data.takipListesi||[]), ...(window.IMPORT_TAKIP_DATA||[])]));
+                    this.data.takipListesi = Array.from(new Set([...(this.data.takipListesi || []), ...(window.IMPORT_TAKIP_DATA || [])]));
                     window.IMPORT_EKSTRE_DATA = null;
                     if (window.IMPORT_NAKIT_DATA && window.IMPORT_NAKIT_DATA.length > 0) {
                         this.data.nakitHareketleri = window.IMPORT_NAKIT_DATA;
@@ -617,30 +617,30 @@ const State = {
                     this.save();
                     console.log("IMPORTED EXCEL DATA!");
                 }
-                
+
                 processLoadedData();
             } else {
                 const localData = localStorage.getItem('borsa_app_data');
                 if (localData) {
                     try {
                         this.data = { ...DEFAULT_STATE, ...JSON.parse(localData) };
-                    } catch(e) {
+                    } catch (e) {
                         this.data = JSON.parse(JSON.stringify(DEFAULT_STATE));
                     }
                 } else {
                     this.data = JSON.parse(JSON.stringify(DEFAULT_STATE));
                 }
-                
+
                 if (window.IMPORT_EKSTRE_DATA && window.IMPORT_EKSTRE_DATA.length > 0) {
                     this.data.ekstre = window.IMPORT_EKSTRE_DATA;
-                    this.data.takipListesi = Array.from(new Set([...(this.data.takipListesi||[]), ...(window.IMPORT_TAKIP_DATA||[])]));
+                    this.data.takipListesi = Array.from(new Set([...(this.data.takipListesi || []), ...(window.IMPORT_TAKIP_DATA || [])]));
                     window.IMPORT_EKSTRE_DATA = null;
                     if (window.IMPORT_NAKIT_DATA && window.IMPORT_NAKIT_DATA.length > 0) {
                         this.data.nakitHareketleri = window.IMPORT_NAKIT_DATA;
                         window.IMPORT_NAKIT_DATA = null;
                     }
                 }
-                
+
                 processLoadedData();
                 this.syncHisseFolders();
                 this.save();
@@ -662,13 +662,13 @@ const State = {
             if (localData) {
                 try {
                     this.data = { ...DEFAULT_STATE, ...JSON.parse(localData) };
-                } catch(e) {
+                } catch (e) {
                     this.data = JSON.parse(JSON.stringify(DEFAULT_STATE));
                 }
             }
             if (window.IMPORT_EKSTRE_DATA && window.IMPORT_EKSTRE_DATA.length > 0) {
                 this.data.ekstre = window.IMPORT_EKSTRE_DATA;
-                this.data.takipListesi = Array.from(new Set([...(this.data.takipListesi||[]), ...(window.IMPORT_TAKIP_DATA||[])]));
+                this.data.takipListesi = Array.from(new Set([...(this.data.takipListesi || []), ...(window.IMPORT_TAKIP_DATA || [])]));
                 window.IMPORT_EKSTRE_DATA = null;
                 if (window.IMPORT_NAKIT_DATA && window.IMPORT_NAKIT_DATA.length > 0) {
                     this.data.nakitHareketleri = window.IMPORT_NAKIT_DATA;
@@ -692,20 +692,20 @@ const State = {
             // Böylece eski kod her halükarda Firebase verisini kendi verisinden daha "yeni" sanıp kabul edecek.
             this.data.lastUpdated = Date.now() + (1000 * 60 * 60 * 24 * 365 * 10);
             this.lastSaveTime = Date.now();
-            
+
             // ROLLING BACKUP SYSTEM
             try {
                 for (let i = 4; i >= 1; i--) {
                     const prev = localStorage.getItem(`borsa_app_data_backup_${i}`);
-                    if (prev) localStorage.setItem(`borsa_app_data_backup_${i+1}`, prev);
+                    if (prev) localStorage.setItem(`borsa_app_data_backup_${i + 1}`, prev);
                 }
                 const currentLocal = localStorage.getItem('borsa_app_data');
                 if (currentLocal) localStorage.setItem('borsa_app_data_backup_1', currentLocal);
             } catch (e) {
                 console.error('Backup error', e);
             }
-            
-            try { localStorage.setItem('borsa_app_data', JSON.stringify(this.data)); } catch(e) { console.warn('Quota exceeded, clearing backups'); for(let i=1; i<=4; i++) localStorage.removeItem('borsa_app_data_backup_'+i); localStorage.setItem('borsa_app_data', JSON.stringify(this.data)); }
+
+            try { localStorage.setItem('borsa_app_data', JSON.stringify(this.data)); } catch (e) { console.warn('Quota exceeded, clearing backups'); for (let i = 1; i <= 4; i++) localStorage.removeItem('borsa_app_data_backup_' + i); localStorage.setItem('borsa_app_data', JSON.stringify(this.data)); }
 
             // FILE SYSTEM BACKUP (ABSOLUTELY BULLETPROOF)
             try {
@@ -746,7 +746,7 @@ const State = {
             if (typeof require === 'undefined' || typeof __dirname === 'undefined') return;
             const fs = require('fs');
             const path = require('path');
-            
+
             let appRoot = __dirname;
             if (appRoot.endsWith('js') || appRoot.endsWith('js\\') || appRoot.endsWith('js/')) {
                 appRoot = path.join(appRoot, '..');
@@ -764,23 +764,23 @@ const State = {
 
             targetDirs.forEach(hisselerDir => {
                 if (!fs.existsSync(hisselerDir)) {
-                    try { fs.mkdirSync(hisselerDir, { recursive: true }); } catch(e) {}
+                    try { fs.mkdirSync(hisselerDir, { recursive: true }); } catch (e) { }
                 }
-                
+
                 if (fs.existsSync(hisselerDir)) {
                     activeTakip.forEach(menkul => {
                         const folderPath = path.join(hisselerDir, menkul);
                         if (!fs.existsSync(folderPath)) {
-                            try { fs.mkdirSync(folderPath); } catch(e) {}
+                            try { fs.mkdirSync(folderPath); } catch (e) { }
                         }
                     });
-                    
+
                     const existingFolders = fs.readdirSync(hisselerDir);
                     existingFolders.forEach(folder => {
                         const folderPath = path.join(hisselerDir, folder);
                         if (fs.statSync(folderPath).isDirectory()) {
                             if (!activeTakip.includes(folder)) {
-                                try { fs.rmSync(folderPath, { recursive: true, force: true }); } catch(e) {}
+                                try { fs.rmSync(folderPath, { recursive: true, force: true }); } catch (e) { }
                             }
                         }
                     });
@@ -794,9 +794,9 @@ const State = {
     addEkstre(islem) {
         let islemAdet = parseFloat(islem.adet);
         if (islem.islemTip === 'SATIŞ') islemAdet = -Math.abs(islemAdet);
-        
+
         const tutar = Math.abs(islemAdet) * parseFloat(islem.fiyat);
-        
+
         this.data.ekstre.push({
             id: Date.now().toString(),
             tarih: islem.tarih,
@@ -806,7 +806,7 @@ const State = {
             fiyat: parseFloat(islem.fiyat),
             tutar: tutar
         });
-        
+
         this.save(false, true);
     },
 
@@ -885,7 +885,7 @@ const ensureDatalist = () => {
         dl.id = 'bist-hisse-list';
         document.body.appendChild(dl);
     }
-    window.defaultStocksArray = ["HLGYO","KAYSE","OZRDN","FONET","AVGYO","METRO","DARDL","GOODY","CATES","KRGYO","CIMSA","MPARK","ARASE","AVTUR","BRSAN","IHAAS","ZRE20","ARFYE","MERKO","TDGYO","OFSYM","EGSER","AEFES","TCKRC","VERTU","HTTBT","RUZYE","EDIP","BIGCH","ISYAT","BALAT","MEYSU","TRGYO","KUTPO","SEGMN","BJKAS","INTEK","VBTYZ","AVPGY","GLBMD","IEYHO","BEYAZ","GENIL","PAMEL","MERIT","ISBIR","ARMGD","CEOEM","EUHOL","ALARK","HUNER","OPTGY","OZYSR","SODSN","SELEC","BARMA","UNLU","ENTRA","EDATA","TMSN","DURDO","LXGYO","EKSUN","KUYAS","ISCTR","ARCLK","DITAS","TSGYO","EKIZ","ACSEL","AKMGY","ADEL","GLCVY","AKSEN","RODRG","ETYAT","YONGA","PRKAB","ISMEN","VESTL","INFO","PNLSN","MAKIM","KCHOL","EKGYO","AYEN","GLYHO","AVOD","ALGYO","BRKVY","CLEBI","DOFER","AKHAN","BRISA","RUBNS","VAKBN","ISGYO","GLRMK","OSMEN","SUNTK","BASCM","GMTAS","BRMEN","SUWEN","AGESA","BULGS","GWIND","VKING","VERUS","MARTI","SMRTG","TRHOL","YATAS","CMENT","DMSAS","TUCLK","KARTN","CWENE","ZERGY","SKBNK","KRDMD","BANVT","ALKA","PINSU","TGSAS","KOPOL","FADE","TKFEN","SONME","PRKME","SELVA","AKSGY","LYDHO","EUPWR","PEKGY","EKOS","AYCES","QNBTR","ADGYO","TERA","YESIL","BIGTK","A1YEN","ASGYO","ESCAR","CRDFA","MARMR","VAKKO","KFEIN","KLSER","SVGYO","AYGAZ","KZGYO","AHGAZ","OYAKC","PSDTC","PKART","BALSU","EGEEN","LMKDC","BAKAB","DOCO","HATSN","ALCTL","LIDER","DIRIT","MHRGY","SURGY","EREGL","KRTEK","MOBTL","TEZOL","NATEN","BESTE","LOGO","GEDIK","DENGE","VKGYO","ISKPL","LILAK","AKFIS","HEDEF","PNSUT","MERCN","ALKLC","TURGG","PAPIL","ENPRA","BURVA","OYAYO","BEGYO","YKSLN","VAKFN","TLMAN","BESLR","UCAYM","POLTK","MSGYO","MAVI","EUKYO","ORCAY","CASA","AKYHO","TATGD","FORTE","HRKET","NETAS","KMPUR","BIOEN","ADESE","KAPLM","AYDEM","ULUFA","HATEK","ODAS","ANELE","KRVGD","ZPT10","OPX30","GOZDE","AGYO","PSGYO","GLDTR","PAHOL","GARFA","ULUUN","DURKN","ONRYT","SEKFK","DSTKF","KOCMT","INGRM","BSOKE","EUREN","GENKM","MEDTR","SNPAM","KUVVA","SANKO","AZTEK","SKTAS","KENT","JANTS","MEGAP","ULAS","OZKGY","VAKFA","FMIZP","AGROT","ANHYT","VRGYO","GENTS","BRKO","CEMZY","AKCNS","EGEPO","OPT25","AFYON","MIATK","GOKNR","TSKB","GRNYO","KONKA","SAMAT","LKMNH","LINK","ECOGR","BTCIM","ALBRK","TARKM","TRALT","KBORU","REEDR","FLAP","GUNDG","KTSKR","EGPRO","IHEVA","CVKMD","KLYPV","BOSSA","KOTON","ISFIN","DGGYO","GEDZA","GRTHO","VANGD","DOFRB","YGGYO","IZINV","KRPLS","TEHOL","TUPRS","AGHOL","APBDL","TMPOL","KONTR","NUGYO","TTRAK","HEKTS","AKBNK","DMLKT","IZFAS","PRZMA","TRMET","NIBAS","MARKA","OZSUB","FORMT","BAGFS","RNPOL","MNDRS","AKFYE","ALVES","LYDYE","QUAGR","SKYLP","RYSAS","KORDS","VSNMD","ARDYZ","ONCSM","ORMA","OYLUM","ZPBDL","GEREL","ENJSA","KRONT","BINHO","CANTE","FZLGY","TABGD","PENGD","ATAKP","BINBN","BAHKM","GARAN","FENER","RALYH","GMSTR","ARSAN","BASGZ","RYGYO","AVHOL","AHSGY","USDTR","ICUGS","MACKO","Z30KP","DUNYH","OBAMS","EBEBK","NTGAZ","DGNMO","SUMAS","AYES","DOGUB","SKYMD","MANAS","ISKUR","PARSN","HKTM","YIGIT","ARZUM","EMPAE","ZRGYO","DOAS","KATMR","TURSG","KLGYO","KLRHO","PASEU","KRDMB","TNZTP","BORLS","TAVHL","BRKSN","ULKER","KERVN","INVES","FRMPL","A1CAP","OTTO","BERA","BFREN","IZENR","KLSYN","YUNSA","TOASO","PKENT","SEYKM","EGEGY","ASTOR","PETKM","MZHLD","BNTAS","PENTA","ALTNY","DYOBY","GUBRF","ENDAE","MAGEN","TSPOR","CRFSA","ASUZU","CUSAN","ISSEN","ZEDUR","CMBTN","GESAN","LUKSK","KSTUR","ICBCT","ATEKS","PAGYO","EMKEL","ERBOS","KAREL","ODINE","YYAPI","TBORG","OPK30","MTRYO","APX30","MEPET","SEKUR","TCELL","BIGEN","QNBFK","ZGYO","ISDMR","AKFGY","INVEO","ISGLK","OBASE","DCTTR","YEOTK","LRSHO","SASA","KLNMA","ENERY","TRILC","IHYAY","SAYAS","SISE","INDES","KLMSN","TKNSA","MTRKS","ECZYT","CELHA","ANGEN","CONSE","SANEL","HURGZ","IHGZT","ESCOM","OTKAR","CGCAM","YAPRK","HOROZ","SAHOL","UFUK","EYGYO","CEMTS","RAYSG","SNICA","USAK","GZNMI","SERNT","PLTUR","SOKM","ALKIM","BAYRK","MRGYO","DMRGD","YYLGD","NUHCM","ATSYH","GRSEL","SEGYO","MNDTR","COSMO","ENSRI","ERCB","ENKAI","FRIGO","MMCAS","ASELS","KRSTL","KNFRT","ARENA","MOGAN","BUCIM","Z30KE","IDGYO","PRDGS","DOHOL","ALCAR","EGGUB","DNISI","ZPLIB","KCAER","QTEMZ","SDTTR","YBTAS","BIENY","MAKTK","BURCE","ISBTR","DAPGM","BRYAT","KRDMA","MEGMT","TUREX","BYDNR","BVSAN","ATAGY","GOLTS","BIMAS","ETILR","AKSUE","ANSGR","BIZIM","MARBL","YAYLA","EFOR","EMNIS","HDFGS","SAFKR","DERHL","TATEN","TTKOM","SRVGY","MRSHL","CEMAS","NETCD","KGYO","ZOREN","VESBE","BLUME","IMASM","POLHO","ALTIN","SNGYO","FROTO","TRCAS","ORGE","ALFAS","SILVR","MEKAG","GSDHO","PATEK","HALKB","SARKY","ATLAS","ARTMS","TUKAS","AAGYO","IHLAS","KONYA","GIPTA","MCARD","PCILT","ATATR","RGYAS","TEKTU","SMART","EUYO","SMRVA","AKSA","ELITE","YKBNK","KIMMR","BMSTL","BOBET","AKENR","ULUSE","KZBGY","INTEM","BRLSM","CCOLA","OZGYO","BMSCH","DEVA","GSDDE","DESPC","DESA","ERSU","MAALT","DAGI","IZMDC","KTLEV","PETUN","OSTIM","RTALB","DZGYO","IHLGM","OPTLR","MOPAS","PGSUS","DGATE","NTHOL","ZGOLD","SOKE","EKDMR","SANFM","ATATP","MGROS","ECILC","KARSN","GLRYH","OYYAT","LIDFA","OZATD","THYAO","DERIM","ZSR25","DOKTA","HUBVC","VKFYO","EPLAS","GATEG","GSRAY","AKGRT","KLKIM","TRENJ","BORSK","ESEN","ISGSY","BLCYT"];
+    window.defaultStocksArray = ["HLGYO", "KAYSE", "OZRDN", "FONET", "AVGYO", "METRO", "DARDL", "GOODY", "CATES", "KRGYO", "CIMSA", "MPARK", "ARASE", "AVTUR", "BRSAN", "IHAAS", "ZRE20", "ARFYE", "MERKO", "TDGYO", "OFSYM", "EGSER", "AEFES", "TCKRC", "VERTU", "HTTBT", "RUZYE", "EDIP", "BIGCH", "ISYAT", "BALAT", "MEYSU", "TRGYO", "KUTPO", "SEGMN", "BJKAS", "INTEK", "VBTYZ", "AVPGY", "GLBMD", "IEYHO", "BEYAZ", "GENIL", "PAMEL", "MERIT", "ISBIR", "ARMGD", "CEOEM", "EUHOL", "ALARK", "HUNER", "OPTGY", "OZYSR", "SODSN", "SELEC", "BARMA", "UNLU", "ENTRA", "EDATA", "TMSN", "DURDO", "LXGYO", "EKSUN", "KUYAS", "ISCTR", "ARCLK", "DITAS", "TSGYO", "EKIZ", "ACSEL", "AKMGY", "ADEL", "GLCVY", "AKSEN", "RODRG", "ETYAT", "YONGA", "PRKAB", "ISMEN", "VESTL", "INFO", "PNLSN", "MAKIM", "KCHOL", "EKGYO", "AYEN", "GLYHO", "AVOD", "ALGYO", "BRKVY", "CLEBI", "DOFER", "AKHAN", "BRISA", "RUBNS", "VAKBN", "ISGYO", "GLRMK", "OSMEN", "SUNTK", "BASCM", "GMTAS", "BRMEN", "SUWEN", "AGESA", "BULGS", "GWIND", "VKING", "VERUS", "MARTI", "SMRTG", "TRHOL", "YATAS", "CMENT", "DMSAS", "TUCLK", "KARTN", "CWENE", "ZERGY", "SKBNK", "KRDMD", "BANVT", "ALKA", "PINSU", "TGSAS", "KOPOL", "FADE", "TKFEN", "SONME", "PRKME", "SELVA", "AKSGY", "LYDHO", "EUPWR", "PEKGY", "EKOS", "AYCES", "QNBTR", "ADGYO", "TERA", "YESIL", "BIGTK", "A1YEN", "ASGYO", "ESCAR", "CRDFA", "MARMR", "VAKKO", "KFEIN", "KLSER", "SVGYO", "AYGAZ", "KZGYO", "AHGAZ", "OYAKC", "PSDTC", "PKART", "BALSU", "EGEEN", "LMKDC", "BAKAB", "DOCO", "HATSN", "ALCTL", "LIDER", "DIRIT", "MHRGY", "SURGY", "EREGL", "KRTEK", "MOBTL", "TEZOL", "NATEN", "BESTE", "LOGO", "GEDIK", "DENGE", "VKGYO", "ISKPL", "LILAK", "AKFIS", "HEDEF", "PNSUT", "MERCN", "ALKLC", "TURGG", "PAPIL", "ENPRA", "BURVA", "OYAYO", "BEGYO", "YKSLN", "VAKFN", "TLMAN", "BESLR", "UCAYM", "POLTK", "MSGYO", "MAVI", "EUKYO", "ORCAY", "CASA", "AKYHO", "TATGD", "FORTE", "HRKET", "NETAS", "KMPUR", "BIOEN", "ADESE", "KAPLM", "AYDEM", "ULUFA", "HATEK", "ODAS", "ANELE", "KRVGD", "ZPT10", "OPX30", "GOZDE", "AGYO", "PSGYO", "GLDTR", "PAHOL", "GARFA", "ULUUN", "DURKN", "ONRYT", "SEKFK", "DSTKF", "KOCMT", "INGRM", "BSOKE", "EUREN", "GENKM", "MEDTR", "SNPAM", "KUVVA", "SANKO", "AZTEK", "SKTAS", "KENT", "JANTS", "MEGAP", "ULAS", "OZKGY", "VAKFA", "FMIZP", "AGROT", "ANHYT", "VRGYO", "GENTS", "BRKO", "CEMZY", "AKCNS", "EGEPO", "OPT25", "AFYON", "MIATK", "GOKNR", "TSKB", "GRNYO", "KONKA", "SAMAT", "LKMNH", "LINK", "ECOGR", "BTCIM", "ALBRK", "TARKM", "TRALT", "KBORU", "REEDR", "FLAP", "GUNDG", "KTSKR", "EGPRO", "IHEVA", "CVKMD", "KLYPV", "BOSSA", "KOTON", "ISFIN", "DGGYO", "GEDZA", "GRTHO", "VANGD", "DOFRB", "YGGYO", "IZINV", "KRPLS", "TEHOL", "TUPRS", "AGHOL", "APBDL", "TMPOL", "KONTR", "NUGYO", "TTRAK", "HEKTS", "AKBNK", "DMLKT", "IZFAS", "PRZMA", "TRMET", "NIBAS", "MARKA", "OZSUB", "FORMT", "BAGFS", "RNPOL", "MNDRS", "AKFYE", "ALVES", "LYDYE", "QUAGR", "SKYLP", "RYSAS", "KORDS", "VSNMD", "ARDYZ", "ONCSM", "ORMA", "OYLUM", "ZPBDL", "GEREL", "ENJSA", "KRONT", "BINHO", "CANTE", "FZLGY", "TABGD", "PENGD", "ATAKP", "BINBN", "BAHKM", "GARAN", "FENER", "RALYH", "GMSTR", "ARSAN", "BASGZ", "RYGYO", "AVHOL", "AHSGY", "USDTR", "ICUGS", "MACKO", "Z30KP", "DUNYH", "OBAMS", "EBEBK", "NTGAZ", "DGNMO", "SUMAS", "AYES", "DOGUB", "SKYMD", "MANAS", "ISKUR", "PARSN", "HKTM", "YIGIT", "ARZUM", "EMPAE", "ZRGYO", "DOAS", "KATMR", "TURSG", "KLGYO", "KLRHO", "PASEU", "KRDMB", "TNZTP", "BORLS", "TAVHL", "BRKSN", "ULKER", "KERVN", "INVES", "FRMPL", "A1CAP", "OTTO", "BERA", "BFREN", "IZENR", "KLSYN", "YUNSA", "TOASO", "PKENT", "SEYKM", "EGEGY", "ASTOR", "PETKM", "MZHLD", "BNTAS", "PENTA", "ALTNY", "DYOBY", "GUBRF", "ENDAE", "MAGEN", "TSPOR", "CRFSA", "ASUZU", "CUSAN", "ISSEN", "ZEDUR", "CMBTN", "GESAN", "LUKSK", "KSTUR", "ICBCT", "ATEKS", "PAGYO", "EMKEL", "ERBOS", "KAREL", "ODINE", "YYAPI", "TBORG", "OPK30", "MTRYO", "APX30", "MEPET", "SEKUR", "TCELL", "BIGEN", "QNBFK", "ZGYO", "ISDMR", "AKFGY", "INVEO", "ISGLK", "OBASE", "DCTTR", "YEOTK", "LRSHO", "SASA", "KLNMA", "ENERY", "TRILC", "IHYAY", "SAYAS", "SISE", "INDES", "KLMSN", "TKNSA", "MTRKS", "ECZYT", "CELHA", "ANGEN", "CONSE", "SANEL", "HURGZ", "IHGZT", "ESCOM", "OTKAR", "CGCAM", "YAPRK", "HOROZ", "SAHOL", "UFUK", "EYGYO", "CEMTS", "RAYSG", "SNICA", "USAK", "GZNMI", "SERNT", "PLTUR", "SOKM", "ALKIM", "BAYRK", "MRGYO", "DMRGD", "YYLGD", "NUHCM", "ATSYH", "GRSEL", "SEGYO", "MNDTR", "COSMO", "ENSRI", "ERCB", "ENKAI", "FRIGO", "MMCAS", "ASELS", "KRSTL", "KNFRT", "ARENA", "MOGAN", "BUCIM", "Z30KE", "IDGYO", "PRDGS", "DOHOL", "ALCAR", "EGGUB", "DNISI", "ZPLIB", "KCAER", "QTEMZ", "SDTTR", "YBTAS", "BIENY", "MAKTK", "BURCE", "ISBTR", "DAPGM", "BRYAT", "KRDMA", "MEGMT", "TUREX", "BYDNR", "BVSAN", "ATAGY", "GOLTS", "BIMAS", "ETILR", "AKSUE", "ANSGR", "BIZIM", "MARBL", "YAYLA", "EFOR", "EMNIS", "HDFGS", "SAFKR", "DERHL", "TATEN", "TTKOM", "SRVGY", "MRSHL", "CEMAS", "NETCD", "KGYO", "ZOREN", "VESBE", "BLUME", "IMASM", "POLHO", "ALTIN", "SNGYO", "FROTO", "TRCAS", "ORGE", "ALFAS", "SILVR", "MEKAG", "GSDHO", "PATEK", "HALKB", "SARKY", "ATLAS", "ARTMS", "TUKAS", "AAGYO", "IHLAS", "KONYA", "GIPTA", "MCARD", "PCILT", "ATATR", "RGYAS", "TEKTU", "SMART", "EUYO", "SMRVA", "AKSA", "ELITE", "YKBNK", "KIMMR", "BMSTL", "BOBET", "AKENR", "ULUSE", "KZBGY", "INTEM", "BRLSM", "CCOLA", "OZGYO", "BMSCH", "DEVA", "GSDDE", "DESPC", "DESA", "ERSU", "MAALT", "DAGI", "IZMDC", "KTLEV", "PETUN", "OSTIM", "RTALB", "DZGYO", "IHLGM", "OPTLR", "MOPAS", "PGSUS", "DGATE", "NTHOL", "ZGOLD", "SOKE", "EKDMR", "SANFM", "ATATP", "MGROS", "ECILC", "KARSN", "GLRYH", "OYYAT", "LIDFA", "OZATD", "THYAO", "DERIM", "ZSR25", "DOKTA", "HUBVC", "VKFYO", "EPLAS", "GATEG", "GSRAY", "AKGRT", "KLKIM", "TRENJ", "BORSK", "ESEN", "ISGSY", "BLCYT"];
     const stocks = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : window.defaultStocksArray;
     dl.innerHTML = stocks.map(s => `<option value="${s}"></option>`).join('');
 };
@@ -910,7 +910,7 @@ window.fetchGuncelFiyatlar = async () => {
                 State.updateFiyat('GRAM ALTIN', graPrice, true);
             }
         }
-    } catch(e) {
+    } catch (e) {
         console.error('TradingView Dolar/Altın çekilemedi:', e);
     }
 
@@ -921,13 +921,13 @@ window.fetchGuncelFiyatlar = async () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: JSON.stringify({
-                filter: [{"left":"type","operation":"in_range","right":["stock","dr","fund"]}],
+                filter: [{ "left": "type", "operation": "in_range", "right": ["stock", "dr", "fund"] }],
                 markets: ["turkey"],
-                columns: ["name","close","change"],
-                range: [0,5000]
+                columns: ["name", "close", "change"],
+                range: [0, 5000]
             })
         });
-        
+
         if (tvResponse.ok) {
             const tvData = await tvResponse.json();
             if (!State.bistStocks) State.bistStocks = [];
@@ -953,7 +953,7 @@ window.fetchGuncelFiyatlar = async () => {
         State.data.hisseFiyatlari.forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
         State.data.ekstre.forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
         const exclude = ['DOLAR', 'GRAM ALTIN', 'NAKIT', 'BIST'];
-        
+
         const symbolsToFetch = Array.from(symbolsSet).filter(m => !exclude.includes(m) && (!tvBasarili || !State.bistStocks.includes(m) || State.getFiyat(m) === 0));
 
         if (symbolsToFetch.length > 0) {
@@ -965,7 +965,7 @@ window.fetchGuncelFiyatlar = async () => {
                     `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
                     `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
                 ];
-                
+
                 for (const proxy of proxies) {
                     try {
                         const yfResponse = await fetch(proxy);
@@ -985,12 +985,12 @@ window.fetchGuncelFiyatlar = async () => {
                                 break;
                             }
                         }
-                    } catch(err) {}
+                    } catch (err) { }
                 }
             });
             await Promise.all(fetchPromises);
         }
-    } catch(e2) {
+    } catch (e2) {
         console.error('Yahoo Finance yedek sistemi başarısız oldu.', e2);
     }
 
@@ -1016,12 +1016,12 @@ window.fetchGuncelFiyatlar = async () => {
                                 State.updateFiyat(menkul, parseFloat(match[1]), true);
                             }
                         }
-                    } catch(err) {}
+                    } catch (err) { }
                 }
             });
             await Promise.all(fetchPromises);
         }
-    } catch(e) {}
+    } catch (e) { }
 
     // 3. TEFAS Fonları ve Özel Hisseler (Google Apps Script API)
     const gasUrl = localStorage.getItem('exchangeApp_gasUrl');
@@ -1031,7 +1031,7 @@ window.fetchGuncelFiyatlar = async () => {
             State.data.hisseFiyatlari.forEach(h => { if (h.menkul) symbolsSet.add(h.menkul.trim().toUpperCase()); });
             State.data.ekstre.forEach(e => { if (e.menkul) symbolsSet.add(e.menkul.trim().toUpperCase()); });
             const symbolsToFetch = Array.from(symbolsSet).filter(m => m !== 'DOLAR' && m !== 'GRAM ALTIN' && m !== 'NAKIT' && !State.bistStocks.includes(m));
-            
+
             if (symbolsToFetch.length > 0) {
                 const gasRes = await fetch(gasUrl + '?symbols=' + symbolsToFetch.join(','));
                 if (gasRes.ok) {
@@ -1064,10 +1064,10 @@ const renderPortfoy = (container) => {
         if (typeof renderPage === 'function') renderPage();
     });
     const { portfoyList, arsivList, portfoyBilgileri } = calculatePortfoy(State.data.ekstre, (m) => State.getFiyat(m), State.data.nakitHareketleri);
-    
+
     let totalOdenen = 0, totalGuncel = 0, totalKar = 0;
     let hissePortfoyTutar = 0, fonPortfoyTutar = 0;
-    
+
     const filteredPortfoy = portfoyList.filter(p => !p.isNakit);
 
     window.varliklarSort = window.varliklarSort || { col: null, asc: true };
@@ -1107,7 +1107,7 @@ const renderPortfoy = (container) => {
         totalOdenen += p.odenenTutar;
         totalKar += p.kar;
         totalGuncel += p.guncelTutar;
-        
+
         if (p.menkul.length === 3) fonPortfoyTutar += p.guncelTutar;
         else hissePortfoyTutar += p.guncelTutar;
 
@@ -1154,7 +1154,7 @@ const renderPortfoy = (container) => {
     if (nakitItemForTable && nakitItemForTable.guncelTutar > 0) {
         totalGuncel += nakitItemForTable.guncelTutar;
         totalOdenen += nakitItemForTable.guncelTutar;
-        
+
         portfoyHtml += `<tr>
             <td style="text-align: center !important;">${filteredPortfoy.length + 1}</td>
             <td style="text-align: left !important;">Nakit</td>
@@ -1178,7 +1178,7 @@ const renderPortfoy = (container) => {
     window.arsivSort = window.arsivSort || { col: null, asc: true };
     arsivList.sort((a, b) => {
         if (!window.arsivSort.col) return 0;
-        
+
         let valA, valB;
         if (window.arsivSort.col === 'menkul') {
             valA = a.menkul; valB = b.menkul;
@@ -1195,7 +1195,7 @@ const renderPortfoy = (container) => {
             valA = new Date(a.sonSatimTarihi).getTime() - new Date(a.ilkAlimTarihi).getTime();
             valB = new Date(b.sonSatimTarihi).getTime() - new Date(b.ilkAlimTarihi).getTime();
         }
-        
+
         return window.arsivSort.asc ? valA - valB : valB - valA;
     });
 
@@ -1203,7 +1203,7 @@ const renderPortfoy = (container) => {
         arsivKarTotal += a.kar;
         const guncelFiyat = State.getFiyat(a.menkul);
         return `<tr>
-            <td style="text-align: center !important;">${i+1}</td>
+            <td style="text-align: center !important;">${i + 1}</td>
             <td style="text-align: left !important;" class="takip-hisse-link" onclick="window.goToHisse('${a.menkul}')">${a.menkul}</td>
             <td style="text-align: right !important;">${formatCurrency(guncelFiyat)}</td>
             <td style="text-align: right !important;">${a.adet.toLocaleString('tr-TR')}</td>
@@ -1220,10 +1220,10 @@ const renderPortfoy = (container) => {
     const nakitItem = portfoyList.find(p => p.isNakit);
     const guncelNakitTutar = nakitItem ? nakitItem.guncelTutar : 0;
 
-    
-    
-        const getTabBg = (tab) => window.portfoyTab === tab ? 'var(--overlay-bg)' : 'transparent';
-        const getTabColor = (tab) => window.portfoyTab === tab ? '#ffffff' : 'var(--text-secondary)';
+
+
+    const getTabBg = (tab) => window.portfoyTab === tab ? 'var(--overlay-bg)' : 'transparent';
+    const getTabColor = (tab) => window.portfoyTab === tab ? '#ffffff' : 'var(--text-secondary)';
     const tabsHtml = `
         <style>
             .portfoy-tab-btn:hover { color: #ffffff !important; background: var(--overlay-bg) !important; }
@@ -1237,7 +1237,7 @@ const renderPortfoy = (container) => {
     `;
 
     let tabContentHtml = '';
-    
+
     if (window.portfoyTab === 'bilgiler') {
         tabContentHtml = `
             <div id="portfoy-bilgiler" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
@@ -1437,48 +1437,48 @@ const renderPortfoy = (container) => {
     window.togglePortfoyEdit = () => {
         const nakitText = document.getElementById('nakit-text');
         const isEditing = nakitText.style.display === 'none';
-        
+
         nakitText.style.display = isEditing ? 'inline' : 'none';
         document.getElementById('inline-nakit-input').style.display = isEditing ? 'none' : 'inline-block';
-        
+
         document.getElementById('hedef-text').style.display = isEditing ? 'inline' : 'none';
         document.getElementById('inline-hedef-input').style.display = isEditing ? 'none' : 'inline-block';
-        
+
         if (!isEditing) {
             document.getElementById('inline-nakit-input').focus();
         }
     };
-    
+
     window.savePortfoyEdit = () => {
         const nakitVal = document.getElementById('inline-nakit-input').value;
         const hedefVal = document.getElementById('inline-hedef-input').value;
-        
+
         if (nakitVal !== '') State.data.manuelNakitTutar = parseFloat(nakitVal) || 0;
         if (hedefVal !== '') State.data.hedefPortfoyTL = parseFloat(hedefVal) || 0;
-        
+
         State.save();
         if (typeof renderPage === "function") renderPage();
     };
 
     window.toggleVarliklarEdit = () => {
         const isEditing = document.getElementById('varliklar-save-btn').style.display !== 'none';
-        
+
         const pryText = document.querySelector('.pry-text');
         const pryInput = document.querySelector('.inline-pry-input');
-        
+
         if (pryText && pryInput) {
             pryText.style.display = isEditing ? 'inline' : 'none';
             pryInput.style.display = isEditing ? 'none' : 'inline-block';
         }
-        
+
         document.getElementById('varliklar-edit-btn').style.display = isEditing ? 'inline-block' : 'none';
         document.getElementById('varliklar-save-btn').style.display = isEditing ? 'none' : 'inline-block';
-        
+
         if (!isEditing && pryInput) {
             pryInput.focus();
         }
     };
-    
+
     window.saveVarliklarEdit = () => {
         const pryInput = document.querySelector('.inline-pry-input');
         if (pryInput && pryInput.value !== '') {
@@ -1510,55 +1510,55 @@ const renderPortfoy = (container) => {
         const pieLinesPlugin = {
             id: 'pieLines',
             afterDraw(chart) {
-        const ctx = chart.ctx;
-        chart.data.datasets.forEach((dataset, i) => {
-            chart.getDatasetMeta(i).data.forEach((arc, index) => {
-                const dataVal = dataset.data[index];
-                if (dataVal <= 0) return;
-                
-                const centerPoint = arc.tooltipPosition();
-                const chartCenter = { x: chart.chartArea.left + chart.chartArea.width/2, y: chart.chartArea.top + chart.chartArea.height/2 };
-                
-                let angle = Math.atan2(centerPoint.y - chartCenter.y, centerPoint.x - chartCenter.x);
-                if (chart.data.labels && chart.data.labels[index] === 'Nakit' && Math.cos(angle) < 0) {
-                    angle = (Math.PI / 2) - 0.2;
-                }
-                if (index === 1 && Math.sin(angle) > 0.8 && chart.data.labels[index] !== 'Nakit') {
-                    angle = Math.PI - 0.4;
-                }
-                const radius = arc.outerRadius;
-                
-                const startX = chartCenter.x + Math.cos(angle) * radius;
-                const startY = chartCenter.y + Math.sin(angle) * radius;
-                
-                const endX = startX + Math.cos(angle) * 15;
-                const endY = startY + Math.sin(angle) * 15;
-                
-                ctx.save();
-                ctx.beginPath();
-                ctx.moveTo(startX, startY);
-                ctx.lineTo(endX, endY);
-                
-                const lineLen = 10;
-                const finalX = endX + (Math.cos(angle) >= 0 ? lineLen : -lineLen);
-                ctx.lineTo(finalX, endY);
-                ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-                ctx.stroke();
-                
-                ctx.fillStyle = '#fff';
-                ctx.font = '12px Arial';
-                ctx.textBaseline = 'middle';
-                ctx.textAlign = Math.cos(angle) >= 0 ? 'left' : 'right';
-                
-                let sum = 0;
-                dataset.data.forEach(d => sum+=d);
-                const text = (dataVal * 100 / sum).toFixed(0) + '%';
-                ctx.fillText(text, finalX + (Math.cos(angle) >= 0 ? 3 : -3), endY);
-                ctx.restore();
-            });
-        });
-    }
-};
+                const ctx = chart.ctx;
+                chart.data.datasets.forEach((dataset, i) => {
+                    chart.getDatasetMeta(i).data.forEach((arc, index) => {
+                        const dataVal = dataset.data[index];
+                        if (dataVal <= 0) return;
+
+                        const centerPoint = arc.tooltipPosition();
+                        const chartCenter = { x: chart.chartArea.left + chart.chartArea.width / 2, y: chart.chartArea.top + chart.chartArea.height / 2 };
+
+                        let angle = Math.atan2(centerPoint.y - chartCenter.y, centerPoint.x - chartCenter.x);
+                        if (chart.data.labels && chart.data.labels[index] === 'Nakit' && Math.cos(angle) < 0) {
+                            angle = (Math.PI / 2) - 0.2;
+                        }
+                        if (index === 1 && Math.sin(angle) > 0.8 && chart.data.labels[index] !== 'Nakit') {
+                            angle = Math.PI - 0.4;
+                        }
+                        const radius = arc.outerRadius;
+
+                        const startX = chartCenter.x + Math.cos(angle) * radius;
+                        const startY = chartCenter.y + Math.sin(angle) * radius;
+
+                        const endX = startX + Math.cos(angle) * 15;
+                        const endY = startY + Math.sin(angle) * 15;
+
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(startX, startY);
+                        ctx.lineTo(endX, endY);
+
+                        const lineLen = 10;
+                        const finalX = endX + (Math.cos(angle) >= 0 ? lineLen : -lineLen);
+                        ctx.lineTo(finalX, endY);
+                        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#fff';
+                        ctx.font = '12px Arial';
+                        ctx.textBaseline = 'middle';
+                        ctx.textAlign = Math.cos(angle) >= 0 ? 'left' : 'right';
+
+                        let sum = 0;
+                        dataset.data.forEach(d => sum += d);
+                        const text = (dataVal * 100 / sum).toFixed(0) + '%';
+                        ctx.fillText(text, finalX + (Math.cos(angle) >= 0 ? 3 : -3), endY);
+                        ctx.restore();
+                    });
+                });
+            }
+        };
 
         const ctxOzet = document.getElementById('chart-ozet');
         if (ctxOzet) {
@@ -1577,15 +1577,15 @@ const renderPortfoy = (container) => {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { 
-                            position: 'bottom', 
-                            labels: { 
+                        legend: {
+                            position: 'bottom',
+                            labels: {
                                 color: '#fff',
                                 font: { size: 12 },
                                 boxWidth: 10,
                                 boxHeight: 10,
                                 padding: 15
-                            } 
+                            }
                         },
                         datalabels: {
                             display: false
@@ -1600,14 +1600,14 @@ const renderPortfoy = (container) => {
         if (ctxVarliklar && (filteredPortfoy.length > 0 || (nakitItemForTable && nakitItemForTable.guncelTutar > 0))) {
             const labels = filteredPortfoy.map(p => p.menkul);
             const data = filteredPortfoy.map(p => p.guncelTutar);
-            
+
             if (nakitItemForTable && nakitItemForTable.guncelTutar > 0) {
                 labels.push('Nakit');
                 data.push(nakitItemForTable.guncelTutar);
             }
 
             const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'];
-            
+
             if (window.chartVarliklarInstance) {
                 window.chartVarliklarInstance.destroy();
             }
@@ -1626,16 +1626,16 @@ const renderPortfoy = (container) => {
                     layout: { padding: 40 },
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { 
-                            position: 'bottom', 
-                            labels: { 
-                                color: '#fff', 
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#fff',
                                 font: { size: 12 },
                                 boxWidth: 10,
                                 boxHeight: 10,
                                 padding: 10
-                            } 
+                            }
                         },
                         datalabels: {
                             display: false
@@ -1652,7 +1652,7 @@ const renderPortfoy = (container) => {
         const dayOfWeek = now.getDay();
         const isBefore0950 = timeInMins <= (9 * 60 + 50);
         const isAfter1830 = timeInMins >= (18 * 60 + 30);
-        
+
         let targetDate = null;
         if (dayOfWeek === 6) { // Cumartesi -> Cuma
             targetDate = new Date(now);
@@ -1671,12 +1671,12 @@ const renderPortfoy = (container) => {
         }
 
         if (!State.data.portfoyGecmisi) State.data.portfoyGecmisi = [];
-        
+
         // Hatalı kaydedilmiş olabilecek hafta sonu (Cumartesi, Pazar) verilerini ve mükerrerleri temizle
         let needsSave = false;
         const uniqueGecmis = [];
         const seenDates = new Set();
-        
+
         // Sondan başa doğru giderek en güncel kaydı tutalım
         for (let i = State.data.portfoyGecmisi.length - 1; i >= 0; i--) {
             const r = State.data.portfoyGecmisi[i];
@@ -1692,12 +1692,12 @@ const renderPortfoy = (container) => {
                 needsSave = true; // Mükerrer bulundu
             }
         }
-        
+
         if (needsSave) {
             State.data.portfoyGecmisi = uniqueGecmis;
             State.save();
         }
-        
+
         // Hedeflenen kapanış günü için kayıt
         if (targetDate) {
             const yyyyMmDd = targetDate.getFullYear() + '-' + String(targetDate.getMonth() + 1).padStart(2, '0') + '-' + String(targetDate.getDate()).padStart(2, '0');
@@ -1717,12 +1717,12 @@ const renderPortfoy = (container) => {
                 }
             }
         }
-        
+
         const ctxPortfoyGecmisi = document.getElementById('chart-portfoy-gecmisi');
         if (ctxPortfoyGecmisi) {
             let historyData = [...State.data.portfoyGecmisi];
             historyData.sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
-            
+
             // Aradaki boş günleri doldur
             if (historyData.length > 0) {
                 const filledData = [];
@@ -1730,7 +1730,7 @@ const renderPortfoy = (container) => {
                 const lastRecordDate = new Date(historyData[historyData.length - 1].tarih);
                 let lastKnownVal = historyData[0].tutar;
                 let lastKnownAnapara = historyData[0].anapara !== undefined ? historyData[0].anapara : historyData[0].tutar;
-                
+
                 while (curr <= lastRecordDate) {
                     const dw = curr.getDay();
                     if (dw !== 0 && dw !== 6) { // Hafta sonlarını atla
@@ -1746,7 +1746,7 @@ const renderPortfoy = (container) => {
                 }
                 historyData = filledData;
             }
-            
+
             // Anlık (Güncel) durumu ekle (Hafta içi piyasa açıkken)
             if (dayOfWeek >= 1 && dayOfWeek <= 5 && !isBefore0950 && !isAfter1830) {
                 const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
@@ -1759,9 +1759,9 @@ const renderPortfoy = (container) => {
                     });
                 }
             }
-            
+
             const currentRange = window.portfoyChartRange || '1A';
-            
+
             // Highlight active filter
             setTimeout(() => {
                 document.querySelectorAll('.chart-filter').forEach(el => {
@@ -1778,8 +1778,8 @@ const renderPortfoy = (container) => {
             if (historyData.length > 0) {
                 const lastDate = new Date(historyData[historyData.length - 1].tarih);
                 let cutoffDate = new Date(lastDate);
-                
-                switch(currentRange) {
+
+                switch (currentRange) {
                     case '1H': cutoffDate.setDate(cutoffDate.getDate() - 7); break;
                     case '1A': cutoffDate.setMonth(cutoffDate.getMonth() - 1); break;
                     case '6A': cutoffDate.setMonth(cutoffDate.getMonth() - 6); break;
@@ -1790,7 +1790,7 @@ const renderPortfoy = (container) => {
                 }
                 historyData = historyData.filter(d => new Date(d.tarih) >= cutoffDate);
             }
-            
+
             const labels = historyData.map(d => {
                 const parts = d.tarih.split('-');
                 if (d.isAnlik) return 'Güncel';
@@ -1801,11 +1801,11 @@ const renderPortfoy = (container) => {
             });
             const data = historyData.map(d => d.tutar);
             const dataAnapara = historyData.map(d => d.anapara !== undefined ? d.anapara : d.tutar);
-            
+
             if (window.chartPortfoyGecmisiInstance) {
                 window.chartPortfoyGecmisiInstance.destroy();
             }
-            
+
             window.chartPortfoyGecmisiInstance = new Chart(ctxPortfoyGecmisi, {
                 type: 'line',
                 data: {
@@ -1849,7 +1849,7 @@ const renderPortfoy = (container) => {
                         datalabels: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     return ' ' + context.dataset.label + ': ₺' + context.parsed.y.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
                                 }
                             }
@@ -1862,10 +1862,10 @@ const renderPortfoy = (container) => {
                         },
                         y: {
                             grid: { color: 'rgba(255, 255, 255, 0.03)' },
-                            ticks: { 
-                                color: '#aaa', 
+                            ticks: {
+                                color: '#aaa',
                                 font: { size: 10 },
-                                callback: function(value) {
+                                callback: function (value) {
                                     return value.toLocaleString('tr-TR');
                                 }
                             }
@@ -1887,13 +1887,13 @@ const renderHisseler = (container) => {
         fsNode = require('fs');
         pathNode = require('path');
         shellNode = require('electron').shell;
-    } catch(e) { console.warn("Node integration not available", e); }
+    } catch (e) { console.warn("Node integration not available", e); }
 
     const hisse = window.currentSelectedHisse;
     let selectedHisse = window.currentSelectedHisse || null;
     window.currentSelectedHisse = selectedHisse; // sync it back
     const hName = selectedHisse || 'Hisse';
-    
+
     const validTabs = ['Özet Rapor', 'Akış', 'Değerleme', 'Gelir Tablosu'];
     let activeTab = window.currentHisseTab || 'Özet Rapor';
     if (!validTabs.includes(activeTab)) {
@@ -1968,7 +1968,7 @@ const renderHisseler = (container) => {
     const renderUI = () => {
         const tabIcons = {
             'Özet Rapor': 'fas fa-chart-pie',
-            
+
             'Değerleme': 'fas fa-gem',
             'Gelir Tablosu': 'fas fa-file-invoice-dollar',
             'Gelir Tablosu': 'fas fa-file-invoice-dollar',
@@ -1987,7 +1987,7 @@ const renderHisseler = (container) => {
             </div>`;
 
         let tabsHtml = makeBtn('Özet Rapor') + makeBtn('Akış') + makeBtn('Değerleme') + makeBtn('Gelir Tablosu');
-                       
+
         let contentHtml = '';
 
         if (!selectedHisse) {
@@ -2025,13 +2025,13 @@ const renderHisseler = (container) => {
 
             if (!window.addGenelNot) {
                 window.addGenelNot = () => { State.data.genelNotlar.push({ id: Date.now().toString(), text: '', color: '#f1c40f' }); State.save(); renderUI(); };
-                window.updateGenelNot = (id, text) => { const not = State.data.genelNotlar.find(n => n.id === id); if(not) { not.text = text; State.save(); } };
-                window.deleteGenelNot = (id) => { if(confirm('Bu notu silmek istediğinize emin misiniz?')) { State.data.genelNotlar = State.data.genelNotlar.filter(n => n.id !== id); State.save(); renderUI(); } };
-                window.changeGenelNotColor = (id, color) => { const not = State.data.genelNotlar.find(n => n.id === id); if(not) { not.color = color; State.save(); renderUI(); } };
+                window.updateGenelNot = (id, text) => { const not = State.data.genelNotlar.find(n => n.id === id); if (not) { not.text = text; State.save(); } };
+                window.deleteGenelNot = (id) => { if (confirm('Bu notu silmek istediğinize emin misiniz?')) { State.data.genelNotlar = State.data.genelNotlar.filter(n => n.id !== id); State.save(); renderUI(); } };
+                window.changeGenelNotColor = (id, color) => { const not = State.data.genelNotlar.find(n => n.id === id); if (not) { not.color = color; State.save(); renderUI(); } };
             }
         } else {
             if (window.parseExcelData && (!window.stockData || !window.stockData[selectedHisse] || !window.stockData[selectedHisse].bilanco)) {
-                try { window.parseExcelData(selectedHisse); } catch(e) { console.error(e); }
+                try { window.parseExcelData(selectedHisse); } catch (e) { console.error(e); }
             }
             const sData = (window.stockData && window.stockData[selectedHisse]) ? window.stockData[selectedHisse] : {};
             const fiyat = parseFloat(State.getFiyat(selectedHisse)) || 0;
@@ -2040,63 +2040,63 @@ const renderHisseler = (container) => {
             const odenmisSermaye = getVal(sData.bilanco, 'Ödenmiş Sermaye');
             const piyasaDegeri = fiyat * odenmisSermaye;
             const piyasaDegeriUsd = piyasaDegeri / usdtry;
-                        let finansalBorclarTotal = 0;
+            let finansalBorclarTotal = 0;
             let nakitTotal = 0;
             if (sData.bilanco && sData.bilanco.rows) {
                 sData.bilanco.rows.forEach(r => {
                     if (!r[0]) return;
                     const rName = r[0].toLocaleLowerCase('tr-TR');
                     if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
-                        const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                        const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                         finansalBorclarTotal += val;
                     }
                     if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
-                        const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                        const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                         nakitTotal += val;
                     }
                 });
             }
             const netBorc = finansalBorclarTotal - nakitTotal;
             const firmaDegeri = piyasaDegeri + netBorc;
-                        // Yıllıklandırılmış FAVÖK (TTM)
+            // Yıllıklandırılmış FAVÖK (TTM)
             let favok = 0;
             if (sData.gelirYillik && sData.gelirYillik.rows) {
                 const fR = sData.gelirYillik.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
                 if (fR) {
-                    favok = typeof fR[1] === 'number' ? fR[1] : parseFloat((fR[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                    favok = typeof fR[1] === 'number' ? fR[1] : parseFloat((fR[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                 }
             }
             if (favok === 0) favok = getVal(sData.gelirYillik, 'FAVÖK');
-            
+
             const fdFavok = favok !== 0 ? (firmaDegeri / favok) : 0;
             const netBorcFavok = favok !== 0 ? (netBorc / favok) : 0;
-            
+
             // Yıllıklandırılmış Net Kar (TTM)
             let yilliklandirilmisNetKar = 0;
             if (sData.gelirYillik && sData.gelirYillik.rows) {
                 const nR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
                 if (nR) {
-                    yilliklandirilmisNetKar = typeof nR[1] === 'number' ? nR[1] : parseFloat((nR[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                    yilliklandirilmisNetKar = typeof nR[1] === 'number' ? nR[1] : parseFloat((nR[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                 }
             }
             if (yilliklandirilmisNetKar === 0) yilliklandirilmisNetKar = getVal(sData.gelirYillik, 'Net Dönem Karı');
-            
+
             const fk = yilliklandirilmisNetKar !== 0 ? (piyasaDegeri / yilliklandirilmisNetKar) : 0;
-            
+
             // PD/DD Hesaplaması (Ana Ortaklığa Ait Özkaynaklar)
             let anaOrtaklikOzkaynaklar = 0;
             if (sData.bilanco && sData.bilanco.rows) {
                 const aoRow = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
                 if (aoRow) {
-                    anaOrtaklikOzkaynaklar = typeof aoRow[1] === 'number' ? aoRow[1] : parseFloat((aoRow[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                    anaOrtaklikOzkaynaklar = typeof aoRow[1] === 'number' ? aoRow[1] : parseFloat((aoRow[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                 }
             }
             if (anaOrtaklikOzkaynaklar === 0) anaOrtaklikOzkaynaklar = getVal(sData.bilanco, 'Özkaynaklar');
             const pdDd = anaOrtaklikOzkaynaklar !== 0 ? (piyasaDegeri / anaOrtaklikOzkaynaklar) : 0;
-            
+
             const satislar = getVal(sData.gelirYillik, 'Satış Gelirleri');
             const pdSatislar = satislar !== 0 ? (piyasaDegeri / satislar) : 0;
-            
+
             let peg = 0;
             if (fk > 0) {
                 const nkRow = (sData.gelirYillik && sData.gelirYillik.rows) ? sData.gelirYillik.rows.find(r => r[0] === 'Net Dönem Karı') : null;
@@ -2135,22 +2135,22 @@ const renderHisseler = (container) => {
 
             if (activeTab === hName || activeTab === 'Özet Rapor' || activeTab === 'Gelir Tablosu') {
                 // FINTABLES STYLE SUMMARY DASHBOARD
-                
+
                 const fmtVal = (val) => {
                     if (val === null || val === undefined || isNaN(val)) return '-';
                     return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(val);
                 };
-                
+
                 const calcPct = (current, previous, options = {}) => {
                     if (!current || !previous || previous === 0) return { text: 'N/A', color: 'gray' };
                     const pct = ((current - previous) / Math.abs(previous)) * 100;
                     const isNegative = pct < 0;
-                    
+
                     let color = isNegative ? '#e74c3c' : '#2ecc71';
                     if (options.reverseColor) {
                         color = isNegative ? '#2ecc71' : '#e74c3c';
                     }
-                    
+
                     const text = isNegative ? `% -${Math.abs(pct).toFixed(0)}` : `% ${Math.abs(pct).toFixed(0)}`;
                     return { text: text, color: color };
                 };
@@ -2180,11 +2180,11 @@ const renderHisseler = (container) => {
                         p2_idx = headers.indexOf(lastYear);
                     }
                     if (p2_idx === -1) p2_idx = 2; // fallback to previous quarter
-                    
+
                     const p2 = headers[p2_idx];
 
                     // Gelir Tablosu Items
-                    
+
                     const parseTRNumber = (str) => {
                         if (!str) return 0;
                         if (typeof str === 'number') return str;
@@ -2194,7 +2194,7 @@ const renderHisseler = (container) => {
                         const r = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes(name.toLocaleLowerCase('tr-TR')));
                         return r ? { v1: parseTRNumber(r[1]), v2: parseTRNumber(r[p2_idx]) } : { v1: 0, v2: 0 };
                     };
-                    
+
                     const gItems = [
                         { label: 'Satış Gelirleri', key: 'satış gelirleri' },
                         { label: 'Brüt Kar', key: 'brüt kar' },
@@ -2214,7 +2214,7 @@ const renderHisseler = (container) => {
                             </tr>
                         </thead>
                         <tbody>`;
-                    
+
                     gItems.forEach(item => {
                         const vals = getG(item.key);
                         const pct = calcPct(vals.v1, vals.v2);
@@ -2297,7 +2297,7 @@ const renderHisseler = (container) => {
                             </tr>
                         </thead>
                         <tbody>`;
-                    
+
                     bItems.forEach(item => {
                         const vals = getB(item.key);
                         const pct = calcPct(vals.v1, vals.v2, { reverseColor: item.reverseColor });
@@ -2312,9 +2312,9 @@ const renderHisseler = (container) => {
 
                     // Chart Data
                     let limit = headers.length - 1;
-                      const idx20243 = headers.indexOf('2024/3');
-                      if (idx20243 !== -1) limit = idx20243;
-                    
+                    const idx20243 = headers.indexOf('2024/3');
+                    if (idx20243 !== -1) limit = idx20243;
+
                     const getCQ = (array, i, headers) => {
                         if (!array || !array[i]) return 0;
                         const currentHeader = headers[i];
@@ -2322,14 +2322,14 @@ const renderHisseler = (container) => {
                         if (!currentHeader) return val;
                         if (currentHeader.endsWith('/3')) return val;
                         if (i + 1 < array.length) {
-                            const prevHeader = headers[i+1];
+                            const prevHeader = headers[i + 1];
                             if (prevHeader && prevHeader.split('/')[0] === currentHeader.split('/')[0]) {
-                                return val - parseTRNumber(array[i+1]);
+                                return val - parseTRNumber(array[i + 1]);
                             }
                         }
                         return val;
                     };
-                    
+
                     const brutR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('brüt kar'));
                     const donenR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam dönen varlıklar'));
                     const kisaR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam kısa vadeli'));
@@ -2349,19 +2349,19 @@ const renderHisseler = (container) => {
                         const faaliyetR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('esas faaliyet kar'));
                         const fR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
                         const nR = (sData.gelirDonemsel.rows || []).find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
-                          
-                          const cqSatis = getCQ(sR, i, headers);
-                          const cqBrut = getCQ(brutR, i, headers);
-                          const cqFaaliyet = getCQ(faaliyetR, i, headers);
-                          const cqFavok = getCQ(fR, i, headers);
-                          const cqNetKar = getCQ(nR, i, headers);
-                          
+
+                        const cqSatis = getCQ(sR, i, headers);
+                        const cqBrut = getCQ(brutR, i, headers);
+                        const cqFaaliyet = getCQ(faaliyetR, i, headers);
+                        const cqFavok = getCQ(fR, i, headers);
+                        const cqNetKar = getCQ(nR, i, headers);
+
                         chartSatislar.push(cqSatis);
                         chartBrutKar.push(cqBrut);
                         chartFaaliyet.push(cqFaaliyet);
                         chartFavok.push(cqFavok);
                         chartNetKar.push(cqNetKar);
-                        
+
                         const rawSatis = sR && sR[i] !== undefined ? parseTRNumber(sR[i]) : 0;
                         const rawBrut = brutR && brutR[i] !== undefined ? parseTRNumber(brutR[i]) : 0;
                         const rawFaaliyet = faaliyetR && faaliyetR[i] !== undefined ? parseTRNumber(faaliyetR[i]) : 0;
@@ -2392,78 +2392,78 @@ const renderHisseler = (container) => {
                         chartYFavok.push(yFavok);
                         chartYNetKar.push(yNetKar);
 
-                          chartBKM.push(cqSatis ? (cqBrut / cqSatis) * 100 : 0);
-                          chartFKM.push(cqSatis ? (cqFavok / cqSatis) * 100 : 0);
-                          chartNKM.push(cqSatis ? (cqNetKar / cqSatis) * 100 : 0);
+                        chartBKM.push(cqSatis ? (cqBrut / cqSatis) * 100 : 0);
+                        chartFKM.push(cqSatis ? (cqFavok / cqSatis) * 100 : 0);
+                        chartNKM.push(cqSatis ? (cqNetKar / cqSatis) * 100 : 0);
 
-                          chartYBKM.push(ySatis ? (yBrut / ySatis) * 100 : 0);
-                          chartYFKM.push(ySatis ? (yFavok / ySatis) * 100 : 0);
-                          chartYNKM.push(ySatis ? (yNetKar / ySatis) * 100 : 0);
+                        chartYBKM.push(ySatis ? (yBrut / ySatis) * 100 : 0);
+                        chartYFKM.push(ySatis ? (yFavok / ySatis) * 100 : 0);
+                        chartYNKM.push(ySatis ? (yNetKar / ySatis) * 100 : 0);
 
-                          const vDonen = donenR ? parseTRNumber(donenR[i]) : 0;
-                          const vKisa = kisaR ? parseTRNumber(kisaR[i]) : 0;
-                          const vUzun = uzunR ? parseTRNumber(uzunR[i]) : 0;
-                          const vToplamV = toplamVR ? parseTRNumber(toplamVR[i]) : 0;
-                          const vOz = ozR ? parseTRNumber(ozR[i]) : 0;
+                        const vDonen = donenR ? parseTRNumber(donenR[i]) : 0;
+                        const vKisa = kisaR ? parseTRNumber(kisaR[i]) : 0;
+                        const vUzun = uzunR ? parseTRNumber(uzunR[i]) : 0;
+                        const vToplamV = toplamVR ? parseTRNumber(toplamVR[i]) : 0;
+                        const vOz = ozR ? parseTRNumber(ozR[i]) : 0;
 
-                          chartCari.push(vKisa ? vDonen / vKisa : 0);
-                          chartKaldirac.push(vToplamV ? ((vKisa + vUzun) / vToplamV) * 100 : 0);
+                        chartCari.push(vKisa ? vDonen / vKisa : 0);
+                        chartKaldirac.push(vToplamV ? ((vKisa + vUzun) / vToplamV) * 100 : 0);
 
-                                                    // Özkaynak Karlılığı (ROE) Hesaplaması
-                          let annNk = 0;
-                          if (sData.gelirYillik && sData.gelirYillik.rows) {
-                              const yNkR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
-                              if (yNkR && yNkR[i] !== undefined) {
-                                  annNk = parseTRNumber(yNkR[i]);
-                              }
-                          }
-                          if (annNk === 0) { // Fallback if Yilliklanmis sheet is not found
-                              const rawNetKar = nR ? parseTRNumber(nR[i]) : 0;
-                              annNk = rawNetKar;
-                              if (headers[i]) {
-                                  if (headers[i].endsWith('/3')) annNk = rawNetKar * 4;
-                                  else if (headers[i].endsWith('/6')) annNk = rawNetKar * 2;
-                                  else if (headers[i].endsWith('/9')) annNk = rawNetKar * (4/3);
-                              }
-                          }
-                          
-                          let currentOz = ozR ? parseTRNumber(ozR[i]) : 0;
-                          let previousOz = currentOz;
-                          if (ozR && ozR.length > i + 4) {
-                              previousOz = parseTRNumber(ozR[i+4]);
-                              if (previousOz === 0) previousOz = currentOz; // fallback if empty
-                          }
-                          let ortalamaOz = (currentOz + previousOz) / 2;
-                          chartROE.push(ortalamaOz > 0 ? (annNk / ortalamaOz) * 100 : 0);
+                        // Özkaynak Karlılığı (ROE) Hesaplaması
+                        let annNk = 0;
+                        if (sData.gelirYillik && sData.gelirYillik.rows) {
+                            const yNkR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                            if (yNkR && yNkR[i] !== undefined) {
+                                annNk = parseTRNumber(yNkR[i]);
+                            }
+                        }
+                        if (annNk === 0) { // Fallback if Yilliklanmis sheet is not found
+                            const rawNetKar = nR ? parseTRNumber(nR[i]) : 0;
+                            annNk = rawNetKar;
+                            if (headers[i]) {
+                                if (headers[i].endsWith('/3')) annNk = rawNetKar * 4;
+                                else if (headers[i].endsWith('/6')) annNk = rawNetKar * 2;
+                                else if (headers[i].endsWith('/9')) annNk = rawNetKar * (4 / 3);
+                            }
+                        }
+
+                        let currentOz = ozR ? parseTRNumber(ozR[i]) : 0;
+                        let previousOz = currentOz;
+                        if (ozR && ozR.length > i + 4) {
+                            previousOz = parseTRNumber(ozR[i + 4]);
+                            if (previousOz === 0) previousOz = currentOz; // fallback if empty
+                        }
+                        let ortalamaOz = (currentOz + previousOz) / 2;
+                        chartROE.push(ortalamaOz > 0 ? (annNk / ortalamaOz) * 100 : 0);
                     }
                 }
 
-                                // Karne Hesaplamaları
+                // Karne Hesaplamaları
                 let karlilikPuan = 0;
                 let buyumePuan = 0;
                 let borclulukPuan = 0;
-                
+
                 if (chartSatislar.length >= 2) {
                     const l = chartSatislar.length - 1;
                     // Büyüme (Satışlar, FAVÖK, Net Kar)
-                    if (chartSatislar[l] > chartSatislar[l-1]) buyumePuan += 2;
-                    if (chartFavok[l] > chartFavok[l-1]) buyumePuan += 2;
-                    if (chartNetKar[l] > chartNetKar[l-1]) buyumePuan += 2;
-                    
+                    if (chartSatislar[l] > chartSatislar[l - 1]) buyumePuan += 2;
+                    if (chartFavok[l] > chartFavok[l - 1]) buyumePuan += 2;
+                    if (chartNetKar[l] > chartNetKar[l - 1]) buyumePuan += 2;
+
                     // Karlılık (BKM, FKM, NKM)
-                    if (chartBKM[l] > chartBKM[l-1]) karlilikPuan += 2;
-                    if (chartFKM[l] > chartFKM[l-1]) karlilikPuan += 2;
-                    if (chartNKM[l] > chartNKM[l-1]) karlilikPuan += 2;
-                    
+                    if (chartBKM[l] > chartBKM[l - 1]) karlilikPuan += 2;
+                    if (chartFKM[l] > chartFKM[l - 1]) karlilikPuan += 2;
+                    if (chartNKM[l] > chartNKM[l - 1]) karlilikPuan += 2;
+
                     // Borçluluk (Cari Oran artmışsa iyi, Kaldıraç düşmüşse iyi)
-                    if (chartCari[l] > chartCari[l-1]) borclulukPuan += 3;
-                    if (chartKaldirac[l] < chartKaldirac[l-1]) borclulukPuan += 3;
+                    if (chartCari[l] > chartCari[l - 1]) borclulukPuan += 3;
+                    if (chartKaldirac[l] < chartKaldirac[l - 1]) borclulukPuan += 3;
                 }
-                
+
                 const vOzCurrent = (sData.bilanco && sData.bilanco.rows) ? sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar')) : null;
                 const vKisaCurrent = (sData.bilanco && sData.bilanco.rows) ? sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam kısa vadeli')) : null;
                 const vUzunCurrent = (sData.bilanco && sData.bilanco.rows) ? sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam uzun vadeli')) : null;
-                
+
                 let pctOz = 0, pctKisa = 0, pctUzun = 0;
                 if (sData.bilanco && sData.bilanco.headers.length > 1) {
                     const parseTRNumberLocal = (str) => {
@@ -2482,14 +2482,14 @@ const renderHisseler = (container) => {
                         pctUzun = Math.round((vU / tot) * 100);
                     }
                 }
-                
+
                 // Hisse Başına Kar (HBK)
                 const parseTRNumberForHBK = (str) => {
                     if (!str) return 0;
                     if (typeof str === 'number') return str;
                     return parseFloat(str.replace(/\./g, '').replace(/,/g, '.')) || 0;
                 };
-                
+
                 const hbk = (odenmisSermaye && odenmisSermaye > 0) ? (yilliklandirilmisNetKar / odenmisSermaye) : 0;
 
                 contentHtml = `
@@ -2627,7 +2627,7 @@ const renderHisseler = (container) => {
                     </div>
                 </div>
                 `;
-                
+
                 window.shouldRenderDashboardCharts = true;
                 window.dashboardChartData = {
                     labels: chartLabels,
@@ -2646,10 +2646,10 @@ const renderHisseler = (container) => {
                     dFaaliyet: chartDFaaliyet,
                     dFavok: chartDFavok,
                     dNetKar: chartDNetKar,
-                      bkm: chartBKM, fkm: chartFKM, nkm: chartNKM,
-                      ybkm: chartYBKM, yfkm: chartYFKM, ynkm: chartYNKM,
-                      cari: chartCari, kaldirac: chartKaldirac, roe: chartROE
-                  };
+                    bkm: chartBKM, fkm: chartFKM, nkm: chartNKM,
+                    ybkm: chartYBKM, yfkm: chartYFKM, ynkm: chartYNKM,
+                    cari: chartCari, kaldirac: chartKaldirac, roe: chartROE
+                };
             }
             if (activeTab === 'Gelir Tablosu') {
                 contentHtml = `
@@ -2862,75 +2862,144 @@ const renderHisseler = (container) => {
                 window.shouldRenderDashboardCharts = true;
             } else if (['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler'].includes(activeTab)) {
                 contentHtml = `<div style="display:flex; justify-content:center; align-items:center; height:200px; opacity:0.5; font-style:italic;">${activeTab} sayfası henüz yapım aşamasındadır.</div>`;
-             } else if (activeTab === 'Değerleme') {
-                if (!window.degerlemeTab) window.degerlemeTab = 'ara';
-                window.setDegerlemeTab = (tab) => { window.degerlemeTab = tab; if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage(); };
+            } else if (activeTab === 'Değerleme') {
                 // Initialize default edit modes if not present
-                if (!window.degerlemeEditMode) window.degerlemeEditMode = { '2026': false, '2027': false, '2028': false, '2029': false, '2030': false };
-                window.toggleDegerlemeEdit = (y) => {
-                    window.degerlemeEditMode[y] = !window.degerlemeEditMode[y];
+                if (!window.degerlemeEditMode) window.degerlemeEditMode = {};
+                if (!window.araDegerlemeEditMode) window.araDegerlemeEditMode = {};
+
+                window.enterDegerlemeEdit = (p, key) => {
+                    if (p.includes('/')) window.araDegerlemeEditMode[p] = true;
+                    else window.degerlemeEditMode[p] = true;
+                    window.degerlemeFocusPeriod = p;
+                    window.degerlemeFocusKey = key;
+                    if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
+                };
+
+                window.exitDegerlemeEdit = (p) => {
+                    if (p.includes('/')) window.araDegerlemeEditMode[p] = false;
+                    else window.degerlemeEditMode[p] = false;
                     if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
                 };
 
                 // Read saved target price data for this hisse
-                if(!State.data.degerleme) State.data.degerleme = {};
-                if(!State.data.degerleme[selectedHisse]) State.data.degerleme[selectedHisse] = {};
+                if (!State.data.degerleme) State.data.degerleme = {};
+                if (!State.data.degerleme[selectedHisse]) State.data.degerleme[selectedHisse] = {};
+                if (!State.data.araDegerleme) State.data.araDegerleme = {};
+                if (!State.data.araDegerleme[selectedHisse]) State.data.araDegerleme[selectedHisse] = {};
+
                 const stateData = State.data.degerleme[selectedHisse];
-                const savedNotYil = stateData.genelNotYil !== undefined ? stateData.genelNotYil : (stateData.genelNot || '');
-                const savedNotAra = stateData.genelNotAra || '';
-                const years = ['2026', '2027', '2028', '2029', '2030'];
-                
-                window.updateDegerlemeInput = (hisse, year, field, value) => {
-                    if (!State.data.degerleme[hisse]) State.data.degerleme[hisse] = {};
-                    if (!State.data.degerleme[hisse][year]) State.data.degerleme[hisse][year] = {};
-                    State.data.degerleme[hisse][year][field] = value;
+                const araStateData = State.data.araDegerleme[selectedHisse];
+
+                // Combine notes if both exist, else use one
+                let savedNotYil = stateData.genelNotYil !== undefined ? stateData.genelNotYil : (stateData.genelNot || '');
+                let savedNotAra = stateData.genelNotAra || '';
+                let combinedNot = savedNotYil;
+                if (savedNotAra && savedNotAra !== savedNotYil) {
+                    combinedNot = combinedNot ? (combinedNot + "\n\n" + savedNotAra) : savedNotAra;
+                }
+
+                window.updateDegerlemeInputUnified = (hisse, p, field, value, shouldRender = true) => {
+                    if (p.includes('/')) {
+                        if (!State.data.araDegerleme[hisse]) State.data.araDegerleme[hisse] = {};
+                        if (!State.data.araDegerleme[hisse][p]) State.data.araDegerleme[hisse][p] = {};
+                        State.data.araDegerleme[hisse][p][field] = value;
+                    } else {
+                        if (!State.data.degerleme[hisse]) State.data.degerleme[hisse] = {};
+                        if (!State.data.degerleme[hisse][p]) State.data.degerleme[hisse][p] = {};
+                        State.data.degerleme[hisse][p][field] = value;
+                    }
                     State.save();
-                    if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
+                    if (shouldRender) {
+                        if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
+                    }
                 };
 
-                window.saveDegerlemeNot = (hisse, type) => {
+                window.saveDegerlemeNotUnified = (hisse) => {
                     if (!State.data.degerleme[hisse]) State.data.degerleme[hisse] = {};
                     const input = document.getElementById('degerleme-not-input');
                     if (!input) return;
-                    const val = input.value;
-                    if (type === 'yil') {
-                        State.data.degerleme[hisse].genelNotYil = val;
-                    } else {
-                        State.data.degerleme[hisse].genelNotAra = val;
-                    }
+                    State.data.degerleme[hisse].genelNotYil = input.value;
+                    // clear ara note to avoid duplication in future
+                    if (State.data.degerleme[hisse].genelNotAra) State.data.degerleme[hisse].genelNotAra = "";
                     State.save();
                 };
 
+                const sDataDeg = window.stockData && window.stockData[selectedHisse] ? window.stockData[selectedHisse] : null;
+                const bilancoHeaders = (sDataDeg && sDataDeg.bilanco && sDataDeg.bilanco.headers) ? sDataDeg.bilanco.headers : [];
 
-                
-                let tabUI = `
-                    <div style="display: flex; gap: 15px; margin-bottom: 5px; padding-bottom: 0px; overflow-x: auto;">
-                        <span style="cursor: pointer; font-size: 12px; font-weight: normal; color: ${window.degerlemeTab === 'ara' ? '#ffffff' : 'var(--text-secondary)'}; background: ${window.degerlemeTab === 'ara' ? 'var(--overlay-bg)' : 'transparent'}; padding: 5px 10px; border-radius: 4px; transition: 0.2s;" onclick="window.setDegerlemeTab('ara')">Ara Bilançolara Göre</span>
-                        <span style="cursor: pointer; font-size: 12px; font-weight: normal; color: ${window.degerlemeTab === 'yil' ? '#ffffff' : 'var(--text-secondary)'}; background: ${window.degerlemeTab === 'yil' ? 'var(--overlay-bg)' : 'transparent'}; padding: 5px 10px; border-radius: 4px; transition: 0.2s;" onclick="window.setDegerlemeTab('yil')">Yıl Sonu Bilançolara Göre</span>
-                    </div>
-                `;
-                
-    
-                let headerHtml = `<tr><th>Kalem</th>`;
-                years.forEach(y => {
-                    headerHtml += `<th style="font-size: 12px; text-align:center;">
-                        <div>${y}</div>
+                // Determine past quarters (up to 4)
+                let pastQuarters = [];
+                let pastIndices = [];
+                for (let i = 1; i <= Math.min(4, bilancoHeaders.length - 1); i++) {
+                    pastQuarters.push(bilancoHeaders[i]);
+                    pastIndices.push(i);
+                }
+                pastQuarters.reverse();
+                pastIndices.reverse();
+
+                // Determine next quarter
+                let nextQuarter = "Gelecek Çeyrek";
+                if (pastQuarters.length > 0) {
+                    const latest = pastQuarters[pastQuarters.length - 1];
+                    if (latest.includes('/')) {
+                        let parts = latest.split('/');
+                        let y = parseInt(parts[0]);
+                        let m = parseInt(parts[1]);
+                        m += 3;
+                        if (m > 12) {
+                            m = m % 12 || 12;
+                            y += 1;
+                        }
+                        nextQuarter = y + '/' + m;
+                    }
+                }
+
+                // Determine next annual years (5 years)
+                let nextYearNum = new Date().getFullYear();
+                if (nextQuarter !== "Gelecek Çeyrek" && nextQuarter.includes('/')) {
+                    nextYearNum = parseInt(nextQuarter.split('/')[0]);
+                }
+                let annualYears = [];
+                for (let i = 0; i < 5; i++) {
+                    annualYears.push((nextYearNum + i).toString());
+                }
+
+                const allPeriods = [...pastQuarters, nextQuarter, ...annualYears];
+
+                let headerHtml = `<tr><th style="width: 140px;">Kalem</th>`;
+                const colWidthStyle = `width: calc((100% - 140px) / ${allPeriods.length});`;
+                allPeriods.forEach(p => {
+                    const isPast = pastQuarters.includes(p);
+                    let dotsHtml = '';
+                    if (!isPast) {
+                        const d = (p.includes('/') ? araStateData[p] : stateData[p]) || {};
+                        const curCurrency = d.currency || 'TRY';
+                        dotsHtml = `
+                        <div style="position:absolute; right:0; top:0; bottom:0; padding:0 8px; display:flex; align-items:center; cursor:pointer;" onmouseenter="document.querySelectorAll('.currency-dropdown').forEach(el => el.style.display='none'); this.querySelector('.currency-dropdown').style.display='block';" onmouseleave="this.querySelector('.currency-dropdown').style.display='none';">
+                            <i class="fas fa-ellipsis-v" style="color:var(--text-secondary);"></i>
+                            <div class="currency-dropdown" style="display:none; position:absolute; right:0; top:100%; background:#1e1e1e; border:1px solid #444; border-radius:4px; z-index:999; padding:5px; box-shadow: 0 4px 6px rgba(0,0,0,0.5); text-align:left;">
+                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'TRY' ? '#ffffff' : '#cccccc'}; font-size:12px; font-weight:normal; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'TRY'); this.parentElement.style.display='none';">₺ TRY</div>
+                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'USD' ? '#ffffff' : '#cccccc'}; font-size:12px; font-weight:normal; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'USD'); this.parentElement.style.display='none';">$ USD</div>
+                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'EUR' ? '#ffffff' : '#cccccc'}; font-size:12px; font-weight:normal; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'EUR'); this.parentElement.style.display='none';">€ EUR</div>
+                            </div>
+                        </div>`;
+                    }
+                    headerHtml += `<th style="font-size: 12px; text-align:center; position:relative; ${colWidthStyle}">
+                        <div>${p}</div>
+                        ${dotsHtml}
                     </th>`;
                 });
                 headerHtml += `</tr>`;
 
-                let html = `<div class="dash-card" style="display:flex; flex-direction:column;">
-${tabUI}
+                let html = `<div class="dash-card" style="display:flex; flex-direction:column; margin-top: 0;">
                     <style>.degerleme-table td, .degerleme-table th, .degerleme-table input { color: #cccccc !important; }</style>
-                    
                     <div style="overflow-x:auto;">
-                    <table class="dash-table compact-table degerleme-table" style="min-width: 1000px;">
+                    <table class="dash-table compact-table degerleme-table" style="width: 100%; min-width: 1200px; table-layout: fixed !important;" onclick="document.querySelectorAll('.currency-dropdown').forEach(el => el.style.display='none');">
                             <thead>${headerHtml}</thead>
                             <tbody>`;
-                
-                // Get Odenmis Sermaye dynamically
+
+                // Common calculations
                 let odenmisSermayeDeg = 0;
-                const sDataDeg = window.stockData && window.stockData[selectedHisse] ? window.stockData[selectedHisse] : null;
                 if (sDataDeg && sDataDeg.bilanco && sDataDeg.bilanco.rows) {
                     const osRow_deg = sDataDeg.bilanco.rows.find(r => r[0] && r[0].toLowerCase().includes('ödenmiş sermaye'));
                     if (osRow_deg && osRow_deg.length > 1) {
@@ -2948,287 +3017,48 @@ ${tabUI}
                         const rName = r[0].toLocaleLowerCase('tr-TR');
                         if (rName.trim() === 'duran varlıklar') inDuran = true;
                         if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sDataDeg.bilanco.rows.length || sDataDeg.bilanco.rows.indexOf(r) < sDataDeg.bilanco.rows.length - 2)) {
-                            const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                            const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                             finansalBorclarTotal_deg += val;
                         }
                         if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
-                            const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                            const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                             nakitTotal_deg += val;
                         }
                         if (rName.includes('finansal yatırımlar') && !inDuran) {
-                            const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                            const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                             finYatTotal_deg += val;
                         }
                     });
                     netBorc_deg = finansalBorclarTotal_deg - nakitTotal_deg - finYatTotal_deg;
                 }
+
                 const guncelFiyat = parseFloat(State.getFiyat ? State.getFiyat(selectedHisse) : (window.fiyatlar ? window.fiyatlar[selectedHisse] : 0)) || 0;
                 const usdKuru = (State.getFiyat ? parseFloat(State.getFiyat('USDTRY')) : null) || window.dolarKuru || 46.99;
                 const eurKuru = (State.getFiyat ? parseFloat(State.getFiyat('EURTRY')) : null) || window.euroKuru || 50;
-                
-                const rows = [
-                    { key: 'ciro', label: 'Satış Gelirleri', type: 'currency' },
-                    { key: 'favok_marji', label: 'FAVÖK Marjı', type: 'percent' },
-                    { key: 'net_kar_marji', label: 'Net Kar Marjı', type: 'percent' },
-                    { key: 'favok', label: 'FAVÖK', readonly: true, type: 'currency' },
-                    { key: 'net_kar', label: 'Net Kar', readonly: true, type: 'currency' },
-                    { key: 'ozkaynaklar_deg', label: 'Özkaynaklar', type: 'currency' },
-                    { key: 'fd_favok', label: 'FD/FAVÖK', type: 'decimal' },
-                    { key: 'f_k', label: 'F/K', type: 'decimal' },
-                    { key: 'pd_dd', label: 'PD/DD', type: 'decimal' },
-                    { key: 'hedef_fiyat', label: 'Hedef Fiyat', readonly: true, isTarget: true, type: 'target' },
-                    { key: 'potansiyel', label: 'Potansiyel', readonly: true, type: 'percent_target' }
-                ];
-                
-                rows.forEach(r => {
-                    html += `<tr><td style="text-align:left !important; font-weight:normal;">${r.label}</td>`;
-                    years.forEach(y => {
-                        const d = stateData[y] || {};
-                        const editMode = window.degerlemeEditMode[y];
-                        const curCurrency = d.currency || 'TRY';
-                        let currencySymbol = '₺';
-                        if (curCurrency === 'USD') currencySymbol = '$';
-                        if (curCurrency === 'EUR') currencySymbol = '€';
-                        
-                        let val = d[r.key] !== undefined ? d[r.key] : '';
-                        let displayVal = val;
-                        
-                        const ciro = parseFloat(d.ciro) || 0;
-                        const favokMarji = parseFloat(d.favok_marji) || 0;
-                        const netKarMarji = parseFloat(d.net_kar_marji) || 0;
-                        
-                        // Calculate auto fields
-                        let favok = 0;
-                        let net_kar = 0;
-                        let hasFavok = false;
-                        let hasNetKar = false;
-                        
-                        if (d.ciro !== undefined && d.ciro !== '' && d.favok_marji !== undefined && d.favok_marji !== '') {
-                            favok = ciro * (favokMarji / 100);
-                            hasFavok = true;
-                        }
-                        if (d.ciro !== undefined && d.ciro !== '' && d.net_kar_marji !== undefined && d.net_kar_marji !== '') {
-                            net_kar = ciro * (netKarMarji / 100);
-                            hasNetKar = true;
-                        }
-                        
-                        if (r.key === 'favok') {
-                            displayVal = val = hasFavok ? favok : '---';
-                        }
-                        if (r.key === 'net_kar') {
-                            displayVal = val = hasNetKar ? net_kar : '---';
-                        }
-                        
-                        // Calculate PDs
-                        let validPDs = [];
-                        
-                        let currentNetBorc = netBorc_deg;
-                        if (curCurrency === 'USD') currentNetBorc = netBorc_deg / usdKuru;
-                        else if (curCurrency === 'EUR') currentNetBorc = netBorc_deg / eurKuru;
-
-                        if (hasFavok && d.fd_favok !== undefined && d.fd_favok !== '') {
-                            validPDs.push((favok * (parseFloat(d.fd_favok) || 0)) - currentNetBorc);
-                        }
-                        if (hasNetKar && d.f_k !== undefined && d.f_k !== '') {
-                            validPDs.push(net_kar * (parseFloat(d.f_k) || 0));
-                        }
-                        if (d.ozkaynaklar_deg !== undefined && d.ozkaynaklar_deg !== '' && d.pd_dd !== undefined && d.pd_dd !== '') {
-                            validPDs.push((parseFloat(d.ozkaynaklar_deg) || 0) * (parseFloat(d.pd_dd) || 0));
-                        }
-                        
-                        let avgPD = 0;
-                        if (validPDs.length > 0) {
-                            avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
-                        }
-                        
-                        let hedefFiyatTL = 0;
-                        let hasHedef = false;
-                        
-                        let currentOdenmisSermaye = odenmisSermayeDeg;
-                        if (d.sermaye !== undefined && d.sermaye !== '') {
-                            currentOdenmisSermaye = parseFloat(d.sermaye) || currentOdenmisSermaye;
-                        }
-                        
-                        if (validPDs.length > 0 && currentOdenmisSermaye > 0) {
-                            let hedefFiyatForeign = avgPD / currentOdenmisSermaye;
-                            if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
-                            else if (curCurrency === 'EUR') hedefFiyatTL = hedefFiyatForeign * eurKuru;
-                            else hedefFiyatTL = hedefFiyatForeign;
-                            hasHedef = true;
-                        }
-                        
-                        if (r.key === 'hedef_fiyat') {
-                            displayVal = val = hasHedef ? hedefFiyatTL : '---';
-                        }
-                        
-                        let potansiyelNum = 0;
-                        if (hasHedef && guncelFiyat > 0) {
-                            potansiyelNum = ((hedefFiyatTL - guncelFiyat) / guncelFiyat) * 100;
-                        }
-
-                        if (r.key === 'potansiyel') {
-                            if (hasHedef && guncelFiyat > 0) {
-                                displayVal = val = potansiyelNum;
-                            } else {
-                                displayVal = val = '---';
-                            }
-                        }
-                        if (r.key === 'sermaye' && !editMode && (d.sermaye === undefined || d.sermaye === '')) {
-                            displayVal = odenmisSermayeDeg;
-                        }
-
-                        
-                        // Formatting logic
-                        if (displayVal !== '---' && displayVal !== '') {
-                            let numVal = parseFloat(displayVal);
-                            if (!isNaN(numVal)) {
-                                if (r.type === 'target') {
-                                    displayVal = '₺' + new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(numVal);
-                                } else if (r.type === 'currency') {
-                                    displayVal = currencySymbol === '€' ? new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(numVal) + '€' : currencySymbol + new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(numVal);
-                                } else if (r.type === 'percent') {
-                                    let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(Math.abs(numVal));
-                                    displayVal = numVal < 0 ? '%-' + formatted : '%' + formatted;
-                                } else if (r.type === 'percent_target') {
-                                    let formatted = new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(Math.abs(numVal));
-                                    displayVal = numVal < 0 ? '%-' + formatted : '%' + formatted;
-                                } else if (r.type === 'decimal') {
-                                    displayVal = new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(numVal);
-                                }
-                            }
-                        }
-                        
-                        let extraStyle = '';
-                        if (r.isTarget && hasHedef) {
-                            extraStyle = potansiyelNum > 0 ? 'color: #2ecc71 !important; font-weight: normal; font-size:1.1rem;' : 'color: #e74c3c !important; font-weight: normal; font-size:1.1rem;';
-                        }
-                        if (r.key === 'potansiyel' && val !== '---') {
-                            extraStyle = val > 0 ? 'color: #2ecc71 !important; font-weight: normal;' : 'color: #e74c3c !important; font-weight: normal;';
-                        }
-                        
-                        if (editMode && !r.readonly) {
-                            html += `<td style="text-align: right !important;"><input type="number" step="any" style="width:100%; background:var(--input-bg); color:var(--text-primary); border:1px solid var(--accent-color); padding:4px; text-align:right; border-radius:4px;" value="${val !== '---' ? val : ''}" onblur="window.updateDegerlemeInput('${selectedHisse}', '${y}', '${r.key}', this.value)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); window.degerlemeEditMode['${y}'] = false; this.blur(); }"></td>`;
-                        } else {
-                            html += `<td style="text-align: right !important; ${extraStyle}">${displayVal === '' ? '---' : displayVal}</td>`;
-                        }
-                    });
-                    html += `</tr>`;
-                });
-                
-                // Add actions row at the bottom
-                html += `<tr><td style="text-align:left; font-weight:normal; color:var(--text-secondary);"></td>`;
-                years.forEach(y => {
-                    const d = stateData[y] || {};
-                    const curCurrency = d.currency || 'TRY';
-                    html += `<td style="text-align: center;">
-                        <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem; padding-top: 5px;">
-                            <select style="background:var(--input-bg); color:var(--text-primary); border:1px solid var(--surface-border); border-radius:4px; padding:2px 4px; font-size:0.8rem;" onchange="window.updateDegerlemeInput('${selectedHisse}', '${y}', 'currency', this.value)">
-                                <option value="TRY" ${curCurrency === 'TRY' ? 'selected' : ''}>₺</option>
-                                <option value="USD" ${curCurrency === 'USD' ? 'selected' : ''}>$</option>
-                                <option value="EUR" ${curCurrency === 'EUR' ? 'selected' : ''}>€</option>
-                            </select>
-                            <i class="fas fa-edit" style="cursor:pointer; color:#cccccc; font-size:12px;" onclick="window.toggleDegerlemeEdit('${y}')" title="Düzenle"></i>
-                            <i class="fas fa-save" style="cursor:pointer; color:#cccccc; font-size:12px;" onclick="window.toggleDegerlemeEdit('${y}')" title="Kaydet"></i>
-                            <i class="fas fa-trash-alt" style="cursor:pointer; color:#cccccc; font-size:12px;" onclick="if(confirm('${y} verilerini silmek istediğinize emin misiniz?')){ delete State.data.degerleme['${selectedHisse}']['${y}']; State.save(); if(typeof renderUI === 'function') renderUI(); else if(typeof renderPage === 'function') renderPage(); }" title="Sil"></i>
-                        </div>
-                    </td>`;
-                });
-                html += `</tr>`;
-                
-                
-                html += `</tbody></table></div>`; // End of table wrapper
-                html += `
-                    <div style="margin-top: 1rem; border-top: 1px solid var(--surface-border); padding-top: 1rem;">
-                        <textarea id="degerleme-not-input" class="form-control" style="width: 100%; height: 44px; resize: vertical; font-size: 12px; font-family: inherit; margin-bottom: 0.5rem;" placeholder="Bu hisse için değerleme notlarınızı buraya yazabilirsiniz..." onblur="window.saveDegerlemeNot('${selectedHisse}', 'yil')">${savedNotYil}</textarea>
-                    </div>
-                </div>`; // End of dash-card
-                if (window.degerlemeTab === 'yil') contentHtml += html;
-
-                // ====== ARA BİLANÇO BEKLENTİLERİ ======
-                if (!window.araDegerlemeEditMode) window.araDegerlemeEditMode = {};
-                window.toggleAraDegerlemeEdit = (p) => {
-                    window.araDegerlemeEditMode[p] = !window.araDegerlemeEditMode[p];
-                    if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
-                };
-                window.updateAraDegerlemeInput = (hisse, period, field, value) => {
-                    if (!State.data.araDegerleme) State.data.araDegerleme = {};
-                    if (!State.data.araDegerleme[hisse]) State.data.araDegerleme[hisse] = {};
-                    if (!State.data.araDegerleme[hisse][period]) State.data.araDegerleme[hisse][period] = {};
-                    State.data.araDegerleme[hisse][period][field] = value;
-                    State.save();
-                    if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
-                };
-
-                const bilancoHeaders = (sDataDeg && sDataDeg.bilanco && sDataDeg.bilanco.headers) ? sDataDeg.bilanco.headers : [];
-                let pastPeriods = [];
-                let pastIndices = [];
-                for (let i = 1; i <= Math.min(3, bilancoHeaders.length - 1); i++) {
-                    pastPeriods.push(bilancoHeaders[i]);
-                    pastIndices.push(i);
-                }
-                pastPeriods.reverse();
-                pastIndices.reverse();
-
-                let nextPeriod = "Gelecek";
-                if (pastPeriods.length > 0) {
-                    const latest = pastPeriods[pastPeriods.length - 1];
-                    if (latest.includes('/')) {
-                        let parts = latest.split('/');
-                        let y = parseInt(parts[0]);
-                        let m = parseInt(parts[1]);
-                        m += 3;
-                        if (m > 12) {
-                            m = m % 12 || 12;
-                            y += 1;
-                        }
-                        nextPeriod = y + '/' + m;
-                    }
-                }
-                const araPeriods = [...pastPeriods, nextPeriod];
-
-                let araHeaderHtml = `<tr><th>Kalem</th>`;
-                araPeriods.forEach(p => {
-                    araHeaderHtml += `<th style="font-size: 12px; text-align:center;">
-                        <div>${p}</div>
-                    </th>`;
-                });
-                araHeaderHtml += `</tr>`;
-
-                let araHtml = `<div class="dash-card" style="display:flex; flex-direction:column; margin-top: 0;">
-${tabUI}
-                    <style>.degerleme-table td, .degerleme-table th, .degerleme-table input { color: #cccccc !important; }</style>
-                    
-                    <div style="overflow-x:auto;">
-                    <table class="dash-table compact-table degerleme-table" style="min-width: 1000px;">
-                        <thead>${araHeaderHtml}</thead>
-                        <tbody>`;
-
-                if (!State.data.araDegerleme) State.data.araDegerleme = {};
-                if (!State.data.araDegerleme[selectedHisse]) State.data.araDegerleme[selectedHisse] = {};
-                const araStateData = State.data.araDegerleme[selectedHisse];
 
                 const parseTRNumberForAra = (str) => {
                     if (str === undefined || str === null || str === '') return 0;
                     if (typeof str === 'number') return str;
                     return parseFloat(str.replace(/\./g, '').replace(/,/g, '.')) || 0;
                 };
+
                 const fetchHistVal = (key, idx) => {
-                    if (!sData) return '';
+                    if (!sDataDeg) return '';
                     let r = null;
                     let val = '';
                     if (key === 'ciro') {
-                        if (sDataDeg.gelirYillik && sDataDeg.gelirYillik.rows) {
-                            r = sDataDeg.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
+                        if (sDataDeg.gelirCeyrek && sDataDeg.gelirCeyrek.rows) {
+                            r = sDataDeg.gelirCeyrek.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
                         }
                     } else if (key === 'favok') {
-                        if (sDataDeg.gelirYillik && sDataDeg.gelirYillik.rows) {
-                            r = sDataDeg.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
+                        if (sDataDeg.gelirCeyrek && sDataDeg.gelirCeyrek.rows) {
+                            r = sDataDeg.gelirCeyrek.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
                         }
                     } else if (key === 'net_kar') {
-                        if (sDataDeg.gelirYillik && sDataDeg.gelirYillik.rows) {
-                            r = sDataDeg.gelirYillik.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                        if (sDataDeg.gelirCeyrek && sDataDeg.gelirCeyrek.rows) {
+                            r = sDataDeg.gelirCeyrek.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
                         }
-                    } else if (key === 'ozkaynaklar_deg') {
+                    } else if (key === 'ozkaynaklar') {
                         if (sDataDeg.bilanco && sDataDeg.bilanco.rows) {
                             r = sDataDeg.bilanco.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
                         }
@@ -3237,23 +3067,36 @@ ${tabUI}
                     return val;
                 };
 
+                const rows = [
+                    { key: 'ciro', label: 'Satış Gelirleri', type: 'currency_int' },
+                    { key: 'favok_marji', label: 'FAVÖK Marjı', type: 'percent' },
+                    { key: 'net_kar_marji', label: 'Net Kar Marjı', type: 'percent' },
+                    { key: 'favok', label: 'FAVÖK', readonly: true, type: 'currency_int' },
+                    { key: 'net_kar', label: 'Net Kar', readonly: true, type: 'currency_int' },
+                    { key: 'ozkaynaklar', label: 'Özkaynaklar', type: 'currency_int' },
+                    { key: 'fd_favok', label: 'FD/FAVÖK', type: 'decimal' },
+                    { key: 'f_k', label: 'F/K', type: 'decimal' },
+                    { key: 'pd_dd', label: 'PD/DD', type: 'decimal' },
+                    { key: 'hedef_fiyat', label: 'Hedef Fiyat', readonly: true, isTarget: true, type: 'target' },
+                    { key: 'potansiyel', label: 'Potansiyel', readonly: true, type: 'percent_target' }
+                ];
+
                 rows.forEach(r => {
-                    araHtml += `<tr><td style="text-align:left !important; font-weight:normal;">${r.label}</td>`;
-                    araPeriods.forEach((p, pIndex) => {
-                        const isPast = pIndex < pastPeriods.length;
-                        const pIdx = isPast ? pastIndices[pIndex] : -1;
-                        
+                    html += `<tr><td style="text-align:left !important; font-weight:normal;">${r.label}</td>`;
+                    allPeriods.forEach(p => {
+                        const isPast = pastQuarters.includes(p);
                         let d = {};
                         if (isPast) {
+                            const pIdx = pastIndices[pastQuarters.indexOf(p)];
                             const ciro = fetchHistVal('ciro', pIdx);
                             const favok = fetchHistVal('favok', pIdx);
                             const net_kar = fetchHistVal('net_kar', pIdx);
-                            const ozkaynaklar_deg = fetchHistVal('ozkaynaklar_deg', pIdx);
-                            
+                            const ozkaynaklar = fetchHistVal('ozkaynaklar', pIdx);
+
                             d.ciro = ciro;
                             d.favok = favok;
                             d.net_kar = net_kar;
-                            d.ozkaynaklar_deg = ozkaynaklar_deg;
+                            d.ozkaynaklar = ozkaynaklar;
                             d.favok_marji = (ciro !== '' && ciro !== 0 && favok !== '') ? (favok / ciro) * 100 : '';
                             d.net_kar_marji = (ciro !== '' && ciro !== 0 && net_kar !== '') ? (net_kar / ciro) * 100 : '';
                             d.fd_favok = '';
@@ -3261,67 +3104,90 @@ ${tabUI}
                             d.pd_dd = '';
                             d.hedef_fiyat = '';
                             d.potansiyel = '';
-                        } else {
+                        } else if (p.includes('/')) {
                             d = araStateData[p] || {};
+                        } else {
+                            d = stateData[p] || {};
                         }
 
-                        const editMode = !isPast && window.araDegerlemeEditMode && window.araDegerlemeEditMode[p];
+                        const editMode = !isPast && (p.includes('/') ? window.araDegerlemeEditMode[p] : window.degerlemeEditMode[p]);
                         const curCurrency = d.currency || 'TRY';
                         let currencySymbol = '₺';
                         if (curCurrency === 'USD') currencySymbol = '$';
                         if (curCurrency === 'EUR') currencySymbol = '€';
-                        
+
                         let val = d[r.key] !== undefined ? d[r.key] : '';
                         let displayVal = val;
-                        
+
                         if (isPast && ['fd_favok', 'f_k', 'pd_dd', 'hedef_fiyat', 'potansiyel'].includes(r.key)) {
                             displayVal = val = '---';
                         } else if (!isPast) {
                             const ciro = parseFloat(d.ciro) || 0;
                             const favokMarji = parseFloat(d.favok_marji) || 0;
                             const netKarMarji = parseFloat(d.net_kar_marji) || 0;
-                            
+
                             let favok = 0;
                             let net_kar = 0;
                             let hasFavok = false;
                             let hasNetKar = false;
-                            
+
+                            let past3Favok = 0;
+                            let past3NetKar = 0;
+
+                            if (p.includes('/') && sDataDeg && sDataDeg.gelirCeyrek && sDataDeg.gelirCeyrek.rows) {
+                                const favokRow = sDataDeg.gelirCeyrek.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
+                                const netKarRow = sDataDeg.gelirCeyrek.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                                
+                                for (let i = 1; i <= Math.min(3, sDataDeg.gelirCeyrek.headers.length - 1); i++) {
+                                    if (favokRow && favokRow[i] !== undefined && favokRow[i] !== '') {
+                                        past3Favok += (typeof favokRow[i] === 'number' ? favokRow[i] : parseFloat(String(favokRow[i]).replace(/\./g, '').replace(/,/g, '.')) || 0);
+                                    }
+                                    if (netKarRow && netKarRow[i] !== undefined && netKarRow[i] !== '') {
+                                        past3NetKar += (typeof netKarRow[i] === 'number' ? netKarRow[i] : parseFloat(String(netKarRow[i]).replace(/\./g, '').replace(/,/g, '.')) || 0);
+                                    }
+                                }
+                            }
+
                             if (d.ciro !== undefined && d.ciro !== '' && d.favok_marji !== undefined && d.favok_marji !== '') {
-                                favok = ciro * (favokMarji / 100);
+                                favok = (ciro * (favokMarji / 100)) + past3Favok;
                                 hasFavok = true;
                             }
                             if (d.ciro !== undefined && d.ciro !== '' && d.net_kar_marji !== undefined && d.net_kar_marji !== '') {
-                                net_kar = ciro * (netKarMarji / 100);
+                                net_kar = (ciro * (netKarMarji / 100)) + past3NetKar;
                                 hasNetKar = true;
                             }
-                            
+
                             if (r.key === 'favok') displayVal = val = hasFavok ? favok : '---';
                             if (r.key === 'net_kar') displayVal = val = hasNetKar ? net_kar : '---';
-                            
+
                             let validPDs = [];
                             let currentNetBorc = netBorc_deg;
                             if (curCurrency === 'USD') currentNetBorc = netBorc_deg / usdKuru;
                             else if (curCurrency === 'EUR') currentNetBorc = netBorc_deg / eurKuru;
 
-                            if (hasFavok && d.fd_favok !== undefined && d.fd_favok !== '') {
-                                validPDs.push((favok * (parseFloat(d.fd_favok) || 0)) - currentNetBorc);
+                            let yFdFavok = parseFloat(d.fd_favok) || 0;
+                            let yFk = parseFloat(d.f_k) || 0;
+                            let yPdDd = parseFloat(d.pd_dd) || 0;
+
+                            if (hasFavok && yFdFavok > 0) {
+                                validPDs.push((favok * yFdFavok) - currentNetBorc);
                             }
-                            if (hasNetKar && d.f_k !== undefined && d.f_k !== '') {
-                                validPDs.push(net_kar * (parseFloat(d.f_k) || 0));
+                            if (hasNetKar && yFk > 0) {
+                                validPDs.push(net_kar * yFk);
                             }
-                            if (d.ozkaynaklar_deg !== undefined && d.ozkaynaklar_deg !== '' && d.pd_dd !== undefined && d.pd_dd !== '') {
-                                validPDs.push((parseFloat(d.ozkaynaklar_deg) || 0) * (parseFloat(d.pd_dd) || 0));
+                            if (d.ozkaynaklar !== undefined && d.ozkaynaklar !== '' && yPdDd > 0) {
+                                validPDs.push((parseFloat(d.ozkaynaklar) || 0) * yPdDd);
                             }
-                            
+
                             let avgPD = 0;
                             if (validPDs.length > 0) avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
-                            
+
                             let hedefFiyatTL = 0;
                             let hasHedef = false;
-                            
+
                             let currentOdenmisSermaye = odenmisSermayeDeg;
                             if (d.sermaye !== undefined && d.sermaye !== '') currentOdenmisSermaye = parseFloat(d.sermaye) || currentOdenmisSermaye;
-                            
+
                             if (validPDs.length > 0 && currentOdenmisSermaye > 0) {
                                 let hedefFiyatForeign = avgPD / currentOdenmisSermaye;
                                 if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
@@ -3329,9 +3195,9 @@ ${tabUI}
                                 else hedefFiyatTL = hedefFiyatForeign;
                                 hasHedef = true;
                             }
-                            
+
                             if (r.key === 'hedef_fiyat') displayVal = val = hasHedef ? hedefFiyatTL : '---';
-                            
+
                             let potansiyelNum = 0;
                             if (hasHedef && guncelFiyat > 0) potansiyelNum = ((hedefFiyatTL - guncelFiyat) / guncelFiyat) * 100;
 
@@ -3339,84 +3205,85 @@ ${tabUI}
                                 if (hasHedef && guncelFiyat > 0) displayVal = val = potansiyelNum;
                                 else displayVal = val = '---';
                             }
+                            if (r.key === 'sermaye' && !editMode && (d.sermaye === undefined || d.sermaye === '')) {
+                                displayVal = odenmisSermayeDeg;
+                            }
                         }
 
                         if (displayVal !== '---' && displayVal !== '') {
                             let numVal = parseFloat(displayVal);
                             if (!isNaN(numVal)) {
-                                if (r.type === 'target') displayVal = '₺' + new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(numVal);
-                                else if (r.type === 'currency') displayVal = currencySymbol === '€' ? new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(numVal) + '€' : currencySymbol + new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(numVal);
+                                if (r.type === 'target') displayVal = '₺' + new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numVal);
+                                else if (r.type === 'currency') displayVal = currencySymbol === '€' ? new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(numVal) + '€' : currencySymbol + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(numVal);
+                                else if (r.type === 'currency_int') displayVal = currencySymbol === '€' ? new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(numVal) + '€' : currencySymbol + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(numVal);
                                 else if (r.type === 'percent') {
-                                    let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits:2 }).format(Math.abs(numVal));
+                                    let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(Math.abs(numVal));
                                     displayVal = numVal < 0 ? '%-' + formatted : '%' + formatted;
                                 } else if (r.type === 'percent_target') {
-                                    let formatted = new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(Math.abs(numVal));
+                                    let formatted = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(numVal));
                                     displayVal = numVal < 0 ? '%-' + formatted : '%' + formatted;
                                 } else if (r.type === 'decimal') {
-                                    displayVal = new Intl.NumberFormat('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }).format(numVal);
+                                    displayVal = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numVal);
                                 }
                             }
                         }
-                        
+
                         let extraStyle = '';
                         if (!isPast && r.isTarget && displayVal !== '---') {
-                            const numPot = ((parseFloat(String(displayVal).replace('₺','').replace(/\./g,'').replace(',','.')) - guncelFiyat) / guncelFiyat) * 100;
+                            const numPot = ((parseFloat(String(displayVal).replace('₺', '').replace(/\./g, '').replace(',', '.')) - guncelFiyat) / guncelFiyat) * 100;
                             extraStyle = numPot > 0 ? 'color: #2ecc71 !important; font-weight: normal; font-size:1.1rem;' : 'color: #e74c3c !important; font-weight: normal; font-size:1.1rem;';
                         }
                         if (!isPast && r.key === 'potansiyel' && val !== '---') {
                             extraStyle = val > 0 ? 'color: #2ecc71 !important; font-weight: normal;' : 'color: #e74c3c !important; font-weight: normal;';
                         }
-                        
+
+                        const pSafe = p.replace('/', '-');
                         if (editMode && !r.readonly) {
-                            araHtml += `<tr><td style="text-align: right !important;"><input type="number" step="any" style="width:100%; background:var(--input-bg); color:var(--text-primary); border:1px solid var(--accent-color); padding:4px; text-align:right; border-radius:4px;" value="${val !== '---' ? val : ''}" onblur="window.updateAraDegerlemeInput('${selectedHisse}', '${p}', '${r.key}', this.value)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); window.araDegerlemeEditMode['${p}'] = false; this.blur(); }"></td></tr>`;
+                            html += `<td class="editing-column-${pSafe}" style="text-align: right !important; padding: 2px !important; ${colWidthStyle}">
+                                <input id="edit-input-${pSafe}-${r.key}" type="number" step="any" style="width:100%; min-width:0; box-sizing: border-box; background:var(--input-bg); color:var(--text-primary); border:1px solid var(--accent-color); padding:4px; text-align:right; border-radius:4px;" 
+                                value="${val !== '---' ? val : ''}" 
+                                oninput="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', '${r.key}', this.value, false)" 
+                                onkeydown="if(event.key === 'Enter') { event.preventDefault(); window.exitDegerlemeEdit('${p}'); }"
+                                onblur="setTimeout(() => { if (!document.activeElement.closest('.editing-column-${pSafe}')) { window.exitDegerlemeEdit('${p}'); } }, 100)">
+                            </td>`;
                         } else {
-                            araHtml += `<td style="text-align: right !important; ${extraStyle}">${displayVal === '' ? '---' : displayVal}</td>`;
+                            const dblClick = (!isPast && !r.readonly) ? `ondblclick="window.enterDegerlemeEdit('${p}', '${r.key}')" style="cursor:text; text-align: right !important; ${extraStyle}" title="Düzenlemek için çift tıklayın"` : `style="text-align: right !important; ${extraStyle}"`;
+                            html += `<td class="editing-column-${pSafe}" ${dblClick}>${displayVal === '' ? '---' : displayVal}</td>`;
                         }
                     });
-                    araHtml += `</tr>`;
+                    html += `</tr>`;
                 });
 
-                araHtml += `<tr><td style="text-align:left; font-weight:normal; color:var(--text-secondary);"></td>`;
-                araPeriods.forEach((p, pIndex) => {
-                    const isPast = pIndex < pastPeriods.length;
-                    if (isPast) {
-                        araHtml += `<td style="text-align: center;"></td>`;
-                    } else {
-                        const d = araStateData[p] || {};
-                        const curCurrency = d.currency || 'TRY';
-                        araHtml += `<td style="text-align: center;">
-                            <div style="display:flex; align-items:center; justify-content:center; gap:0.5rem; padding-top: 5px;">
-                                <select style="background:var(--input-bg); color:var(--text-primary); border:1px solid var(--surface-border); border-radius:4px; padding:2px 4px; font-size:0.8rem;" onchange="window.updateAraDegerlemeInput('${selectedHisse}', '${p}', 'currency', this.value)">
-                                    <option value="TRY" ${curCurrency === 'TRY' ? 'selected' : ''}>₺</option>
-                                    <option value="USD" ${curCurrency === 'USD' ? 'selected' : ''}>$</option>
-                                    <option value="EUR" ${curCurrency === 'EUR' ? 'selected' : ''}>€</option>
-                                </select>
-                                <i class="fas fa-edit" style="cursor:pointer; color:#cccccc; font-size:12px;" onclick="window.toggleAraDegerlemeEdit('${p}')" title="Düzenle"></i>
-                                <i class="fas fa-save" style="cursor:pointer; color:#cccccc; font-size:12px;" onclick="window.toggleAraDegerlemeEdit('${p}')" title="Kaydet"></i>
-                                <i class="fas fa-trash-alt" style="cursor:pointer; color:#cccccc; font-size:12px;" onclick="if(confirm('${p} verilerini silmek istediğinize emin misiniz?')){ delete State.data.araDegerleme['${selectedHisse}']['${p}']; State.save(); if(typeof renderUI === 'function') renderUI(); else if(typeof renderPage === 'function') renderPage(); }" title="Sil"></i>
-                            </div>
-                        </td>`;
-                    }
-                });
-                araHtml += `</tr>`;
-                araHtml += `</tbody></table></div>`; // End of table wrapper
-                araHtml += `
+                if (window.degerlemeFocusPeriod && window.degerlemeFocusKey) {
+                    setTimeout(() => {
+                        const el = document.getElementById(`edit-input-${window.degerlemeFocusPeriod.replace('/', '-')}-${window.degerlemeFocusKey}`);
+                        if (el) {
+                            el.focus();
+                            el.select();
+                        }
+                        window.degerlemeFocusPeriod = null;
+                        window.degerlemeFocusKey = null;
+                    }, 50);
+                }
+
+                html += `</tbody></table></div>`; // End of table wrapper
+                html += `
                     <div style="margin-top: 1rem; border-top: 1px solid var(--surface-border); padding-top: 1rem;">
-                        <textarea id="degerleme-not-input" class="form-control" style="width: 100%; height: 44px; resize: vertical; font-size: 12px; font-family: inherit; margin-bottom: 0.5rem;" placeholder="Bu hisse için değerleme notlarınızı buraya yazabilirsiniz..." onblur="window.saveDegerlemeNot('${selectedHisse}', 'ara')">${savedNotAra}</textarea>
+                        <textarea id="degerleme-not-input" class="form-control" style="width: 100%; height: 60px; resize: vertical; font-size: 12px; font-family: inherit; margin-bottom: 0.5rem; color: #cccccc;" placeholder="Bu hisse için değerleme notlarınızı buraya yazabilirsiniz..." onblur="window.saveDegerlemeNotUnified('${selectedHisse}')">${combinedNot}</textarea>
                     </div>
                 </div>`; // End of dash-card
-                if (window.degerlemeTab === 'ara') contentHtml += araHtml;
+                contentHtml += html;
             } else if (activeTab === 'Akış') {
                 let analizler = State.data.analizler || [];
                 analizler = analizler.filter(a => (a.hisse || '').toUpperCase() === selectedHisse.toUpperCase());
-                
+
                 // Get Reports
                 let foundReports = [];
                 const availablePdfs = (window.stockReports && window.stockReports[selectedHisse]) ? window.stockReports[selectedHisse] : [];
                 availablePdfs.forEach(file => {
                     let baseName = file.toLowerCase();
                     if (baseName.endsWith('.pdf')) baseName = baseName.substring(0, baseName.length - 4);
-                    
+
                     const trMap = {
                         'arastirma': 'Araştırma', 'raporu': 'Raporu', 'faaliyet': 'Faaliyet',
                         'finansal': 'Finansal', 'toplanti': 'Toplantı', 'notlari': 'Notları',
@@ -3434,18 +3301,18 @@ ${tabUI}
                         'gelecege': 'Geleceğe', 'donuk': 'Dönük', 'beklentiler': 'Beklentiler',
                         'aciklama': 'Açıklama'
                     };
-                    
+
                     const cols = baseName.split('-');
                     let sirket = '-';
                     let tarih = '-';
                     let ad = '-';
                     let sn = '-';
-                    
+
                     const formatWords = (str) => {
-                        if(!str) return '-';
+                        if (!str) return '-';
                         return str.split('_').map(w => trMap[w] || w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                     };
-                    
+
                     if (/^\d+$/.test(cols[0])) {
                         sn = cols[0];
                         if (cols.length >= 4) { ad = formatWords(cols[1]); tarih = formatWords(cols[2]); sirket = formatWords(cols[3]); }
@@ -3456,32 +3323,32 @@ ${tabUI}
                         else if (cols.length === 2) { ad = formatWords(cols[0]); tarih = formatWords(cols[1]); }
                         else if (cols.length === 1) { ad = formatWords(cols[0]); }
                     }
-                    
+
                     foundReports.push({ type: 'report', file: file, sn: sn, name: ad, tarih: tarih, company: sirket });
                 });
 
-                                  const parseDateStr = (dStr) => {
-                      if (!dStr || dStr === '-') return 0;
-                      let s = dStr.replace(/[\s\._]/g, '-');
-                      let p = s.split('-');
-                      if (p.length >= 3) {
-                          if (p[0].length === 4) {
-                              return parseInt(p[0] + p[1].padStart(2,'0') + p[2].padStart(2,'0'));
-                          } else if (p[2].length === 4) {
-                              return parseInt(p[2] + p[1].padStart(2,'0') + p[0].padStart(2,'0'));
-                          }
-                      }
-                      let clean = dStr.replace(/\D/g, '');
-                      if (clean.length === 8) {
-                          if (clean.startsWith('20')) return parseInt(clean);
-                          return parseInt(clean.substring(4,8) + clean.substring(2,4) + clean.substring(0,2));
-                      }
-                      return parseInt(clean) || 0;
-                  };
+                const parseDateStr = (dStr) => {
+                    if (!dStr || dStr === '-') return 0;
+                    let s = dStr.replace(/[\s\._]/g, '-');
+                    let p = s.split('-');
+                    if (p.length >= 3) {
+                        if (p[0].length === 4) {
+                            return parseInt(p[0] + p[1].padStart(2, '0') + p[2].padStart(2, '0'));
+                        } else if (p[2].length === 4) {
+                            return parseInt(p[2] + p[1].padStart(2, '0') + p[0].padStart(2, '0'));
+                        }
+                    }
+                    let clean = dStr.replace(/\D/g, '');
+                    if (clean.length === 8) {
+                        if (clean.startsWith('20')) return parseInt(clean);
+                        return parseInt(clean.substring(4, 8) + clean.substring(2, 4) + clean.substring(0, 2));
+                    }
+                    return parseInt(clean) || 0;
+                };
 
                 const today = new Date().toISOString().split('T')[0];
                 let unifiedList = [];
-                
+
                 analizler.forEach(a => {
                     let d = 0;
                     if (a.tarih) {
@@ -3603,7 +3470,7 @@ ${tabUI}
                         </thead>
                         <tbody>
                 `;
-                
+
                 if (unifiedList.length === 0) {
                     tableHtml += `<tr><td colspan="6" style="text-align: center; padding: 2rem; opacity: 0.5;">Henüz akış verisi bulunmuyor.</td></tr>`;
                 } else {
@@ -3675,27 +3542,27 @@ ${tabUI}
                 </div>`;
                 contentHtml += tableHtml;
             }
-        let stockHeaderHtml = '';
-        if (selectedHisse) {
-            window.stockChanges = window.stockChanges || {};
-            const hFiyat = parseFloat(State.getFiyat(selectedHisse)) || 0;
-            let hDegisim = 0;
-            if (window.stockChanges[selectedHisse] !== undefined) {
-                hDegisim = window.stockChanges[selectedHisse];
-            } else {
-                const hKayit = State.data.hisseFiyatlari && State.data.hisseFiyatlari.find(h => h.hisse === selectedHisse);
-                const oKapanis = hKayit && hKayit.onceki_kapanis ? parseFloat(hKayit.onceki_kapanis) : hFiyat;
-                hDegisim = oKapanis > 0 ? ((hFiyat - oKapanis) / oKapanis) * 100 : 0;
-            }
-            
-            const isPos = hDegisim >= 0;
-            const hColor = isPos ? 'var(--success-color)' : 'var(--danger-color)';
-            
-            let initChangeStr = Math.abs(hDegisim).toFixed(2).replace('.', ',');
-            if (isPos && hDegisim > 0) initChangeStr = '+' + initChangeStr;
-            else if (!isPos) initChangeStr = '-' + initChangeStr;
+            let stockHeaderHtml = '';
+            if (selectedHisse) {
+                window.stockChanges = window.stockChanges || {};
+                const hFiyat = parseFloat(State.getFiyat(selectedHisse)) || 0;
+                let hDegisim = 0;
+                if (window.stockChanges[selectedHisse] !== undefined) {
+                    hDegisim = window.stockChanges[selectedHisse];
+                } else {
+                    const hKayit = State.data.hisseFiyatlari && State.data.hisseFiyatlari.find(h => h.hisse === selectedHisse);
+                    const oKapanis = hKayit && hKayit.onceki_kapanis ? parseFloat(hKayit.onceki_kapanis) : hFiyat;
+                    hDegisim = oKapanis > 0 ? ((hFiyat - oKapanis) / oKapanis) * 100 : 0;
+                }
 
-            stockHeaderHtml = `
+                const isPos = hDegisim >= 0;
+                const hColor = isPos ? 'var(--success-color)' : 'var(--danger-color)';
+
+                let initChangeStr = Math.abs(hDegisim).toFixed(2).replace('.', ',');
+                if (isPos && hDegisim > 0) initChangeStr = '+' + initChangeStr;
+                else if (!isPos) initChangeStr = '-' + initChangeStr;
+
+                stockHeaderHtml = `
             <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 0; flex-shrink: 0;">
                 <div>
                     <h1 style="margin: 0; font-size: 16px; font-weight: 800; letter-spacing: 1px; color: var(--text-primary);">${selectedHisse}</h1>
@@ -3708,9 +3575,9 @@ ${tabUI}
                 </div>
             </div>
             `;
-        }
+            }
 
-        container.innerHTML = `
+            container.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 1rem; height: 100%;">
                 ${stockHeaderHtml}
                 <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--table-border); border-radius: 12px; flex-wrap: wrap; align-items: center; background: var(--overlay-bg); flex-shrink: 0;">
@@ -3722,482 +3589,482 @@ ${tabUI}
             </div>
         `;
 
-        if (selectedHisse) {
-            setTimeout(() => {
-                fetch('https://scanner.tradingview.com/turkey/scan', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({ symbols: { tickers: ['BIST:' + selectedHisse] }, columns: ['close', 'change'] })
-                }).then(res => res.json()).then(data => {
-                    if (data && data.data && data.data.length > 0) {
-                        const change = data.data[0].d[1];
+            if (selectedHisse) {
+                setTimeout(() => {
+                    fetch('https://scanner.tradingview.com/turkey/scan', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' },
+                        body: JSON.stringify({ symbols: { tickers: ['BIST:' + selectedHisse] }, columns: ['close', 'change'] })
+                    }).then(res => res.json()).then(data => {
+                        if (data && data.data && data.data.length > 0) {
+                            const change = data.data[0].d[1];
+                            const changeEl = document.getElementById('hisse-header-change');
+                            const borderEl = document.getElementById('hisse-header-border');
+                            if (changeEl) {
+                                window.stockChanges[selectedHisse] = change;
+                                const isPos = change >= 0;
+                                const color = isPos ? 'var(--success-color)' : 'var(--danger-color)';
+                                changeEl.style.color = color;
+                                changeEl.style.display = 'block';
+                                let changeStr = Math.abs(change).toFixed(2).replace('.', ',');
+                                if (isPos && change > 0) changeStr = '+' + changeStr;
+                                else if (!isPos) changeStr = '-' + changeStr;
+                                changeEl.innerHTML = '<i class="fas fa-caret-' + (isPos ? 'up' : 'down') + '"></i> %' + changeStr;
+                                if (borderEl) borderEl.style.borderLeftColor = color;
+                            }
+                        }
+                    }).catch(e => {
                         const changeEl = document.getElementById('hisse-header-change');
-                        const borderEl = document.getElementById('hisse-header-border');
-                        if (changeEl) {
-                            window.stockChanges[selectedHisse] = change;
-                            const isPos = change >= 0;
-                            const color = isPos ? 'var(--success-color)' : 'var(--danger-color)';
-                            changeEl.style.color = color;
-                            changeEl.style.display = 'block';
-                            let changeStr = Math.abs(change).toFixed(2).replace('.', ',');
-                            if (isPos && change > 0) changeStr = '+' + changeStr;
-                            else if (!isPos) changeStr = '-' + changeStr;
-                            changeEl.innerHTML = '<i class="fas fa-caret-' + (isPos ? 'up' : 'down') + '"></i> %' + changeStr;
-                            if(borderEl) borderEl.style.borderLeftColor = color;
-                        }
-                    }
-                }).catch(e => {
-                    const changeEl = document.getElementById('hisse-header-change');
-                    if (changeEl) changeEl.innerHTML = '-';
-                });
-            }, 100);
-        }
+                        if (changeEl) changeEl.innerHTML = '-';
+                    });
+                }, 100);
+            }
 
 
-if (window.shouldRenderDashboardCharts) {
-            window.shouldRenderDashboardCharts = false;
-            setTimeout(() => {
-                if (!window.dashboardChartData) return;
-                const dData = window.dashboardChartData;
-                if (!dData.labels || dData.labels.length === 0) return;
-                
-                const labels = dData.labels;
-                const cOpts = {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: { 
-                            enabled: true,
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed.y !== null) {
-                                        label += new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(context.parsed.y);
+            if (window.shouldRenderDashboardCharts) {
+                window.shouldRenderDashboardCharts = false;
+                setTimeout(() => {
+                    if (!window.dashboardChartData) return;
+                    const dData = window.dashboardChartData;
+                    if (!dData.labels || dData.labels.length === 0) return;
+
+                    const labels = dData.labels;
+                    const cOpts = {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                enabled: true,
+                                callbacks: {
+                                    label: function (context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) label += ': ';
+                                        if (context.parsed.y !== null) {
+                                            label += new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(context.parsed.y);
+                                        }
+                                        return label;
                                     }
-                                    return label;
+                                }
+                            },
+                            datalabels: { display: false }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
+                            y: { ticks: { display: false }, grid: { display: false }, border: { display: false } }
+                        }
+                    };
+
+
+                    if (document.getElementById('chart-bkm')) {
+                        const commonOpts = {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                datalabels: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (ctx) => {
+                                            let val = ctx.parsed.y !== null ? new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(ctx.parsed.y) : '';
+                                            if (ctx.dataset.label && ctx.dataset.label.includes('%') && val) {
+                                                return '%' + val;
+                                            }
+                                            return val;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } },
+                                y: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } }
+                            }
+                        };
+                        const pinkColor = '#d6336c';
+
+                        const createChart = (id, data, label) => {
+                            let chartCanvas = document.getElementById(id);
+                            let existingChart = Chart.getChart(chartCanvas);
+                            if (existingChart) existingChart.destroy();
+                            new Chart(chartCanvas.getContext('2d'), {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: [{
+                                        label: label,
+                                        data: data,
+                                        borderColor: pinkColor,
+                                        backgroundColor: 'rgba(214, 51, 108, 0.1)',
+                                        borderWidth: 2,
+                                        pointBackgroundColor: pinkColor,
+                                        pointRadius: 4,
+                                        tension: 0
+                                    }]
+                                },
+                                options: commonOpts
+                            });
+                        };
+
+                        const createMarjChart = (id, ceyreklikData, yillikData) => {
+                            let chartCanvas = document.getElementById(id);
+                            if (!chartCanvas) return;
+                            let existingChart = Chart.getChart(chartCanvas);
+                            if (existingChart) existingChart.destroy();
+                            new Chart(chartCanvas.getContext('2d'), {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: [
+                                        {
+                                            label: 'Çeyreklik',
+                                            data: ceyreklikData,
+                                            borderColor: '#10b981', // yeşil
+                                            backgroundColor: 'transparent',
+                                            borderWidth: 2,
+                                            pointRadius: 4,
+                                            pointBackgroundColor: '#10b981',
+                                            tension: 0.3
+                                        },
+                                        {
+                                            label: 'Yıllıklandırılmış',
+                                            data: yillikData,
+                                            borderColor: '#3b82f6', // mavi
+                                            backgroundColor: 'transparent',
+                                            borderWidth: 2,
+                                            pointRadius: 4,
+                                            pointBackgroundColor: '#3b82f6',
+                                            tension: 0.3
+                                        }
+                                    ]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    plugins: {
+                                        legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10, color: '#aaa' } } },
+                                        tooltip: {
+                                            callbacks: {
+                                                label: (ctx) => '%' + (ctx.parsed.y || 0).toFixed(1)
+                                            }
+                                        },
+                                        datalabels: {
+                                            color: '#fff',
+                                            align: 'top',
+                                            formatter: (value) => '%' + (value || 0).toFixed(1),
+                                            font: { size: 10, weight: 'bold' }
+                                        }
+                                    },
+                                    scales: {
+                                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', callback: v => '%' + v } },
+                                        x: { grid: { display: false }, ticks: { color: '#888', maxRotation: 45, minRotation: 45, font: { size: 10 } } }
+                                    }
+                                }
+                            });
+                        };
+
+                        createMarjChart('chart-bkm', dData.bkm, dData.ybkm);
+                        createMarjChart('chart-fkm', dData.fkm, dData.yfkm);
+                        createMarjChart('chart-nkm', dData.nkm, dData.ynkm);
+                        createChart('chart-cari', dData.cari, 'Cari Oran');
+                        createChart('chart-kaldirac', dData.kaldirac, 'Kaldıraç Oranı (%)');
+                        createChart('chart-roe', dData.roe, 'Özkaynak Karlılığı (%)');
+                    }
+
+                    const lineOpts = {
+                        ...cOpts,
+                        plugins: {
+                            ...cOpts.plugins,
+                            legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10, color: '#aaa' } } },
+                            tooltip: {
+                                ...cOpts.plugins.tooltip,
+                                callbacks: {
+                                    ...cOpts.plugins.tooltip.callbacks,
+                                    label: function (context) {
+                                        if (context.parsed.y !== null) {
+                                            return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(context.parsed.y);
+                                        }
+                                        return '';
+                                    }
                                 }
                             }
                         },
-                        datalabels: { display: false }
-                    },
-                    scales: { 
-                        x: { ticks: { color: '#888', font: {size: 10} }, grid: { display:false } }, 
-                        y: { ticks: { display: false }, grid: { display: false }, border: {display: false} }
-                    }
-                };
-
-                
-                          if (document.getElementById('chart-bkm')) {
-                              const commonOpts = {
-                                  responsive: true, maintainAspectRatio: false,
-                                  plugins: { 
-                                      legend: { display: false }, 
-                                      datalabels: { display: false },
-                                      tooltip: {
-                                          callbacks: {
-                                              label: (ctx) => {
-                                                  let val = ctx.parsed.y !== null ? new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(ctx.parsed.y) : '';
-                                                  if (ctx.dataset.label && ctx.dataset.label.includes('%') && val) {
-                                                      return '%' + val;
-                                                  }
-                                                  return val;
-                                              }
-                                          }
-                                      }
-                                  },
-                                  scales: {
-                                      x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } },
-                                      y: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } }
-                                  }
-                              };
-                              const pinkColor = '#d6336c';
-                              
-                              const createChart = (id, data, label) => {
-                                  let chartCanvas = document.getElementById(id);
-                                  let existingChart = Chart.getChart(chartCanvas);
-                                  if (existingChart) existingChart.destroy();
-                                  new Chart(chartCanvas.getContext('2d'), {
-                                      type: 'line',
-                                      data: {
-                                          labels: labels,
-                                          datasets: [{
-                                              label: label,
-                                              data: data,
-                                              borderColor: pinkColor,
-                                              backgroundColor: 'rgba(214, 51, 108, 0.1)',
-                                              borderWidth: 2,
-                                              pointBackgroundColor: pinkColor,
-                                              pointRadius: 4,
-                                              tension: 0
-                                          }]
-                                      },
-                                      options: commonOpts
-                                  });
-                              };
-
-                              const createMarjChart = (id, ceyreklikData, yillikData) => {
-                                  let chartCanvas = document.getElementById(id);
-                                  if (!chartCanvas) return;
-                                  let existingChart = Chart.getChart(chartCanvas);
-                                  if (existingChart) existingChart.destroy();
-                                  new Chart(chartCanvas.getContext('2d'), {
-                                      type: 'line',
-                                      data: {
-                                          labels: labels,
-                                          datasets: [
-                                              {
-                                                  label: 'Çeyreklik',
-                                                  data: ceyreklikData,
-                                                  borderColor: '#10b981', // yeşil
-                                                  backgroundColor: 'transparent',
-                                                  borderWidth: 2,
-                                                  pointRadius: 4,
-                                                  pointBackgroundColor: '#10b981',
-                                                  tension: 0.3
-                                              },
-                                              {
-                                                  label: 'Yıllıklandırılmış',
-                                                  data: yillikData,
-                                                  borderColor: '#3b82f6', // mavi
-                                                  backgroundColor: 'transparent',
-                                                  borderWidth: 2,
-                                                  pointRadius: 4,
-                                                  pointBackgroundColor: '#3b82f6',
-                                                  tension: 0.3
-                                              }
-                                          ]
-                                      },
-                                      options: {
-                                          responsive: true,
-                                          maintainAspectRatio: false,
-                                          plugins: {
-                                              legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10, color: '#aaa' } } },
-                                              tooltip: {
-                                                  callbacks: {
-                                                      label: (ctx) => '%' + (ctx.parsed.y || 0).toFixed(1)
-                                                  }
-                                              },
-                                              datalabels: {
-                                                  color: '#fff',
-                                                  align: 'top',
-                                                  formatter: (value) => '%' + (value || 0).toFixed(1),
-                                                  font: { size: 10, weight: 'bold' }
-                                              }
-                                          },
-                                          scales: {
-                                              y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', callback: v => '%' + v } },
-                                              x: { grid: { display: false }, ticks: { color: '#888', maxRotation: 45, minRotation: 45, font: { size: 10 } } }
-                                          }
-                                      }
-                                  });
-                              };
-                              
-                              createMarjChart('chart-bkm', dData.bkm, dData.ybkm);
-                              createMarjChart('chart-fkm', dData.fkm, dData.yfkm);
-                              createMarjChart('chart-nkm', dData.nkm, dData.ynkm);
-                              createChart('chart-cari', dData.cari, 'Cari Oran');
-                              createChart('chart-kaldirac', dData.kaldirac, 'Kaldıraç Oranı (%)');
-                              createChart('chart-roe', dData.roe, 'Özkaynak Karlılığı (%)');
-                          }
-
-                const lineOpts = {
-                    ...cOpts,
-                    plugins: {
-                        ...cOpts.plugins,
-                        legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10, color: '#aaa' } } },
-                        tooltip: {
-                            ...cOpts.plugins.tooltip,
-                            callbacks: {
-                                ...cOpts.plugins.tooltip.callbacks,
-                                label: function(context) {
-                                    if (context.parsed.y !== null) {
-                                        return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(context.parsed.y);
+                        scales: {
+                            x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } },
+                            y: {
+                                ticks: {
+                                    font: { size: 10 }, color: 'rgba(255,255,255,0.5)',
+                                    callback: function (value) {
+                                        if (Math.abs(value) >= 1e9) return (value / 1e9).toFixed(1) + 'Mlyr';
+                                        if (Math.abs(value) >= 1e6) return (value / 1e6).toFixed(1) + 'Mn';
+                                        return value;
                                     }
-                                    return '';
-                                }
+                                },
+                                grid: { color: 'rgba(255, 255, 255, 0.03)' }
                             }
                         }
-                    },
-                    scales: {
-                        x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } },
-                        y: { 
-                            ticks: { 
-                                font: { size: 10 }, color: 'rgba(255,255,255,0.5)',
-                                callback: function(value) {
-                                    if (Math.abs(value) >= 1e9) return (value / 1e9).toFixed(1) + 'Mlyr';
-                                    if (Math.abs(value) >= 1e6) return (value / 1e6).toFixed(1) + 'Mn';
-                                    return value;
-                                }
-                            }, 
-                            grid: { color: 'rgba(255, 255, 255, 0.03)' } 
+                    };
+
+                    const bgColors = labels.map(l => {
+                        if (l.includes('/3') || l.includes('/03') || l.includes('-3')) return 'rgba(255, 99, 132, 0.8)'; // Kırmızı
+                        if (l.includes('/6') || l.includes('/06') || l.includes('-6')) return 'rgba(75, 192, 192, 0.8)'; // Yeşil
+                        if (l.includes('/9') || l.includes('/09') || l.includes('-9')) return 'rgba(54, 162, 235, 0.8)'; // Mavi
+                        if (l.includes('/12') || l.includes('-12')) return 'rgba(255, 206, 86, 0.8)'; // Sarı
+                        return 'rgba(77, 166, 255, 0.8)';
+                    });
+                    const borderColors = labels.map(l => {
+                        if (l.includes('/3') || l.includes('/03') || l.includes('-3')) return 'rgb(255, 99, 132)';
+                        if (l.includes('/6') || l.includes('/06') || l.includes('-6')) return 'rgb(75, 192, 192)';
+                        if (l.includes('/9') || l.includes('/09') || l.includes('-9')) return 'rgb(54, 162, 235)';
+                        if (l.includes('/12') || l.includes('-12')) return 'rgb(255, 206, 86)';
+                        return 'rgb(77, 166, 255)';
+                    });
+
+                    const barOpts = {
+                        ...lineOpts,
+                        plugins: {
+                            ...lineOpts.plugins,
+                            legend: { display: false }
                         }
-                    }
-                };
+                    };
 
-                const bgColors = labels.map(l => {
-                    if (l.includes('/3') || l.includes('/03') || l.includes('-3')) return 'rgba(255, 99, 132, 0.8)'; // Kırmızı
-                    if (l.includes('/6') || l.includes('/06') || l.includes('-6')) return 'rgba(75, 192, 192, 0.8)'; // Yeşil
-                    if (l.includes('/9') || l.includes('/09') || l.includes('-9')) return 'rgba(54, 162, 235, 0.8)'; // Mavi
-                    if (l.includes('/12') || l.includes('-12')) return 'rgba(255, 206, 86, 0.8)'; // Sarı
-                    return 'rgba(77, 166, 255, 0.8)';
-                });
-                const borderColors = labels.map(l => {
-                    if (l.includes('/3') || l.includes('/03') || l.includes('-3')) return 'rgb(255, 99, 132)';
-                    if (l.includes('/6') || l.includes('/06') || l.includes('-6')) return 'rgb(75, 192, 192)';
-                    if (l.includes('/9') || l.includes('/09') || l.includes('-9')) return 'rgb(54, 162, 235)';
-                    if (l.includes('/12') || l.includes('-12')) return 'rgb(255, 206, 86)';
-                    return 'rgb(77, 166, 255)';
-                });
-
-                const barOpts = {
-                    ...lineOpts,
-                    plugins: {
-                        ...lineOpts.plugins,
-                        legend: { display: false }
-                    }
-                };
-
-                const ctxSatislarYillik = document.getElementById('chart-yillik-satislar');
-                if (ctxSatislarYillik) {
-                    let ex = Chart.getChart(ctxSatislarYillik); if (ex) ex.destroy();
-                    new Chart(ctxSatislarYillik, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                data: dData.ySatislar,
-                                backgroundColor: bgColors,
-                                borderColor: borderColors,
-                                borderWidth: 1,
-                                borderRadius: 4
-                            }]
-                        },
-                        options: barOpts
-                    });
-                }
-
-                const ctxSatislarCeyreklik = document.getElementById('chart-ceyreklik-satislar');
-                if (ctxSatislarCeyreklik) {
-                    let ex = Chart.getChart(ctxSatislarCeyreklik); if (ex) ex.destroy();
-                    new Chart(ctxSatislarCeyreklik, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Satışlar',
-                                data: dData.satislar,
-                                backgroundColor: bgColors,
-                                borderColor: borderColors,
-                                borderWidth: 1
-                            }]
-                        },
-                        options: barOpts
-                    });
-                }
-
-                const ctxSatislarDonemsel = document.getElementById('chart-donemsel-satislar');
-                if (ctxSatislarDonemsel) {
-                    let ex = Chart.getChart(ctxSatislarDonemsel); if (ex) ex.destroy();
-                    new Chart(ctxSatislarDonemsel, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Dönemsel Satışlar',
-                                data: dData.dSatislar,
-                                backgroundColor: bgColors,
-                                borderColor: borderColors,
-                                borderWidth: 1
-                            }]
-                        },
-                        options: barOpts
-                    });
-                }
-
-                const ctxCombined = document.getElementById('chart-combined-satislar');
-                if (ctxCombined) {
-                    let ex = Chart.getChart(ctxCombined); if (ex) ex.destroy();
-                    new Chart(ctxCombined, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                {
-                                    label: 'Çeyreklik',
-                                    data: dData.satislar,
-                                    backgroundColor: bgColors,
-                                    borderColor: borderColors,
-                                    borderWidth: 1,
-                                    borderRadius: 2
-                                },
-                                {
-                                    label: 'Dönemsel',
-                                    data: dData.dSatislar,
-                                    backgroundColor: bgColors,
-                                    borderColor: borderColors,
-                                    borderWidth: 1,
-                                    borderRadius: 2
-                                },
-                                {
-                                    label: 'Yıllıklandırılmış',
+                    const ctxSatislarYillik = document.getElementById('chart-yillik-satislar');
+                    if (ctxSatislarYillik) {
+                        let ex = Chart.getChart(ctxSatislarYillik); if (ex) ex.destroy();
+                        new Chart(ctxSatislarYillik, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
                                     data: dData.ySatislar,
                                     backgroundColor: bgColors,
                                     borderColor: borderColors,
                                     borderWidth: 1,
-                                    borderRadius: 2
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    mode: 'index',
-                                    intersect: false,
-                                    callbacks: {
-                                        label: function(c) {
-                                            let v = c.raw;
-                                            return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-');
-                                        }
-                                    }
-                                },
-                                datalabels: { display: false }
+                                    borderRadius: 4
+                                }]
                             },
-                            scales: {
-                                x: {
-                                    ticks: { color: '#ccc', font: { size: 10 } },
-                                    grid: { color: 'rgba(255,255,255,0.05)' }
+                            options: barOpts
+                        });
+                    }
+
+                    const ctxSatislarCeyreklik = document.getElementById('chart-ceyreklik-satislar');
+                    if (ctxSatislarCeyreklik) {
+                        let ex = Chart.getChart(ctxSatislarCeyreklik); if (ex) ex.destroy();
+                        new Chart(ctxSatislarCeyreklik, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Satışlar',
+                                    data: dData.satislar,
+                                    backgroundColor: bgColors,
+                                    borderColor: borderColors,
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: barOpts
+                        });
+                    }
+
+                    const ctxSatislarDonemsel = document.getElementById('chart-donemsel-satislar');
+                    if (ctxSatislarDonemsel) {
+                        let ex = Chart.getChart(ctxSatislarDonemsel); if (ex) ex.destroy();
+                        new Chart(ctxSatislarDonemsel, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Dönemsel Satışlar',
+                                    data: dData.dSatislar,
+                                    backgroundColor: bgColors,
+                                    borderColor: borderColors,
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: barOpts
+                        });
+                    }
+
+                    const ctxCombined = document.getElementById('chart-combined-satislar');
+                    if (ctxCombined) {
+                        let ex = Chart.getChart(ctxCombined); if (ex) ex.destroy();
+                        new Chart(ctxCombined, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    {
+                                        label: 'Çeyreklik',
+                                        data: dData.satislar,
+                                        backgroundColor: bgColors,
+                                        borderColor: borderColors,
+                                        borderWidth: 1,
+                                        borderRadius: 2
+                                    },
+                                    {
+                                        label: 'Dönemsel',
+                                        data: dData.dSatislar,
+                                        backgroundColor: bgColors,
+                                        borderColor: borderColors,
+                                        borderWidth: 1,
+                                        borderRadius: 2
+                                    },
+                                    {
+                                        label: 'Yıllıklandırılmış',
+                                        data: dData.ySatislar,
+                                        backgroundColor: bgColors,
+                                        borderColor: borderColors,
+                                        borderWidth: 1,
+                                        borderRadius: 2
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        mode: 'index',
+                                        intersect: false,
+                                        callbacks: {
+                                            label: function (c) {
+                                                let v = c.raw;
+                                                return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-');
+                                            }
+                                        }
+                                    },
+                                    datalabels: { display: false }
                                 },
-                                y: {
-                                    ticks: { color: '#ccc', font: { size: 10 } },
-                                    grid: { color: 'rgba(255,255,255,0.05)' }
+                                scales: {
+                                    x: {
+                                        ticks: { color: '#ccc', font: { size: 10 } },
+                                        grid: { color: 'rgba(255,255,255,0.05)' }
+                                    },
+                                    y: {
+                                        ticks: { color: '#ccc', font: { size: 10 } },
+                                        grid: { color: 'rgba(255,255,255,0.05)' }
+                                    }
                                 }
                             }
-                        }
-                    });
+                        });
+                    }
+
+                    const ctxBrutCeyreklik = document.getElementById('chart-ceyreklik-brut');
+                    if (ctxBrutCeyreklik) {
+                        let ex = Chart.getChart(ctxBrutCeyreklik); if (ex) ex.destroy();
+                        new Chart(ctxBrutCeyreklik, {
+                            type: 'bar',
+                            data: { labels: labels, datasets: [{ data: dData.brutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] },
+                            options: barOpts
+                        });
+                    }
+
+                    const ctxBrutDonemsel = document.getElementById('chart-donemsel-brut');
+                    if (ctxBrutDonemsel) {
+                        let ex = Chart.getChart(ctxBrutDonemsel); if (ex) ex.destroy();
+                        new Chart(ctxBrutDonemsel, {
+                            type: 'bar',
+                            data: { labels: labels, datasets: [{ data: dData.dBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] },
+                            options: barOpts
+                        });
+                    }
+
+                    const ctxBrutYillik = document.getElementById('chart-yillik-brut');
+                    if (ctxBrutYillik) {
+                        let ex = Chart.getChart(ctxBrutYillik); if (ex) ex.destroy();
+                        new Chart(ctxBrutYillik, {
+                            type: 'bar',
+                            data: { labels: labels, datasets: [{ data: dData.yBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] },
+                            options: barOpts
+                        });
+                    }
+
+                    const ctxBrutCombined = document.getElementById('chart-combined-brut');
+                    if (ctxBrutCombined) {
+                        let ex = Chart.getChart(ctxBrutCombined); if (ex) ex.destroy();
+                        new Chart(ctxBrutCombined, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [
+                                    { label: 'Çeyreklik', data: dData.brutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 },
+                                    { label: 'Dönemsel', data: dData.dBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 },
+                                    { label: 'Yıllıklandırılmış', data: dData.yBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }
+                                ]
+                            },
+                            options: {
+                                responsive: true, maintainAspectRatio: false,
+                                plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function (c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } },
+                                scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } }
+                            }
+                        });
+                    }
+                    // --- Faaliyet Karı ---
+                    const ctxFaaliyetCeyreklik = document.getElementById('chart-ceyreklik-faaliyet');
+                    if (ctxFaaliyetCeyreklik) { let ex = Chart.getChart(ctxFaaliyetCeyreklik); if (ex) ex.destroy(); new Chart(ctxFaaliyetCeyreklik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.faaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                    const ctxFaaliyetDonemsel = document.getElementById('chart-donemsel-faaliyet');
+                    if (ctxFaaliyetDonemsel) { let ex = Chart.getChart(ctxFaaliyetDonemsel); if (ex) ex.destroy(); new Chart(ctxFaaliyetDonemsel, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.dFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                    const ctxFaaliyetYillik = document.getElementById('chart-yillik-faaliyet');
+                    if (ctxFaaliyetYillik) { let ex = Chart.getChart(ctxFaaliyetYillik); if (ex) ex.destroy(); new Chart(ctxFaaliyetYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                    const ctxFaaliyetCombined = document.getElementById('chart-combined-faaliyet');
+                    if (ctxFaaliyetCombined) { let ex = Chart.getChart(ctxFaaliyetCombined); if (ex) ex.destroy(); new Chart(ctxFaaliyetCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.faaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function (c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+
+                    // --- FAVÖK ---
+                    const ctxFavokCeyreklik2 = document.getElementById('chart-ceyreklik-favok2');
+                    if (ctxFavokCeyreklik2) { let ex = Chart.getChart(ctxFavokCeyreklik2); if (ex) ex.destroy(); new Chart(ctxFavokCeyreklik2, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.favok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                    const ctxFavokDonemsel = document.getElementById('chart-donemsel-favok');
+                    if (ctxFavokDonemsel) { let ex = Chart.getChart(ctxFavokDonemsel); if (ex) ex.destroy(); new Chart(ctxFavokDonemsel, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.dFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                    const ctxFavokYillik = document.getElementById('chart-yillik-favok');
+                    if (ctxFavokYillik) { let ex = Chart.getChart(ctxFavokYillik); if (ex) ex.destroy(); new Chart(ctxFavokYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                    const ctxFavokCombined = document.getElementById('chart-combined-favok');
+                    if (ctxFavokCombined) { let ex = Chart.getChart(ctxFavokCombined); if (ex) ex.destroy(); new Chart(ctxFavokCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.favok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function (c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+
+                    // --- Net Kar ---
+                    const ctxNetKarCeyreklik2 = document.getElementById('chart-ceyreklik-netkar2');
+                    if (ctxNetKarCeyreklik2) { let ex = Chart.getChart(ctxNetKarCeyreklik2); if (ex) ex.destroy(); new Chart(ctxNetKarCeyreklik2, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.netkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                    const ctxNetKarDonemsel = document.getElementById('chart-donemsel-netkar');
+                    if (ctxNetKarDonemsel) { let ex = Chart.getChart(ctxNetKarDonemsel); if (ex) ex.destroy(); new Chart(ctxNetKarDonemsel, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.dNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                    const ctxNetKarYillik = document.getElementById('chart-yillik-netkar');
+                    if (ctxNetKarYillik) { let ex = Chart.getChart(ctxNetKarYillik); if (ex) ex.destroy(); new Chart(ctxNetKarYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
+                    const ctxNetKarCombined = document.getElementById('chart-combined-netkar');
+                    if (ctxNetKarCombined) { let ex = Chart.getChart(ctxNetKarCombined); if (ex) ex.destroy(); new Chart(ctxNetKarCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.netkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function (c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+
+
+                    // Clear the temporary data
+                    window.dashboardChartData = null;
+
+                }, 300);
+            }
+        };
+
+        window.handleIsYatirimUpdate = async (hisse) => {
+            if (!hisse) return;
+            const btn = document.getElementById('btn-isyatirim-update');
+            const originalHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:4px;"></i>Güncelleniyor...';
+                btn.disabled = true;
+            }
+
+            try {
+                if (typeof window.fetchIsYatirimData === 'function') {
+                    await window.fetchIsYatirimData(hisse);
+                } else {
+                    alert('Güncelleme modülü bulunamadı.');
                 }
-
-                const ctxBrutCeyreklik = document.getElementById('chart-ceyreklik-brut');
-                if (ctxBrutCeyreklik) {
-                    let ex = Chart.getChart(ctxBrutCeyreklik); if (ex) ex.destroy();
-                    new Chart(ctxBrutCeyreklik, {
-                        type: 'bar',
-                        data: { labels: labels, datasets: [{ data: dData.brutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] },
-                        options: barOpts
-                    });
+            } catch (e) {
+                console.error(e);
+                alert('Güncelleme sırasında hata oluştu.');
+            } finally {
+                if (btn) {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
                 }
+            }
+        };
 
-                const ctxBrutDonemsel = document.getElementById('chart-donemsel-brut');
-                if (ctxBrutDonemsel) {
-                    let ex = Chart.getChart(ctxBrutDonemsel); if (ex) ex.destroy();
-                    new Chart(ctxBrutDonemsel, {
-                        type: 'bar',
-                        data: { labels: labels, datasets: [{ data: dData.dBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] },
-                        options: barOpts
-                    });
-                }
-
-                const ctxBrutYillik = document.getElementById('chart-yillik-brut');
-                if (ctxBrutYillik) {
-                    let ex = Chart.getChart(ctxBrutYillik); if (ex) ex.destroy();
-                    new Chart(ctxBrutYillik, {
-                        type: 'bar',
-                        data: { labels: labels, datasets: [{ data: dData.yBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] },
-                        options: barOpts
-                    });
-                }
-
-                const ctxBrutCombined = document.getElementById('chart-combined-brut');
-                if (ctxBrutCombined) {
-                    let ex = Chart.getChart(ctxBrutCombined); if (ex) ex.destroy();
-                    new Chart(ctxBrutCombined, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                { label: 'Çeyreklik', data: dData.brutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 },
-                                { label: 'Dönemsel', data: dData.dBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 },
-                                { label: 'Yıllıklandırılmış', data: dData.yBrutkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }
-                            ]
-                        },
-                        options: {
-                            responsive: true, maintainAspectRatio: false,
-                            plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } },
-                            scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } }
-                        }
-                    });
-                }
-                // --- Faaliyet Karı ---
-                const ctxFaaliyetCeyreklik = document.getElementById('chart-ceyreklik-faaliyet');
-                if (ctxFaaliyetCeyreklik) { let ex = Chart.getChart(ctxFaaliyetCeyreklik); if (ex) ex.destroy(); new Chart(ctxFaaliyetCeyreklik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.faaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
-                const ctxFaaliyetDonemsel = document.getElementById('chart-donemsel-faaliyet');
-                if (ctxFaaliyetDonemsel) { let ex = Chart.getChart(ctxFaaliyetDonemsel); if (ex) ex.destroy(); new Chart(ctxFaaliyetDonemsel, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.dFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
-                const ctxFaaliyetYillik = document.getElementById('chart-yillik-faaliyet');
-                if (ctxFaaliyetYillik) { let ex = Chart.getChart(ctxFaaliyetYillik); if (ex) ex.destroy(); new Chart(ctxFaaliyetYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
-                const ctxFaaliyetCombined = document.getElementById('chart-combined-faaliyet');
-                if (ctxFaaliyetCombined) { let ex = Chart.getChart(ctxFaaliyetCombined); if (ex) ex.destroy(); new Chart(ctxFaaliyetCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.faaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
-
-                // --- FAVÖK ---
-                const ctxFavokCeyreklik2 = document.getElementById('chart-ceyreklik-favok2');
-                if (ctxFavokCeyreklik2) { let ex = Chart.getChart(ctxFavokCeyreklik2); if (ex) ex.destroy(); new Chart(ctxFavokCeyreklik2, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.favok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
-                const ctxFavokDonemsel = document.getElementById('chart-donemsel-favok');
-                if (ctxFavokDonemsel) { let ex = Chart.getChart(ctxFavokDonemsel); if (ex) ex.destroy(); new Chart(ctxFavokDonemsel, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.dFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
-                const ctxFavokYillik = document.getElementById('chart-yillik-favok');
-                if (ctxFavokYillik) { let ex = Chart.getChart(ctxFavokYillik); if (ex) ex.destroy(); new Chart(ctxFavokYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
-                const ctxFavokCombined = document.getElementById('chart-combined-favok');
-                if (ctxFavokCombined) { let ex = Chart.getChart(ctxFavokCombined); if (ex) ex.destroy(); new Chart(ctxFavokCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.favok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
-
-                // --- Net Kar ---
-                const ctxNetKarCeyreklik2 = document.getElementById('chart-ceyreklik-netkar2');
-                if (ctxNetKarCeyreklik2) { let ex = Chart.getChart(ctxNetKarCeyreklik2); if (ex) ex.destroy(); new Chart(ctxNetKarCeyreklik2, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.netkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
-                const ctxNetKarDonemsel = document.getElementById('chart-donemsel-netkar');
-                if (ctxNetKarDonemsel) { let ex = Chart.getChart(ctxNetKarDonemsel); if (ex) ex.destroy(); new Chart(ctxNetKarDonemsel, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.dNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
-                const ctxNetKarYillik = document.getElementById('chart-yillik-netkar');
-                if (ctxNetKarYillik) { let ex = Chart.getChart(ctxNetKarYillik); if (ex) ex.destroy(); new Chart(ctxNetKarYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
-                const ctxNetKarCombined = document.getElementById('chart-combined-netkar');
-                if (ctxNetKarCombined) { let ex = Chart.getChart(ctxNetKarCombined); if (ex) ex.destroy(); new Chart(ctxNetKarCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.netkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
-
-                
-    // Clear the temporary data
-                window.dashboardChartData = null;
-
-            }, 300);
-        }
     };
 
-    window.handleIsYatirimUpdate = async (hisse) => {
-    if (!hisse) return;
-    const btn = document.getElementById('btn-isyatirim-update');
-    const originalHtml = btn ? btn.innerHTML : '';
-    if (btn) {
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:4px;"></i>Güncelleniyor...';
-        btn.disabled = true;
-    }
-    
-    try {
-        if (typeof window.fetchIsYatirimData === 'function') {
-            await window.fetchIsYatirimData(hisse);
-        } else {
-            alert('Güncelleme modülü bulunamadı.');
-        }
-    } catch (e) {
-        console.error(e);
-        alert('Güncelleme sırasında hata oluştu.');
-    } finally {
-        if (btn) {
-            btn.innerHTML = originalHtml;
-            btn.disabled = false;
-        }
-    }
-};
-
-};
-
-window.setHisseTab = (tab) => {
+    window.setHisseTab = (tab) => {
         activeTab = tab;
         window.currentHisseTab = tab;
         renderUI();
@@ -4328,10 +4195,10 @@ const renderHisseIslemleri = (container) => {
     });
 
     window.hisseGroupCollapsed = window.hisseGroupCollapsed || {};
-    
+
     const groupedItems = [];
     const groupMap = {};
-    
+
     hisseFonEkstre.forEach(e => {
         if (!groupMap[e.menkul]) {
             groupMap[e.menkul] = [];
@@ -4346,7 +4213,7 @@ const renderHisseIslemleri = (container) => {
     groupedItems.forEach(g => {
         const isCollapsed = window.hisseGroupCollapsed[g.menkul] !== false;
         const iconClass = isCollapsed ? 'fa-chevron-right' : 'fa-chevron-down';
-        
+
         ekstreRowsHtml += `<tr class="group-header-row" style="background: rgba(255,255,255,0.05); font-weight: bold; cursor: pointer;" onclick="window.toggleHisseGroup('${g.menkul}')">
             <td colspan="8" style="text-align: left !important; color: var(--accent-color); padding-left: 1rem !important;">
                 <i class="fas ${iconClass}" style="margin-right: 8px; width: 12px; display: inline-block; text-align: center;"></i>${g.menkul}
@@ -4399,7 +4266,7 @@ const renderHisseIslemleri = (container) => {
     const ekstreRows = ekstreRowsHtml;
 
     const todayStr = new Date().toISOString().split('T')[0];
-    
+
     const fonSet = new Set();
     State.data.ekstre.forEach(e => {
         if (e.menkul !== 'NAKIT' && e.menkul.length === 3) fonSet.add(e.menkul);
@@ -4517,27 +4384,27 @@ const renderHisseIslemleri = (container) => {
     document.getElementById('i-fiyat')?.addEventListener('input', () => calcTutar('i-fiyat', 'i-adet', 'i-tutar'));
     document.getElementById('i-adet')?.addEventListener('input', () => calcTutar('i-fiyat', 'i-adet', 'i-tutar'));
 
-    if(document.getElementById('edit-fiyat')) {
+    if (document.getElementById('edit-fiyat')) {
         document.getElementById('edit-fiyat').addEventListener('input', () => calcTutar('edit-fiyat', 'edit-adet', 'edit-tutar'));
         document.getElementById('edit-adet').addEventListener('input', () => calcTutar('edit-fiyat', 'edit-adet', 'edit-tutar'));
     }
 
     window.toggleInlineForm = (type) => {
         const section = document.getElementById(`${type}-ekle-section`);
-        if(section) section.style.display = section.style.display === 'none' ? '' : 'none';
-        
+        if (section) section.style.display = section.style.display === 'none' ? '' : 'none';
+
         if (type === 'nakit' && typeof window.cancelNakitEdit === 'function') window.cancelNakitEdit();
         else if (typeof window.cancelEdit === 'function') window.cancelEdit();
-        
+
         // focus the first input if opening
-        if(section && section.style.display === '') {
+        if (section && section.style.display === '') {
             const firstInput = section.querySelector('input, select');
-            if(firstInput) firstInput.focus();
+            if (firstInput) firstInput.focus();
         }
     };
 
     window.deleteEkstre = (id) => {
-        if(confirm('Bu işlemi silmek istediğinize emin misiniz?')) {
+        if (confirm('Bu işlemi silmek istediğinize emin misiniz?')) {
             State.deleteEkstre(id);
             if (typeof renderPage === 'function') renderPage();
         }
@@ -4548,7 +4415,7 @@ const renderHisseIslemleri = (container) => {
         if (typeof renderPage === 'function') renderPage();
     };
     window.cancelEdit = () => {
-        if(window.currentEditId) {
+        if (window.currentEditId) {
             window.currentEditId = null;
             if (typeof renderPage === 'function') renderPage();
         }
@@ -4582,7 +4449,7 @@ const renderHisseIslemleri = (container) => {
         State.addEkstre(islem);
         if (typeof renderPage === 'function') renderPage();
     };
-    
+
     renderNakitIslemleri(container, true);
 };
 
@@ -4590,9 +4457,9 @@ const renderNakitIslemleri = (container, append = false) => {
     window.currentNakitEditId = window.currentNakitEditId || null;
     window.nakitSort = window.nakitSort || { col: null, asc: true };
     if (window.nakitTableCollapsed === undefined) window.nakitTableCollapsed = true;
-    const nakitHareketleriList = [...(State.data.nakitHareketleri || [])].sort((a,b) => {
+    const nakitHareketleriList = [...(State.data.nakitHareketleri || [])].sort((a, b) => {
         if (!window.nakitSort.col) return new Date(b.tarih) - new Date(a.tarih);
-        
+
         let valA, valB;
         if (window.nakitSort.col === 'tarih') {
             valA = new Date(a.tarih).getTime(); valB = new Date(b.tarih).getTime();
@@ -4613,7 +4480,7 @@ const renderNakitIslemleri = (container, append = false) => {
     const nakitRows = nakitHareketleriList.map((n, i) => {
         if (n.id === window.currentNakitEditId) {
             return `<tr style="background: rgba(0,0,0,0.4);">
-                <td>${i+1}</td>
+                <td>${i + 1}</td>
                 <td><input type="date" id="edit-n-tarih" class="form-control" style="width:100%; font-size:12px; padding:2px; text-align:right;" value="${n.tarih}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
                 <td><input type="number" step="0.01" id="edit-n-tutar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.tutar}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
                 <td><input type="number" step="0.01" id="edit-n-bist" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.bist100 || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
@@ -4627,7 +4494,7 @@ const renderNakitIslemleri = (container, append = false) => {
             </tr>`;
         }
         return `<tr>
-            <td>${i+1}</td><td style="text-align: right;">${formatDate(n.tarih)}</td><td class="${n.tutar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(n.tutar, 0)}</td><td>${formatNumber(n.bist100)}</td><td>${formatNumber(n.dolar)}</td><td>${formatNumber(n.gramAltin)}</td><td>${formatNumber(n.pry, 6)}</td>
+            <td>${i + 1}</td><td style="text-align: right;">${formatDate(n.tarih)}</td><td class="${n.tutar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(n.tutar, 0)}</td><td>${formatNumber(n.bist100)}</td><td>${formatNumber(n.dolar)}</td><td>${formatNumber(n.gramAltin)}</td><td>${formatNumber(n.pry, 6)}</td>
             <td>
                 <button class="btn" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditNakit('${n.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
                 <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; color: #888888; border: none;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
@@ -4678,21 +4545,21 @@ const renderNakitIslemleri = (container, append = false) => {
 
     window.toggleInlineForm = (type) => {
         const section = document.getElementById(`${type}-ekle-section`);
-        if(section) {
+        if (section) {
             section.style.display = section.style.display === 'none' ? '' : 'none';
         }
         if (type === 'nakit' && typeof window.cancelNakitEdit === 'function') window.cancelNakitEdit();
         else if (typeof window.cancelEdit === 'function') window.cancelEdit();
-        
+
         // focus the first input if opening
-        if(section && section.style.display === '') {
+        if (section && section.style.display === '') {
             const firstInput = section.querySelector('input, select');
-            if(firstInput) firstInput.focus();
+            if (firstInput) firstInput.focus();
         }
     };
 
     window.deleteNakit = (id) => {
-        if(confirm('Bu nakit hareketini silmek istediğinize emin misiniz?')) {
+        if (confirm('Bu nakit hareketini silmek istediğinize emin misiniz?')) {
             State.deleteNakitHareket(id);
             if (typeof renderPage === 'function') renderPage();
         }
@@ -4702,7 +4569,7 @@ const renderNakitIslemleri = (container, append = false) => {
         if (typeof renderPage === 'function') renderPage();
     };
     window.cancelNakitEdit = () => {
-        if(window.currentNakitEditId) {
+        if (window.currentNakitEditId) {
             window.currentNakitEditId = null;
             if (typeof renderPage === 'function') renderPage();
         }
@@ -4737,13 +4604,13 @@ const renderNakitIslemleri = (container, append = false) => {
 const renderVeriler = (container) => {
     // We will place Enflasyon Form, Hedef Portföy input, and Fon Fiyatlari input here.
     const hedefPortfoy = State.data.hedefPortfoyTL || 0;
-    
+
     // Fon Set
     const fonSet = new Set();
     State.data.ekstre.forEach(e => {
         if (e.menkul !== 'NAKIT' && e.menkul.length === 3) fonSet.add(e.menkul);
     });
-    
+
     let fonHtml = '';
     fonSet.forEach(fon => {
         const pFiyat = State.getFiyat(fon);
@@ -4835,9 +4702,9 @@ window.toggleEnfForm = () => {
 window.renderEnflasyonData = () => {
     const tbody = document.getElementById('enf-data-tbody');
     if (!tbody) return;
-    
+
     let html = '';
-        if (!State.data.enflasyonListesi || State.data.enflasyonListesi.length === 0) {
+    if (!State.data.enflasyonListesi || State.data.enflasyonListesi.length === 0) {
         State.data.enflasyonListesi = [
             { id: 'enf_1719792000005', tarih: '2026-06', oran: 1.64 },
             { id: 'enf_1719792000004', tarih: '2026-05', oran: 3.37 },
@@ -4848,14 +4715,14 @@ window.renderEnflasyonData = () => {
         ];
     }
     const list = State.data.enflasyonListesi || [];
-    
+
     if (list.length === 0) {
         html = `<tr><td colspan="4" style="text-align:center; padding:1rem; opacity:0.5;">Henüz enflasyon verisi eklenmemiş.</td></tr>`;
     } else {
-        const sorted = [...list].sort((a,b) => b.tarih.localeCompare(a.tarih));
-        
+        const sorted = [...list].sort((a, b) => b.tarih.localeCompare(a.tarih));
+
         let cumulative = 1;
-        const ascSorted = [...list].sort((a,b) => a.tarih.localeCompare(b.tarih));
+        const ascSorted = [...list].sort((a, b) => a.tarih.localeCompare(b.tarih));
         const cumMap = {};
         ascSorted.forEach(item => {
             cumulative *= (1 + (parseFloat(item.oran) / 100));
@@ -4868,8 +4735,8 @@ window.renderEnflasyonData = () => {
             const cumColor = cumMap[item.tarih] >= 0 ? 'var(--danger-color)' : 'var(--success-color)';
             html += `<tr>
                 <td style="text-align:center;">${item.tarih}</td>
-                <td style="text-align:right; color:${color}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', {maximumFractionDigits:2}).format(pct)}%</td>
-                <td style="text-align:right; color:${cumColor}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', {maximumFractionDigits:2}).format(cumMap[item.tarih])}%</td>
+                <td style="text-align:right; color:${color}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(pct)}%</td>
+                <td style="text-align:right; color:${cumColor}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(cumMap[item.tarih])}%</td>
                 <td style="text-align:center;">
                     <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; color: #888888; border: none;" onclick="window.deleteEnflasyon('${item.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                 </td>
@@ -4883,14 +4750,14 @@ window.addEnflasyon = (e) => {
     if (e) e.preventDefault();
     const tarih = document.getElementById('i-enf-tarih').value;
     const oranStr = document.getElementById('i-enf-oran').value;
-    
+
     if (!tarih || !oranStr) {
         alert('Lütfen tarih ve oran giriniz.');
         return;
     }
-    
+
     if (!State.data.enflasyonListesi) State.data.enflasyonListesi = [];
-    
+
     const existingIdx = State.data.enflasyonListesi.findIndex(x => x.tarih === tarih);
     if (existingIdx !== -1) {
         State.data.enflasyonListesi[existingIdx].oran = oranStr;
@@ -4901,23 +4768,23 @@ window.addEnflasyon = (e) => {
             oran: oranStr
         });
     }
-    
+
     State.save();
     window.toggleEnfForm();
-    if(typeof renderPage === 'function') renderPage();
+    if (typeof renderPage === 'function') renderPage();
 };
 
 window.deleteEnflasyon = (id) => {
-    if(confirm('Bu enflasyon verisini silmek istediğinize emin misiniz?')) {
+    if (confirm('Bu enflasyon verisini silmek istediğinize emin misiniz?')) {
         State.data.enflasyonListesi = (State.data.enflasyonListesi || []).filter(x => x.id !== id);
         State.save();
-        if(typeof renderPage === 'function') renderPage();
+        if (typeof renderPage === 'function') renderPage();
     }
 };
 
 window.toggleInlineAnaliz = () => {
     const row = document.getElementById('inline-analiz-row');
-    if(row) {
+    if (row) {
         const displayType = row.tagName.toUpperCase() === 'TR' ? 'table-row' : 'flex';
         row.style.display = row.style.display === 'none' ? displayType : 'none';
         if (row.style.display !== 'none') {
@@ -4932,7 +4799,7 @@ window.sortAnalizler = (analizlerList) => {
     return analizlerList.sort((a, b) => {
         if (a.isKisiselNot && !b.isKisiselNot) return -1;
         if (!a.isKisiselNot && b.isKisiselNot) return 1;
-        
+
         const hA = (a.hisse || '').toUpperCase();
         const hB = (b.hisse || '').toUpperCase();
         if (hA !== hB) {
@@ -4951,7 +4818,7 @@ window.addAnaliz = () => {
         const hisseEl = document.getElementById('analiz-hisse');
         const baglantiEl = document.getElementById('analiz-baglanti');
         const notTextEl = document.getElementById('analiz-not');
-        
+
         if (!tarihEl || !borsaciEl || !hisseEl) {
             alert('DOM elements not found! ' + (!tarihEl ? 'tarih ' : '') + (!borsaciEl ? 'borsaci ' : '') + (!hisseEl ? 'hisse' : ''));
             return;
@@ -4967,7 +4834,7 @@ window.addAnaliz = () => {
         const baslik = baslikEl ? baslikEl.value.trim() : '';
         const baglanti = baglantiEl ? baglantiEl.value.trim() : '';
         const notText = notTextEl ? notTextEl.value.trim() : '';
-        
+
         if (isKisiselNot) {
             if (!notText || !hisse) {
                 alert('Lütfen Hisse ve Notlar alanlarını doldurun.');
@@ -4979,9 +4846,9 @@ window.addAnaliz = () => {
                 return;
             }
         }
-        
+
         if (!State.data.analizler) State.data.analizler = [];
-        
+
         if (window.currentEditingAnalizId) {
             const index = State.data.analizler.findIndex(a => String(a.id) === String(window.currentEditingAnalizId));
             if (index !== -1) {
@@ -5000,32 +4867,32 @@ window.addAnaliz = () => {
                 id: Date.now()
             });
         }
-        
+
         State.data.analizler = window.sortAnalizler(State.data.analizler);
-        
+
         // Add to Takip Listesi if not exists
         if (!State.data.takipListesi) State.data.takipListesi = [];
         if (!State.data.takipListesi.includes(hisse)) {
             State.data.takipListesi.push(hisse);
-            
+
             if (!State.data.tickerData) State.data.tickerData = [];
             if (!State.data.tickerData.includes(hisse)) {
                 State.data.tickerData.push(hisse);
             }
             if (window.initTicker) window.initTicker();
         }
-        
+
         State.save();
-        
+
         // Reset the form so it is ready for the next one
         tarihEl.value = new Date().toISOString().split('T')[0];
         borsaciEl.value = '';
         hisseEl.value = '';
         if (baglantiEl) baglantiEl.value = '';
         if (notTextEl) notTextEl.value = '';
-        
+
         renderPage();
-        
+
         // Ensure inline row is hidden after save (by not forcing it open)
         const row = document.getElementById('inline-analiz-row');
         if (row && row.style.display !== 'none') {
@@ -5041,30 +4908,30 @@ window.addAnaliz = () => {
 window.editAnaliz = (id) => {
     const analiz = State.data.analizler.find(a => String(a.id) === String(id));
     if (!analiz) return;
-    
+
     window.currentEditingAnalizId = id;
-    
+
     setTimeout(() => {
         const row = document.getElementById('inline-analiz-row');
-        if(row) row.style.display = row.tagName.toUpperCase() === 'TR' ? 'table-row' : 'flex';
-        
+        if (row) row.style.display = row.tagName.toUpperCase() === 'TR' ? 'table-row' : 'flex';
+
         const tEl = document.getElementById('analiz-tarih');
-        if(tEl) tEl.value = analiz.tarih;
+        if (tEl) tEl.value = analiz.tarih;
         const bEl = document.getElementById('analiz-borsaci');
-        if(bEl) bEl.value = analiz.borsaci;
+        if (bEl) bEl.value = analiz.borsaci;
         const hEl = document.getElementById('analiz-hisse');
-        if(hEl) hEl.value = analiz.hisse;
+        if (hEl) hEl.value = analiz.hisse;
         const bslEl = document.getElementById('analiz-baslik');
-        if(bslEl) bslEl.value = analiz.baslik || '';
+        if (bslEl) bslEl.value = analiz.baslik || '';
         const lEl = document.getElementById('analiz-baglanti');
-        if(lEl) lEl.value = analiz.baglanti || '';
+        if (lEl) lEl.value = analiz.baglanti || '';
         const nEl = document.getElementById('analiz-not');
-        if(nEl) nEl.value = analiz.notText || '';
-        
+        if (nEl) nEl.value = analiz.notText || '';
+
         const radioAnaliz = document.querySelector('input[name="notTipi"][value="analiz"]');
         const radioKisisel = document.querySelector('input[name="notTipi"][value="kisisel"]');
         const detayAlanlari = document.getElementById('analiz-detay-alanlari');
-        
+
         if (analiz.isKisiselNot) {
             if (radioKisisel) radioKisisel.checked = true;
             if (detayAlanlari) detayAlanlari.style.display = 'none';
@@ -5072,8 +4939,8 @@ window.editAnaliz = (id) => {
             if (radioAnaliz) radioAnaliz.checked = true;
             if (detayAlanlari) detayAlanlari.style.display = 'flex';
         }
-        
-        if(bEl && !analiz.isKisiselNot) bEl.focus();
+
+        if (bEl && !analiz.isKisiselNot) bEl.focus();
         else if (nEl) nEl.focus();
     }, 50);
 };
@@ -5088,10 +4955,10 @@ window.deleteAnaliz = (id) => {
 window.setupCustomDropdown = (inputId, optionsList) => {
     const input = document.getElementById(inputId);
     if (!input) return;
-    
+
     // Remove native list attribute
     input.removeAttribute('list');
-    
+
     if (!input.parentNode.classList.contains('custom-dropdown-wrapper')) {
         const wrapper = document.createElement('div');
         wrapper.className = 'custom-dropdown-wrapper';
@@ -5100,7 +4967,7 @@ window.setupCustomDropdown = (inputId, optionsList) => {
         wrapper.style.zIndex = '9999'; // Ensure wrapper is on top
         input.parentNode.insertBefore(wrapper, input);
         wrapper.appendChild(input);
-        
+
         const list = document.createElement('div');
         list.id = inputId + '-custom-list';
         list.className = 'custom-dropdown-list';
@@ -5122,20 +4989,20 @@ window.setupCustomDropdown = (inputId, optionsList) => {
         list.style.border = '1px solid var(--surface-border)';
         wrapper.appendChild(list);
     }
-    
+
     const list = document.getElementById(inputId + '-custom-list');
     const wrapper = input.parentNode;
-    
-    const handler = function() {
+
+    const handler = function () {
         let val = this.value.toUpperCase();
         list.innerHTML = '';
-        
+
         let matches = [];
         if (val) {
             // Only show matches
             matches = optionsList.filter(s => s && s.toUpperCase().startsWith(val));
         }
-        
+
         // Find the table container and disable overflow while dropdown is open so it isn't clipped
         const tableContainer = input.closest('.table-container');
         if (tableContainer) {
@@ -5143,7 +5010,7 @@ window.setupCustomDropdown = (inputId, optionsList) => {
             tableContainer.style.overflowX = 'visible';
             tableContainer.style.overflowY = 'visible';
         }
-        
+
         if (matches.length > 0) {
             matches.forEach(match => {
                 const item = document.createElement('div');
@@ -5151,13 +5018,13 @@ window.setupCustomDropdown = (inputId, optionsList) => {
                 item.style.cursor = 'pointer';
                 item.style.color = '#fff';
                 item.style.textAlign = 'left';
-                
+
                 if (val) {
                     item.innerHTML = `<strong style="color: var(--accent-color);">${match.substr(0, val.length)}</strong>${match.substr(val.length)}`;
                 } else {
                     item.innerHTML = match;
                 }
-                
+
                 item.addEventListener('click', (e) => {
                     e.stopPropagation();
                     input.value = match;
@@ -5182,11 +5049,11 @@ window.setupCustomDropdown = (inputId, optionsList) => {
             }
         }
     };
-    
+
     input.addEventListener('input', handler);
     input.addEventListener('focus', handler);
     input.addEventListener('click', (e) => { e.stopPropagation(); handler.call(input); });
-    
+
     if (window['dropdown_listener_' + inputId]) {
         document.removeEventListener('click', window['dropdown_listener_' + inputId]);
     }
@@ -5207,16 +5074,16 @@ window.setupCustomDropdown = (inputId, optionsList) => {
 const renderAnalizler = (container) => {
     let analizler = State.data.analizler || [];
     analizler = window.sortAnalizler([...analizler]);
-    
+
     const uniqueBorsacilar = [...new Set(analizler.map(a => a.borsaci).filter(b => b))].sort();
     const borsaciOptions = uniqueBorsacilar.map(b => `<option value="${b}">`).join('');
-    
+
     let tableRows = analizler.map(a => {
         const linkHtml = a.baglanti ? `<a href="${a.baglanti}" target="_blank" style="color: var(--accent-color); text-decoration: none;"><i class="fas fa-external-link-alt"></i> Link</a>` : '-';
         return `
             <tr>
                 <td style="text-align: right; white-space: nowrap; width: 100px; color: var(--text-secondary);">${a.tarih ? a.tarih.split('-').reverse().join('.') : ''}</td>
-                <td style="text-align: left; word-break: break-word; width: 140px; padding-left: 10px; color: var(--text-secondary);">${(a.borsaci||'').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu, '').trim()}</td>
+                <td style="text-align: left; word-break: break-word; width: 140px; padding-left: 10px; color: var(--text-secondary);">${(a.borsaci || '').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu, '').trim()}</td>
                 <td style="text-align: left; font-weight: bold; white-space: nowrap; width: 100px; padding-left: 10px;">${a.hisse}</td>
                 <td style="text-align: left; white-space: nowrap; width: 100px; padding-left: 10px;">${linkHtml}</td>
                 <td style="text-align: left; word-break: break-word; width: 100%;">${a.notText || ''}</td>
@@ -5229,13 +5096,13 @@ const renderAnalizler = (container) => {
             </tr>
         `;
     }).join('');
-    
+
     if (analizler.length === 0) {
         tableRows += `<tr><td colspan="6" style="text-align: center; padding: 2rem; opacity: 0.5;">Henüz eklenmiş bir analiz bulunmuyor.</td></tr>`;
     }
-    
+
     const today = new Date().toISOString().split('T')[0];
-    
+
     container.innerHTML = `
         
         <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; max-width: 1200px; margin: 0 auto; padding: 0 1rem; padding-top: 0.5rem; min-height: 100%;">
@@ -5332,7 +5199,7 @@ const renderAyarlar = (container) => {
     `;
 
     db.collection('users').doc(currentUser.uid).get().then(doc => {
-        if(doc.exists && doc.data().phone) {
+        if (doc.exists && doc.data().phone) {
             document.getElementById('profile-phone').value = doc.data().phone;
         }
     });
@@ -5343,7 +5210,7 @@ const renderAyarlar = (container) => {
         const newPhone = document.getElementById('profile-phone').value;
         currentUser.updateProfile({ displayName: newName }).then(() => {
             const unEl = document.getElementById('user-name');
-            if(unEl) unEl.innerText = newName;
+            if (unEl) unEl.innerText = newName;
             return db.collection('users').doc(currentUser.uid).set({ phone: newPhone, displayName: newName }, { merge: true });
         }).then(() => {
             alert('Profil güncellendi!');
@@ -5359,32 +5226,154 @@ const renderAyarlar = (container) => {
         }).catch(err => alert(err.message));
     });
 };
+window.getGBHF = (hisse) => {
+    if (!State.data.araDegerleme || !State.data.araDegerleme[hisse]) return null;
+    let qKeys = Object.keys(State.data.araDegerleme[hisse]).sort((a, b) => {
+        let [yA, mA] = a.split('/').map(Number);
+        let [yB, mB] = b.split('/').map(Number);
+        if (yA !== yB) return yB - yA;
+        return mB - mA;
+    });
+    
+    // Find the latest quarter that actually has data and generates a target price
+    for (let period of qKeys) {
+        const d = State.data.araDegerleme[hisse][period];
+        if (!d || Object.keys(d).length === 0) continue;
+        
+        const sData = (window.stockData && window.stockData[hisse]) ? window.stockData[hisse] : null;
+        if (!sData) continue;
+        
+        let past3Favok = 0; let past3NetKar = 0;
+        if (sData.gelirCeyrek && sData.gelirCeyrek.rows) {
+            const fRow = sData.gelirCeyrek.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
+            const nRow = sData.gelirCeyrek.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+            for (let i = 1; i <= Math.min(3, sData.gelirCeyrek.headers.length - 1); i++) {
+                if (fRow && fRow[i] !== undefined && fRow[i] !== '') past3Favok += (typeof fRow[i] === 'number' ? fRow[i] : parseFloat(String(fRow[i]).replace(/\./g, '').replace(/,/g, '.')) || 0);
+                if (nRow && nRow[i] !== undefined && nRow[i] !== '') past3NetKar += (typeof nRow[i] === 'number' ? nRow[i] : parseFloat(String(nRow[i]).replace(/\./g, '').replace(/,/g, '.')) || 0);
+            }
+        }
+        
+        let finansalBorclarTotal = 0; let nakitTotal = 0; let finYatTotal = 0; let inDuran = false;
+        if (sData.bilanco && sData.bilanco.rows) {
+            sData.bilanco.rows.forEach(r => {
+                if (!r[0]) return;
+                const rName = r[0].toLocaleLowerCase('tr-TR');
+                if (rName.trim() === 'duran varlıklar') inDuran = true;
+                if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
+                    finansalBorclarTotal += typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                }
+                if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
+                    nakitTotal += typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                }
+                if (rName.includes('finansal yatırımlar') && !inDuran) {
+                    finYatTotal += typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                }
+            });
+        }
+        const netBorc = finansalBorclarTotal - nakitTotal - finYatTotal;
+        
+        let odenmisSermayeDeg = 0;
+        if (sData.bilanco && sData.bilanco.rows) {
+            const osRow = sData.bilanco.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('ödenmiş sermaye'));
+            if (osRow && osRow[1]) odenmisSermayeDeg = typeof osRow[1] === 'number' ? osRow[1] : parseFloat(String(osRow[1]).replace(/\./g, '').replace(/,/g, '.')) || 0;
+        }
+        
+        const curCurrency = d.currency || 'TRY';
+        const usdKuru = (State.getFiyat ? parseFloat(State.getFiyat('USDTRY')) : null) || window.dolarKuru || 46.99;
+        const eurKuru = (State.getFiyat ? parseFloat(State.getFiyat('EURTRY')) : null) || window.euroKuru || 50.00;
+        const guncelFiyat = parseFloat(State.getFiyat(hisse)) || 0;
+        
+        let ciro = parseFloat(d.ciro) || 0;
+        let favokMarji = parseFloat(d.favok_marji) || 0;
+        let netKarMarji = parseFloat(d.net_kar_marji) || 0;
+        
+        let favok = past3Favok;
+        let hasFavok = true;
+        if (d.ciro !== undefined && d.ciro !== '' && d.favok_marji !== undefined && d.favok_marji !== '') {
+            favok = (ciro * (favokMarji / 100)) + past3Favok;
+        }
+        
+        let net_kar = past3NetKar;
+        let hasNetKar = true;
+        if (d.ciro !== undefined && d.ciro !== '' && d.net_kar_marji !== undefined && d.net_kar_marji !== '') {
+            net_kar = (ciro * (netKarMarji / 100)) + past3NetKar;
+        }
+        
+        let validPDs = [];
+        let currentNetBorc = netBorc;
+        if (curCurrency === 'USD') currentNetBorc = netBorc / usdKuru;
+        else if (curCurrency === 'EUR') currentNetBorc = netBorc / eurKuru;
+        
+        let yFdFavok = parseFloat(d.fd_favok) || 0;
+        let yFk = parseFloat(d.f_k) || 0;
+        let yPdDd = parseFloat(d.pd_dd) || 0;
+        
+        if (hasFavok && yFdFavok > 0) validPDs.push((favok * yFdFavok) - currentNetBorc);
+        if (hasNetKar && yFk > 0) validPDs.push(net_kar * yFk);
+        if (d.ozkaynaklar !== undefined && d.ozkaynaklar !== '' && yPdDd > 0) validPDs.push((parseFloat(d.ozkaynaklar) || 0) * yPdDd);
+        
+        let currentOdenmisSermaye = odenmisSermayeDeg;
+        if (d.sermaye !== undefined && d.sermaye !== '') currentOdenmisSermaye = parseFloat(d.sermaye) || currentOdenmisSermaye;
+        
+        if (validPDs.length > 0 && currentOdenmisSermaye > 0) {
+            let avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
+            let hedefFiyatForeign = avgPD / currentOdenmisSermaye;
+            let hedefFiyatTL = 0;
+            if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
+            else if (curCurrency === 'EUR') hedefFiyatTL = hedefFiyatForeign * eurKuru;
+            else hedefFiyatTL = hedefFiyatForeign;
+            
+            let potansiyelNum = 0;
+            if (guncelFiyat > 0) potansiyelNum = ((hedefFiyatTL - guncelFiyat) / guncelFiyat) * 100;
+            
+            return { hedefFiyat: hedefFiyatTL, potansiyel: potansiyelNum, period: period };
+        }
+    }
+    return null;
+};
 
 const renderHedef = (container) => {
     if (window.recalculateHedefFiyatlar) window.recalculateHedefFiyatlar();
     let rowsHtml = '';
-    
-    if (State.data.hedefFiyatlar) {
-        let sn = 1;
+
+    if (State.data.hedefFiyatlar || State.data.araDegerleme) {
         const fmtDec = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(val);
-        const fmtPct = (val) => { let num = val * 100; let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(Math.abs(num)); return num < 0 ? '%-' + formatted : '%' + formatted; };
+        const fmtPct = (val) => { let num = val / 100; let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(Math.abs(val)); return val < 0 ? '%-' + formatted : '%' + formatted; };
         
-        for (const hisse of Object.keys(State.data.hedefFiyatlar).sort()) {
-            const hData = State.data.hedefFiyatlar[hisse];
-            if (!hData['2026'] && !hData['2027'] && !hData['2028'] && !hData['2029'] && !hData['2030']) continue;
+        let allHisseler = new Set([...Object.keys(State.data.hedefFiyatlar || {}), ...Object.keys(State.data.araDegerleme || {})]);
+        
+        for (const hisse of Array.from(allHisseler).sort()) {
+            const hData = State.data.hedefFiyatlar[hisse] || {};
+            const gbhfData = window.getGBHF(hisse);
             
+            let hasYillik = hData['2026'] || hData['2027'] || hData['2028'] || hData['2029'] || hData['2030'];
+            if (!hasYillik && !gbhfData) continue;
+
             const guncelFiyat = parseFloat(State.getFiyat(hisse)) || 0;
-            
+            let guncelPct = 0;
+            if (window.stockData && window.stockData[hisse]) {
+                guncelPct = parseFloat(window.stockData[hisse].yuzde) || 0;
+            }
+            const gColor = guncelPct >= 0 ? '#2ecc71' : '#e74c3c';
+            const guncelFiyatHtml = `<td style="text-align: right !important;">${fmtDec(guncelFiyat)}<br><span style="color:${gColor}; font-size:10px;">${guncelPct > 0 ? '+' : ''}${guncelPct.toFixed(2)}%</span></td>`;
+
             const renderCell = (year) => {
                 if (!hData[year]) return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
                 const color = hData[year].potansiyel > 0 ? '#2ecc71' : '#e74c3c';
                 return `<td style="text-align: right !important;">${fmtDec(hData[year].hedefFiyat)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
             };
 
+            let gbhfHtml = `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
+            if (gbhfData) {
+                const color = gbhfData.potansiyel > 0 ? '#2ecc71' : '#e74c3c';
+                gbhfHtml = `<td style="text-align: right !important; color:${color} !important; font-weight:bold;" title="${gbhfData.period}">${fmtDec(gbhfData.hedefFiyat)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(gbhfData.potansiyel)}</td>`;
+            }
+
             rowsHtml += `<tr>
                 <td style="text-align: center !important;">${sn++}</td>
                 <td class="takip-hisse-link" style="text-align: left !important;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
-                <td style="text-align: right !important;">${fmtDec(guncelFiyat)}</td>
+                ${guncelFiyatHtml}
+                ${gbhfHtml}
                 ${renderCell('2026')}
                 ${renderCell('2027')}
                 ${renderCell('2028')}
@@ -5409,6 +5398,8 @@ const renderHedef = (container) => {
                             <th>S.N.</th>
                             <th>Hisse</th>
                             <th>Güncel Fiyat</th>
+                            <th title="Gelecek Bilanço Hedef Fiyat">G.B.H.F.</th>
+                            <th title="Gelecek Bilanço Potansiyeli">Pot.</th>
                             <th>2026<br>H.</th>
                             <th>2026<br>P.</th>
                             <th>2027<br>H.</th>
@@ -5437,7 +5428,7 @@ window.goToHisse = (h) => {
     document.querySelectorAll('#primary-sidebar .nav-btn').forEach(btn => btn.classList.remove('active'));
     currentPage = 'hisse_detay';
     if (typeof renderPage === 'function') renderPage();
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
 };
 
 window.openHisseFromDropdown = (h) => {
@@ -5447,101 +5438,101 @@ window.openHisseFromDropdown = (h) => {
     document.querySelectorAll('#primary-sidebar .nav-btn').forEach(btn => btn.classList.remove('active'));
     currentPage = 'hisse_detay';
     if (typeof renderPage === 'function') renderPage();
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
 };
 
 window.removeHisseFromTakip = (hisseKodu) => {
-      document.getElementById('theme-confirm-message').innerText = hisseKodu + ' takip listesinden çıkarılacak. Emin misiniz?';
-      window.themeConfirmAction = () => {
-          State.removeTakip(hisseKodu);
-          if(currentPage === 'anasayfa') renderPage();
-          document.getElementById('hisse-sil-modal').style.display = 'none';
-      };
-      document.getElementById('theme-confirm-modal').style.display = 'flex';
-  };
-
-  // Takip Listesi Modal Functions
-  window.toggleTakipEditModal = (event) => {
-        const modal = document.getElementById('takip-edit-modal');
-        const glass = document.getElementById('takip-edit-glass');
-        const btn = document.getElementById('takip-edit-btn');
-        
-        if (modal.style.display === 'block') {
-            modal.style.display = 'none';
-            if (btn) {
-                btn.className = 'fas fa-pen';
-                btn.innerHTML = '';
-                btn.style.fontSize = '13px';
-            }
-        } else {
-            modal.style.display = 'block';
-            if (event && event.target) {
-                const rect = (btn ? btn.getBoundingClientRect() : event.target.getBoundingClientRect());
-                glass.style.top = (rect.bottom) + 'px';
-                glass.style.left = (rect.right - 195) + 'px';
-                glass.style.bottom = '20px';
-            }
-            if (btn) {
-                btn.className = 'fas fa-pen';
-                btn.innerHTML = '';
-                btn.style.fontSize = '13px';
-            }
-            document.getElementById('takip-edit-arama-input').value = '';
-            document.getElementById('takip-edit-autocomplete-list').style.display = 'none';
-            window.renderTakipEditList();
-            setTimeout(() => document.getElementById('takip-edit-arama-input').focus(), 100);
-        }
+    document.getElementById('theme-confirm-message').innerText = hisseKodu + ' takip listesinden çıkarılacak. Emin misiniz?';
+    window.themeConfirmAction = () => {
+        State.removeTakip(hisseKodu);
+        if (currentPage === 'anasayfa') renderPage();
+        document.getElementById('hisse-sil-modal').style.display = 'none';
     };
+    document.getElementById('theme-confirm-modal').style.display = 'flex';
+};
 
-  window.renderTakipEditList = () => {
-      const container = document.getElementById('takip-edit-list-container');
-      if (!container) return;
-      const list = (State.data.takipListesi || []).slice().sort((a,b) => a.localeCompare(b));
-      
-      if (list.length === 0) {
-          container.innerHTML = '<div style="text-align:center; color:var(--text-secondary); padding:1rem; font-size:13px;">Takip listeniz boş.</div>';
-          return;
-      }
+// Takip Listesi Modal Functions
+window.toggleTakipEditModal = (event) => {
+    const modal = document.getElementById('takip-edit-modal');
+    const glass = document.getElementById('takip-edit-glass');
+    const btn = document.getElementById('takip-edit-btn');
 
-      container.innerHTML = list.map(hisse => `
+    if (modal.style.display === 'block') {
+        modal.style.display = 'none';
+        if (btn) {
+            btn.className = 'fas fa-pen';
+            btn.innerHTML = '';
+            btn.style.fontSize = '13px';
+        }
+    } else {
+        modal.style.display = 'block';
+        if (event && event.target) {
+            const rect = (btn ? btn.getBoundingClientRect() : event.target.getBoundingClientRect());
+            glass.style.top = (rect.bottom) + 'px';
+            glass.style.left = (rect.right - 195) + 'px';
+            glass.style.bottom = '20px';
+        }
+        if (btn) {
+            btn.className = 'fas fa-pen';
+            btn.innerHTML = '';
+            btn.style.fontSize = '13px';
+        }
+        document.getElementById('takip-edit-arama-input').value = '';
+        document.getElementById('takip-edit-autocomplete-list').style.display = 'none';
+        window.renderTakipEditList();
+        setTimeout(() => document.getElementById('takip-edit-arama-input').focus(), 100);
+    }
+};
+
+window.renderTakipEditList = () => {
+    const container = document.getElementById('takip-edit-list-container');
+    if (!container) return;
+    const list = (State.data.takipListesi || []).slice().sort((a, b) => a.localeCompare(b));
+
+    if (list.length === 0) {
+        container.innerHTML = '<div style="text-align:center; color:var(--text-secondary); padding:1rem; font-size:13px;">Takip listeniz boş.</div>';
+        return;
+    }
+
+    container.innerHTML = list.map(hisse => `
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.15rem 0.25rem; border-bottom: 1px solid var(--surface-border);">
               <span style="color: var(--text-secondary); font-weight: 500; font-size: 12px;">${hisse}</span>
                 <i class="fas fa-trash-alt" style="cursor: pointer; color: var(--text-secondary); font-size: 12px; padding: 4px;" onclick="window.removeHisseFromTakipModal('${hisse}')"></i>
           </div>
       `).join('');
-  };
+};
 
-  window.addHisseToTakipFromModal = () => {
-      const input = document.getElementById('takip-edit-arama-input');
-      if (!input) return;
-      let val = input.value.trim().toUpperCase();
-      if (!val) return;
-      
-      const validStocks = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : (window.defaultStocksArray || []);
-      if (!validStocks.includes(val)) {
-          alert('Geçersiz hisse kodu: ' + val);
-          return;
-      }
-      
-      if (!State.data.takipListesi) State.data.takipListesi = [];
-      if (!State.data.takipListesi.includes(val)) {
-          State.data.takipListesi.push(val);
-          input.value = '';
-          document.getElementById('takip-edit-autocomplete-list').style.display = 'none';
-          State.save();
-          window.renderTakipEditList();
-          if(currentPage === 'anasayfa') renderPage();
-      } else {
-          alert('Bu hisse zaten takip listesinde.');
-      }
-  };
+window.addHisseToTakipFromModal = () => {
+    const input = document.getElementById('takip-edit-arama-input');
+    if (!input) return;
+    let val = input.value.trim().toUpperCase();
+    if (!val) return;
 
-  window.removeHisseFromTakipModal = (hisse) => {
-      State.removeTakip(hisse);
-      State.save();
-      window.renderTakipEditList();
-      if(currentPage === 'anasayfa') renderPage();
-  };
+    const validStocks = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : (window.defaultStocksArray || []);
+    if (!validStocks.includes(val)) {
+        alert('Geçersiz hisse kodu: ' + val);
+        return;
+    }
+
+    if (!State.data.takipListesi) State.data.takipListesi = [];
+    if (!State.data.takipListesi.includes(val)) {
+        State.data.takipListesi.push(val);
+        input.value = '';
+        document.getElementById('takip-edit-autocomplete-list').style.display = 'none';
+        State.save();
+        window.renderTakipEditList();
+        if (currentPage === 'anasayfa') renderPage();
+    } else {
+        alert('Bu hisse zaten takip listesinde.');
+    }
+};
+
+window.removeHisseFromTakipModal = (hisse) => {
+    State.removeTakip(hisse);
+    State.save();
+    window.renderTakipEditList();
+    if (currentPage === 'anasayfa') renderPage();
+};
 
 window.toggleTakipSort = (col) => {
     if (!window.takipSort) window.takipSort = { col: null, asc: true };
@@ -5569,7 +5560,7 @@ const renderAnasayfa = (container) => {
 
     if (window.recalculateHedefFiyatlar) window.recalculateHedefFiyatlar();
     let takipList = State.data.takipListesi ? [...State.data.takipListesi] : [];
-    
+
     const fmtDec = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(val);
     const fmtPct = (val) => { let num = val * 100; let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(Math.abs(num))); return num < 0 ? '%-' + formatted : '%' + formatted; };
     const fmtNum = (val) => {
@@ -5603,15 +5594,15 @@ const renderAnasayfa = (container) => {
         } else {
             fiyat = State.getFiyat(hisse);
         }
-        
+
         if (window.parseExcelData && (!window.stockData || !window.stockData[hisse] || !window.stockData[hisse].bilanco)) {
-            try { window.parseExcelData(hisse); } catch(e) {}
+            try { window.parseExcelData(hisse); } catch (e) { }
         }
-        
+
         let piyasaDegeri = 0, fdFavok = 0, fk = 0, pdDd = 0, firmaDegeri = 0;
-        let araHedefFiyat = -Infinity, araPotansiyel = -Infinity;
+        let araHedefFiyat = -Infinity, araPotansiyel = -Infinity, araPeriod = null;
         const sData = (window.stockData && window.stockData[hisse]) ? window.stockData[hisse] : null;
-        
+
         if (sData) {
             const getVal = (sheet, rowName) => {
                 if (!sheet || !sheet.rows) return 0;
@@ -5641,11 +5632,11 @@ const renderAnasayfa = (container) => {
                     if (!r[0]) return;
                     const rName = r[0].toLocaleLowerCase('tr-TR');
                     if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
-                        const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                        const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                         finansalBorclarTotal += val;
                     }
                     if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
-                        const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                        const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                         nakitTotal += val;
                     }
                 });
@@ -5657,7 +5648,7 @@ const renderAnasayfa = (container) => {
             if (sData.gelirYillik && sData.gelirYillik.rows) {
                 const fR = sData.gelirYillik.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
                 if (fR) {
-                    favok = typeof fR[1] === 'number' ? fR[1] : parseFloat((fR[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                    favok = typeof fR[1] === 'number' ? fR[1] : parseFloat((fR[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                 }
             }
             if (favok === 0) favok = getVal(sData.gelirYillik, 'FAVÖK');
@@ -5667,7 +5658,7 @@ const renderAnasayfa = (container) => {
             if (sData.gelirYillik && sData.gelirYillik.rows) {
                 const nR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
                 if (nR) {
-                    yilliklandirilmisNetKar = typeof nR[1] === 'number' ? nR[1] : parseFloat((nR[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                    yilliklandirilmisNetKar = typeof nR[1] === 'number' ? nR[1] : parseFloat((nR[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                 }
             }
             if (yilliklandirilmisNetKar === 0) yilliklandirilmisNetKar = getVal(sData.gelirYillik, 'Net Dönem Karı');
@@ -5677,66 +5668,18 @@ const renderAnasayfa = (container) => {
             if (sData.bilanco && sData.bilanco.rows) {
                 const aoRow = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
                 if (aoRow) {
-                    anaOrtaklikOzkaynaklar = typeof aoRow[1] === 'number' ? aoRow[1] : parseFloat((aoRow[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                    anaOrtaklikOzkaynaklar = typeof aoRow[1] === 'number' ? aoRow[1] : parseFloat((aoRow[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                 }
             }
             if (anaOrtaklikOzkaynaklar === 0) anaOrtaklikOzkaynaklar = getVal(sData.bilanco, 'Özkaynaklar');
             pdDd = anaOrtaklikOzkaynaklar !== 0 ? (piyasaDegeri / anaOrtaklikOzkaynaklar) : 0;
-            
-            if (State.data.araDegerleme && State.data.araDegerleme[hisse]) {
-                const bilancoHeaders = (sData.bilanco && sData.bilanco.headers) ? sData.bilanco.headers : [];
-                let nextPeriod = "Gelecek";
-                if (bilancoHeaders.length > 1) {
-                    const latest = bilancoHeaders[1];
-                    if (latest && latest.includes('/')) {
-                        let parts = latest.split('/');
-                        let y = parseInt(parts[0]);
-                        let m = parseInt(parts[1]);
-                        m += 3;
-                        if (m > 12) { m = m % 12 || 12; y += 1; }
-                        nextPeriod = y + '/' + m;
-                    }
-                }
-                const d = State.data.araDegerleme[hisse][nextPeriod] || {};
-                const curCurrency = d.currency || 'TRY';
-                const ciro = parseFloat(d.ciro) || 0;
-                const favokMarji = parseFloat(d.favok_marji) || 0;
-                const netKarMarji = parseFloat(d.net_kar_marji) || 0;
-                
-                let favok_calc = 0, net_kar_calc = 0;
-                let hasFavok = false, hasNetKar = false;
-                if (d.ciro !== undefined && d.ciro !== '' && d.favok_marji !== undefined && d.favok_marji !== '') {
-                    favok_calc = ciro * (favokMarji / 100);
-                    hasFavok = true;
-                }
-                if (d.ciro !== undefined && d.ciro !== '' && d.net_kar_marji !== undefined && d.net_kar_marji !== '') {
-                    net_kar_calc = ciro * (netKarMarji / 100);
-                    hasNetKar = true;
-                }
-                
-                let validPDs = [];
-                let currentNetBorc = netBorc || 0;
-                if (curCurrency === 'USD') currentNetBorc = currentNetBorc / dolarKuru;
-                else if (curCurrency === 'EUR') currentNetBorc = currentNetBorc / (State.getFiyat('EURO') || 1);
-                
-                if (hasFavok && d.fd_favok !== undefined && d.fd_favok !== '') validPDs.push((favok_calc * (parseFloat(d.fd_favok) || 0)) - currentNetBorc);
-                if (hasNetKar && d.f_k !== undefined && d.f_k !== '') validPDs.push(net_kar_calc * (parseFloat(d.f_k) || 0));
-                if (d.ozkaynaklar !== undefined && d.ozkaynaklar !== '' && d.pd_dd !== undefined && d.pd_dd !== '') validPDs.push((parseFloat(d.ozkaynaklar) || 0) * (parseFloat(d.pd_dd) || 0));
-                
-                let avgPD = 0;
-                if (validPDs.length > 0) avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
-                
-                let currentOdenmisSermaye = odenmisSermaye || 0;
-                if (d.sermaye !== undefined && d.sermaye !== '') currentOdenmisSermaye = parseFloat(d.sermaye) || currentOdenmisSermaye;
-                
-                if (validPDs.length > 0 && currentOdenmisSermaye > 0) {
-                    let hfForeign = avgPD / currentOdenmisSermaye;
-                    if (curCurrency === 'USD') araHedefFiyat = hfForeign * dolarKuru;
-                    else if (curCurrency === 'EUR') araHedefFiyat = hfForeign * (State.getFiyat('EURO') || 1);
-                    else araHedefFiyat = hfForeign;
-                    
-                    if (fiyat > 0) araPotansiyel = (araHedefFiyat - fiyat) / fiyat;
-                }
+
+            araPeriod = null;
+            const gbhfData = window.getGBHF(hisse);
+            if (gbhfData) {
+                araHedefFiyat = gbhfData.hedefFiyat;
+                araPotansiyel = gbhfData.potansiyel / 100;
+                araPeriod = gbhfData.period;
             }
         }
 
@@ -5749,7 +5692,7 @@ const renderAnasayfa = (container) => {
 
         return {
             hisse, fiyat, gunlukYuzde, piyasaDegeri, piyasaDegeriUsd: piyasaDegeri / dolarKuru, firmaDegeri, fdFavok, fk, pdDd,
-            araHedefFiyat, araPotansiyel,
+            araHedefFiyat, araPotansiyel, araPeriod,
             pot2026: getPot('2026'), pot2027: getPot('2027'),
             pot2028: getPot('2028'), pot2029: getPot('2029'), pot2030: getPot('2030')
         };
@@ -5766,11 +5709,11 @@ const renderAnasayfa = (container) => {
             if (b.pot2030 !== a.pot2030) return b.pot2030 - a.pot2030;
             return a.hisse.localeCompare(b.hisse);
         }
-        
+
         if (window.takipSort.col === 'hisse') {
             return window.takipSort.asc ? a.hisse.localeCompare(b.hisse) : b.hisse.localeCompare(a.hisse);
         }
-        
+
         let valA = a[window.takipSort.col];
         let valB = b[window.takipSort.col];
         if (valA === -Infinity) valA = -999999999;
@@ -5780,8 +5723,8 @@ const renderAnasayfa = (container) => {
 
     let rowsHtml = '';
     takipDataList.forEach((item, i) => {
-        const { hisse, fiyat, gunlukYuzde, piyasaDegeri, piyasaDegeriUsd, firmaDegeri, fdFavok, fk, pdDd, araHedefFiyat, araPotansiyel, pot2026, pot2027, pot2028, pot2029, pot2030 } = item;
-        
+        const { hisse, fiyat, gunlukYuzde, piyasaDegeri, piyasaDegeriUsd, firmaDegeri, fdFavok, fk, pdDd, araHedefFiyat, araPotansiyel, araPeriod, pot2026, pot2027, pot2028, pot2029, pot2030 } = item;
+
         const formatGunluk = (val) => {
             if (val === null || val === undefined || isNaN(val)) return `<td style="text-align: right !important;">-</td>`;
             const color = val > 0 ? '#2ecc71' : (val < 0 ? '#e74c3c' : 'var(--text-primary)');
@@ -5796,13 +5739,13 @@ const renderAnasayfa = (container) => {
             const color = hData[year].potansiyel > 0 ? '#2ecc71' : '#e74c3c';
             return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtDec(hData[year].hedefFiyat)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
         };
-        
-        const renderAraCell = (hf, pot) => {
+
+        const renderAraCell = (hf, pot, period) => {
             if (hf === -Infinity || pot === -Infinity) return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
             const color = pot > 0 ? '#2ecc71' : '#e74c3c';
             return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtDec(hf)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(pot)}</td>`;
         };
-        
+
         const oranlarHtml = `
                 <td style="text-align: right !important;">${fmtCurrency(piyasaDegeri, '₺')}</td>
                 <td style="text-align: right !important;">${fmtCurrency(piyasaDegeriUsd, '$')}</td>
@@ -5811,16 +5754,16 @@ const renderAnasayfa = (container) => {
                 <td style="text-align: right !important;">${fmtMet(fk)}</td>
                 <td style="text-align: right !important;">${fmtMet(pdDd)}</td>
         `;
-        
+
         const degerlemeHtml = `
-                ${renderAraCell(araHedefFiyat, araPotansiyel)}
+                ${renderAraCell(araHedefFiyat, araPotansiyel, araPeriod)}
                 ${renderCell('2026')}
                 ${renderCell('2027')}
                 ${renderCell('2028')}
                 ${renderCell('2029')}
                 ${renderCell('2030')}
         `;
-        
+
         const restHtml = window.takipTab === 'degerleme' ? degerlemeHtml : oranlarHtml;
 
         rowsHtml += `
@@ -5910,7 +5853,7 @@ window.confirmAddHisse = () => {
     if (!input) return;
     const hisseKodu = input.value.trim().toUpperCase();
     if (hisseKodu) {
-        const defaultStocks = ["THYAO","KCHOL","TUPRS","AKBNK","GARAN","ISCTR","YKBNK","SISE","BIMAS","FROTO","EREGL","SAHOL","ASELS","TCELL","ENKAI","PGSUS","PETKM","TOASO","TTKOM","ARCLK"];
+        const defaultStocks = ["THYAO", "KCHOL", "TUPRS", "AKBNK", "GARAN", "ISCTR", "YKBNK", "SISE", "BIMAS", "FROTO", "EREGL", "SAHOL", "ASELS", "TCELL", "ENKAI", "PGSUS", "PETKM", "TOASO", "TTKOM", "ARCLK"];
         const validStocks = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : defaultStocks;
         if (!validStocks.includes(hisseKodu)) {
             alert('Lütfen geçerli bir BİST hisse kodu giriniz veya listeden seçiniz.');
@@ -5971,7 +5914,7 @@ window.importData = async (e) => {
         try {
             const importedData = JSON.parse(ev.target.result);
             if (!importedData || typeof importedData !== 'object') throw new Error("Geçersiz veri");
-            
+
             if (confirm("Bu işlem dosyadan yüklediğiniz verileri mevcut verilerinizle BİRLEŞTİRECEK (Nakit hareketleri, hisse notları vb. kaybolmayacak). Onaylıyor musunuz?")) {
                 const mergeData = (target, source) => {
                     for (const key of Object.keys(source)) {
@@ -6017,10 +5960,10 @@ let notSaveTimeout;
 window.saveHisseNotu = (hisse, not) => {
     if (!State.data.hisseNotlari) State.data.hisseNotlari = {};
     State.data.hisseNotlari[hisse] = not;
-    
+
     // Save locally immediately
     localStorage.setItem('borsa_app_data', JSON.stringify(State.data));
-    
+
     // Debounce the full save (Firebase sync)
     clearTimeout(notSaveTimeout);
     notSaveTimeout = setTimeout(() => {
@@ -6087,10 +6030,10 @@ window.hideHisseDropdown = () => {
 window.openHisseFromDropdown = (h) => {
     window.currentSelectedHisse = h;
     if (currentPage !== 'hisse_detay') window.currentHisseTab = 'Özet Rapor';
-    
+
     // Bypass the button click entirely to avoid event quirks
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    
+
     currentPage = 'hisse_detay';
     if (typeof renderPage === 'function') renderPage();
     window.hideHisseDropdown();
@@ -6100,7 +6043,7 @@ window.updateGlobalHisseDropdown = () => {
     const hisseDropdown = document.getElementById('global-hisse-dropdown');
     if (hisseDropdown && State.data && State.data.takipListesi) {
         let dropdownHtml = '';
-        const sortedTakip = [...State.data.takipListesi].sort((a,b) => a.localeCompare(b));
+        const sortedTakip = [...State.data.takipListesi].sort((a, b) => a.localeCompare(b));
         sortedTakip.forEach(h => {
             dropdownHtml += `<div class="hisse-menu-item" style="padding: 0.3rem 0.8rem; cursor: pointer; border-bottom: 1px solid var(--table-border); font-size: 13px; color: #eee;" onclick="window.openHisseFromDropdown('${h}')">${h}</div>`;
         });
@@ -6117,7 +6060,7 @@ window.goToAyarlar = () => {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     currentPage = 'ayarlar';
     if (typeof renderPage === 'function') renderPage();
-    window.scrollTo(0,0);
+    window.scrollTo(0, 0);
 };
 
 // deleted bad goToGiris
@@ -6153,7 +6096,7 @@ window.closeSecondarySidebar = () => {
 window.goToAnasayfa = () => {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     const homeBtn = document.querySelector('.nav-btn[data-target="anasayfa"]');
-    if(homeBtn) homeBtn.classList.add('active');
+    if (homeBtn) homeBtn.classList.add('active');
     currentPage = 'anasayfa';
     if (typeof renderPage === 'function') renderPage();
 };
@@ -6170,17 +6113,17 @@ const _renderPageActual = () => {
     // update active nav
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     const activeBtn = document.querySelector(`.nav-btn[data-target="${currentPage}"]`);
-    if(activeBtn) activeBtn.classList.add('active');
+    if (activeBtn) activeBtn.classList.add('active');
 
     const container = document.getElementById('main-content');
-    if(!container) return;
-    
+    if (!container) return;
+
     // Top Bar visibility:
     const topBar = document.querySelector('.top-bar');
     if (topBar) {
         topBar.style.display = currentPage === 'anasayfa' ? 'flex' : 'none';
     }
-    
+
     switch (currentPage) {
         case 'anasayfa': renderAnasayfa(container); break;
         case 'portfoy': renderPortfoy(container); break;
@@ -6209,7 +6152,7 @@ window.renderNotlar = (container) => {
 
     const grid = document.getElementById('notes-grid');
     const notes = State.data.notlar || [];
-    
+
     if (notes.length === 0) {
         grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 4rem 1rem; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1);">
             <i class="fas fa-sticky-note" style="font-size: 3rem; opacity: 0.5; margin-bottom: 1rem;"></i><br>
@@ -6217,19 +6160,19 @@ window.renderNotlar = (container) => {
             <span style="font-size: 0.9rem; opacity: 0.7;">Fikirlerinizi, al-sat stratejilerinizi veya hatırlatıcılarınızı buraya kaydedebilirsiniz.</span>
         </div>`;
     } else {
-        notes.sort((a,b) => b.timestamp - a.timestamp).forEach(note => {
+        notes.sort((a, b) => b.timestamp - a.timestamp).forEach(note => {
             const card = document.createElement('div');
             card.className = 'dash-card';
             card.style.cssText = `position: relative; display: flex; flex-direction: column; background: var(--surface-color); padding: 1.5rem; border-radius: 12px; border-left: 4px solid ${note.color || 'var(--accent-color)'}; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s;`;
             card.onmouseover = () => { card.style.transform = 'translateY(-3px)'; card.style.boxShadow = '0 8px 25px rgba(0,0,0,0.4)'; };
             card.onmouseout = () => { card.style.transform = 'none'; card.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)'; };
-            
+
             const dateStr = new Date(note.timestamp).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            
+
             const urlRegex = /(https?:\/\/[^\s<]+)/g;
             const formattedContent = (note.content || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>').replace(urlRegex, '<a href="$1" target="_blank" style="color: #3498db; text-decoration: underline;">$1</a>');
             const formattedTitle = (note.title || 'Başlıksız').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            
+
             card.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
                     <h3 style="margin: 0; font-size: 12px; font-weight: normal; color: #fff; word-break: break-word;">${formattedTitle}</h3>
@@ -6257,7 +6200,7 @@ window.renderNotlar = (container) => {
         });
     }
 
-    if(!document.getElementById('note-modal')) {
+    if (!document.getElementById('note-modal')) {
         const modal = document.createElement('div');
         modal.id = 'note-modal';
         modal.className = 'app-container';
@@ -6286,7 +6229,7 @@ window.renderNotlar = (container) => {
             </div>
         `;
         document.body.appendChild(modal);
-        
+
         document.querySelectorAll('#note-color-picker .color-swatch').forEach(sw => {
             sw.addEventListener('click', (e) => {
                 document.querySelectorAll('#note-color-picker .color-swatch').forEach(s => s.style.border = '2px solid transparent');
@@ -6304,11 +6247,11 @@ window.enterNoteEditMode = (id) => {
         const note = State.data.notlar.find(n => n.id === id);
         if (note) {
             editArea.value = note.content || '';
-            
+
             // Set the exact height before switching display
             const rect = displayDiv.getBoundingClientRect();
             editArea.style.height = Math.max(100, rect.height) + 'px';
-            
+
             displayDiv.style.display = 'none';
             editArea.style.display = 'block';
             editArea.focus();
@@ -6324,7 +6267,7 @@ window.saveNoteInline = (id) => {
             note.content = editArea.value;
             note.timestamp = Date.now();
             State.save();
-            if(currentPage === 'notlar') renderPage();
+            if (currentPage === 'notlar') renderPage();
         } else {
             const displayDiv = document.getElementById(`note-content-display-${id}`);
             if (displayDiv) {
@@ -6340,7 +6283,7 @@ window.changeNoteColor = (id, color) => {
     if (note) {
         note.color = color;
         State.save();
-        if(currentPage === 'notlar') renderPage();
+        if (currentPage === 'notlar') renderPage();
     }
 };
 
@@ -6349,14 +6292,14 @@ window.openNoteModal = () => {
     document.getElementById('note-id-input').value = '';
     document.getElementById('note-title-input').value = '';
     document.getElementById('note-content-input').value = '';
-    
+
     const swatches = document.querySelectorAll('#note-color-picker .color-swatch');
     if (swatches.length > 0) {
         swatches.forEach(s => s.style.border = '2px solid transparent');
         swatches[0].style.border = '2px solid #fff';
         document.getElementById('note-color-input').value = swatches[0].getAttribute('data-color');
     }
-    
+
     const modal = document.getElementById('note-modal');
     modal.style.display = 'flex';
     setTimeout(() => {
@@ -6381,15 +6324,15 @@ window.saveNote = () => {
     const content = document.getElementById('note-content-input').value.trim();
     const color = document.getElementById('note-color-input').value;
 
-    if (!content) { 
+    if (!content) {
         const contentInput = document.getElementById('note-content-input');
         contentInput.style.borderColor = 'var(--danger-color)';
         setTimeout(() => contentInput.style.borderColor = 'rgba(255,255,255,0.1)', 2000);
-        return; 
+        return;
     }
 
     if (!State.data.notlar) State.data.notlar = [];
-    
+
     if (id) {
         const existing = State.data.notlar.find(n => n.id === id);
         if (existing) {
@@ -6400,27 +6343,27 @@ window.saveNote = () => {
         }
     } else {
         State.data.notlar.push({
-            id: 'note_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+            id: 'note_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
             title: title,
             content: content,
             color: color,
             timestamp: Date.now()
         });
     }
-    
+
     State.save();
     window.closeNoteModal();
-    if(currentPage === 'notlar') {
+    if (currentPage === 'notlar') {
         setTimeout(() => renderPage(), 300);
     }
 };
 
 window.deleteNote = (id) => {
-    if(!confirm('Bu notu silmek istediğinize emin misiniz?')) return;
-    if(State.data.notlar) {
+    if (!confirm('Bu notu silmek istediğinize emin misiniz?')) return;
+    if (State.data.notlar) {
         State.data.notlar = State.data.notlar.filter(n => n.id !== id);
         State.save();
-        if(currentPage === 'notlar') renderPage();
+        if (currentPage === 'notlar') renderPage();
     }
 };
 
@@ -6429,17 +6372,17 @@ window.toggleNoteColorMenu = (id, event) => {
     const menu = document.getElementById('note-color-menu-' + id);
     if (!menu) return;
     const isVisible = menu.style.display === 'block';
-    
+
     document.querySelectorAll('[id^="note-color-menu-"]').forEach(m => m.style.display = 'none');
-    
+
     if (!isVisible) {
         menu.style.display = 'block';
     }
 };
 
-if(!window.noteMenuListenerAdded) {
+if (!window.noteMenuListenerAdded) {
     document.addEventListener('click', (e) => {
-        if(!e.target.closest('[id^="note-color-menu-"]') && !e.target.closest('button[onclick^="window.toggleNoteColorMenu"]')) {
+        if (!e.target.closest('[id^="note-color-menu-"]') && !e.target.closest('button[onclick^="window.toggleNoteColorMenu"]')) {
             document.querySelectorAll('[id^="note-color-menu-"]').forEach(m => m.style.display = 'none');
         }
     });
@@ -6462,21 +6405,21 @@ window.fetchTickerData = async () => {
                 const usd = trJson.data.find(x => x.s === 'FX:USDTRY');
                 const eur = trJson.data.find(x => x.s === 'FX_IDC:EURTRY');
                 const ons = trJson.data.find(x => x.s === 'OANDA:XAUUSD');
-                
+
                 if (usd) tData['USD'] = { Selling: usd.d[0].toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), Change: usd.d[1] };
                 if (eur) tData['EUR'] = { Selling: eur.d[0].toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), Change: eur.d[1] };
                 if (ons) tData['ons'] = { Selling: ons.d[0].toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), Change: ons.d[1] };
-                
+
                 if (usd && ons) {
                     const graPrice = (ons.d[0] * usd.d[0]) / 31.1035;
-                    const graChange = ((1 + ons.d[1]/100) * (1 + usd.d[1]/100) - 1) * 100;
+                    const graChange = ((1 + ons.d[1] / 100) * (1 + usd.d[1] / 100) - 1) * 100;
                     tData['gram-altin'] = { Selling: graPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), Change: graChange };
                 }
             }
-        } catch(e) { console.error(e); }
+        } catch (e) { console.error(e); }
 
         let xu100 = null, brent = null;
-        
+
         const renderTicker = () => {
             const items = [
                 { id: 'XU100', label: 'XU100', data: xu100 || { Selling: '...', Change: null } },
@@ -6491,7 +6434,7 @@ window.fetchTickerData = async () => {
             if (tickerBar) {
                 tickerBar.innerHTML = items.map(item => {
                     if (!item.data || (!item.data.Selling && !item.data.Buying)) return '';
-                    
+
                     let changeHtml = '';
                     if (item.data.Change !== null && item.data.Change !== undefined) {
                         let changeStr = String(item.data.Change).replace('%', '').replace(',', '.');
@@ -6503,7 +6446,7 @@ window.fetchTickerData = async () => {
                     }
 
                     const val = item.data.Selling || item.data.Buying || 0;
-                    
+
                     return `<div style="display: flex; flex-direction: column; align-items: flex-start; min-width: 100px; flex: 1; justify-content: center;">
                         <span style="color: var(--text-secondary); font-size: 12px; font-weight: 500; margin-bottom: 0.1rem; letter-spacing: 0.5px;">${item.label}</span>
                         <div style="font-size: 12px; font-weight: 400; color: #ffffff;">
@@ -6532,12 +6475,12 @@ window.fetchTickerData = async () => {
                 if (d.data && d.data.length > 0) {
                     const price = d.data[0].d[0];
                     const change = d.data[0].d[1];
-                    return { 
-                        Selling: price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), 
-                        Change: change.toFixed(2).replace('.', ',') 
+                    return {
+                        Selling: price.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                        Change: change.toFixed(2).replace('.', ',')
                     };
                 }
-            } catch(e) {}
+            } catch (e) { }
             return null;
         };
 
@@ -6548,7 +6491,7 @@ window.fetchTickerData = async () => {
             renderTicker();
         });
 
-    } catch(e) {
+    } catch (e) {
         console.error('Ticker verisi alınamadı:', e);
     }
 };
@@ -6596,13 +6539,13 @@ const toggleAuthMode = () => {
     isLoginMode = !isLoginMode;
     document.getElementById('auth-title').innerText = isLoginMode ? 'Giriş Yap' : 'Kayıt Ol';
     document.getElementById('auth-submit-btn').innerText = isLoginMode ? 'Giriş Yap' : 'Kayıt Ol';
-    document.getElementById('auth-toggle').innerHTML = isLoginMode ? 
-        'Hesabınız yok mu? <span style="color: var(--accent-color);">Kayıt Olun</span>' : 
+    document.getElementById('auth-toggle').innerHTML = isLoginMode ?
+        'Hesabınız yok mu? <span style="color: var(--accent-color);">Kayıt Olun</span>' :
         'Zaten hesabınız var mı? <span style="color: var(--accent-color);">Giriş Yapın</span>';
-    
+
     document.getElementById('auth-name').style.display = isLoginMode ? 'none' : 'block';
     document.getElementById('auth-phone').style.display = isLoginMode ? 'none' : 'block';
-    if(!isLoginMode) {
+    if (!isLoginMode) {
         document.getElementById('auth-name').required = true;
         document.getElementById('auth-phone').required = true;
     } else {
@@ -6617,9 +6560,9 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const email = document.getElementById('auth-email').value;
     const password = document.getElementById('auth-password').value;
-    
+
     const errorDiv = document.getElementById('auth-error');
-    if(errorDiv) { errorDiv.style.display = 'none'; errorDiv.innerText = ''; }
+    if (errorDiv) { errorDiv.style.display = 'none'; errorDiv.innerText = ''; }
     const btn = document.getElementById('auth-submit-btn');
     const originalBtnText = btn.innerText;
     btn.innerText = 'Bekleyiniz...';
@@ -6627,13 +6570,13 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 
     if (isLoginMode) {
         auth.signInWithEmailAndPassword(email, password).catch(err => {
-            if(errorDiv) { errorDiv.style.display = 'block'; errorDiv.innerText = "Hata: " + err.message; }
+            if (errorDiv) { errorDiv.style.display = 'block'; errorDiv.innerText = "Hata: " + err.message; }
             else alert(err.message);
             btn.innerText = originalBtnText;
             btn.disabled = false;
         });
     } else {
-        if(errorDiv) { errorDiv.style.display = 'block'; errorDiv.innerText = "Yeni üye alımı güvenlik nedeniyle kapatılmıştır."; }
+        if (errorDiv) { errorDiv.style.display = 'block'; errorDiv.innerText = "Yeni üye alımı güvenlik nedeniyle kapatılmıştır."; }
         else alert("Yeni üye alımı güvenlik nedeniyle kapatılmıştır.");
         btn.innerText = originalBtnText;
         btn.disabled = false;
@@ -6664,7 +6607,7 @@ auth.onAuthStateChanged(user => {
         }
         const unEl = document.getElementById('user-name');
         if (unEl) unEl.innerText = displayName || 'Kullanıcı';
-        
+
         window.setTheme = (newTheme) => {
             document.body.setAttribute('data-theme', newTheme);
             localStorage.setItem('borsa_theme', newTheme);
@@ -6673,7 +6616,7 @@ auth.onAuthStateChanged(user => {
         State.init(renderPage);
     } else {
         currentUser = null;
-        if(State.unsubscribe) State.unsubscribe();
+        if (State.unsubscribe) State.unsubscribe();
         document.getElementById('auth-container').style.display = 'flex';
         document.getElementById('app').style.display = 'none';
     }
@@ -6684,9 +6627,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#primary-sidebar .nav-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const target = btn.getAttribute('data-target');
-            if(target) {
+            if (target) {
                 currentPage = target;
-                if(target !== 'hisse_detay') window.closeSecondarySidebar();
+                if (target !== 'hisse_detay') window.closeSecondarySidebar();
                 renderPage();
             }
         });
@@ -6698,24 +6641,24 @@ document.addEventListener('DOMContentLoaded', () => {
 const setupSearchAutocomplete = () => {
     const input = document.getElementById('takip-edit-arama-input');
     const list = document.getElementById('takip-edit-autocomplete-list');
-    if(!input || !list) return;
-    
-    input.addEventListener('input', function() {
+    if (!input || !list) return;
+
+    input.addEventListener('input', function () {
         let val = this.value.toUpperCase();
         list.innerHTML = '';
         if (!val) {
             list.style.display = 'none';
             return;
         }
-        
+
         const validStocks = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : (window.defaultStocksArray || []);
-        
+
         let matches = validStocks.filter(s => s.startsWith(val));
         if (matches.length === 0) {
             list.style.display = 'none';
             return;
         }
-        
+
         matches.slice(0, 10).forEach(hisse => {
             let div = document.createElement('div');
             div.innerHTML = `<strong style="color: #ffffff;">${hisse.substr(0, val.length)}</strong>${hisse.substr(val.length)}`;
@@ -6726,8 +6669,8 @@ const setupSearchAutocomplete = () => {
             div.className = 'autocomplete-item';
             div.onmouseover = () => div.style.background = 'rgba(255,255,255,0.1)';
             div.onmouseout = () => div.style.background = 'transparent';
-            
-            div.addEventListener('mousedown', function(e) {
+
+            div.addEventListener('mousedown', function (e) {
                 e.stopPropagation();
                 input.value = hisse;
                 list.style.display = 'none';
@@ -6741,7 +6684,7 @@ const setupSearchAutocomplete = () => {
     if (window.takipEditListener) {
         document.removeEventListener('click', window.takipEditListener);
     }
-    window.takipEditListener = function(e) {
+    window.takipEditListener = function (e) {
         if (e.target !== input && e.target !== list) {
             list.style.display = 'none';
         }
@@ -6757,16 +6700,16 @@ window.showSidebarTakip = (btn) => {
     if (takipHideTimeout) clearTimeout(takipHideTimeout);
     const dropdown = document.getElementById('sidebar-takip-dropdown');
     if (!dropdown) return;
-    
-    const takipList = (State.data.takipListesi || []).slice().sort((a,b) => a.localeCompare(b));
+
+    const takipList = (State.data.takipListesi || []).slice().sort((a, b) => a.localeCompare(b));
     if (takipList.length === 0) {
         dropdown.innerHTML = '<div style="padding: 0.5rem; color: var(--text-secondary); font-size: 12px; white-space: nowrap; text-align: center;">Listeniz boş</div>';
     } else {
-        dropdown.innerHTML = takipList.map(hisse => 
+        dropdown.innerHTML = takipList.map(hisse =>
             `<button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; font-size: 12px; padding: 0.5rem 1rem;" onclick="window.goToHisse('${hisse}'); if(window.hideSidebarTakip) window.hideSidebarTakip(true);">${hisse}</button>`
         ).join('');
     }
-    
+
     const rect = btn.getBoundingClientRect();
     dropdown.style.left = (rect.right - 5) + 'px';
     dropdown.style.top = rect.top + 'px';
@@ -6801,9 +6744,9 @@ window.cancelHideTakip = () => {
 
 
 window.recalculateHedefFiyatlar = () => {
-    if (!State.data.degerleme) return;
+    if (!State.data.degerleme && !State.data.araDegerleme) return;
     if (!State.data.hedefFiyatlar) State.data.hedefFiyatlar = {};
-    
+
     const getVal = (sheet, rowName) => {
         if (!sheet || !sheet.rows) return 0;
         const searchStr = rowName.toLowerCase().replace(/[öçşğıü]/g, '');
@@ -6822,9 +6765,14 @@ window.recalculateHedefFiyatlar = () => {
         return 0;
     };
 
-    for (const hisse of Object.keys(State.data.degerleme)) {
+    const allHisseler = new Set([
+        ...Object.keys(State.data.degerleme || {}),
+        ...Object.keys(State.data.araDegerleme || {})
+    ]);
+
+    for (const hisse of allHisseler) {
         if (window.parseExcelData && (!window.stockData || !window.stockData[hisse] || !window.stockData[hisse].bilanco)) {
-            try { window.parseExcelData(hisse); } catch(e) {}
+            try { window.parseExcelData(hisse); } catch (e) { }
         }
         const sData = (window.stockData && window.stockData[hisse]) ? window.stockData[hisse] : null;
         if (!sData) continue;
@@ -6836,11 +6784,11 @@ window.recalculateHedefFiyatlar = () => {
                 if (!r[0]) return;
                 const rName = r[0].toLocaleLowerCase('tr-TR');
                 if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
-                    const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                    const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                     finansalBorclarTotal += val;
                 }
                 if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
-                    const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                    const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                     nakitTotal += val;
                 }
             });
@@ -6853,7 +6801,7 @@ window.recalculateHedefFiyatlar = () => {
                 const rName = r[0].toLocaleLowerCase('tr-TR');
                 if (rName.trim() === 'duran varlıklar') inDuran = true;
                 if (rName.includes('finansal yatırımlar') && !inDuran) {
-                    finYatTotal += typeof r[1] === 'number' ? r[1] : parseFloat((r[1]||'').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                    finYatTotal += typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                 }
             });
         }
@@ -6864,56 +6812,136 @@ window.recalculateHedefFiyatlar = () => {
         const eurKuru = (State.getFiyat ? parseFloat(State.getFiyat('EURTRY')) : null) || window.euroKuru || 50.00;
         const usdKuru = (State.getFiyat ? parseFloat(State.getFiyat('USDTRY')) : null) || window.dolarKuru || 46.99;
 
-        if (!State.data.hedefFiyatlar[hisse]) State.data.hedefFiyatlar[hisse] = {};
+        // CLEAR ALL STALE TARGET PRICES FOR THIS STOCK BEFORE RECALCULATING
+        State.data.hedefFiyatlar[hisse] = {};
 
         const years = ['2026', '2027', '2028', '2029', '2030'];
-        years.forEach(y => {
-            const d = State.data.degerleme[hisse][y];
-            if (!d) return;
-            const pNum = (val) => (val === undefined || val === null || val === '') ? null : parseFloat(val);
-            const curCurrency = d.currency || 'TRY';
-            
-            let ySatis = pNum(d['ciro']);
-            let yFavokMarji = pNum(d['favok_marji']);
-            let yNetKarMarji = pNum(d['net_kar_marji']);
-            let yFdFavok = pNum(d['fd_favok']);
-            let yFk = pNum(d['fk']);
-            let yPdDd = pNum(d['pddd']);
-            let yOzkaynak = pNum(d['ozkaynaklar']);
-            
-            let favok = (ySatis !== null && yFavokMarji !== null) ? ySatis * (yFavokMarji/100) : null;
-            let netKar = (ySatis !== null && yNetKarMarji !== null) ? ySatis * (yNetKarMarji/100) : null;
-            
-            let currentNetBorc = netBorc;
-            if (curCurrency === 'USD') currentNetBorc = netBorc / usdKuru;
-            else if (curCurrency === 'EUR') currentNetBorc = netBorc / eurKuru;
+        if (State.data.degerleme && State.data.degerleme[hisse]) {
+            years.forEach(y => {
+                const d = State.data.degerleme[hisse][y];
+                if (!d) return;
+                const pNum = (val) => (val === undefined || val === null || val === '') ? null : parseFloat(val);
+                const curCurrency = d.currency || 'TRY';
 
-            let pd1 = (favok !== null && yFdFavok !== null) ? (favok * yFdFavok) - currentNetBorc : null;
-            let pd2 = (netKar !== null && yFk !== null) ? (netKar * yFk) : null;
-            let pd3 = (yOzkaynak !== null && yPdDd !== null) ? (yOzkaynak * yPdDd) : null;
-            
-            let validPDs = [];
-            if (pd1 !== null) validPDs.push(pd1);
-            if (pd2 !== null) validPDs.push(pd2);
-            if (pd3 !== null) validPDs.push(pd3);
-            
-            if (validPDs.length > 0 && odenmisSermaye > 0) {
-                let avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
-                let hedefFiyatForeign = avgPD / odenmisSermaye;
-                let hedefFiyatTL = 0;
-                if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
-                else if (curCurrency === 'EUR') hedefFiyatTL = hedefFiyatForeign * eurKuru;
-                else hedefFiyatTL = hedefFiyatForeign;
-                
-                let potansiyel = 0;
-                if (guncelFiyat > 0) {
-                    potansiyel = (hedefFiyatTL - guncelFiyat) / guncelFiyat;
+                let ySatis = pNum(d['ciro']);
+                let yFavokMarji = pNum(d['favok_marji']);
+                let yNetKarMarji = pNum(d['net_kar_marji']);
+                let yFdFavok = pNum(d['fd_favok']);
+                let yFk = pNum(d['fk']);
+                let yPdDd = pNum(d['pddd']);
+                let yOzkaynak = pNum(d['ozkaynaklar']);
+
+                let favok = (ySatis !== null && yFavokMarji !== null) ? ySatis * (yFavokMarji / 100) : null;
+                let netKar = (ySatis !== null && yNetKarMarji !== null) ? ySatis * (yNetKarMarji / 100) : null;
+
+                let currentNetBorc = netBorc;
+                if (curCurrency === 'USD') currentNetBorc = netBorc / usdKuru;
+                else if (curCurrency === 'EUR') currentNetBorc = netBorc / eurKuru;
+
+                let pd1 = (favok !== null && yFdFavok !== null && yFdFavok > 0) ? (favok * yFdFavok) - currentNetBorc : null;
+                let pd2 = (netKar !== null && yFk !== null && yFk > 0) ? (netKar * yFk) : null;
+                let pd3 = (yOzkaynak !== null && yPdDd !== null && yPdDd > 0) ? (yOzkaynak * yPdDd) : null;
+
+                let validPDs = [];
+                if (pd1 !== null) validPDs.push(pd1);
+                if (pd2 !== null) validPDs.push(pd2);
+                if (pd3 !== null) validPDs.push(pd3);
+
+                if (validPDs.length > 0 && odenmisSermaye > 0) {
+                    let avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
+                    let hedefFiyatForeign = avgPD / odenmisSermaye;
+                    let hedefFiyatTL = 0;
+                    if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
+                    else if (curCurrency === 'EUR') hedefFiyatTL = hedefFiyatForeign * eurKuru;
+                    else hedefFiyatTL = hedefFiyatForeign;
+
+                    let potansiyel = 0;
+                    if (guncelFiyat > 0) {
+                        potansiyel = (hedefFiyatTL - guncelFiyat) / guncelFiyat;
+                    }
+                    State.data.hedefFiyatlar[hisse][y] = { hedefFiyat: hedefFiyatTL, potansiyel: potansiyel };
+                } else {
+                    delete State.data.hedefFiyatlar[hisse][y];
                 }
-                State.data.hedefFiyatlar[hisse][y] = { hedefFiyat: hedefFiyatTL, potansiyel: potansiyel };
-            } else {
-                delete State.data.hedefFiyatlar[hisse][y];
-            }
-        });
+            });
+        }
+
+        if (State.data.araDegerleme && State.data.araDegerleme[hisse]) {
+            Object.keys(State.data.araDegerleme[hisse]).forEach(y => {
+                const d = State.data.araDegerleme[hisse][y];
+                if (!d) return;
+                const pNum = (val) => (val === undefined || val === null || val === '') ? null : parseFloat(val);
+                const curCurrency = d.currency || 'TRY';
+
+                let ySatis = pNum(d['ciro']);
+                let yFavokMarji = pNum(d['favok_marji']);
+                let yNetKarMarji = pNum(d['net_kar_marji']);
+                let yFdFavok = pNum(d['fd_favok']);
+                let yFk = pNum(d['f_k']);
+                let yPdDd = pNum(d['pd_dd']);
+                let yOzkaynak = pNum(d['ozkaynaklar']);
+
+                let past3Favok = 0;
+                let past3NetKar = 0;
+
+                if (y.includes('/') && sData && sData.gelirCeyrek && sData.gelirCeyrek.rows) {
+                    const favokRow = sData.gelirCeyrek.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
+                    const netKarRow = sData.gelirCeyrek.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                    
+                    for (let i = 1; i <= Math.min(3, sData.gelirCeyrek.headers.length - 1); i++) {
+                        if (favokRow && favokRow[i] !== undefined && favokRow[i] !== '') {
+                            past3Favok += (typeof favokRow[i] === 'number' ? favokRow[i] : parseFloat(String(favokRow[i]).replace(/\./g, '').replace(/,/g, '.')) || 0);
+                        }
+                        if (netKarRow && netKarRow[i] !== undefined && netKarRow[i] !== '') {
+                            past3NetKar += (typeof netKarRow[i] === 'number' ? netKarRow[i] : parseFloat(String(netKarRow[i]).replace(/\./g, '').replace(/,/g, '.')) || 0);
+                        }
+                    }
+                }
+
+                let favok = past3Favok;
+                if (ySatis !== null && yFavokMarji !== null) {
+                    favok = (ySatis * (yFavokMarji / 100)) + past3Favok;
+                }
+                
+                let netKar = past3NetKar;
+                if (ySatis !== null && yNetKarMarji !== null) {
+                    netKar = (ySatis * (yNetKarMarji / 100)) + past3NetKar;
+                }
+
+                let currentNetBorc = netBorc;
+                if (curCurrency === 'USD') currentNetBorc = netBorc / usdKuru;
+                else if (curCurrency === 'EUR') currentNetBorc = netBorc / eurKuru;
+
+                let pd1 = (favok !== null && yFdFavok !== null && yFdFavok > 0) ? (favok * yFdFavok) - currentNetBorc : null;
+                let pd2 = (netKar !== null && yFk !== null && yFk > 0) ? (netKar * yFk) : null;
+                let pd3 = (yOzkaynak !== null && yPdDd !== null && yPdDd > 0) ? (yOzkaynak * yPdDd) : null;
+
+                let validPDs = [];
+                if (pd1 !== null) validPDs.push(pd1);
+                if (pd2 !== null) validPDs.push(pd2);
+                if (pd3 !== null) validPDs.push(pd3);
+
+                let inputSermaye = pNum(d['sermaye']);
+                let finalSermaye = (inputSermaye !== null && inputSermaye !== 0) ? inputSermaye : odenmisSermaye;
+
+                if (validPDs.length > 0 && finalSermaye > 0) {
+                    let avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
+                    let hedefFiyatForeign = avgPD / finalSermaye;
+                    let hedefFiyatTL = 0;
+                    if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
+                    else if (curCurrency === 'EUR') hedefFiyatTL = hedefFiyatForeign * eurKuru;
+                    else hedefFiyatTL = hedefFiyatForeign;
+
+                    let potansiyel = 0;
+                    if (guncelFiyat > 0) {
+                        potansiyel = (hedefFiyatTL - guncelFiyat) / guncelFiyat;
+                    }
+                    State.data.hedefFiyatlar[hisse][y] = { hedefFiyat: hedefFiyatTL, potansiyel: potansiyel };
+                } else {
+                    delete State.data.hedefFiyatlar[hisse][y];
+                }
+            });
+        }
     }
 };
 
@@ -6928,18 +6956,18 @@ window.uploadRapor = async () => {
     const status = document.getElementById('upload-status');
 
     if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-        if(status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Lütfen bir dosya seçin.'; }
+        if (status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Lütfen bir dosya seçin.'; }
         return;
     }
     if (!hisse) {
-        if(status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Lütfen Hisse kodunu doldurun.'; }
+        if (status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Lütfen Hisse kodunu doldurun.'; }
         return;
     }
 
-    if(status) { status.style.color = 'var(--text-primary)'; status.innerHTML = `<i class="fas fa-spinner fa-spin"></i> GitHub'a yükleniyor, lütfen bekleyin...`; }
+    if (status) { status.style.color = 'var(--text-primary)'; status.innerHTML = `<i class="fas fa-spinner fa-spin"></i> GitHub'a yükleniyor, lütfen bekleyin...`; }
 
     const file = fileInput.files[0];
-    
+
     // Format characters
     const formatStr = (str) => {
         if (!str) return '';
@@ -6948,7 +6976,7 @@ window.uploadRapor = async () => {
             .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
             .replace(/\s+/g, '_');
     };
-    
+
     const parts = [];
     if (sn) parts.push(sn);
     if (ad) parts.push(formatStr(ad));
@@ -6956,7 +6984,7 @@ window.uploadRapor = async () => {
     if (sirket) parts.push(formatStr(sirket));
 
     const newFileName = parts.length > 0 ? parts.join('-') + '.pdf' : file.name;
-    
+
     const toBase64 = file => new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -6966,7 +6994,7 @@ window.uploadRapor = async () => {
 
     try {
         const base64Content = await toBase64(file);
-        
+
         const response = await fetch('/api/upload', {
             method: 'POST',
             headers: {
@@ -6982,9 +7010,9 @@ window.uploadRapor = async () => {
         const result = await response.json();
 
         if (response.ok) {
-            if(status) { 
-                status.style.color = 'var(--success-color)'; 
-                status.innerHTML = `<i class="fas fa-check-circle"></i> Dosyanız başarıyla yüklendi.`; 
+            if (status) {
+                status.style.color = 'var(--success-color)';
+                status.innerHTML = `<i class="fas fa-check-circle"></i> Dosyanız başarıyla yüklendi.`;
             }
             // Clear inputs
             fileInput.value = '';
@@ -6995,22 +7023,22 @@ window.uploadRapor = async () => {
             document.getElementById('upload-tarih').value = '';
             document.getElementById('upload-sirket').value = '';
         } else {
-            if(status) { 
-                status.style.color = 'var(--danger-color)'; 
-                status.innerHTML = `<i class="fas fa-times-circle"></i> Hata: ${result.error || 'Bilinmeyen bir hata oluştu.'}`; 
+            if (status) {
+                status.style.color = 'var(--danger-color)';
+                status.innerHTML = `<i class="fas fa-times-circle"></i> Hata: ${result.error || 'Bilinmeyen bir hata oluştu.'}`;
             }
         }
     } catch (error) {
         console.error('Upload Error:', error);
-        if(status) { 
-            status.style.color = 'var(--danger-color)'; 
-            status.innerHTML = `<i class="fas fa-times-circle"></i> Ağ veya sunucu hatası oluştu.`; 
+        if (status) {
+            status.style.color = 'var(--danger-color)';
+            status.innerHTML = `<i class="fas fa-times-circle"></i> Ağ veya sunucu hatası oluştu.`;
         }
     }
 };
 
 // Takip listesi linkleri icin ozel CSS
-(function() {
+(function () {
     if (!document.getElementById('takip-link-style')) {
         const style = document.createElement('style');
         style.id = 'takip-link-style';
