@@ -1151,27 +1151,35 @@ const renderPortfoy = (container) => {
     }).join('');
 
     const nakitItemForTable = portfoyList.find(p => p.isNakit);
-    if (nakitItemForTable && nakitItemForTable.guncelTutar > 0) {
-        totalGuncel += nakitItemForTable.guncelTutar;
-        totalOdenen += nakitItemForTable.guncelTutar;
+    let guncelNakitDeger = State.data.manuelNakitTutar || 0;
+    
+    // We add Nakit to totals regardless of value since we now show it
+    totalGuncel += guncelNakitDeger;
+    totalOdenen += guncelNakitDeger;
+    
+    const nakitOran = (totalGuncel > 0) ? (guncelNakitDeger / totalGuncel) : 0;
 
-        portfoyHtml += `<tr>
-            <td style="text-align: center !important;">${filteredPortfoy.length + 1}</td>
-            <td style="text-align: left !important;">Nakit</td>
-            <td style="text-align: left !important;">Nakit</td>
-            <td style="text-align: right !important;"></td>
-            <td style="text-align: right !important;"></td>
-            <td style="text-align: right !important;"></td>
-            <td style="text-align: right !important;"></td>
-            <td style="text-align: right !important;"></td>
-            <td style="text-align: right !important;">${formatCurrency(nakitItemForTable.guncelTutar, 0)}</td>
-            <td style="text-align: right !important;"></td>
-            <td style="text-align: right !important;"></td>
-            <td style="text-align: right !important;">${formatPercent(nakitItemForTable.portfoyOrani, 0)}</td>
-            <td style="text-align: right !important;"></td>
-            <td style="text-align: right !important;"></td>
-        </tr>`;
-    }
+    portfoyHtml += `<tr>
+        <td style="text-align: center !important;">${filteredPortfoy.length + 1}</td>
+        <td style="text-align: left !important;">Nakit</td>
+        <td style="text-align: left !important;">Nakit</td>
+        <td style="text-align: right !important;"></td>
+        <td style="text-align: right !important;"></td>
+        <td style="text-align: right !important;"></td>
+        <td style="text-align: right !important;"></td>
+        <td style="text-align: right !important;"></td>
+        <td style="text-align: right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">
+            <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
+                <span style="cursor:pointer;" onclick="this.style.display='none'; this.nextElementSibling.style.display='inline-block'; this.nextElementSibling.focus();" title="Düzenlemek için tıklayın">${formatCurrency(guncelNakitDeger, 2)}</span>
+                <input type="number" step="0.01" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${guncelNakitDeger}" onblur="window.saveNakitVarlikEdit(this)" onkeydown="if(event.key==='Enter') window.saveNakitVarlikEdit(this)">
+            </div>
+        </td>
+        <td style="text-align: right !important;"></td>
+        <td style="text-align: right !important;"></td>
+        <td style="text-align: right !important;">${formatPercent(nakitOran, 0)}</td>
+        <td style="text-align: right !important;"></td>
+        <td style="text-align: right !important;"></td>
+    </tr>`;
 
     let arsivKarTotal = 0;
 
@@ -1246,12 +1254,13 @@ const renderPortfoy = (container) => {
                         <table class="dash-table compact-table" style="width: max-content; white-space: nowrap;">
                             <tbody>
                                 <tr>
-                                    <td style="text-align:left !important; width:50%;">Nakit</td>
-                                    <td style="text-align:right !important; width:50%; border-right: 1px solid rgba(255, 255, 255, 0.03); cursor: pointer;" ondblclick="window.togglePortfoyEdit()" title="Düzenlemek için çift tıklayın">
-                                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
-                                            <span id="nakit-text">${formatCurrency(guncelNakitTutar)}</span>
-                                            <input type="number" step="0.01" id="inline-nakit-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${State.data.manuelNakitTutar || 0}" onblur="window.savePortfoyEdit()" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
-                                        </div>
+                                    <td style="text-align:left !important; width:50%;">Toplam Portföy</td>
+                                    <td style="text-align:right !important; width:50%; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.toplamPortfoy)}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left !important;">Nakit</td>
+                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">
+                                        <span id="nakit-text">${formatCurrency(guncelNakitTutar, 2)}</span>
                                     </td>
                                 </tr>
                                 <tr>
@@ -1261,10 +1270,6 @@ const renderPortfoy = (container) => {
                                 <tr>
                                     <td style="text-align:left !important;">Fon Portföyü</td>
                                     <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(fonPortfoyTutar)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align:left !important;">Toplam Portföy</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.toplamPortfoy)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Anapara</td>
@@ -1435,27 +1440,29 @@ const renderPortfoy = (container) => {
 
 
     window.togglePortfoyEdit = () => {
-        const nakitText = document.getElementById('nakit-text');
-        const isEditing = nakitText.style.display === 'none';
+        const hedefText = document.getElementById('hedef-text');
+        const isEditing = hedefText.style.display === 'none';
 
-        nakitText.style.display = isEditing ? 'inline' : 'none';
-        document.getElementById('inline-nakit-input').style.display = isEditing ? 'none' : 'inline-block';
-
-        document.getElementById('hedef-text').style.display = isEditing ? 'inline' : 'none';
+        hedefText.style.display = isEditing ? 'inline' : 'none';
         document.getElementById('inline-hedef-input').style.display = isEditing ? 'none' : 'inline-block';
 
         if (!isEditing) {
-            document.getElementById('inline-nakit-input').focus();
+            document.getElementById('inline-hedef-input').focus();
         }
     };
 
     window.savePortfoyEdit = () => {
-        const nakitVal = document.getElementById('inline-nakit-input').value;
         const hedefVal = document.getElementById('inline-hedef-input').value;
 
-        if (nakitVal !== '') State.data.manuelNakitTutar = parseFloat(nakitVal) || 0;
         if (hedefVal !== '') State.data.hedefPortfoyTL = parseFloat(hedefVal) || 0;
 
+        State.save();
+        if (typeof renderPage === "function") renderPage();
+    };
+
+    window.saveNakitVarlikEdit = (input) => {
+        const nakitVal = input.value;
+        if (nakitVal !== '') State.data.manuelNakitTutar = parseFloat(nakitVal) || 0;
         State.save();
         if (typeof renderPage === "function") renderPage();
     };
@@ -1512,20 +1519,26 @@ const renderPortfoy = (container) => {
             afterDraw(chart) {
                 const ctx = chart.ctx;
                 chart.data.datasets.forEach((dataset, i) => {
+                    let sum = 0;
+                    dataset.data.forEach(d => sum += d);
+
                     chart.getDatasetMeta(i).data.forEach((arc, index) => {
                         const dataVal = dataset.data[index];
-                        if (dataVal <= 0) return;
+                        const percentage = (dataVal * 100 / sum);
+                        
+                        // 0% (veya 0.5'ten küçük) dilimleri gösterme
+                        if (percentage < 0.5) return;
 
                         const centerPoint = arc.tooltipPosition();
                         const chartCenter = { x: chart.chartArea.left + chart.chartArea.width / 2, y: chart.chartArea.top + chart.chartArea.height / 2 };
 
                         let angle = Math.atan2(centerPoint.y - chartCenter.y, centerPoint.x - chartCenter.x);
-                        if (chart.data.labels && chart.data.labels[index] === 'Nakit' && Math.cos(angle) < 0) {
-                            angle = (Math.PI / 2) - 0.2;
+                        
+                        // Çizgilerin tam aşağı inip alttaki yazılara (legend) çarpmasını engelle
+                        if (angle > 1.2 && angle < 1.94) {
+                            angle = (angle < 1.57) ? 1.0 : 2.14; 
                         }
-                        if (index === 1 && Math.sin(angle) > 0.8 && chart.data.labels[index] !== 'Nakit') {
-                            angle = Math.PI - 0.4;
-                        }
+
                         const radius = arc.outerRadius;
 
                         const startX = chartCenter.x + Math.cos(angle) * radius;
@@ -1546,13 +1559,11 @@ const renderPortfoy = (container) => {
                         ctx.stroke();
 
                         ctx.fillStyle = '#fff';
-                        ctx.font = '12px Arial';
+                        ctx.font = 'normal 12px Inter, Arial';
                         ctx.textBaseline = 'middle';
                         ctx.textAlign = Math.cos(angle) >= 0 ? 'left' : 'right';
 
-                        let sum = 0;
-                        dataset.data.forEach(d => sum += d);
-                        const text = (dataVal * 100 / sum).toFixed(0) + '%';
+                        const text = percentage.toFixed(0) + '%';
                         ctx.fillText(text, finalX + (Math.cos(angle) >= 0 ? 3 : -3), endY);
                         ctx.restore();
                     });
@@ -6143,10 +6154,10 @@ const _renderPageActual = () => {
 window.renderNotlar = (container) => {
     container.innerHTML = `
         <div class="header-section" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0px;">
-            <h2 style="margin: 0; font-size: 16px; font-weight: 700; background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Notlarım</h2>
+            <h2 style="margin: 0; font-size: 17px; font-weight: 700; background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Notlarım</h2>
             <button class="btn" style="background: var(--accent-color); color: #fff;" onclick="window.openNoteModal()"><i class="fas fa-plus"></i> Yeni Not Ekle</button>
         </div>
-        <div id="notes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; align-items: start;">
+        <div id="notes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; align-items: start; margin-top: -10px;">
         </div>
     `;
 
