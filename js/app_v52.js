@@ -6129,6 +6129,15 @@ const _renderPageActual = () => {
     const container = document.getElementById('main-content');
     if (!container) return;
 
+    if (window.Chart) {
+        Object.values(Chart.instances).forEach(chart => {
+            if (chart) chart.destroy();
+        });
+        window.chartOzetInstance = null;
+        window.chartVarliklarInstance = null;
+        window.chartPortfoyGecmisiInstance = null;
+    }
+
     // Top Bar visibility:
     const topBar = document.querySelector('.top-bar');
     if (topBar) {
