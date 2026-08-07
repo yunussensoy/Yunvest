@@ -6516,7 +6516,11 @@ window.fetchTickerData = async () => {
     }
 };
 
+let isAppInitialized = false;
 const initApp = () => {
+    if (isAppInitialized) return;
+    isAppInitialized = true;
+
     ensureDatalist();
 
     const savedTheme = localStorage.getItem('borsa_theme') || 'dark';
