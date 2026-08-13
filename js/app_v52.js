@@ -6667,7 +6667,10 @@ const setupSearchAutocomplete = () => {
     const list = document.getElementById('takip-edit-autocomplete-list');
     if (!input || !list) return;
 
-    input.addEventListener('input', function () {
+    if (input._searchAutocompleteHandler) {
+    input.removeEventListener('input', input._searchAutocompleteHandler);
+}
+input._searchAutocompleteHandler = function () {
         let val = this.value.toUpperCase();
         list.innerHTML = '';
         if (!val) {
@@ -6702,7 +6705,8 @@ const setupSearchAutocomplete = () => {
             list.appendChild(div);
         });
         list.style.display = 'flex';
-    });
+    };
+input.addEventListener('input', input._searchAutocompleteHandler);
 
     // Hide when clicking outside
     if (window.takipEditListener) {
