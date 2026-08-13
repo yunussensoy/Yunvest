@@ -3160,11 +3160,11 @@ const renderHisseler = (container) => {
                             }
 
                             if (d.ciro !== undefined && d.ciro !== '' && d.favok_marji !== undefined && d.favok_marji !== '') {
-                                favok = (ciro * (favokMarji / 100)) + past3Favok;
+                                favok = (ciro * (favokMarji / 100));
                                 hasFavok = true;
                             }
                             if (d.ciro !== undefined && d.ciro !== '' && d.net_kar_marji !== undefined && d.net_kar_marji !== '') {
-                                net_kar = (ciro * (netKarMarji / 100)) + past3NetKar;
+                                net_kar = (ciro * (netKarMarji / 100));
                                 hasNetKar = true;
                             }
 
@@ -5301,13 +5301,13 @@ window.getGBHF = (hisse) => {
         let favok = past3Favok;
         let hasFavok = true;
         if (d.ciro !== undefined && d.ciro !== '' && d.favok_marji !== undefined && d.favok_marji !== '') {
-            favok = (ciro * (favokMarji / 100)) + past3Favok;
+            favok = (ciro * (favokMarji / 100));
         }
         
         let net_kar = past3NetKar;
         let hasNetKar = true;
         if (d.ciro !== undefined && d.ciro !== '' && d.net_kar_marji !== undefined && d.net_kar_marji !== '') {
-            net_kar = (ciro * (netKarMarji / 100)) + past3NetKar;
+            net_kar = (ciro * (netKarMarji / 100));
         }
         
         let validPDs = [];
@@ -6667,7 +6667,10 @@ const setupSearchAutocomplete = () => {
     const list = document.getElementById('takip-edit-autocomplete-list');
     if (!input || !list) return;
 
-    input.addEventListener('input', function () {
+    if (input._searchAutocompleteHandler) {
+    input.removeEventListener('input', input._searchAutocompleteHandler);
+}
+input._searchAutocompleteHandler = function () {
         let val = this.value.toUpperCase();
         list.innerHTML = '';
         if (!val) {
@@ -6702,7 +6705,8 @@ const setupSearchAutocomplete = () => {
             list.appendChild(div);
         });
         list.style.display = 'flex';
-    });
+    };
+input.addEventListener('input', input._searchAutocompleteHandler);
 
     // Hide when clicking outside
     if (window.takipEditListener) {
@@ -6924,12 +6928,12 @@ window.recalculateHedefFiyatlar = () => {
 
                 let favok = past3Favok;
                 if (ySatis !== null && yFavokMarji !== null) {
-                    favok = (ySatis * (yFavokMarji / 100)) + past3Favok;
+                    favok = (ySatis * (yFavokMarji / 100));
                 }
                 
                 let netKar = past3NetKar;
                 if (ySatis !== null && yNetKarMarji !== null) {
-                    netKar = (ySatis * (yNetKarMarji / 100)) + past3NetKar;
+                    netKar = (ySatis * (yNetKarMarji / 100));
                 }
 
                 let currentNetBorc = netBorc;
