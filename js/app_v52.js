@@ -1938,9 +1938,12 @@ const renderHisseler = (container) => {
     const getVal = (sheet, rowName) => {
         if (!sheet || !sheet.rows) return 0;
         const searchStr = rowName.toLowerCase().replace(/[öçşğıü]/g, '');
-        const row = sheet.rows.find(r => {
+        
+        let exactRow = sheet.rows.find(r => r[0] && r[0].toLowerCase().replace(/[öçşğıü]/g, '').trim() === searchStr.trim());
+        const row = exactRow || sheet.rows.find(r => {
             if (!r[0]) return false;
             const t = r[0].toLowerCase().replace(/[öçşğıü]/g, '');
+            if (searchStr.includes('sermaye') && (t.includes('fark') || t.includes('duzeltme'))) return false;
             return t.includes(searchStr);
         });
         if (!row) return 0;
@@ -2241,14 +2244,8 @@ const renderHisseler = (container) => {
                     // Bilanço Items
                     const b_headers = sData.bilanco.headers;
                     const bp1 = b_headers[1];
-                    let bp2_idx = 2; // fallback to previous quarter
-                    // try to find previous year end
-                    if (bp1) {
-                        const parts = bp1.split('/');
-                        const lastYearEnd = (parseInt(parts[0]) - 1) + '/12';
-                        const foundIdx = b_headers.indexOf(lastYearEnd);
-                        if (foundIdx !== -1) bp2_idx = foundIdx;
-                    }
+                    let bp2_idx = 2; // always use previous quarter
+                    if (b_headers.length <= 2) bp2_idx = 1; // fallback
                     const bp2 = b_headers[bp2_idx];
 
                     const getB = (name) => {
@@ -3012,7 +3009,7 @@ const renderHisseler = (container) => {
                 // Common calculations
                 let odenmisSermayeDeg = 0;
                 if (sDataDeg && sDataDeg.bilanco && sDataDeg.bilanco.rows) {
-                    const osRow_deg = sDataDeg.bilanco.rows.find(r => r[0] && r[0].toLowerCase().includes('ödenmiş sermaye'));
+                    const osRow_deg = sDataDeg.bilanco.rows.find(r => r[0] && r[0].toLowerCase().includes('ödenmiş sermaye') && !r[0].toLowerCase().includes('fark') && !r[0].toLowerCase().includes('düzeltme'));
                     if (osRow_deg && osRow_deg.length > 1) {
                         odenmisSermayeDeg = parseFloat(String(osRow_deg[1]).replace(/\./g, '').replace(/,/g, '.')) || 0;
                     }
@@ -3180,11 +3177,14 @@ const renderHisseler = (container) => {
                             let yFk = parseFloat(d.f_k) || 0;
                             let yPdDd = parseFloat(d.pd_dd) || 0;
 
+                            let ttmFavok = favok + (p.includes('/') ? past3Favok : 0);
+                            let ttmNetKar = net_kar + (p.includes('/') ? past3NetKar : 0);
+
                             if (hasFavok && yFdFavok > 0) {
-                                validPDs.push((favok * yFdFavok) - currentNetBorc);
+                                validPDs.push((ttmFavok * yFdFavok) - currentNetBorc);
                             }
                             if (hasNetKar && yFk > 0) {
-                                validPDs.push(net_kar * yFk);
+                                validPDs.push(ttmNetKar * yFk);
                             }
                             if (d.ozkaynaklar !== undefined && d.ozkaynaklar !== '' && yPdDd > 0) {
                                 validPDs.push((parseFloat(d.ozkaynaklar) || 0) * yPdDd);
@@ -5285,7 +5285,7 @@ window.getGBHF = (hisse) => {
         
         let odenmisSermayeDeg = 0;
         if (sData.bilanco && sData.bilanco.rows) {
-            const osRow = sData.bilanco.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('ödenmiş sermaye'));
+            const osRow = sData.bilanco.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('ödenmiş sermaye') && !String(x[0]).toLocaleLowerCase('tr-TR').includes('fark') && !String(x[0]).toLocaleLowerCase('tr-TR').includes('düzeltme'));
             if (osRow && osRow[1]) odenmisSermayeDeg = typeof osRow[1] === 'number' ? osRow[1] : parseFloat(String(osRow[1]).replace(/\./g, '').replace(/,/g, '.')) || 0;
         }
         
@@ -5298,14 +5298,13 @@ window.getGBHF = (hisse) => {
         let favokMarji = parseFloat(d.favok_marji) || 0;
         let netKarMarji = parseFloat(d.net_kar_marji) || 0;
         
-        let favok = past3Favok;
-        let hasFavok = true;
+        let favok = 0; let hasFavok = false;
         if (d.ciro !== undefined && d.ciro !== '' && d.favok_marji !== undefined && d.favok_marji !== '') {
             favok = (ciro * (favokMarji / 100));
+            hasFavok = true;
         }
         
-        let net_kar = past3NetKar;
-        let hasNetKar = true;
+        let net_kar = 0; let hasNetKar = false;
         if (d.ciro !== undefined && d.ciro !== '' && d.net_kar_marji !== undefined && d.net_kar_marji !== '') {
             net_kar = (ciro * (netKarMarji / 100));
         }
@@ -5319,8 +5318,11 @@ window.getGBHF = (hisse) => {
         let yFk = parseFloat(d.f_k) || 0;
         let yPdDd = parseFloat(d.pd_dd) || 0;
         
-        if (hasFavok && yFdFavok > 0) validPDs.push((favok * yFdFavok) - currentNetBorc);
-        if (hasNetKar && yFk > 0) validPDs.push(net_kar * yFk);
+        let ttmFavok = favok + (p.includes('/') ? past3Favok : 0);
+        let ttmNetKar = net_kar + (p.includes('/') ? past3NetKar : 0);
+        
+        if (hasFavok && yFdFavok > 0) validPDs.push((ttmFavok * yFdFavok) - currentNetBorc);
+        if (hasNetKar && yFk > 0) validPDs.push(ttmNetKar * yFk);
         if (d.ozkaynaklar !== undefined && d.ozkaynaklar !== '' && yPdDd > 0) validPDs.push((parseFloat(d.ozkaynaklar) || 0) * yPdDd);
         
         let currentOdenmisSermaye = odenmisSermayeDeg;
@@ -5618,9 +5620,11 @@ const renderAnasayfa = (container) => {
             const getVal = (sheet, rowName) => {
                 if (!sheet || !sheet.rows) return 0;
                 const searchStr = rowName.toLowerCase().replace(/[öçşğıü]/g, '');
-                const row = sheet.rows.find(r => {
+                let exactRow = sheet.rows.find(r => r[0] && r[0].toLowerCase().replace(/[öçşğıü]/g, '').trim() === searchStr.trim());
+                const row = exactRow || sheet.rows.find(r => {
                     if (!r[0]) return false;
                     const t = r[0].toLowerCase().replace(/[öçşğıü]/g, '');
+                    if (searchStr.includes('sermaye') && (t.includes('fark') || t.includes('duzeltme'))) return false;
                     return t.includes(searchStr);
                 });
                 if (!row) return 0;
@@ -6778,9 +6782,11 @@ window.recalculateHedefFiyatlar = () => {
     const getVal = (sheet, rowName) => {
         if (!sheet || !sheet.rows) return 0;
         const searchStr = rowName.toLowerCase().replace(/[öçşğıü]/g, '');
-        const row = sheet.rows.find(r => {
+        let exactRow = sheet.rows.find(r => r[0] && r[0].toLowerCase().replace(/[öçşğıü]/g, '').trim() === searchStr.trim());
+        const row = exactRow || sheet.rows.find(r => {
             if (!r[0]) return false;
             const t = r[0].toLowerCase().replace(/[öçşğıü]/g, '');
+            if (searchStr.includes('sermaye') && (t.includes('fark') || t.includes('duzeltme'))) return false;
             return t.includes(searchStr);
         });
         if (!row) return 0;
