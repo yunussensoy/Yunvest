@@ -5429,6 +5429,10 @@ window.getGBHF = (hisse) => {
         const sData = (window.stockData && window.stockData[hisse]) ? window.stockData[hisse] : null;
         if (!sData) continue;
         
+        if (sData.gelirCeyrek && sData.gelirCeyrek.headers && sData.gelirCeyrek.headers.includes(period)) {
+            continue;
+        }
+        
         let past3Favok = 0; let past3NetKar = 0;
         if (sData.gelirCeyrek && sData.gelirCeyrek.rows) {
             const fRow = sData.gelirCeyrek.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
@@ -5891,25 +5895,35 @@ const renderAnasayfa = (container) => {
 
     window.takipSort = window.takipSort || { col: null, asc: true };
     takipDataList.sort((a, b) => {
-        if (!window.takipSort.col) {
-            if (b.araPotansiyel !== a.araPotansiyel && b.araPotansiyel !== -Infinity && a.araPotansiyel !== -Infinity) return b.araPotansiyel - a.araPotansiyel;
+        const multiLevelSort = () => {
+            if (b.araPotansiyel !== a.araPotansiyel) return b.araPotansiyel - a.araPotansiyel;
             if (b.pot2026 !== a.pot2026) return b.pot2026 - a.pot2026;
             if (b.pot2027 !== a.pot2027) return b.pot2027 - a.pot2027;
             if (b.pot2028 !== a.pot2028) return b.pot2028 - a.pot2028;
             if (b.pot2029 !== a.pot2029) return b.pot2029 - a.pot2029;
             if (b.pot2030 !== a.pot2030) return b.pot2030 - a.pot2030;
             return a.hisse.localeCompare(b.hisse);
+        };
+
+        if (!window.takipSort.col) {
+            return multiLevelSort();
         }
 
         if (window.takipSort.col === 'hisse') {
-            return window.takipSort.asc ? a.hisse.localeCompare(b.hisse) : b.hisse.localeCompare(a.hisse);
+            let diff = window.takipSort.asc ? a.hisse.localeCompare(b.hisse) : b.hisse.localeCompare(a.hisse);
+            if (diff !== 0) return diff;
+            return multiLevelSort();
         }
 
         let valA = a[window.takipSort.col];
         let valB = b[window.takipSort.col];
         if (valA === -Infinity) valA = -999999999;
         if (valB === -Infinity) valB = -999999999;
-        return window.takipSort.asc ? valA - valB : valB - valA;
+        
+        let diff = window.takipSort.asc ? valA - valB : valB - valA;
+        if (diff !== 0 && !isNaN(diff)) return diff;
+        
+        return multiLevelSort();
     });
 
     let rowsHtml = '';
