@@ -1,0 +1,1 @@
+const fs = require('fs'); const file = 'js/app_v53.js'; let d = fs.readFileSync(file, 'utf8'); d = d.replace(/color: white;/g, 'color: var(--text-primary);'); d = d.replace(/color: #ffffff;/gi, 'color: var(--text-primary);'); d = d.replace(/color: #fff;/gi, 'color: var(--text-primary);'); d = d.replace(/color:#fff;/gi, 'color: var(--text-primary);'); fs.writeFileSync(file, d);

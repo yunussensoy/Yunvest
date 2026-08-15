@@ -1057,8 +1057,8 @@ window.fetchGuncelFiyatlar = async () => {
 
 // --- PAGES ---
 const renderPortfoy = (container) => {
-
-    window.portfoyTab = window.portfoyTab || 'varliklar';
+    try {
+        window.portfoyTab = window.portfoyTab || 'varliklar';
     window.setPortfoyTab = window.setPortfoyTab || ((tab) => {
         window.portfoyTab = tab;
         if (typeof renderPage === 'function') renderPage();
@@ -1231,10 +1231,10 @@ const renderPortfoy = (container) => {
 
 
     const getTabBg = (tab) => window.portfoyTab === tab ? 'var(--overlay-bg)' : 'transparent';
-    const getTabColor = (tab) => window.portfoyTab === tab ? '#ffffff' : 'var(--text-secondary)';
+    const getTabColor = (tab) => window.portfoyTab === tab ? 'var(--active-text-color)' : 'var(--text-secondary)';
     const tabsHtml = `
         <style>
-            .portfoy-tab-btn:hover { color: #ffffff !important; background: var(--overlay-bg) !important; }
+            .portfoy-tab-btn:hover { color: var(--active-text-color) !important; background: var(--overlay-bg) !important; }
         </style>
         <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-start; overflow-x: auto; white-space: nowrap; width: 100%;">
             <span class="portfoy-tab-btn" style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 6px 12px; border-radius: 4px; background: ${getTabBg('varliklar')}; color: ${getTabColor('varliklar')}; transition: color 0.2s;" onclick="window.setPortfoyTab('varliklar')">Varlıklarım</span>
@@ -1335,7 +1335,7 @@ const renderPortfoy = (container) => {
                 transition: color 0.2s, background 0.2s;
             }
             .chart-filter:hover, .chart-filter.active-filter {
-                color: #ffffff !important;
+                color: var(--active-text-color) !important;
             }
             </style>
             <div style="display: flex; flex-direction: column; width: 100%; min-height: 350px; margin-bottom: 0;">
@@ -1363,7 +1363,7 @@ const renderPortfoy = (container) => {
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 0px;">
                     <div style="width: 100%; overflow-x: auto;">
                         <table class="dash-table compact-table varliklar-table" style="text-align: center; border-collapse: separate; border-spacing: 0;">
-                            <thead style="position: sticky; top: 0; z-index: 10; background: var(--bg-card, #1e293b);">
+                            <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
                                 <tr><th>S.N.</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('menkul')">Menkul${getVarliklarSortIcon('menkul')}</th><th>Tür</th><th>Güncel Fiyat</th><th>Adet</th><th>Güncel Maliyet</th><th>Net Maliyet</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('odenenTutar')">Ödenen Tutar${getVarliklarSortIcon('odenenTutar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('guncelTutar')">Güncel Tutar${getVarliklarSortIcon('guncelTutar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('kar')">Kar/Zarar${getVarliklarSortIcon('kar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('karYuzde')">Kar/Zarar %${getVarliklarSortIcon('karYuzde')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('portfoyOrani')">Portföy Oranı${getVarliklarSortIcon('portfoyOrani')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('ilkAlimTarihi')">İlk Alım Tarihi${getVarliklarSortIcon('ilkAlimTarihi')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('gecenSure')">Geçen Süre${getVarliklarSortIcon('gecenSure')}</th></tr>
                             </thead>
                             <tbody>
@@ -1393,7 +1393,7 @@ const renderPortfoy = (container) => {
                 <div class="table-container custom-scroll" style="margin-bottom: 0; overflow-x: auto; overflow-y: auto; height: 100%;">
 
                     <table class="dash-table compact-table" style="min-width: 1000px; text-align: center; border-collapse: separate; border-spacing: 0;">
-                        <thead style="position: sticky; top: 0; z-index: 10; background: var(--bg-card, #1e293b);">
+                        <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
                             <tr><th style="font-size: 14px;">S.N.</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('menkul')">Menkul${getArsivSortIcon('menkul')}</th><th>Güncel Fiyat</th><th>Adet</th><th>Alış Fiyatı</th><th>Satış Fiyatı</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('kar')">Kar / Zarar${getArsivSortIcon('kar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('karYuzde')">Kar / Zarar %${getArsivSortIcon('karYuzde')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('ilkAlimTarihi')">İlk Alım Tarihi${getArsivSortIcon('ilkAlimTarihi')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('sonSatimTarihi')">Son Satım Tarihi${getArsivSortIcon('sonSatimTarihi')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('tasimaSuresi')">Taşıma Süresi${getArsivSortIcon('tasimaSuresi')}</th></tr>
                         </thead>
                         <tbody>
@@ -1558,7 +1558,7 @@ const renderPortfoy = (container) => {
                         ctx.strokeStyle = 'rgba(255,255,255,0.4)';
                         ctx.stroke();
 
-                        ctx.fillStyle = '#fff';
+                        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-primary').trim() || '#fff';
                         ctx.font = 'normal 12px Inter, Arial';
                         ctx.textBaseline = 'middle';
                         ctx.textAlign = Math.cos(angle) >= 0 ? 'left' : 'right';
@@ -1591,7 +1591,7 @@ const renderPortfoy = (container) => {
                         legend: {
                             position: 'bottom',
                             labels: {
-                                color: '#fff',
+                                color: getComputedStyle(document.body).getPropertyValue('--text-primary').trim() || '#fff',
                                 font: { size: 12 },
                                 boxWidth: 10,
                                 boxHeight: 10,
@@ -1641,7 +1641,7 @@ const renderPortfoy = (container) => {
                         legend: {
                             position: 'bottom',
                             labels: {
-                                color: '#fff',
+                                color: getComputedStyle(document.body).getPropertyValue('--text-primary').trim() || '#fff',
                                 font: { size: 12 },
                                 boxWidth: 10,
                                 boxHeight: 10,
@@ -1938,9 +1938,12 @@ const renderHisseler = (container) => {
     const getVal = (sheet, rowName) => {
         if (!sheet || !sheet.rows) return 0;
         const searchStr = rowName.toLowerCase().replace(/[öçşğıü]/g, '');
-        const row = sheet.rows.find(r => {
+        
+        let exactRow = sheet.rows.find(r => r[0] && r[0].toString().toLowerCase().replace(/[öçşğıü]/g, '').trim() === searchStr.trim());
+        const row = exactRow || sheet.rows.find(r => {
             if (!r[0]) return false;
-            const t = r[0].toLowerCase().replace(/[öçşğıü]/g, '');
+            const t = r[0].toString().toLowerCase().replace(/[öçşğıü]/g, '');
+            if (searchStr.includes('sermaye') && (t.includes('fark') || t.includes('duzeltme'))) return false;
             return t.includes(searchStr);
         });
         if (!row) return 0;
@@ -2056,7 +2059,7 @@ const renderHisseler = (container) => {
             if (sData.bilanco && sData.bilanco.rows) {
                 sData.bilanco.rows.forEach(r => {
                     if (!r[0]) return;
-                    const rName = r[0].toLocaleLowerCase('tr-TR');
+                    const rName = r[0].toString().toLocaleLowerCase('tr-TR');
                     if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
                         const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                         finansalBorclarTotal += val;
@@ -2072,7 +2075,7 @@ const renderHisseler = (container) => {
             // Yıllıklandırılmış FAVÖK (TTM)
             let favok = 0;
             if (sData.gelirYillik && sData.gelirYillik.rows) {
-                const fR = sData.gelirYillik.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
+                const fR = sData.gelirYillik.rows.find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('favök'));
                 if (fR) {
                     favok = typeof fR[1] === 'number' ? fR[1] : parseFloat((fR[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                 }
@@ -2085,7 +2088,7 @@ const renderHisseler = (container) => {
             // Yıllıklandırılmış Net Kar (TTM)
             let yilliklandirilmisNetKar = 0;
             if (sData.gelirYillik && sData.gelirYillik.rows) {
-                const nR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                const nR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toString().toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toString().toLocaleLowerCase('tr-TR').includes('dönem net kar')));
                 if (nR) {
                     yilliklandirilmisNetKar = typeof nR[1] === 'number' ? nR[1] : parseFloat((nR[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                 }
@@ -2097,7 +2100,7 @@ const renderHisseler = (container) => {
             // PD/DD Hesaplaması (Ana Ortaklığa Ait Özkaynaklar)
             let anaOrtaklikOzkaynaklar = 0;
             if (sData.bilanco && sData.bilanco.rows) {
-                const aoRow = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
+                const aoRow = sData.bilanco.rows.find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
                 if (aoRow) {
                     anaOrtaklikOzkaynaklar = typeof aoRow[1] === 'number' ? aoRow[1] : parseFloat((aoRow[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                 }
@@ -2202,7 +2205,7 @@ const renderHisseler = (container) => {
                         return parseFloat(str.replace(/\./g, '').replace(/,/g, '.')) || 0;
                     };
                     const getG = (name) => {
-                        const r = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes(name.toLocaleLowerCase('tr-TR')));
+                        const r = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes(name.toString().toLocaleLowerCase('tr-TR')));
                         return r ? { v1: parseTRNumber(r[1]), v2: parseTRNumber(r[p2_idx]) } : { v1: 0, v2: 0 };
                     };
 
@@ -2241,14 +2244,8 @@ const renderHisseler = (container) => {
                     // Bilanço Items
                     const b_headers = sData.bilanco.headers;
                     const bp1 = b_headers[1];
-                    let bp2_idx = 2; // fallback to previous quarter
-                    // try to find previous year end
-                    if (bp1) {
-                        const parts = bp1.split('/');
-                        const lastYearEnd = (parseInt(parts[0]) - 1) + '/12';
-                        const foundIdx = b_headers.indexOf(lastYearEnd);
-                        if (foundIdx !== -1) bp2_idx = foundIdx;
-                    }
+                    let bp2_idx = 2; // always use previous quarter
+                    if (b_headers.length <= 2) bp2_idx = 1; // fallback
                     const bp2 = b_headers[bp2_idx];
 
                     const getB = (name) => {
@@ -2258,14 +2255,14 @@ const renderHisseler = (container) => {
                             const finYat = getB('finansal yatırımlar');
                             return { v1: fBorc.v1 - nakit.v1 - finYat.v1, v2: fBorc.v2 - nakit.v2 - finYat.v2 };
                         }
-                        const searchName = name.toLocaleLowerCase('tr-TR');
+                        const searchName = name.toString().toLocaleLowerCase('tr-TR');
                         if (searchName.includes('finansal bor') || searchName.includes('finansal yatırımlar') || searchName.includes('nakit ve nakit')) {
                             let v1 = 0, v2 = 0;
                             let addedRows = [];
                             let inDuran = false;
                             sData.bilanco.rows.forEach((x, idx) => {
                                 if (x[0]) {
-                                    const rName = x[0].toLocaleLowerCase('tr-TR');
+                                    const rName = x[0].toString().toLocaleLowerCase('tr-TR');
                                     if (rName.trim() === 'duran varlıklar') inDuran = true;
                                     let match = false;
                                     if (searchName.includes('finansal bor') && rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && idx < sData.bilanco.rows.length - 2) {
@@ -2285,7 +2282,7 @@ const renderHisseler = (container) => {
                             });
                             return { v1, v2, debug: addedRows.join(' + ') };
                         }
-                        const r = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes(searchName));
+                        const r = sData.bilanco.rows.find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes(searchName));
                         return r ? { v1: parseTRNumber(r[1]), v2: parseTRNumber(r[bp2_idx]) } : { v1: 0, v2: 0 };
                     };
 
@@ -2341,12 +2338,12 @@ const renderHisseler = (container) => {
                         return val;
                     };
 
-                    const brutR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('brüt kar'));
-                    const donenR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam dönen varlıklar'));
-                    const kisaR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam kısa vadeli'));
-                    const uzunR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam uzun vadeli'));
-                    const toplamVR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam varlıklar'));
-                    const ozR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
+                    const brutR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('brüt kar'));
+                    const donenR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('toplam dönen varlıklar'));
+                    const kisaR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('toplam kısa vadeli'));
+                    const uzunR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('toplam uzun vadeli'));
+                    const toplamVR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('toplam varlıklar'));
+                    const ozR = (sData.bilanco.rows || []).find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
 
                     chartLabels = []; chartSatislar = []; chartBrutKar = []; chartFaaliyet = []; chartFavok = []; chartNetKar = [];
                     chartYSatislar = []; chartYBrutKar = []; chartYFaaliyet = []; chartYFavok = []; chartYNetKar = [];
@@ -2356,10 +2353,10 @@ const renderHisseler = (container) => {
                     chartCari = []; chartKaldirac = []; chartROE = [];
                     for (let i = limit; i >= 1; i--) {
                         chartLabels.push(headers[i]);
-                        const sR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
-                        const faaliyetR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('esas faaliyet kar'));
-                        const fR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
-                        const nR = (sData.gelirDonemsel.rows || []).find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                        const sR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
+                        const faaliyetR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('esas faaliyet kar'));
+                        const fR = (sData.gelirDonemsel.rows || []).find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('favök'));
+                        const nR = (sData.gelirDonemsel.rows || []).find(x => x[0] && (x[0].toString().toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toString().toLocaleLowerCase('tr-TR').includes('dönem net kar')));
 
                         const cqSatis = getCQ(sR, i, headers);
                         const cqBrut = getCQ(brutR, i, headers);
@@ -2423,7 +2420,7 @@ const renderHisseler = (container) => {
                         // Özkaynak Karlılığı (ROE) Hesaplaması
                         let annNk = 0;
                         if (sData.gelirYillik && sData.gelirYillik.rows) {
-                            const yNkR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                            const yNkR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toString().toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toString().toLocaleLowerCase('tr-TR').includes('dönem net kar')));
                             if (yNkR && yNkR[i] !== undefined) {
                                 annNk = parseTRNumber(yNkR[i]);
                             }
@@ -2471,9 +2468,9 @@ const renderHisseler = (container) => {
                     if (chartKaldirac[l] < chartKaldirac[l - 1]) borclulukPuan += 3;
                 }
 
-                const vOzCurrent = (sData.bilanco && sData.bilanco.rows) ? sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar')) : null;
-                const vKisaCurrent = (sData.bilanco && sData.bilanco.rows) ? sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam kısa vadeli')) : null;
-                const vUzunCurrent = (sData.bilanco && sData.bilanco.rows) ? sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('toplam uzun vadeli')) : null;
+                const vOzCurrent = (sData.bilanco && sData.bilanco.rows) ? sData.bilanco.rows.find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar')) : null;
+                const vKisaCurrent = (sData.bilanco && sData.bilanco.rows) ? sData.bilanco.rows.find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('toplam kısa vadeli')) : null;
+                const vUzunCurrent = (sData.bilanco && sData.bilanco.rows) ? sData.bilanco.rows.find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('toplam uzun vadeli')) : null;
 
                 let pctOz = 0, pctKisa = 0, pctUzun = 0;
                 if (sData.bilanco && sData.bilanco.headers.length > 1) {
@@ -3012,7 +3009,7 @@ const renderHisseler = (container) => {
                 // Common calculations
                 let odenmisSermayeDeg = 0;
                 if (sDataDeg && sDataDeg.bilanco && sDataDeg.bilanco.rows) {
-                    const osRow_deg = sDataDeg.bilanco.rows.find(r => r[0] && r[0].toLowerCase().includes('ödenmiş sermaye'));
+                    const osRow_deg = sDataDeg.bilanco.rows.find(r => r[0] && r[0].toString().toLowerCase().includes('ödenmiş sermaye') && !r[0].toString().toLowerCase().includes('fark') && !r[0].toString().toLowerCase().includes('düzeltme'));
                     if (osRow_deg && osRow_deg.length > 1) {
                         odenmisSermayeDeg = parseFloat(String(osRow_deg[1]).replace(/\./g, '').replace(/,/g, '.')) || 0;
                     }
@@ -3025,7 +3022,7 @@ const renderHisseler = (container) => {
                     let inDuran = false;
                     sDataDeg.bilanco.rows.forEach(r => {
                         if (!r[0]) return;
-                        const rName = r[0].toLocaleLowerCase('tr-TR');
+                        const rName = r[0].toString().toLocaleLowerCase('tr-TR');
                         if (rName.trim() === 'duran varlıklar') inDuran = true;
                         if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sDataDeg.bilanco.rows.length || sDataDeg.bilanco.rows.indexOf(r) < sDataDeg.bilanco.rows.length - 2)) {
                             const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
@@ -3180,11 +3177,14 @@ const renderHisseler = (container) => {
                             let yFk = parseFloat(d.f_k) || 0;
                             let yPdDd = parseFloat(d.pd_dd) || 0;
 
+                            let ttmFavok = favok + (p.includes('/') ? past3Favok : 0);
+                            let ttmNetKar = net_kar + (p.includes('/') ? past3NetKar : 0);
+
                             if (hasFavok && yFdFavok > 0) {
-                                validPDs.push((favok * yFdFavok) - currentNetBorc);
+                                validPDs.push((ttmFavok * yFdFavok) - currentNetBorc);
                             }
                             if (hasNetKar && yFk > 0) {
-                                validPDs.push(net_kar * yFk);
+                                validPDs.push(ttmNetKar * yFk);
                             }
                             if (d.ozkaynaklar !== undefined && d.ozkaynaklar !== '' && yPdDd > 0) {
                                 validPDs.push((parseFloat(d.ozkaynaklar) || 0) * yPdDd);
@@ -3469,7 +3469,7 @@ const renderHisseler = (container) => {
 </div>
                       <div class="table-container custom-scroll" style="overflow-x: auto; overflow-y: auto; height: calc(100vh - 240px);">
                       <table class="dash-table compact-table" style="width:100%; min-width:800px; border-collapse:collapse;">
-                          <thead style="position: sticky; top: 0; z-index: 10; background: var(--bg-card, #1e293b);">
+                          <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
                             <tr style="border-bottom:1px solid var(--table-border); background:var(--table-header-bg);">
                                 <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">S.N.</th>
                                 <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">Ad</th>
@@ -4305,7 +4305,7 @@ const renderHisseIslemleri = (container) => {
                 position: sticky;
                 top: 0;
                 z-index: 10;
-                background: var(--bg-card, #1e293b) !important;
+                background: var(--table-header-bg) !important;
             }
         </style>
         <datalist id="fon-list">${fonDatalistOptions}</datalist>
@@ -5268,7 +5268,7 @@ window.getGBHF = (hisse) => {
         if (sData.bilanco && sData.bilanco.rows) {
             sData.bilanco.rows.forEach(r => {
                 if (!r[0]) return;
-                const rName = r[0].toLocaleLowerCase('tr-TR');
+                const rName = r[0].toString().toLocaleLowerCase('tr-TR');
                 if (rName.trim() === 'duran varlıklar') inDuran = true;
                 if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
                     finansalBorclarTotal += typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
@@ -5285,7 +5285,7 @@ window.getGBHF = (hisse) => {
         
         let odenmisSermayeDeg = 0;
         if (sData.bilanco && sData.bilanco.rows) {
-            const osRow = sData.bilanco.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('ödenmiş sermaye'));
+            const osRow = sData.bilanco.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('ödenmiş sermaye') && !String(x[0]).toLocaleLowerCase('tr-TR').includes('fark') && !String(x[0]).toLocaleLowerCase('tr-TR').includes('düzeltme'));
             if (osRow && osRow[1]) odenmisSermayeDeg = typeof osRow[1] === 'number' ? osRow[1] : parseFloat(String(osRow[1]).replace(/\./g, '').replace(/,/g, '.')) || 0;
         }
         
@@ -5298,14 +5298,13 @@ window.getGBHF = (hisse) => {
         let favokMarji = parseFloat(d.favok_marji) || 0;
         let netKarMarji = parseFloat(d.net_kar_marji) || 0;
         
-        let favok = past3Favok;
-        let hasFavok = true;
+        let favok = 0; let hasFavok = false;
         if (d.ciro !== undefined && d.ciro !== '' && d.favok_marji !== undefined && d.favok_marji !== '') {
             favok = (ciro * (favokMarji / 100));
+            hasFavok = true;
         }
         
-        let net_kar = past3NetKar;
-        let hasNetKar = true;
+        let net_kar = 0; let hasNetKar = false;
         if (d.ciro !== undefined && d.ciro !== '' && d.net_kar_marji !== undefined && d.net_kar_marji !== '') {
             net_kar = (ciro * (netKarMarji / 100));
         }
@@ -5319,8 +5318,11 @@ window.getGBHF = (hisse) => {
         let yFk = parseFloat(d.f_k) || 0;
         let yPdDd = parseFloat(d.pd_dd) || 0;
         
-        if (hasFavok && yFdFavok > 0) validPDs.push((favok * yFdFavok) - currentNetBorc);
-        if (hasNetKar && yFk > 0) validPDs.push(net_kar * yFk);
+        let ttmFavok = favok + (period.includes('/') ? past3Favok : 0);
+        let ttmNetKar = net_kar + (period.includes('/') ? past3NetKar : 0);
+        
+        if (hasFavok && yFdFavok > 0) validPDs.push((ttmFavok * yFdFavok) - currentNetBorc);
+        if (hasNetKar && yFk > 0) validPDs.push(ttmNetKar * yFk);
         if (d.ozkaynaklar !== undefined && d.ozkaynaklar !== '' && yPdDd > 0) validPDs.push((parseFloat(d.ozkaynaklar) || 0) * yPdDd);
         
         let currentOdenmisSermaye = odenmisSermayeDeg;
@@ -5563,7 +5565,8 @@ const getTakipSortIcon = (col) => {
 };
 
 const renderAnasayfa = (container) => {
-    window.takipTab = window.takipTab || 'degerleme';
+    try {
+        window.takipTab = window.takipTab || 'degerleme';
     window.setTakipTab = window.setTakipTab || ((tab) => {
         window.takipTab = tab;
         if (typeof renderPage === 'function') renderPage();
@@ -5618,9 +5621,11 @@ const renderAnasayfa = (container) => {
             const getVal = (sheet, rowName) => {
                 if (!sheet || !sheet.rows) return 0;
                 const searchStr = rowName.toLowerCase().replace(/[öçşğıü]/g, '');
-                const row = sheet.rows.find(r => {
+                let exactRow = sheet.rows.find(r => r[0] && r[0].toString().toLowerCase().replace(/[öçşğıü]/g, '').trim() === searchStr.trim());
+                const row = exactRow || sheet.rows.find(r => {
                     if (!r[0]) return false;
-                    const t = r[0].toLowerCase().replace(/[öçşğıü]/g, '');
+                    const t = r[0].toString().toLowerCase().replace(/[öçşğıü]/g, '');
+                    if (searchStr.includes('sermaye') && (t.includes('fark') || t.includes('duzeltme'))) return false;
                     return t.includes(searchStr);
                 });
                 if (!row) return 0;
@@ -5641,7 +5646,7 @@ const renderAnasayfa = (container) => {
             if (sData.bilanco && sData.bilanco.rows) {
                 sData.bilanco.rows.forEach(r => {
                     if (!r[0]) return;
-                    const rName = r[0].toLocaleLowerCase('tr-TR');
+                    const rName = r[0].toString().toLocaleLowerCase('tr-TR');
                     if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
                         const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                         finansalBorclarTotal += val;
@@ -5657,7 +5662,7 @@ const renderAnasayfa = (container) => {
 
             let favok = 0;
             if (sData.gelirYillik && sData.gelirYillik.rows) {
-                const fR = sData.gelirYillik.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('favök'));
+                const fR = sData.gelirYillik.rows.find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('favök'));
                 if (fR) {
                     favok = typeof fR[1] === 'number' ? fR[1] : parseFloat((fR[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                 }
@@ -5667,7 +5672,7 @@ const renderAnasayfa = (container) => {
 
             let yilliklandirilmisNetKar = 0;
             if (sData.gelirYillik && sData.gelirYillik.rows) {
-                const nR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                const nR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toString().toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toString().toLocaleLowerCase('tr-TR').includes('dönem net kar')));
                 if (nR) {
                     yilliklandirilmisNetKar = typeof nR[1] === 'number' ? nR[1] : parseFloat((nR[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                 }
@@ -5677,7 +5682,7 @@ const renderAnasayfa = (container) => {
 
             let anaOrtaklikOzkaynaklar = 0;
             if (sData.bilanco && sData.bilanco.rows) {
-                const aoRow = sData.bilanco.rows.find(x => x[0] && x[0].toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
+                const aoRow = sData.bilanco.rows.find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
                 if (aoRow) {
                     anaOrtaklikOzkaynaklar = typeof aoRow[1] === 'number' ? aoRow[1] : parseFloat((aoRow[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                 }
@@ -5807,14 +5812,14 @@ const renderAnasayfa = (container) => {
 
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; justify-content: space-between; align-items: center;">
                     <div style="display: flex; gap: 0.5rem;">
-                        <span style="cursor: pointer; font-size: 12px; font-weight: normal; padding: 4px 8px; border-radius: 4px; color: ${window.takipTab === 'degerleme' ? '#ffffff' : '#cccccc'}; background: ${window.takipTab === 'degerleme' ? 'rgba(255,255,255,0.05)' : 'transparent'}" onclick="window.setTakipTab('degerleme')">Değerleme</span>
-                        <span style="cursor: pointer; font-size: 12px; font-weight: normal; padding: 4px 8px; border-radius: 4px; color: ${window.takipTab === 'oranlar' ? '#ffffff' : '#cccccc'}; background: ${window.takipTab === 'oranlar' ? 'rgba(255,255,255,0.05)' : 'transparent'}" onclick="window.setTakipTab('oranlar')">Oranlar</span>
+                        <span style="cursor: pointer; font-size: 12px; font-weight: normal; padding: 4px 8px; border-radius: 4px; color: ${window.takipTab === 'degerleme' ? 'var(--active-text-color)' : 'var(--text-secondary)'}; background: ${window.takipTab === 'degerleme' ? 'var(--overlay-bg)' : 'transparent'}" onclick="window.setTakipTab('degerleme')">Değerleme</span>
+                        <span style="cursor: pointer; font-size: 12px; font-weight: normal; padding: 4px 8px; border-radius: 4px; color: ${window.takipTab === 'oranlar' ? 'var(--active-text-color)' : 'var(--text-secondary)'}; background: ${window.takipTab === 'oranlar' ? 'var(--overlay-bg)' : 'transparent'}" onclick="window.setTakipTab('oranlar')">Oranlar</span>
                     </div>
                     <span id="takip-edit-btn" class="fas fa-pen" style="color: var(--text-secondary); cursor: pointer; font-size: 13px; padding: 4px;" onclick="window.toggleTakipEditModal(event)"></span>
                 </div>
                 <div style="flex: 1; overflow: auto; min-height: 0; border-radius: 8px;">
                     <table class="dash-table compact-table takip-table" style="text-align: center; border-collapse: separate; border-spacing: 0;">
-                        <thead style="position: sticky; top: 0; z-index: 10; background: var(--bg-card, #1e293b);">
+                        <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
                             <tr>
                                 <th style="text-align: center;">S.N</th>
                                 <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('hisse')">Hisse${getTakipSortIcon('hisse')}</th>
@@ -5851,6 +5856,13 @@ const renderAnasayfa = (container) => {
             </div>
         </div>
     `;
+    } catch(err) {
+        container.innerHTML = `<div style="padding: 20px; color: #ff6b6b; font-family: monospace; font-size: 14px;">
+            <h3>Takip Listesi Yüklenirken Hata Oluştu!</h3>
+            <p>${err.message}</p>
+            <pre style="margin-top: 10px; color: #ffcccc;">${err.stack}</pre>
+        </div>`;
+    }
 };
 
 // --- APP ENTRY & ROUTING ---
@@ -6469,7 +6481,7 @@ window.fetchTickerData = async () => {
 
                     return `<div style="display: flex; flex-direction: column; align-items: flex-start; min-width: 100px; flex: 1; justify-content: center;">
                         <span style="color: var(--text-secondary); font-size: 12px; font-weight: 500; margin-bottom: 0.1rem; letter-spacing: 0.5px;">${item.label}</span>
-                        <div style="font-size: 12px; font-weight: 400; color: #ffffff;">
+                        <div style="font-size: 12px; font-weight: 400; color: var(--text-primary);">
                             ${val} ${changeHtml}
                         </div>
                     </div>`;
@@ -6778,9 +6790,11 @@ window.recalculateHedefFiyatlar = () => {
     const getVal = (sheet, rowName) => {
         if (!sheet || !sheet.rows) return 0;
         const searchStr = rowName.toLowerCase().replace(/[öçşğıü]/g, '');
-        const row = sheet.rows.find(r => {
+        let exactRow = sheet.rows.find(r => r[0] && r[0].toString().toLowerCase().replace(/[öçşğıü]/g, '').trim() === searchStr.trim());
+        const row = exactRow || sheet.rows.find(r => {
             if (!r[0]) return false;
-            const t = r[0].toLowerCase().replace(/[öçşğıü]/g, '');
+            const t = r[0].toString().toLowerCase().replace(/[öçşğıü]/g, '');
+            if (searchStr.includes('sermaye') && (t.includes('fark') || t.includes('duzeltme'))) return false;
             return t.includes(searchStr);
         });
         if (!row) return 0;
@@ -6810,7 +6824,7 @@ window.recalculateHedefFiyatlar = () => {
         if (sData.bilanco && sData.bilanco.rows) {
             sData.bilanco.rows.forEach(r => {
                 if (!r[0]) return;
-                const rName = r[0].toLocaleLowerCase('tr-TR');
+                const rName = r[0].toString().toLocaleLowerCase('tr-TR');
                 if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
                     const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
                     finansalBorclarTotal += val;
@@ -6826,7 +6840,7 @@ window.recalculateHedefFiyatlar = () => {
         if (sData.bilanco && sData.bilanco.rows) {
             sData.bilanco.rows.forEach(r => {
                 if (!r[0]) return;
-                const rName = r[0].toLocaleLowerCase('tr-TR');
+                const rName = r[0].toString().toLocaleLowerCase('tr-TR');
                 if (rName.trim() === 'duran varlıklar') inDuran = true;
                 if (rName.includes('finansal yatırımlar') && !inDuran) {
                     finYatTotal += typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;

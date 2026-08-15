@@ -27,6 +27,36 @@
     --text-muted: #cccccc;
     --nav-dropdown-bg: #333333;
     --bottom-nav-bg: rgba(15, 17, 22, 0.95);
+    --active-text-color: #ffffff;
+}
+
+[data-theme="light"] {
+    --bg-color: #f0f2f5;
+    --bg-gradient: linear-gradient(135deg, #e4e6eb 0%, #f0f2f5 100%);
+    --surface-color: rgba(255, 255, 255, 0.8);
+    --surface-border: rgba(0, 0, 0, 0.1);
+    --table-border: rgba(0, 0, 0, 0.05);
+    --text-primary: #1c1e21;
+    --text-secondary: #606770;
+    --accent-color: #1877f2;
+    --accent-glow: rgba(24, 119, 242, 0.2);
+    --success-color: #00a400;
+    --danger-color: #fa383e;
+    --warning-color: #f5a623;
+    
+    --table-header-bg: rgba(0, 0, 0, 0.05);
+    --table-row-bg: rgba(0, 0, 0, 0.02);
+    --table-row-hover-bg: rgba(0, 0, 0, 0.04);
+    --total-row-bg: rgba(0, 0, 0, 0.08);
+    --input-bg: rgba(255, 255, 255, 0.9);
+    --dropdown-bg: #ffffff;
+    --overlay-bg: rgba(0, 0, 0, 0.05);
+    --overlay-hover: rgba(0, 0, 0, 0.08);
+    --btn-text: #fff;
+    --text-muted: #65676b;
+    --nav-dropdown-bg: #ffffff;
+    --bottom-nav-bg: rgba(255, 255, 255, 0.95);
+    --active-text-color: #4a4a4a;
 }
 
 
@@ -112,7 +142,7 @@ body {
 }
 
 .nav-btn.active {
-    color: #ffffff;
+    color: var(--active-text-color);
     background: var(--overlay-bg);
 }
 
@@ -423,8 +453,8 @@ tbody tr {
 
 .glass-sidebar .nav-btn.active {
     background: var(--overlay-bg);
-    border-left-color: #ffffff;
-    color: #ffffff;
+    border-left-color: var(--active-text-color);
+    color: var(--active-text-color);
 }
 
 .btn-icon {
@@ -496,7 +526,7 @@ table th, .std-table th, .dash-table th, .compact-table th {
     text-align: center !important;
     vertical-align: middle !important;
     padding: 5px !important;
-    background: #1e293b !important;
+    background: var(--table-header-bg) !important;
     border-bottom: 1px solid var(--table-border) !important;
     border-right: 1px solid var(--table-border) !important;
     white-space: nowrap;
@@ -683,7 +713,7 @@ input[type="file"]::-webkit-file-upload-button:hover {
 }
 
 .bottom-nav-btn.active {
-    color: #ffffff !important;
+    color: var(--active-text-color) !important;
 }
 
 .bottom-nav-btn.active::after {

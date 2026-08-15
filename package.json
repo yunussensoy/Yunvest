@@ -4,6 +4,7 @@
     "xlsx": "^0.18.5"
   },
   "scripts": {
+    "start": "npx serve .",
     "build-web": "node build.js",
     "compile": "echo 'No compilation needed'",
     "build": "node update_reports.js"

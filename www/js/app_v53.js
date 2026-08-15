@@ -1057,8 +1057,7 @@ window.fetchGuncelFiyatlar = async () => {
 
 // --- PAGES ---
 const renderPortfoy = (container) => {
-    try {
-        window.portfoyTab = window.portfoyTab || 'varliklar';
+    window.portfoyTab = window.portfoyTab || 'varliklar';
     window.setPortfoyTab = window.setPortfoyTab || ((tab) => {
         window.portfoyTab = tab;
         if (typeof renderPage === 'function') renderPage();
@@ -7098,7 +7097,7 @@ window.uploadRapor = async () => {
                 text-shadow: 0 0 8px rgba(255,255,255,0.3) !important;
             }
             .takip-table th {
-                color: #ffffff !important;
+                color: var(--text-primary) !important;
             }
         `;
         document.head.appendChild(style);

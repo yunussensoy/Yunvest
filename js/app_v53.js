@@ -12,8 +12,8 @@ window.toggleExpandCard = function (btnElement) {
         modal.innerHTML = `
             <div class="glass" style="width: 85%; height: 60vh; min-height: 400px; max-height: 600px; padding: 2rem; position: relative; border-radius: 12px; display: flex; flex-direction: column; background: var(--overlay-bg); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                    <h3 id="expanded-chart-title" style="color: white; margin: 0; font-size: 1.2rem; font-weight: 600;">Grafik</h3>
-                    <i class="fas fa-times" style="font-size: 1.5rem; cursor: pointer; color: #ccc; transition: color 0.3s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#ccc'" onclick="window.closeExpandedChart()"></i>
+                    <h3 id="expanded-chart-title" style="color: var(--text-primary); margin: 0; font-size: 1.2rem; font-weight: 600;">Grafik</h3>
+                    <i class="fas fa-times" style="font-size: 1.5rem; cursor: pointer; color: #ccc; transition: color 0.3s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='#ccc'" onclick="window.closeExpandedChart()"></i>
                 </div>
                 <div id="expanded-chart-body" style="flex: 1; position: relative; min-height: 0; width: 100%;">
                 </div>
@@ -1057,8 +1057,7 @@ window.fetchGuncelFiyatlar = async () => {
 
 // --- PAGES ---
 const renderPortfoy = (container) => {
-    try {
-        window.portfoyTab = window.portfoyTab || 'varliklar';
+    window.portfoyTab = window.portfoyTab || 'varliklar';
     window.setPortfoyTab = window.setPortfoyTab || ((tab) => {
         window.portfoyTab = tab;
         if (typeof renderPage === 'function') renderPage();
@@ -2221,7 +2220,7 @@ const renderHisseler = (container) => {
                     gelirHtml = `<table class="dash-table compact-table">
                         <thead>
                             <tr style="border-bottom: 1px solid var(--table-border);">
-                                <th style="text-align:left !important; font-size:13px !important; color:white !important; font-weight:normal !important;">Özet Gelir Tablosu</th>
+                                <th style="text-align:left !important; font-size:13px !important; color: var(--text-primary) !important; font-weight:normal !important;">Özet Gelir Tablosu</th>
                                 <th style="text-align:center !important;">${p1}</th>
                                 <th style="text-align:center !important;">${p2}</th>
                                 <th style="text-align:center !important;">%</th>
@@ -2298,7 +2297,7 @@ const renderHisseler = (container) => {
                     bilancoHtml = `<table class="dash-table compact-table">
                         <thead>
                             <tr style="border-bottom: 1px solid var(--table-border);">
-                                <th style="text-align:left !important; font-size:13px !important; color:white !important; font-weight:normal !important;">Özet Bilanço</th>
+                                <th style="text-align:left !important; font-size:13px !important; color: var(--text-primary) !important; font-weight:normal !important;">Özet Bilanço</th>
                                 <th style="text-align:center !important;">${bp1}</th>
                                 <th style="text-align:center !important;">${bp2}</th>
                                 <th style="text-align:center !important;">%</th>
@@ -2670,7 +2669,7 @@ const renderHisseler = (container) => {
                     
                     <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Satış Gelirleri (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2678,7 +2677,7 @@ const renderHisseler = (container) => {
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Satış Gelirleri (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2686,7 +2685,7 @@ const renderHisseler = (container) => {
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Satış Gelirleri (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2695,7 +2694,7 @@ const renderHisseler = (container) => {
                     </div>
 
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                             <span>Satış Gelirleri</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -2704,7 +2703,7 @@ const renderHisseler = (container) => {
 
                     <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Brüt Kar (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2712,7 +2711,7 @@ const renderHisseler = (container) => {
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Brüt Kar (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2720,7 +2719,7 @@ const renderHisseler = (container) => {
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Brüt Kar (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2729,7 +2728,7 @@ const renderHisseler = (container) => {
                     </div>
 
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                             <span>Brüt Kar</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -2738,21 +2737,21 @@ const renderHisseler = (container) => {
 
                     <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Esas Faaliyet Karı (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-faaliyet"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Esas Faaliyet Karı (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-faaliyet"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Esas Faaliyet Karı (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2760,7 +2759,7 @@ const renderHisseler = (container) => {
                         </div>
                     </div>
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                             <span>Esas Faaliyet Karı</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -2769,21 +2768,21 @@ const renderHisseler = (container) => {
 
                     <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>FAVÖK (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-favok2"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>FAVÖK (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-favok"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>FAVÖK (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2791,7 +2790,7 @@ const renderHisseler = (container) => {
                         </div>
                     </div>
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                             <span>FAVÖK</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -2800,21 +2799,21 @@ const renderHisseler = (container) => {
 
                     <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Net Kar (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-netkar2"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Net Kar (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-netkar"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Net Kar (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2822,7 +2821,7 @@ const renderHisseler = (container) => {
                         </div>
                     </div>
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: white !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                             <span>Net Kar</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -3383,96 +3382,96 @@ const renderHisseler = (container) => {
                     });
                 });
 
-                // Yeniden eskiye (Descending) siralama
-                unifiedList.sort((a, b) => b.sortTarih - a.sortTarih); // Yeniden eskiye siralama (En yeni en ustte)
+                // Kişisel analiz her zaman en üstte, sonra yeniden eskiye sıralama
+                const isPersonal = (item) => item.type === 'analiz' && item.data && (item.data.kurum === 'Yunus Şensoy' || (window.currentUser && item.data.kurum === window.currentUser.displayName));
+                unifiedList.sort((a, b) => {
+                    const aPers = isPersonal(a);
+                    const bPers = isPersonal(b);
+                    if (aPers && !bPers) return -1;
+                    if (!aPers && bPers) return 1;
+                    return b.sortTarih - a.sortTarih;
+                });
 
                 let tableHtml = `
-                <div class="dash-card" style="padding-bottom: 20px;">
+                <div class="dash-card" style="display: flex; flex-direction: column; flex: 1; padding-bottom: 0; margin-bottom: 0; min-height: 0;">
                     <div style="display: flex; align-items: center; justify-content: center; padding: 3px 5px; border-bottom: 1px solid var(--table-border); position: relative;">
-                        <div style="font-size: 13px; font-weight: normal; color: #ffffff; text-align: center;">Akış</div>
+                        <div style="font-size: 15px; font-weight: normal; color: var(--text-primary); text-align: center;">Akış</div>
                         <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: #888888; border: none; box-shadow: none; position: absolute; right: 5px;" onclick="window.toggleInlineAnaliz()" title="Yeni Not Ekle"><i class="fas fa-plus" style="font-size: 15px;"></i></button>
                     </div>
                     
-                      <div id="inline-analiz-row" class="glass" style="display: none; flex-direction: column; gap: 1rem; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--accent-color);">
-    <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
-        <div style="display: flex; gap: 1rem;">
-            <label style="display: flex; align-items: center; gap: 0.3rem; color: var(--text-primary); font-size: 0.9rem; cursor: pointer;">
-                <input type="radio" name="notTipi" value="analiz" checked onchange="document.getElementById('analiz-detay-alanlari').style.display='flex'; document.getElementById('analiz-alt-alanlar').style.display='flex'; document.getElementById('pdf-detay-alanlari').style.display='none'; document.getElementById('upload-status').style.display='none';"> Analiz Ekle
-            </label>
-            <label style="display: flex; align-items: center; gap: 0.3rem; color: var(--text-primary); font-size: 0.9rem; cursor: pointer;">
-                <input type="radio" name="notTipi" value="pdf" onchange="document.getElementById('analiz-detay-alanlari').style.display='none'; document.getElementById('analiz-alt-alanlar').style.display='none'; document.getElementById('pdf-detay-alanlari').style.display='flex'; document.getElementById('upload-status').style.display='block';"> PDF Ekle
-            </label>
-            <label style="display: flex; align-items: center; gap: 0.3rem; color: var(--text-primary); font-size: 0.9rem; cursor: pointer;">
-                <input type="radio" name="notTipi" value="kisisel" onchange="document.getElementById('analiz-detay-alanlari').style.display='none'; document.getElementById('analiz-alt-alanlar').style.display='flex'; document.getElementById('pdf-detay-alanlari').style.display='none'; document.getElementById('upload-status').style.display='none';"> Kişisel Not Ekle
-            </label>
-        </div>
-    </div>
+                                            <div id="inline-analiz-row" class="glass" style="display: none; flex-direction: column; gap: 1rem; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--accent-color);">
+    <input type="hidden" id="analiz-hisse" value="${selectedHisse || ''}">
     
-    <div id="analiz-detay-alanlari" style="display: flex; gap: 1rem; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 150px;">
-            <label style="font-size: 0.8rem; color: #cccccc;">Tarih</label>
-            <input type="date" id="analiz-tarih" class="form-control" style="width:100%; color-scheme: dark;" value="${today}">
+    <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--table-border); padding-bottom: 0.5rem;">
+        <label style="color: #cccccc; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+            <input type="radio" name="akisTipi" value="analiz" checked onchange="window.toggleAkisTipi()"> Genel Analiz/Rapor
+        </label>
+        <label style="color: #cccccc; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+            <input type="radio" name="akisTipi" value="kisisel" onchange="window.toggleAkisTipi()"> Kişisel Not
+        </label>
+    </div>
+
+    <div id="akis-genel-inputs" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+        <!-- 1. Link -->
+        <div style="flex: 2; min-width: 250px;">
+            <label style="font-size: 0.8rem; color: #cccccc;">Link</label>
+            <input type="text" id="analiz-baglanti" class="form-control" style="width:100%;" placeholder="https://...">
         </div>
+        
+        <!-- 2. Analist/Şirket -->
         <div style="flex: 1; min-width: 150px;">
             <label style="font-size: 0.8rem; color: #cccccc;">Analist/Şirket</label>
             <input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%;" placeholder="Örn: Ak Yatırım">
         </div>
-        <input type="hidden" id="analiz-hisse" value="${selectedHisse || ''}">
-        <div style="flex: 1; min-width: 150px;">
-            <label style="font-size: 0.8rem; color: #cccccc;">Başlık (Opsiyonel)</label>
-            <input type="text" id="analiz-baslik" class="form-control" style="width:100%;" placeholder="Rapor/Video Başlığı">
+        
+        <!-- 3. Tarih -->
+        <div style="flex: 1; min-width: 120px;">
+            <label style="font-size: 0.8rem; color: #cccccc;">Tarih</label>
+            <input type="date" id="analiz-tarih" class="form-control" style="width:100%; color-scheme: dark;" value="${today}">
         </div>
-        <div style="flex: 1; min-width: 150px;">
-            <label style="font-size: 0.8rem; color: #cccccc;">Bağlantı Linki</label>
-            <input type="text" id="analiz-baglanti" class="form-control" style="width:100%;" placeholder="https://...">
+        
+        <!-- 4. Başlık -->
+        <div style="flex: 1.5; min-width: 200px;">
+            <label style="font-size: 0.8rem; color: #cccccc;">Başlık (Opsiyonel)</label>
+            <input type="text" id="analiz-baslik" class="form-control" style="width:100%;" placeholder="Not/Rapor/Video Başlığı">
+        </div>
+        
+        <!-- 5. Dosya Ekle -->
+        <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column;">
+            <label style="font-size: 0.8rem; color: #cccccc;">Dosya Ekle (Opsiyonel)</label>
+            <style>
+                #upload-file { display: none; }
+            </style>
+            <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç" style="padding: 3px 7px 3px 4px; background: #000000; color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; border: none; font-size: 12px; font-weight: normal; margin-top: 2px;">
+                <span class="fa-stack" style="font-size: 8px; width: 2em; height: 2em;"><i class="fas fa-folder-open fa-stack-2x" style="color: #ffffff;"></i></span>
+                <span style="margin-left: 5px;">PDF Seç</span>
+            </label>
+            <input type="file" id="upload-file" accept="application/pdf" onchange="const f = this.files[0]; if(f) this.previousElementSibling.innerHTML = '<i class=\'fas fa-file-pdf\' style=\'color:var(--danger-color); font-size: 14px;\'></i> <span style=\'color: #fff; margin-left: 5px; font-size:11px;\'>' + (f.name.length > 15 ? f.name.substring(0,15)+'...' : f.name) + '</span>'">
         </div>
     </div>
     
-    <div id="analiz-alt-alanlar" style="display: flex; flex-direction: column; width: 100%;">
+    <!-- 6. Notunuz -->
+    <div style="display: flex; flex-direction: column; width: 100%;">
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
             <label style="font-size: 0.8rem; color: #cccccc;">Notunuz</label>
-            <textarea id="analiz-not" class="form-control" style="width:100%; min-height: 44px; resize: vertical;" placeholder="Notlarınızı buraya yazın..."></textarea>
+            <textarea id="analiz-not" class="form-control" style="width:100%; min-height: 50px; resize: vertical;" placeholder="Notlarınızı buraya yazın..."></textarea>
         </div>
+        
+        <div id="upload-status" style="font-size: 12px; font-weight: normal; min-height: 0; width: 100%; margin-top: 0.5rem; display: none;"></div>
+        
         <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 0.5rem;">
             <button class="btn" style="background: var(--danger-color); color: #fff; padding: 6px 16px;" onclick="window.toggleInlineAnaliz()">İptal</button>
-            <button class="btn" style="background: var(--success-color); color: #fff; padding: 6px 16px;" onclick="window.addAnaliz()">Kaydet</button>
+            <button class="btn" style="background: var(--success-color); color: #fff; padding: 6px 16px;" onclick="window.saveUnifiedAnaliz()">Kaydet</button>
         </div>
     </div>
-
-    <div id="pdf-detay-alanlari" style="display: none; flex-direction:row; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.5rem;">
-        <style>
-            #upload-file { display: none; }
-        </style>
-        <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç" style="padding: 3px 7px 3px 4px; background: #000000; color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; border: none; font-size: 12px; font-weight: normal;">
-            <span class="fa-stack" style="font-size: 8px; width: 2em; height: 2em;"><i class="fas fa-folder-open fa-stack-2x" style="color: #ffffff;"></i></span>
-        </label>
-        <input type="file" id="upload-file" accept="application/pdf" onchange="const f = this.files[0]; if(f) this.previousElementSibling.innerHTML = '<i class=\'fas fa-file-pdf\' style=\'color:var(--danger-color); font-size: 14px;\'></i> <span style=\'color: #fff; margin-left: 5px;\'>' + (f.name.length > 15 ? f.name.substring(0,15)+'...' : f.name) + '</span>'">
-        
-        
-        <div style="flex: 1; min-width: 60px; max-width: 80px;">
-            <input type="number" id="upload-sn" placeholder="S.N." class="form-control" style="width: 100%; padding: 0.3rem; font-size: 12px; font-weight: normal; color: #cccccc;" onkeydown="if(event.key==='Enter') window.uploadRapor()">
-        </div>
-        <div style="flex: 2; min-width: 120px;">
-            <input type="text" id="upload-ad" placeholder="Ad" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 12px; font-weight: normal; color: #cccccc;" onkeydown="if(event.key==='Enter') window.uploadRapor()">
-        </div>
-        <div style="flex: 1; min-width: 90px;">
-            <input type="text" id="upload-tarih" placeholder="Tarih" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 12px; font-weight: normal; color: #cccccc;" onkeydown="if(event.key==='Enter') window.uploadRapor()">
-        </div>
-        <div style="flex: 2; min-width: 120px;">
-            <input type="text" id="upload-sirket" placeholder="Yatırım Şirketi" class="form-control" style="width: 100%; padding: 0.3rem; font-size: 12px; font-weight: normal; color: #cccccc;" onkeydown="if(event.key==='Enter') window.uploadRapor()">
-        </div>
-
-        <button class="btn btn-icon" style="padding: 3px 7px 3px 4px; background: #000000; border: none; color: var(--accent-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="window.uploadRapor()" title="Yükle"><span class="fa-stack" style="font-size: 9.5px; width: 2em; height: 2em;"><i class="fas fa-cloud fa-stack-2x" style="color: var(--accent-color);"></i><i class="fas fa-arrow-up fa-stack-1x" style="color: #ffffff; margin-top: 2px;"></i></span></button>
-        <button class="btn btn-icon" style="width: 30px; height: 25px; padding: 0; background: #000000; border: none; color: var(--danger-color); display: flex; align-items: center; justify-content: center; border-radius: 4px; margin-left: 0.2rem;" onclick="window.toggleInlineAnaliz()" title="İptal"><i class="fas fa-times" style="font-size: 22px; color: var(--danger-color);"></i></button>
-    </div>
-    <div id="upload-status" style="font-size: 12px; font-weight: normal; min-height: 0; width: 100%; margin-top: 0.5rem; display: none;"></div>
 </div>
-                      <div class="table-container custom-scroll" style="overflow-x: auto; overflow-y: auto; height: calc(100vh - 240px);">
+                      <div class="table-container custom-scroll" style="overflow-x: auto; overflow-y: auto; flex: 1; min-height: 0;">
                       <table class="dash-table compact-table" style="width:100%; min-width:800px; border-collapse:collapse;">
                           <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
                             <tr style="border-bottom:1px solid var(--table-border); background:var(--table-header-bg);">
                                 <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">S.N.</th>
-                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">Ad</th>
+                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Platform</th>
+                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">Başlık</th>
                                 <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Tarih</th>
                                 <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Analist/Şirket</th>
                                 <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle;">Notlar</th>
@@ -3483,7 +3482,7 @@ const renderHisseler = (container) => {
                 `;
 
                 if (unifiedList.length === 0) {
-                    tableHtml += `<tr><td colspan="6" style="text-align: center; padding: 2rem; opacity: 0.5;">Henüz akış verisi bulunmuyor.</td></tr>`;
+                    tableHtml += `<tr><td colspan="7" style="text-align: center; padding: 2rem; opacity: 0.5;">Henüz akış verisi bulunmuyor.</td></tr>`;
                 } else {
                     let sn = 1;
                     unifiedList.forEach(item => {
@@ -3493,56 +3492,55 @@ const renderHisseler = (container) => {
                             tableHtml += `
                             <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
                                 <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">
-                                    <a href="${filePath}" target="_blank" style="color:#cccccc; text-decoration: none; font-weight: normal; word-break: break-word; transition: color 0.2s;" onmouseover="this.style.color='#ffffff';" onmouseout="this.style.color='#cccccc';">
-                                        <i class="fas fa-file-pdf" style="color: #3b82f6;"></i> ${r.name !== '-' ? r.name : r.file}
+                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">
+                                    <a href="${filePath}" target="_blank" style="text-decoration: none;" title="PDF'i Görüntüle">
+                                        <i class="fas fa-file-pdf" style="color: #3b82f6; font-size: 12px; transition: color 0.2s;" onmouseover="this.style.color='#ffffff';" onmouseout="this.style.color='#3b82f6';"></i>
                                     </a>
+                                </td>
+                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">
+                                    ${r.name !== '-' && r.name ? r.name : r.file}
                                 </td>
                                 <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${item.gosterimTarih}</td>
                                 <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${r.company !== '-' ? r.company : '-'}</td>
                                 <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">-</td>
-                                <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;"></td>
+                                <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
+                                    <button class="btn btn-icon" style="background: transparent; color: #888888; padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteAnaliz('${r.id || r.file}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                                </td>
                             </tr>
                             `;
                         } else {
                             const a = item.data;
-                            if (a.isKisiselNot) {
-                                tableHtml += `
-                                <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
-                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">-</td>
-                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">-</td>
-                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">Yunus Şensoy</td>
-                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
-                                    <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
-                                        <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
-                                        <button class="btn btn-icon" style="background: transparent; color: #888888; padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
-                                    </td>
-                                </tr>
-                                `;
-                            } else {
-                                let linkHtml = '-';
-                                if (a.baglanti) {
-                                    let text = a.baslik || 'Dış Bağlantı';
-                                    let icon = 'fas fa-external-link-alt';
-                                    if (a.baglanti.includes('youtube.com') || a.baglanti.includes('youtu.be')) { text = a.baslik || 'YouTube Linki'; icon = 'fas fa-play" style="color:#fff; background:#FF0000; display:flex; justify-content:center; align-items:center; width:16px; height:11px; border-radius:3px; border:1px solid #000; font-size:6px; flex-shrink:0; margin-top:3px;'; }
-                                    else if (a.baglanti.includes('twitter.com') || a.baglanti.includes('x.com')) { text = a.baslik || 'X Linki'; icon = 'fa-brands fa-x-twitter" style="color: var(--text-primary); font-size: 10px; flex-shrink:0; margin-top:3px;'; }
-                                    linkHtml = `<a href="${a.baglanti}" target="_blank" style="color:#cccccc; text-decoration: none; word-break: break-word; display: flex; align-items: flex-start; gap: 5px; transition: color 0.2s;" onmouseover="this.style.color='#ffffff';" onmouseout="this.style.color='#cccccc';"><i class="${icon}"></i> <span style="line-height: 1.3;">${text}</span></a>`;
+                            let platformIcon = '<i class="fas fa-sticky-note" style="color: #888; font-size: 12px;"></i>';
+                            let titleText = a.baslik || '-';
+                            let titleLinkHtml = titleText;
+                            
+                            if (a.baglanti) {
+                                let iconStr = 'fas fa-external-link-alt" style="color: #888; font-size: 12px;';
+                                if (a.baglanti.includes('youtube.com') || a.baglanti.includes('youtu.be')) { 
+                                    iconStr = 'fab fa-youtube" style="color:#FF0000; font-size: 12px;'; 
+                                } else if (a.baglanti.includes('twitter.com') || a.baglanti.includes('x.com')) { 
+                                    iconStr = 'fa-brands fa-x-twitter" style="color: var(--text-primary); font-size: 12px;'; 
                                 }
-                                tableHtml += `
-                                <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
-                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:250px; max-width:250px; white-space:normal !important; word-break:break-word;">${linkHtml}</td>
-                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${item.gosterimTarih}</td>
-                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${a.borsaci || '-'}</td>
-                                    <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
-                                    <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
-                                        <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
-                                        <button class="btn btn-icon" style="background: transparent; color: #888888; padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
-                                    </td>
-                                </tr>
-                                `;
+                                platformIcon = `<a href="${a.baglanti}" target="_blank" style="text-decoration: none;" title="Bağlantıya Git"><i class="${iconStr}"></i></a>`;
+                                titleLinkHtml = titleText;
+                            } else if (a.isKisiselNot) {
+                                platformIcon = '<i class="fas fa-user-edit" style="color: var(--accent-color); font-size: 12px;"></i>';
                             }
+                            
+                            tableHtml += `
+                            <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
+                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
+                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${platformIcon}</td>
+                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">${titleLinkHtml}</td>
+                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${item.gosterimTarih}</td>
+                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${a.borsaci || '-'}</td>
+                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
+                                <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
+                                    <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-icon" style="background: transparent; color: #888888; padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                                </td>
+                            </tr>
+                            `;
                         }
                     });
                 }
@@ -3552,6 +3550,12 @@ const renderHisseler = (container) => {
                     </div>
                 </div>`;
                 contentHtml += tableHtml;
+                setTimeout(() => {
+                    const uniqueBorsacilar = [...new Set((State.data.analizler || []).map(a => a.borsaci ? a.borsaci.trim() : '').filter(b => b))].sort();
+                    if (typeof window.setupCustomDropdown === 'function') {
+                        window.setupCustomDropdown('analiz-borsaci', uniqueBorsacilar);
+                    }
+                }, 50);
             }
             let stockHeaderHtml = '';
             if (selectedHisse) {
@@ -3594,7 +3598,7 @@ const renderHisseler = (container) => {
                 <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--table-border); border-radius: 12px; flex-wrap: wrap; align-items: center; background: var(--overlay-bg); flex-shrink: 0;">
                     ${tabsHtml}
                 </div>
-                <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0; flex: 1; overflow-y: auto;">
+                <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0; flex: 1; overflow: hidden; min-height: 0;">
                     ${contentHtml}
                 </div>
             </div>
@@ -4643,7 +4647,7 @@ const renderVeriler = (container) => {
             <!-- Enflasyon -->
             <div class="table-container glass" style="margin-bottom: 0;">
                 <div class="table-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 13px; color: #ffffff;">Aylık Enflasyon Verileri</span>
+                    <span style="font-size: 13px; color: var(--text-primary);">Aylık Enflasyon Verileri</span>
                     <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: #888888; border: none; box-shadow: none;" onclick="window.toggleEnfForm()" title="Ekle"><i class="fas fa-plus" style="font-size: 14px;"></i></button>
                 </div>
                 
@@ -4800,8 +4804,17 @@ window.toggleInlineAnaliz = () => {
         row.style.display = row.style.display === 'none' ? displayType : 'none';
         if (row.style.display !== 'none') {
             document.getElementById('analiz-borsaci').focus();
+            const akisAnalizRadio = document.querySelector('input[name="akisTipi"][value="analiz"]');
+            if (akisAnalizRadio) {
+                akisAnalizRadio.checked = true;
+                if (typeof window.toggleAkisTipi === 'function') window.toggleAkisTipi();
+            }
         } else {
             window.currentEditingAnalizId = null;
+            if(document.getElementById('analiz-baslik')) document.getElementById('analiz-baslik').value = '';
+            if(document.getElementById('analiz-baglanti')) document.getElementById('analiz-baglanti').value = '';
+            if(document.getElementById('analiz-borsaci')) document.getElementById('analiz-borsaci').value = '';
+            if(document.getElementById('analiz-not')) document.getElementById('analiz-not').value = '';
         }
     }
 };
@@ -4822,6 +4835,127 @@ window.sortAnalizler = (analizlerList) => {
     });
 };
 
+
+
+window.toggleAkisTipi = () => {
+    const isKisisel = document.querySelector('input[name="akisTipi"][value="kisisel"]').checked;
+    const genelInputs = document.getElementById('akis-genel-inputs');
+    if(genelInputs) {
+        genelInputs.style.display = isKisisel ? 'none' : 'flex';
+    }
+};
+
+window.saveUnifiedAnaliz = async () => {
+    const fileInput = document.getElementById('upload-file');
+    const status = document.getElementById('upload-status');
+    const baslik = (document.getElementById('analiz-baslik') ? document.getElementById('analiz-baslik').value.trim() : '');
+    const baglanti = (document.getElementById('analiz-baglanti') ? document.getElementById('analiz-baglanti').value.trim() : '');
+    const borsaci = (document.getElementById('analiz-borsaci') ? document.getElementById('analiz-borsaci').value.trim() : '');
+    const tarih = (document.getElementById('analiz-tarih') ? document.getElementById('analiz-tarih').value.trim() : '');
+    const notText = (document.getElementById('analiz-not') ? document.getElementById('analiz-not').value.trim() : '');
+    const hisse = (document.getElementById('analiz-hisse') ? document.getElementById('analiz-hisse').value.trim().toUpperCase() : (State.ui.selectedHisse || ''));
+
+    const akisTipiRadio = document.querySelector('input[name="akisTipi"]:checked');
+    const akisTipi = akisTipiRadio ? akisTipiRadio.value : 'analiz';
+    
+    let isKisiselNot = false;
+    let finalBorsaci = borsaci;
+    let finalTarih = tarih;
+    let finalBaslik = baslik;
+    
+    if (akisTipi === 'kisisel') {
+        isKisiselNot = true;
+        finalBorsaci = window.currentUser ? window.currentUser.displayName : 'Yunus Şensoy';
+        const d = new Date();
+        finalTarih = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        finalBaslik = '-';
+    } else {
+        isKisiselNot = !!(borsaci === 'Yunus Şensoy' || (window.currentUser && borsaci === window.currentUser.displayName));
+    }
+
+    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+        if (!hisse) {
+            if (status) { status.style.display = 'block'; status.style.color = 'var(--danger-color)'; status.innerText = 'Lütfen Hisse kodunu doldurun.'; }
+            return;
+        }
+        if (status) { status.style.display = 'block'; status.style.color = 'var(--text-primary)'; status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> GitHub\'a yükleniyor...'; }
+
+        const file = fileInput.files[0];
+        const toBase64 = (f) => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(f);
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = error => reject(error);
+        });
+
+        try {
+            const base64Content = await toBase64(file);
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fileContent: base64Content, fileName: file.name, hisse: hisse })
+            });
+
+            if (response.ok) {
+                if (status) { status.style.color = 'var(--success-color)'; status.innerText = 'Başarıyla yüklendi!'; }
+                if (!window.stockReports) window.stockReports = {};
+                if (!window.stockReports[hisse]) window.stockReports[hisse] = [];
+                window.stockReports[hisse].push({
+                    name: baslik || file.name,
+                    tarih: tarih || '-',
+                    company: borsaci || '-',
+                    file: file.name
+                });
+                
+                fileInput.value = '';
+                if(fileInput.previousElementSibling) {
+                    fileInput.previousElementSibling.innerHTML = '<span class="fa-stack" style="font-size: 8px; width: 2em; height: 2em;"><i class="fas fa-folder-open fa-stack-2x" style="color: #ffffff;"></i></span><span style="margin-left: 5px;">PDF Seç</span>';
+                }
+                
+                const row = document.getElementById('inline-analiz-row');
+                if (row) row.style.display = 'none';
+                window.currentEditingAnalizId = null;
+                if (typeof renderPage === 'function') renderPage();
+            } else {
+                const errText = await response.text();
+                if (status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Hata: ' + errText; }
+            }
+        } catch (error) {
+            console.error('Yükleme hatası:', error);
+            if (status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Yükleme sırasında hata oluştu.'; }
+        }
+    } else {
+        if (isKisiselNot) {
+            if (!notText || !hisse) { alert('Lütfen Hisse ve Notlar alanlarını doldurun.'); return; }
+        } else {
+            if (!tarih || !borsaci || !hisse) { alert('Lütfen Tarih, Analist/Şirket ve Hisse alanlarını doldurun.'); return; }
+        }
+
+        if (!State.data.analizler) State.data.analizler = [];
+
+        if (window.currentEditingAnalizId) {
+            const index = State.data.analizler.findIndex(a => String(a.id) === String(window.currentEditingAnalizId));
+            if (index !== -1) {
+                State.data.analizler[index] = { ...State.data.analizler[index], tarih: finalTarih, borsaci: finalBorsaci, hisse, baslik: finalBaslik, baglanti, notText, isKisiselNot };
+            }
+            window.currentEditingAnalizId = null;
+        } else {
+            State.data.analizler.push({ tarih: finalTarih, borsaci: finalBorsaci, hisse, baslik: finalBaslik, baglanti, notText, isKisiselNot, id: Date.now() });
+        }
+        
+        if(document.getElementById('analiz-baslik')) document.getElementById('analiz-baslik').value = '';
+        if(document.getElementById('analiz-baglanti')) document.getElementById('analiz-baglanti').value = '';
+        if(document.getElementById('analiz-borsaci')) document.getElementById('analiz-borsaci').value = '';
+        if(document.getElementById('analiz-not')) document.getElementById('analiz-not').value = '';
+        
+        State.save();
+        State.save();
+        const row = document.getElementById('inline-analiz-row');
+        if (row) row.style.display = 'none';
+        window.currentEditingAnalizId = null;
+        if (typeof renderPage === 'function') renderPage();
+    }
+};
 window.addAnaliz = () => {
     try {
         const tarihEl = document.getElementById('analiz-tarih');
@@ -4904,11 +5038,8 @@ window.addAnaliz = () => {
 
         renderPage();
 
-        // Ensure inline row is hidden after save (by not forcing it open)
         const row = document.getElementById('inline-analiz-row');
-        if (row && row.style.display !== 'none') {
-            if (typeof window.toggleInlineAnaliz === 'function') window.toggleInlineAnaliz();
-        }
+        if (row) row.style.display = 'none';
 
     } catch (e) {
         alert('Hata oluştu: ' + e.message);
@@ -5003,10 +5134,12 @@ window.setupCustomDropdown = (inputId, optionsList) => {
 
     const list = document.getElementById(inputId + '-custom-list');
     const wrapper = input.parentNode;
+    let activeIndex = -1;
 
     const handler = function () {
         let val = this.value.toUpperCase();
         list.innerHTML = '';
+        activeIndex = -1;
 
         let matches = [];
         if (val) {
@@ -5023,12 +5156,14 @@ window.setupCustomDropdown = (inputId, optionsList) => {
         }
 
         if (matches.length > 0) {
-            matches.forEach(match => {
+            matches.forEach((match, index) => {
                 const item = document.createElement('div');
+                item.className = 'custom-dropdown-item';
                 item.style.padding = '10px 15px';
                 item.style.cursor = 'pointer';
                 item.style.color = '#fff';
                 item.style.textAlign = 'left';
+                item.style.background = 'transparent';
 
                 if (val) {
                     item.innerHTML = `<strong style="color: var(--accent-color);">${match.substr(0, val.length)}</strong>${match.substr(val.length)}`;
@@ -5037,7 +5172,7 @@ window.setupCustomDropdown = (inputId, optionsList) => {
                 }
 
                 item.addEventListener('click', (e) => {
-                    e.stopPropagation();
+                    if(e) e.stopPropagation();
                     input.value = match;
                     list.style.display = 'none';
                     if (tableContainer) {
@@ -5046,8 +5181,13 @@ window.setupCustomDropdown = (inputId, optionsList) => {
                         tableContainer.style.overflowY = 'auto';
                     }
                 });
-                item.addEventListener('mouseover', () => item.style.background = 'rgba(255,255,255,0.1)');
-                item.addEventListener('mouseout', () => item.style.background = 'transparent');
+                item.addEventListener('mouseover', () => {
+                    activeIndex = index;
+                    updateActiveStyle();
+                });
+                item.addEventListener('mouseout', () => {
+                    item.style.background = 'transparent';
+                });
                 list.appendChild(item);
             });
             list.style.display = 'flex';
@@ -5061,9 +5201,44 @@ window.setupCustomDropdown = (inputId, optionsList) => {
         }
     };
 
+    const updateActiveStyle = () => {
+        const items = list.querySelectorAll('.custom-dropdown-item');
+        items.forEach((item, index) => {
+            if (index === activeIndex) {
+                item.style.background = 'rgba(255,255,255,0.1)';
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.style.background = 'transparent';
+            }
+        });
+    };
+
     input.addEventListener('input', handler);
     input.addEventListener('focus', handler);
     input.addEventListener('click', (e) => { e.stopPropagation(); handler.call(input); });
+    
+    // Add keyboard navigation
+    input.addEventListener('keydown', (e) => {
+        if (list.style.display !== 'flex') return;
+        
+        const items = list.querySelectorAll('.custom-dropdown-item');
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            activeIndex++;
+            if (activeIndex >= items.length) activeIndex = 0;
+            updateActiveStyle();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            activeIndex--;
+            if (activeIndex < 0) activeIndex = items.length - 1;
+            updateActiveStyle();
+        } else if (e.key === 'Enter') {
+            if (activeIndex > -1 && items[activeIndex]) {
+                e.preventDefault();
+                items[activeIndex].click();
+            }
+        }
+    });
 
     if (window['dropdown_listener_' + inputId]) {
         document.removeEventListener('click', window['dropdown_listener_' + inputId]);
@@ -6207,7 +6382,7 @@ window.renderNotlar = (container) => {
 
             card.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                    <h3 style="margin: 0; font-size: 12px; font-weight: normal; color: #fff; word-break: break-word;">${formattedTitle}</h3>
+                    <h3 style="margin: 0; font-size: 12px; font-weight: normal; color: var(--text-primary); word-break: break-word;">${formattedTitle}</h3>
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: -0.2rem; margin-right: -0.5rem;">
                         <button class="btn" style="background: transparent; color: var(--danger-color); padding: 0.2rem 0.5rem; font-size: 12px;" onclick="window.deleteNote('${note.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                         <div style="position: relative;">
@@ -6239,10 +6414,10 @@ window.renderNotlar = (container) => {
         modal.style.cssText = 'display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; opacity: 0; transition: opacity 0.3s;';
         modal.innerHTML = `
             <div class="glass" style="width: 90%; max-width: 500px; height: 700px; display: flex; flex-direction: column; padding: 1rem; border-radius: 8px; position: relative; transform: scale(0.95); transition: transform 0.3s;">
-                <h3 id="note-modal-title" style="margin-top: 0; margin-bottom: 0.8rem; color: #fff; font-size: calc(1.2rem - 3px); flex-shrink: 0;">Yeni Not Ekle</h3>
+                <h3 id="note-modal-title" style="margin-top: 0; margin-bottom: 0.8rem; color: var(--text-primary); font-size: calc(1.2rem - 3px); flex-shrink: 0;">Yeni Not Ekle</h3>
                 <input type="hidden" id="note-id-input" value="">
-                <input type="text" id="note-title-input" placeholder="Not Başlığı (İsteğe bağlı)" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff; outline: none; font-size: calc(1.2rem - 3px); flex-shrink: 0;">
-                <textarea id="note-content-input" placeholder="Notunuzu buraya yazın..." style="width: 100%; flex: 1; padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff; outline: none; font-family: inherit; font-size: calc(0.95rem - 3px); resize: none; line-height: 1.4;"></textarea>
+                <input type="text" id="note-title-input" placeholder="Not Başlığı (İsteğe bağlı)" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: var(--text-primary); outline: none; font-size: calc(1.2rem - 3px); flex-shrink: 0;">
+                <textarea id="note-content-input" placeholder="Notunuzu buraya yazın..." style="width: 100%; flex: 1; padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: var(--text-primary); outline: none; font-family: inherit; font-size: calc(0.95rem - 3px); resize: none; line-height: 1.4;"></textarea>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.8rem; align-items: center; flex-shrink: 0;">
                     <label style="color: #ccc; font-size: calc(0.95rem - 3px);">Etiket Rengi:</label>
                     <div style="display: flex; gap: 0.3rem;" id="note-color-picker">
@@ -6700,7 +6875,7 @@ input._searchAutocompleteHandler = function () {
 
         matches.slice(0, 10).forEach(hisse => {
             let div = document.createElement('div');
-            div.innerHTML = `<strong style="color: #ffffff;">${hisse.substr(0, val.length)}</strong>${hisse.substr(val.length)}`;
+            div.innerHTML = `<strong style="color: var(--text-primary);">${hisse.substr(0, val.length)}</strong>${hisse.substr(val.length)}`;
             div.style.padding = '0.5rem 1rem';
             div.style.cursor = 'pointer';
             div.style.fontSize = '12px';
@@ -7098,7 +7273,7 @@ window.uploadRapor = async () => {
                 text-shadow: 0 0 8px rgba(255,255,255,0.3) !important;
             }
             .takip-table th {
-                color: #ffffff !important;
+                color: var(--text-primary) !important;
             }
         `;
         document.head.appendChild(style);
