@@ -4803,7 +4803,7 @@ window.toggleInlineAnaliz = () => {
         const displayType = row.tagName.toUpperCase() === 'TR' ? 'table-row' : 'flex';
         row.style.display = row.style.display === 'none' ? displayType : 'none';
         if (row.style.display !== 'none') {
-            document.getElementById('analiz-borsaci').focus();
+            document.getElementById('analiz-baglanti').focus();
             const akisAnalizRadio = document.querySelector('input[name="akisTipi"][value="analiz"]');
             if (akisAnalizRadio) {
                 akisAnalizRadio.checked = true;
