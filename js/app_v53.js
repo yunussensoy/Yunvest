@@ -887,13 +887,44 @@ const ensureDatalist = () => {
     }
     window.defaultStocksArray = ["HLGYO", "KAYSE", "OZRDN", "FONET", "AVGYO", "METRO", "DARDL", "GOODY", "CATES", "KRGYO", "CIMSA", "MPARK", "ARASE", "AVTUR", "BRSAN", "IHAAS", "ZRE20", "ARFYE", "MERKO", "TDGYO", "OFSYM", "EGSER", "AEFES", "TCKRC", "VERTU", "HTTBT", "RUZYE", "EDIP", "BIGCH", "ISYAT", "BALAT", "MEYSU", "TRGYO", "KUTPO", "SEGMN", "BJKAS", "INTEK", "VBTYZ", "AVPGY", "GLBMD", "IEYHO", "BEYAZ", "GENIL", "PAMEL", "MERIT", "ISBIR", "ARMGD", "CEOEM", "EUHOL", "ALARK", "HUNER", "OPTGY", "OZYSR", "SODSN", "SELEC", "BARMA", "UNLU", "ENTRA", "EDATA", "TMSN", "DURDO", "LXGYO", "EKSUN", "KUYAS", "ISCTR", "ARCLK", "DITAS", "TSGYO", "EKIZ", "ACSEL", "AKMGY", "ADEL", "GLCVY", "AKSEN", "RODRG", "ETYAT", "YONGA", "PRKAB", "ISMEN", "VESTL", "INFO", "PNLSN", "MAKIM", "KCHOL", "EKGYO", "AYEN", "GLYHO", "AVOD", "ALGYO", "BRKVY", "CLEBI", "DOFER", "AKHAN", "BRISA", "RUBNS", "VAKBN", "ISGYO", "GLRMK", "OSMEN", "SUNTK", "BASCM", "GMTAS", "BRMEN", "SUWEN", "AGESA", "BULGS", "GWIND", "VKING", "VERUS", "MARTI", "SMRTG", "TRHOL", "YATAS", "CMENT", "DMSAS", "TUCLK", "KARTN", "CWENE", "ZERGY", "SKBNK", "KRDMD", "BANVT", "ALKA", "PINSU", "TGSAS", "KOPOL", "FADE", "TKFEN", "SONME", "PRKME", "SELVA", "AKSGY", "LYDHO", "EUPWR", "PEKGY", "EKOS", "AYCES", "QNBTR", "ADGYO", "TERA", "YESIL", "BIGTK", "A1YEN", "ASGYO", "ESCAR", "CRDFA", "MARMR", "VAKKO", "KFEIN", "KLSER", "SVGYO", "AYGAZ", "KZGYO", "AHGAZ", "OYAKC", "PSDTC", "PKART", "BALSU", "EGEEN", "LMKDC", "BAKAB", "DOCO", "HATSN", "ALCTL", "LIDER", "DIRIT", "MHRGY", "SURGY", "EREGL", "KRTEK", "MOBTL", "TEZOL", "NATEN", "BESTE", "LOGO", "GEDIK", "DENGE", "VKGYO", "ISKPL", "LILAK", "AKFIS", "HEDEF", "PNSUT", "MERCN", "ALKLC", "TURGG", "PAPIL", "ENPRA", "BURVA", "OYAYO", "BEGYO", "YKSLN", "VAKFN", "TLMAN", "BESLR", "UCAYM", "POLTK", "MSGYO", "MAVI", "EUKYO", "ORCAY", "CASA", "AKYHO", "TATGD", "FORTE", "HRKET", "NETAS", "KMPUR", "BIOEN", "ADESE", "KAPLM", "AYDEM", "ULUFA", "HATEK", "ODAS", "ANELE", "KRVGD", "ZPT10", "OPX30", "GOZDE", "AGYO", "PSGYO", "GLDTR", "PAHOL", "GARFA", "ULUUN", "DURKN", "ONRYT", "SEKFK", "DSTKF", "KOCMT", "INGRM", "BSOKE", "EUREN", "GENKM", "MEDTR", "SNPAM", "KUVVA", "SANKO", "AZTEK", "SKTAS", "KENT", "JANTS", "MEGAP", "ULAS", "OZKGY", "VAKFA", "FMIZP", "AGROT", "ANHYT", "VRGYO", "GENTS", "BRKO", "CEMZY", "AKCNS", "EGEPO", "OPT25", "AFYON", "MIATK", "GOKNR", "TSKB", "GRNYO", "KONKA", "SAMAT", "LKMNH", "LINK", "ECOGR", "BTCIM", "ALBRK", "TARKM", "TRALT", "KBORU", "REEDR", "FLAP", "GUNDG", "KTSKR", "EGPRO", "IHEVA", "CVKMD", "KLYPV", "BOSSA", "KOTON", "ISFIN", "DGGYO", "GEDZA", "GRTHO", "VANGD", "DOFRB", "YGGYO", "IZINV", "KRPLS", "TEHOL", "TUPRS", "AGHOL", "APBDL", "TMPOL", "KONTR", "NUGYO", "TTRAK", "HEKTS", "AKBNK", "DMLKT", "IZFAS", "PRZMA", "TRMET", "NIBAS", "MARKA", "OZSUB", "FORMT", "BAGFS", "RNPOL", "MNDRS", "AKFYE", "ALVES", "LYDYE", "QUAGR", "SKYLP", "RYSAS", "KORDS", "VSNMD", "ARDYZ", "ONCSM", "ORMA", "OYLUM", "ZPBDL", "GEREL", "ENJSA", "KRONT", "BINHO", "CANTE", "FZLGY", "TABGD", "PENGD", "ATAKP", "BINBN", "BAHKM", "GARAN", "FENER", "RALYH", "GMSTR", "ARSAN", "BASGZ", "RYGYO", "AVHOL", "AHSGY", "USDTR", "ICUGS", "MACKO", "Z30KP", "DUNYH", "OBAMS", "EBEBK", "NTGAZ", "DGNMO", "SUMAS", "AYES", "DOGUB", "SKYMD", "MANAS", "ISKUR", "PARSN", "HKTM", "YIGIT", "ARZUM", "EMPAE", "ZRGYO", "DOAS", "KATMR", "TURSG", "KLGYO", "KLRHO", "PASEU", "KRDMB", "TNZTP", "BORLS", "TAVHL", "BRKSN", "ULKER", "KERVN", "INVES", "FRMPL", "A1CAP", "OTTO", "BERA", "BFREN", "IZENR", "KLSYN", "YUNSA", "TOASO", "PKENT", "SEYKM", "EGEGY", "ASTOR", "PETKM", "MZHLD", "BNTAS", "PENTA", "ALTNY", "DYOBY", "GUBRF", "ENDAE", "MAGEN", "TSPOR", "CRFSA", "ASUZU", "CUSAN", "ISSEN", "ZEDUR", "CMBTN", "GESAN", "LUKSK", "KSTUR", "ICBCT", "ATEKS", "PAGYO", "EMKEL", "ERBOS", "KAREL", "ODINE", "YYAPI", "TBORG", "OPK30", "MTRYO", "APX30", "MEPET", "SEKUR", "TCELL", "BIGEN", "QNBFK", "ZGYO", "ISDMR", "AKFGY", "INVEO", "ISGLK", "OBASE", "DCTTR", "YEOTK", "LRSHO", "SASA", "KLNMA", "ENERY", "TRILC", "IHYAY", "SAYAS", "SISE", "INDES", "KLMSN", "TKNSA", "MTRKS", "ECZYT", "CELHA", "ANGEN", "CONSE", "SANEL", "HURGZ", "IHGZT", "ESCOM", "OTKAR", "CGCAM", "YAPRK", "HOROZ", "SAHOL", "UFUK", "EYGYO", "CEMTS", "RAYSG", "SNICA", "USAK", "GZNMI", "SERNT", "PLTUR", "SOKM", "ALKIM", "BAYRK", "MRGYO", "DMRGD", "YYLGD", "NUHCM", "ATSYH", "GRSEL", "SEGYO", "MNDTR", "COSMO", "ENSRI", "ERCB", "ENKAI", "FRIGO", "MMCAS", "ASELS", "KRSTL", "KNFRT", "ARENA", "MOGAN", "BUCIM", "Z30KE", "IDGYO", "PRDGS", "DOHOL", "ALCAR", "EGGUB", "DNISI", "ZPLIB", "KCAER", "QTEMZ", "SDTTR", "YBTAS", "BIENY", "MAKTK", "BURCE", "ISBTR", "DAPGM", "BRYAT", "KRDMA", "MEGMT", "TUREX", "BYDNR", "BVSAN", "ATAGY", "GOLTS", "BIMAS", "ETILR", "AKSUE", "ANSGR", "BIZIM", "MARBL", "YAYLA", "EFOR", "EMNIS", "HDFGS", "SAFKR", "DERHL", "TATEN", "TTKOM", "SRVGY", "MRSHL", "CEMAS", "NETCD", "KGYO", "ZOREN", "VESBE", "BLUME", "IMASM", "POLHO", "ALTIN", "SNGYO", "FROTO", "TRCAS", "ORGE", "ALFAS", "SILVR", "MEKAG", "GSDHO", "PATEK", "HALKB", "SARKY", "ATLAS", "ARTMS", "TUKAS", "AAGYO", "IHLAS", "KONYA", "GIPTA", "MCARD", "PCILT", "ATATR", "RGYAS", "TEKTU", "SMART", "EUYO", "SMRVA", "AKSA", "ELITE", "YKBNK", "KIMMR", "BMSTL", "BOBET", "AKENR", "ULUSE", "KZBGY", "INTEM", "BRLSM", "CCOLA", "OZGYO", "BMSCH", "DEVA", "GSDDE", "DESPC", "DESA", "ERSU", "MAALT", "DAGI", "IZMDC", "KTLEV", "PETUN", "OSTIM", "RTALB", "DZGYO", "IHLGM", "OPTLR", "MOPAS", "PGSUS", "DGATE", "NTHOL", "ZGOLD", "SOKE", "EKDMR", "SANFM", "ATATP", "MGROS", "ECILC", "KARSN", "GLRYH", "OYYAT", "LIDFA", "OZATD", "THYAO", "DERIM", "ZSR25", "DOKTA", "HUBVC", "VKFYO", "EPLAS", "GATEG", "GSRAY", "AKGRT", "KLKIM", "TRENJ", "BORSK", "ESEN", "ISGSY", "BLCYT"];
     const stocks = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : window.defaultStocksArray;
-    dl.innerHTML = stocks.map(s => `<option value="${s}"></option>`).join('');
+    if (dl.getAttribute('data-loaded-count') == stocks.length) return; // FIX: Prevent datalist innerHTML memory leak!
+    
+    const newHtml = stocks.map(s => `<option value="${s}"></option>`).join('');
+    dl.innerHTML = newHtml;
+    dl.setAttribute('data-loaded-count', stocks.length);
 };
 
+window.fetchWithTimeout = async (resource, options = {}) => {
+    const { timeout = 8000 } = options;
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+        const response = await fetch(resource, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(id);
+        
+        // CRITICAL MEMORY LEAK FIX: If response is not ok, consume the body to release the stream!
+        if (!response.ok) {
+            try { await response.text(); } catch (e) {}
+        }
+        
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        throw error;
+    }
+};
+
+window.isFetchingGuncelFiyatlar = false;
 window.fetchGuncelFiyatlar = async () => {
+    if (window.isFetchingGuncelFiyatlar) return;
+    window.isFetchingGuncelFiyatlar = true;
+    try {
     // 1. Dolar ve Altın (TradingView)
     try {
-        const trRes = await fetch('https://scanner.tradingview.com/global/scan', {
+        const trRes = await window.fetchWithTimeout('https://scanner.tradingview.com/global/scan', {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify({ symbols: { tickers: ['OANDA:XAUUSD', 'FX:USDTRY', 'FX:EURTRY'] }, columns: ['close'] })
@@ -917,7 +948,7 @@ window.fetchGuncelFiyatlar = async () => {
     // 2. Hisse Senetleri
     let tvBasarili = false;
     try {
-        const tvResponse = await fetch('https://scanner.tradingview.com/turkey/scan', {
+        const tvResponse = await window.fetchWithTimeout('https://scanner.tradingview.com/turkey/scan', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: JSON.stringify({
@@ -968,7 +999,7 @@ window.fetchGuncelFiyatlar = async () => {
 
                 for (const proxy of proxies) {
                     try {
-                        const yfResponse = await fetch(proxy);
+                        const yfResponse = await window.fetchWithTimeout(proxy);
                         if (!yfResponse.ok) continue;
                         const yfData = await yfResponse.json();
                         if (yfData && yfData.chart && yfData.chart.result && yfData.chart.result.length > 0) {
@@ -1007,7 +1038,7 @@ window.fetchGuncelFiyatlar = async () => {
                 if (menkul.length === 3 && !menkul.match(/[0-9]/)) {
                     try {
                         const tefasUrl = `https://www.tefas.gov.tr/tr/fon-detayli-analiz/${menkul}`;
-                        const tefasRes = await fetch(tefasUrl);
+                        const tefasRes = await window.fetchWithTimeout(tefasUrl);
                         if (tefasRes.ok) {
                             const html = await tefasRes.text();
                             let match = html.match(/"sonFiyat\\":([\\d\\.]+)/);
@@ -1033,7 +1064,7 @@ window.fetchGuncelFiyatlar = async () => {
             const symbolsToFetch = Array.from(symbolsSet).filter(m => m !== 'DOLAR' && m !== 'GRAM ALTIN' && m !== 'NAKIT' && !State.bistStocks.includes(m));
 
             if (symbolsToFetch.length > 0) {
-                const gasRes = await fetch(gasUrl + '?symbols=' + symbolsToFetch.join(','));
+                const gasRes = await window.fetchWithTimeout(gasUrl + '?symbols=' + symbolsToFetch.join(','));
                 if (gasRes.ok) {
                     const gasData = await gasRes.json();
                     for (const sym in gasData) {
@@ -1052,6 +1083,9 @@ window.fetchGuncelFiyatlar = async () => {
     State.save(true, false);
     if (typeof renderPage === 'function' && (currentPage === 'giris' || currentPage === 'hedef' || currentPage === 'gorunum')) {
         renderPage();
+    }
+    } finally {
+        window.isFetchingGuncelFiyatlar = false;
     }
 };
 
@@ -1572,6 +1606,9 @@ const renderPortfoy = (container) => {
 
         const ctxOzet = document.getElementById('chart-ozet');
         if (ctxOzet) {
+            if (window.chartOzetInstance) {
+                window.chartOzetInstance.destroy();
+            }
             window.chartOzetInstance = new Chart(ctxOzet, {
                 type: 'doughnut',
                 data: {
@@ -5060,7 +5097,10 @@ window.editAnaliz = (id) => {
         const tEl = document.getElementById('analiz-tarih');
         if (tEl) tEl.value = analiz.tarih;
         const bEl = document.getElementById('analiz-borsaci');
-        if (bEl) bEl.value = analiz.borsaci;
+        if (bEl) {
+            bEl.value = analiz.borsaci;
+            bEl.blur(); // Fix: Prevent browser from auto-focusing this field
+        }
         const hEl = document.getElementById('analiz-hisse');
         if (hEl) hEl.value = analiz.hisse;
         const bslEl = document.getElementById('analiz-baslik');
@@ -5082,8 +5122,19 @@ window.editAnaliz = (id) => {
             if (detayAlanlari) detayAlanlari.style.display = 'flex';
         }
 
-        if (bEl && !analiz.isKisiselNot) bEl.focus();
-        else if (nEl) nEl.focus();
+        if (lEl && !analiz.isKisiselNot) {
+            console.log("Yunvest Debug: Focusing Link element (lEl)");
+            setTimeout(() => { 
+                if (lEl) {
+                    lEl.focus(); 
+                    lEl.select(); // Highlight text to make focus obvious
+                }
+            }, 50);
+            setTimeout(() => { if (lEl) lEl.focus(); }, 150);
+        }
+        else if (nEl) {
+            setTimeout(() => { if (nEl) nEl.focus(); }, 50);
+        }
     }, 50);
 };
 
@@ -6612,11 +6663,14 @@ if (!window.noteMenuListenerAdded) {
 
 // --- TICKER DATA ---
 
+window.isFetchingTickerData = false;
 window.fetchTickerData = async () => {
+    if (window.isFetchingTickerData) return;
+    window.isFetchingTickerData = true;
     try {
         let tData = {};
         try {
-            const trRes = await fetch('https://scanner.tradingview.com/global/scan', {
+            const trRes = await window.fetchWithTimeout('https://scanner.tradingview.com/global/scan', {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify({ symbols: { tickers: ['OANDA:XAUUSD', 'FX:USDTRY', 'FX_IDC:EURTRY'] }, columns: ['close', 'change'] })
@@ -6683,15 +6737,12 @@ window.fetchTickerData = async () => {
 
         const fetchTV = async (market, symbol) => {
             try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 2500);
-                const r = await fetch(`https://scanner.tradingview.com/${market}/scan`, {
+                const r = await window.fetchWithTimeout(`https://scanner.tradingview.com/${market}/scan`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({ symbols: { tickers: [symbol] }, columns: ['close', 'change'] }),
-                    signal: controller.signal
+                    timeout: 2500
                 });
-                clearTimeout(timeoutId);
                 const d = await r.json();
                 if (d.data && d.data.length > 0) {
                     const price = d.data[0].d[0];
@@ -6714,6 +6765,8 @@ window.fetchTickerData = async () => {
 
     } catch (e) {
         console.error('Ticker verisi alınamadı:', e);
+    } finally {
+        window.isFetchingTickerData = false;
     }
 };
 
