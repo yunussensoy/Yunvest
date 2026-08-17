@@ -3647,7 +3647,7 @@ const renderHisseler = (container) => {
                 <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--table-border); border-radius: 12px; flex-wrap: wrap; align-items: center; background: var(--overlay-bg); flex-shrink: 0;">
                     ${tabsHtml}
                 </div>
-                <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0; flex: 1; overflow: hidden; min-height: 0;">
+                <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0; flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0;">
                     ${contentHtml}
                 </div>
             </div>
