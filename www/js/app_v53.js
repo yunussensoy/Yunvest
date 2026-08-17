@@ -548,6 +548,10 @@ const State = {
             return;
         }
 
+        if (this.unsubscribe) {
+            this.unsubscribe();
+        }
+
         this.unsubscribe = db.collection('app_data').doc(currentUser.uid).onSnapshot((doc) => {
             if (doc.exists) {
                 this.data = { ...DEFAULT_STATE, ...doc.data() };
@@ -3627,6 +3631,14 @@ const renderHisseler = (container) => {
                 </div>
             </div>
             `;
+            }
+
+            if (window.Chart) {
+                Object.values(Chart.instances).forEach(chart => {
+                    if (chart && chart.canvas && container.contains(chart.canvas)) {
+                        chart.destroy();
+                    }
+                });
             }
 
             container.innerHTML = `
