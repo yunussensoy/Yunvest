@@ -5375,15 +5375,15 @@ const renderAnalizler = (container) => {
                         </thead>
                         <tbody>
                             <tr id="inline-analiz-row" style="display: none; background: rgba(0,0,0,0.4);">
-                                <td><input type="date" id="analiz-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right; color-scheme: dark;" value="${today}"></td>
-                                <td><input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:left;" placeholder="Analist"></td>
-                                <td><input type="text" id="analiz-hisse" list="bist-hisse-list" class="form-control" style="width:100%; font-size:12px; padding:4px; text-transform:uppercase; text-align:left;" placeholder="Hisse"></td>
-                                <td><input type="text" id="analiz-baglanti" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:left;" placeholder="Link"></td>
-                                <td><input type="text" id="analiz-not" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Not..."></td>
+                                <td><input type="date" id="analiz-tarih" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px; text-align:right; color-scheme: dark;" value="${today}"></td>
+                                <td><input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px; text-align:left;" placeholder="Analist"></td>
+                                <td><input type="text" id="analiz-hisse" list="bist-hisse-list" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px; text-transform:uppercase; text-align:left;" placeholder="Hisse"></td>
+                                <td><input type="text" id="analiz-baglanti" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px; text-align:left;" placeholder="Link"></td>
+                                <td><input type="text" id="analiz-not" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px;" placeholder="Not..."></td>
                                 <td style="text-align: center;">
                                     <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                                        <button class="btn" style="background: var(--success-color); color: var(--btn-text); padding: 2px 6px !important; font-size: 12px !important; min-width: 0 !important; width: fit-content !important; border-radius: 4px; border: none; cursor: pointer; box-sizing: border-box !important;" onclick="window.addAnaliz()">Kaydet</button>
-                                        <button class="btn" style="background: var(--danger-color); color: #fff; padding: 2px 6px !important; font-size: 12px !important; min-width: 0 !important; width: fit-content !important; border-radius: 4px; border: none; cursor: pointer; box-sizing: border-box !important;" onclick="window.toggleInlineAnaliz()">İptal</button>
+                                        <button class="btn" style="background: var(--success-color); color: var(--btn-text); padding: 2px 6px !important; font-size: 12px !important; font-weight: normal !important; min-width: 0 !important; width: fit-content !important; border-radius: 4px; border: none; cursor: pointer; box-sizing: border-box !important;" onclick="window.addAnaliz()">Kaydet</button>
+                                        <button class="btn" style="background: var(--danger-color); color: #fff; padding: 2px 6px !important; font-size: 12px !important; font-weight: normal !important; min-width: 0 !important; width: fit-content !important; border-radius: 4px; border: none; cursor: pointer; box-sizing: border-box !important;" onclick="window.toggleInlineAnaliz()">İptal</button>
                                     </div>
                                 </td>
                             </tr>
