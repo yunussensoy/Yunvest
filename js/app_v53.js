@@ -2020,6 +2020,11 @@ const renderHisseler = (container) => {
     };
 
     const renderUI = () => {
+        if (window.Chart) {
+            Object.values(Chart.instances).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+        }
         const tabIcons = {
             'Özet Rapor': 'fas fa-chart-pie',
 
