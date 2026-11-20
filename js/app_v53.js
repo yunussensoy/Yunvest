@@ -612,6 +612,7 @@ const DEFAULT_STATE = {
     ],
     hedefFiyatlar: {},
     analizler: [],
+    uploadedReports: [],
     portfoyGecmisi: []
 };
 
@@ -627,6 +628,7 @@ const State = {
         const processLoadedData = () => {
             if (!this.data.takipListesi) this.data.takipListesi = [];
             if (!this.data.analizler) this.data.analizler = [];
+            if (!this.data.uploadedReports) this.data.uploadedReports = [];
             if (!this.data.portfoyGecmisi) this.data.portfoyGecmisi = [];
             if (!this.data.hedefFiyatlar || Array.isArray(this.data.hedefFiyatlar)) this.data.hedefFiyatlar = {};
             if (this.data.ekstre) {
@@ -3638,8 +3640,26 @@ const renderHisseler = (container) => {
                     });
                 });
 
+                // Firebase'e yüklenmiş PDF raporları
+                const uploadedPdfs = (State.data.uploadedReports || []).filter(r => (r.hisse || '').toUpperCase() === selectedHisse.toUpperCase());
+                uploadedPdfs.forEach(r => {
+                    let d = parseDateStr(r.tarih);
+                    let displayDate = '-';
+                    if (r.tarih && r.tarih !== '-') {
+                        displayDate = r.tarih.includes('-') && r.tarih.split('-')[0].length === 4
+                            ? r.tarih.split('-').reverse().join('.')
+                            : r.tarih;
+                    }
+                    unifiedList.push({
+                        type: 'firebase_pdf',
+                        data: r,
+                        sortTarih: d,
+                        gosterimTarih: displayDate
+                    });
+                });
+
                 // Kişisel analiz her zaman en üstte, sonra yeniden eskiye sıralama
-                const isPersonal = (item) => item.type === 'analiz' && item.data && (item.data.kurum === 'Yunus Şensoy' || (window.currentUser && item.data.kurum === window.currentUser.displayName));
+                const isPersonal = (item) => item.type === 'analiz' && item.data && (item.data.isKisiselNot || item.data.kurum === 'Yunus Şensoy' || (window.currentUser && (item.data.kurum === window.currentUser.displayName || item.data.borsaci === window.currentUser.displayName)));
                 unifiedList.sort((a, b) => {
                     const aPers = isPersonal(a);
                     const bPers = isPersonal(b);
@@ -3763,6 +3783,32 @@ const renderHisseler = (container) => {
                                 <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">-</td>
                                 <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
                                     <a href="${filePath}" target="_blank" rel="noopener noreferrer" class="btn btn-icon" style="display:inline-flex; align-items:center; justify-content:center; color: var(--accent-color); padding: 2px !important; font-size: 13px; text-decoration: none;" title="Raporu Aç"><i class="fas fa-external-link-alt"></i></a>
+                                </td>
+                            </tr>
+                            `;
+                        } else if (item.type === 'firebase_pdf') {
+                            const r = item.data;
+                            const safeId = window.escapeHtml(r.id);
+                            const safeName = window.escapeHtml(r.name && r.name !== '-' ? r.name : (r.fileName || 'Rapor.pdf'));
+                            const safeComp = window.escapeHtml(r.company && r.company !== '-' ? r.company : '-');
+                            const safeNote = window.escapeHtml(r.notText || '-');
+                            tableHtml += `
+                            <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">
+                                    <a href="javascript:void(0)" onclick="window.openFirebasePdf('${safeId}')" style="text-decoration: none;" title="PDF'i Görüntüle">
+                                        <i class="fas fa-file-pdf" style="color: #dc2626; font-size: 14px;"></i>
+                                    </a>
+                                </td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">
+                                    <a href="javascript:void(0)" onclick="window.openFirebasePdf('${safeId}')" style="color: var(--text-primary); text-decoration: none; font-weight: 500;">${safeName}</a>
+                                </td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(item.gosterimTarih)}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${safeComp}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${safeNote}</td>
+                                <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
+                                    <button class="btn btn-icon" style="color: var(--accent-color); padding: 2px 4px !important; font-size: 13px;" onclick="window.openFirebasePdf('${safeId}')" title="PDF'i Aç"><i class="fas fa-external-link-alt"></i></button>
+                                    <button class="btn btn-icon" style="background: transparent; color: var(--text-secondary); padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteFirebasePdf('${safeId}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                                 </td>
                             </tr>
                             `;
@@ -5107,6 +5153,163 @@ window.toggleAkisTipi = () => {
     }
 };
 
+// --- 100% FIREBASE PDF RAPOR YÖNETİMİ (FIRESTORE CHUNKED STORAGE) ---
+window._pdfBlobCache = window._pdfBlobCache || {};
+
+window.uploadPdfToFirebase = async (file, hisse, meta = {}) => {
+    if (!currentUser) {
+        throw new Error('Dosya yüklemek için giriş yapmalısınız.');
+    }
+    const cleanHisse = String(hisse || '').trim().toUpperCase();
+    if (!/^[A-Z0-9]{2,12}$/.test(cleanHisse)) {
+        throw new Error('Geçersiz hisse kodu.');
+    }
+    if (!file || !/\.pdf$/i.test(file.name)) {
+        throw new Error('Lütfen yalnızca PDF dosyası seçin.');
+    }
+    if (file.size > 10 * 1024 * 1024) {
+        throw new Error('Dosya boyutu 10 MB sınırını aşıyor.');
+    }
+
+    const base64Data = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            const res = String(reader.result || '');
+            resolve(res.includes(',') ? res.split(',')[1] : res);
+        };
+        reader.onerror = () => reject(new Error('Dosya okunamadı.'));
+    });
+
+    if (!base64Data.startsWith('JVBERi0')) {
+        throw new Error('Seçilen dosya geçerli bir PDF değil.');
+    }
+
+    const CHUNK_SIZE = 500000; // ~500 KB per Firestore doc (safely below 1 MiB limit)
+    const chunks = [];
+    for (let i = 0; i < base64Data.length; i += CHUNK_SIZE) {
+        chunks.push(base64Data.slice(i, i + CHUNK_SIZE));
+    }
+
+    const reportId = 'pdf_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    const reportRef = db.collection('app_data').doc(currentUser.uid).collection('pdf_reports').doc(reportId);
+
+    // Upload chunks in batches (max 10 concurrent writes)
+    for (let i = 0; i < chunks.length; i += 10) {
+        const batch = db.batch();
+        const slice = chunks.slice(i, i + 10);
+        slice.forEach((chunkStr, offset) => {
+            const idx = i + offset;
+            batch.set(reportRef.collection('chunks').doc(String(idx)), { idx, data: chunkStr });
+        });
+        await batch.commit();
+    }
+
+    const record = {
+        id: reportId,
+        hisse: cleanHisse,
+        name: (meta.name || '').trim() || file.name.replace(/\.pdf$/i, ''),
+        tarih: (meta.tarih || '').trim() || new Date().toISOString().split('T')[0],
+        company: (meta.company || '').trim() || '-',
+        notText: (meta.notText || '').trim() || '',
+        fileName: file.name,
+        size: file.size,
+        chunkCount: chunks.length,
+        createdAt: Date.now()
+    };
+
+    await reportRef.set(record);
+
+    if (!State.data.uploadedReports) State.data.uploadedReports = [];
+    State.data.uploadedReports.push(record);
+    State.save();
+
+    return record;
+};
+
+window.openFirebasePdf = async (reportId) => {
+    if (!currentUser) {
+        window.showToast('PDF görüntülemek için giriş yapmalısınız.', 'warning');
+        return;
+    }
+    if (window._pdfBlobCache[reportId]) {
+        window.open(window._pdfBlobCache[reportId], '_blank');
+        return;
+    }
+
+    // Open blank window synchronously inside click gesture to avoid popup blockers
+    const previewWin = window.open('', '_blank');
+    if (previewWin) {
+        previewWin.document.write('<div style="font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;color:#113A5D;font-size:15px;">PDF Firebase\'den yükleniyor...</div>');
+        previewWin.document.close();
+    }
+
+    try {
+        const chunksSnap = await db
+            .collection('app_data')
+            .doc(currentUser.uid)
+            .collection('pdf_reports')
+            .doc(reportId)
+            .collection('chunks')
+            .orderBy('idx', 'asc')
+            .get();
+
+        if (chunksSnap.empty) {
+            if (previewWin) previewWin.close();
+            window.showToast('PDF dosyası bulunamadı.', 'error');
+            return;
+        }
+
+        let fullBase64 = '';
+        chunksSnap.forEach(doc => { fullBase64 += (doc.data().data || ''); });
+
+        const binaryStr = atob(fullBase64);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+        }
+
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+        const blobUrl = URL.createObjectURL(blob);
+        window._pdfBlobCache[reportId] = blobUrl;
+
+        if (previewWin && !previewWin.closed) {
+            previewWin.location.href = blobUrl;
+        } else {
+            window.open(blobUrl, '_blank');
+        }
+    } catch (err) {
+        console.error('Firebase PDF açma hatası:', err);
+        if (previewWin && !previewWin.closed) previewWin.close();
+        window.showToast('PDF açılamadı: ' + (err.message || 'Bağlantı hatası'), 'error');
+    }
+};
+
+window.deleteFirebasePdf = async (reportId) => {
+    if (!(await window.showConfirm('Bu PDF raporunu kalıcı olarak silmek istediğinize emin misiniz?'))) return;
+    try {
+        if (currentUser) {
+            const reportRef = db.collection('app_data').doc(currentUser.uid).collection('pdf_reports').doc(reportId);
+            const chunksSnap = await reportRef.collection('chunks').get();
+            const batch = db.batch();
+            chunksSnap.forEach(doc => batch.delete(doc.ref));
+            batch.delete(reportRef);
+            await batch.commit();
+        }
+        if (window._pdfBlobCache[reportId]) {
+            URL.revokeObjectURL(window._pdfBlobCache[reportId]);
+            delete window._pdfBlobCache[reportId];
+        }
+        State.data.uploadedReports = (State.data.uploadedReports || []).filter(r => r.id !== reportId);
+        State.save();
+        if (typeof renderPage === 'function') renderPage();
+        window.showToast('PDF raporu silindi.', 'info');
+    } catch (err) {
+        console.error('Firebase PDF silme hatası:', err);
+        window.showToast('PDF silinirken hata oluştu: ' + (err.message || ''), 'error');
+    }
+};
+
 window.saveUnifiedAnaliz = async () => {
     const fileInput = document.getElementById('upload-file');
     const status = document.getElementById('upload-status');
@@ -5115,7 +5318,7 @@ window.saveUnifiedAnaliz = async () => {
     const borsaci = (document.getElementById('analiz-borsaci') ? document.getElementById('analiz-borsaci').value.trim() : '');
     const tarih = (document.getElementById('analiz-tarih') ? document.getElementById('analiz-tarih').value.trim() : '');
     const notText = (document.getElementById('analiz-not') ? document.getElementById('analiz-not').value.trim() : '');
-    const hisse = (document.getElementById('analiz-hisse') ? document.getElementById('analiz-hisse').value.trim().toUpperCase() : (State.ui.selectedHisse || ''));
+    const hisse = (document.getElementById('analiz-hisse') ? document.getElementById('analiz-hisse').value.trim().toUpperCase() : (window.currentSelectedHisse || ''));
 
     const akisTipiRadio = document.querySelector('input[name="akisTipi"]:checked');
     const akisTipi = akisTipiRadio ? akisTipiRadio.value : 'analiz';
@@ -5142,60 +5345,37 @@ window.saveUnifiedAnaliz = async () => {
             if (status) { status.style.display = 'block'; status.style.color = 'var(--danger-color)'; status.innerText = 'Lütfen Hisse kodunu doldurun.'; }
             return;
         }
-        if (status) { status.style.display = 'block'; status.style.color = 'var(--text-primary)'; status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> GitHub\'a yükleniyor...'; }
+        if (status) { status.style.display = 'block'; status.style.color = 'var(--text-primary)'; status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Firebase\'e yükleniyor...'; }
 
         const file = fileInput.files[0];
-        const toBase64 = (f) => new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(f);
-            reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = error => reject(error);
-        });
-
         try {
-            if (!currentUser) {
-                window.showToast('Dosya yüklemek için giriş yapmalısınız.', 'error');
-                return;
-            }
-            const idToken = await currentUser.getIdToken();
-            const base64Content = await toBase64(file);
-            const uploadApiUrl = window.location.hostname.endsWith('.vercel.app') ? '/api/upload' : 'https://yunvest.vercel.app/api/upload';
-            const response = await fetch(uploadApiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + idToken
-                },
-                body: JSON.stringify({ content: base64Content, filename: file.name, hisse: hisse })
+            await window.uploadPdfToFirebase(file, hisse, {
+                name: baslik || file.name.replace(/\.pdf$/i, ''),
+                tarih: tarih || new Date().toISOString().split('T')[0],
+                company: borsaci || '-',
+                notText: notText || ''
             });
 
-            if (response.ok) {
-                if (status) { status.style.color = 'var(--success-color)'; status.innerText = 'Başarıyla yüklendi!'; }
-                if (!window.stockReports) window.stockReports = {};
-                if (!window.stockReports[hisse]) window.stockReports[hisse] = [];
-                window.stockReports[hisse].push({
-                    name: baslik || file.name,
-                    tarih: tarih || '-',
-                    company: borsaci || '-',
-                    file: file.name
-                });
-                
-                fileInput.value = '';
-                if(fileInput.previousElementSibling) {
-                    fileInput.previousElementSibling.innerHTML = '<span class="fa-stack" style="font-size: 8px; width: 2em; height: 2em;"><i class="fas fa-folder-open fa-stack-2x" style="color: #ffffff;"></i></span><span style="margin-left: 5px;">PDF Seç</span>';
-                }
-                
-                const row = document.getElementById('inline-analiz-row');
-                if (row) row.style.display = 'none';
-                window.currentEditingAnalizId = null;
-                if (typeof renderPage === 'function') renderPage();
-            } else {
-                const errText = await response.text();
-                if (status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Hata: ' + errText; }
+            if (status) { status.style.color = 'var(--success-color)'; status.innerText = 'Firebase\'e başarıyla yüklendi!'; }
+            window.showToast('PDF raporu Firebase\'e yüklendi.', 'success');
+
+            fileInput.value = '';
+            if (fileInput.previousElementSibling) {
+                fileInput.previousElementSibling.innerHTML = '<span class="fa-stack" style="font-size: 8px; width: 2em; height: 2em;"><i class="fas fa-folder-open fa-stack-2x" style="color: #ffffff;"></i></span><span style="margin-left: 5px;">PDF Seç</span>';
             }
+            if (document.getElementById('analiz-baslik')) document.getElementById('analiz-baslik').value = '';
+            if (document.getElementById('analiz-borsaci')) document.getElementById('analiz-borsaci').value = '';
+            if (document.getElementById('analiz-not')) document.getElementById('analiz-not').value = '';
+
+            const row = document.getElementById('inline-analiz-row');
+            if (row) row.style.display = 'none';
+            window.currentEditingAnalizId = null;
+            if (typeof renderPage === 'function') renderPage();
         } catch (error) {
-            console.error('Yükleme hatası:', error);
-            if (status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Yükleme sırasında hata oluştu.'; }
+            console.error('Firebase PDF yükleme hatası:', error);
+            const msg = error.message || 'Yükleme sırasında hata oluştu.';
+            if (status) { status.style.color = 'var(--danger-color)'; status.innerText = 'Hata: ' + msg; }
+            window.showToast(msg, 'error');
         }
     } else {
         if (isKisiselNot) {
@@ -7203,6 +7383,10 @@ auth.onAuthStateChanged(user => {
     } else {
         currentUser = null;
         window.currentUser = null;
+        if (window._pdfBlobCache) {
+            Object.values(window._pdfBlobCache).forEach(url => { try { URL.revokeObjectURL(url); } catch (e) {} });
+            window._pdfBlobCache = {};
+        }
         if (State.unsubscribe) State.unsubscribe();
         document.getElementById('auth-container').style.display = 'flex';
         document.getElementById('app').style.display = 'none';
@@ -7541,11 +7725,10 @@ window.recalculateHedefFiyatlar = () => {
 
 window.uploadRapor = async () => {
     const fileInput = document.getElementById('upload-file');
-    const hisse = State.ui.selectedHisse;
-    const sn = document.getElementById('upload-sn')?.value.trim() || '';
-    const ad = document.getElementById('upload-ad').value.trim();
-    const tarih = document.getElementById('upload-tarih').value.trim();
-    const sirket = document.getElementById('upload-sirket').value.trim();
+    const hisse = window.currentSelectedHisse || (State.ui && State.ui.selectedHisse);
+    const ad = document.getElementById('upload-ad')?.value.trim() || '';
+    const tarih = document.getElementById('upload-tarih')?.value.trim() || '';
+    const sirket = document.getElementById('upload-sirket')?.value.trim() || '';
     const status = document.getElementById('upload-status');
 
     if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
@@ -7557,83 +7740,34 @@ window.uploadRapor = async () => {
         return;
     }
 
-    if (status) { status.style.color = 'var(--text-primary)'; status.innerHTML = `<i class="fas fa-spinner fa-spin"></i> GitHub'a yükleniyor, lütfen bekleyin...`; }
-
-    const file = fileInput.files[0];
-
-    // Format characters
-    const formatStr = (str) => {
-        if (!str) return '';
-        return str.toLowerCase()
-            .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
-            .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
-            .replace(/\s+/g, '_');
-    };
-
-    const parts = [];
-    if (sn) parts.push(sn);
-    if (ad) parts.push(formatStr(ad));
-    if (tarih) parts.push(formatStr(tarih));
-    if (sirket) parts.push(formatStr(sirket));
-
-    const newFileName = parts.length > 0 ? parts.join('-') + '.pdf' : file.name;
-
-    const toBase64 = file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
+    if (status) { status.style.color = 'var(--text-primary)'; status.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Firebase'e yükleniyor, lütfen bekleyin...`; }
 
     try {
-        if (!currentUser) {
-            window.showToast('Dosya yüklemek için giriş yapmalısınız.', 'error');
-            return;
-        }
-        const idToken = await currentUser.getIdToken();
-        const base64Content = await toBase64(file);
-
-        const uploadApiUrl = window.location.hostname.endsWith('.vercel.app') ? '/api/upload' : 'https://yunvest.vercel.app/api/upload';
-        const response = await fetch(uploadApiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + idToken
-            },
-            body: JSON.stringify({
-                hisse: hisse,
-                filename: newFileName,
-                content: base64Content
-            })
+        await window.uploadPdfToFirebase(fileInput.files[0], hisse, {
+            name: ad || fileInput.files[0].name.replace(/\.pdf$/i, ''),
+            tarih: tarih || new Date().toISOString().split('T')[0],
+            company: sirket || '-'
         });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            if (status) {
-                status.style.color = 'var(--success-color)';
-                status.innerHTML = `<i class="fas fa-check-circle"></i> Dosyanız başarıyla yüklendi.`;
-            }
-            // Clear inputs
-            fileInput.value = '';
-            const label = fileInput.previousElementSibling;
-            if (label) label.innerHTML = '<i class="fas fa-folder-open"></i> Bir Dosya Seç';
-            if (document.getElementById('upload-sn')) document.getElementById('upload-sn').value = '';
-            document.getElementById('upload-ad').value = '';
-            document.getElementById('upload-tarih').value = '';
-            document.getElementById('upload-sirket').value = '';
-        } else {
-            if (status) {
-                status.style.color = 'var(--danger-color)';
-                status.innerHTML = `<i class="fas fa-times-circle"></i> Hata: ${result.error || 'Bilinmeyen bir hata oluştu.'}`;
-            }
+        if (status) {
+            status.style.color = 'var(--success-color)';
+            status.innerHTML = `<i class="fas fa-check-circle"></i> Dosyanız Firebase'e başarıyla yüklendi.`;
         }
+        window.showToast('PDF raporu Firebase\'e yüklendi.', 'success');
+        fileInput.value = '';
+        const label = fileInput.previousElementSibling;
+        if (label) label.innerHTML = '<i class="fas fa-folder-open"></i> Bir Dosya Seç';
+        if (document.getElementById('upload-sn')) document.getElementById('upload-sn').value = '';
+        if (document.getElementById('upload-ad')) document.getElementById('upload-ad').value = '';
+        if (document.getElementById('upload-tarih')) document.getElementById('upload-tarih').value = '';
+        if (document.getElementById('upload-sirket')) document.getElementById('upload-sirket').value = '';
+        if (typeof renderPage === 'function') renderPage();
     } catch (error) {
         console.error('Upload Error:', error);
         if (status) {
             status.style.color = 'var(--danger-color)';
-            status.innerHTML = `<i class="fas fa-times-circle"></i> Ağ veya sunucu hatası oluştu.`;
+            status.innerHTML = `<i class="fas fa-times-circle"></i> Hata: ${window.escapeHtml(error.message || 'Yükleme hatası')}`;
         }
+        window.showToast(error.message || 'Yükleme sırasında hata oluştu.', 'error');
     }
 };
 
