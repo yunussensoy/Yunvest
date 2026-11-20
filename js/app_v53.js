@@ -5391,26 +5391,29 @@ const renderHisseler = (container) => {
 
     };
 
+    const hisseTabIcons = {
+        'Özet Rapor': 'fas fa-chart-pie',
+        'Değerleme': 'fas fa-gem',
+        'Bilanço': 'fas fa-balance-scale',
+        'Gelir Tablosu': 'fas fa-file-invoice-dollar',
+        'Nakit Akım Tablosu': 'fas fa-water',
+        'Akış': 'fas fa-stream'
+    };
+
     window.setHisseTab = (tab) => {
         activeTab = tab;
         window.currentHisseTab = tab;
-        if (tab === 'Değerleme' && currentPage === 'hisse_detay') {
-            currentPage = 'hisse_degerleme';
-        } else if (tab !== 'Değerleme' && currentPage === 'hisse_degerleme') {
-            currentPage = 'hisse_detay';
-        }
+        currentPage = 'hisse_detay';
         const headerTitleEl = document.getElementById('header-active-title');
         const headerIconEl = document.getElementById('header-active-icon');
         if (headerTitleEl && selectedHisse) {
-            headerTitleEl.textContent = tab === 'Değerleme' ? `${selectedHisse} · Değerleme` : `${selectedHisse} · ${tab}`;
+            headerTitleEl.textContent = `${selectedHisse} · ${tab}`;
         }
         if (headerIconEl) {
-            headerIconEl.className = tab === 'Değerleme' ? 'fas fa-gem' : 'fas fa-chart-bar';
+            headerIconEl.className = hisseTabIcons[tab] || 'fas fa-chart-bar';
         }
         document.querySelectorAll('.nav-btn[data-target]').forEach(b => b.classList.remove('active'));
-        if (tab === 'Değerleme') {
-            document.querySelectorAll('.nav-btn[data-target="hisse_degerleme"]').forEach(b => b.classList.add('active'));
-        }
+        document.querySelectorAll('.nav-btn[data-target="hisse_detay"]').forEach(b => b.classList.add('active'));
         renderUI();
     };
 
@@ -10906,18 +10909,36 @@ const _renderPageActual = () => {
     if (topBar) {
         topBar.classList.toggle('ticker-hidden', currentPage !== 'anasayfa');
     }
+    const ensureSelectedHisse = () => {
+        if (!window.currentSelectedHisse) {
+            const takipSorted = (State.data && State.data.takipListesi ? [...State.data.takipListesi] : []).sort((a, b) => a.localeCompare(b));
+            const degKeys = Object.keys((State.data && State.data.degerleme) || {}).sort((a, b) => a.localeCompare(b));
+            const stockKeys = Object.keys(window.stockData || {}).sort((a, b) => a.localeCompare(b));
+            window.currentSelectedHisse = takipSorted[0] || degKeys[0] || stockKeys[0] || 'AKSA';
+        }
+        return window.currentSelectedHisse;
+    };
+    const hisseTabIcons = {
+        'Özet Rapor': 'fas fa-chart-pie',
+        'Değerleme': 'fas fa-gem',
+        'Bilanço': 'fas fa-balance-scale',
+        'Gelir Tablosu': 'fas fa-file-invoice-dollar',
+        'Nakit Akım Tablosu': 'fas fa-water',
+        'Akış': 'fas fa-stream'
+    };
+
     const headerTitleEl = document.getElementById('header-active-title');
     const headerIconEl = document.getElementById('header-active-icon');
     const pageMeta = {
         anasayfa: { title: 'Takip Listesi', icon: 'fas fa-list-ul' },
-        hisse_degerleme: { title: window.currentSelectedHisse ? `${window.currentSelectedHisse} · Değerleme` : 'Hisse Değerleme', icon: 'fas fa-gem' },
+        hisse_degerleme: { title: window.currentSelectedHisse ? `${window.currentSelectedHisse} · Değerleme` : 'Hisse Detay', icon: 'fas fa-gem' },
         analizler: { title: 'Analizler', icon: 'fas fa-magnifying-glass-chart' },
         portfoy: { title: 'Portföy', icon: 'fas fa-briefcase' },
         hisse_islemleri: { title: 'Ekstreler', icon: 'fas fa-receipt' },
         veriler: { title: 'Enflasyon Verileri', icon: 'fas fa-chart-line' },
         notlar: { title: 'Notlarım', icon: 'fas fa-sticky-note' },
         ayarlar: { title: 'Hesap Ayarları', icon: 'fas fa-user-cog' },
-        hisse_detay: { title: window.currentSelectedHisse || 'Hisse Detay', icon: 'fas fa-chart-bar' }
+        hisse_detay: { title: window.currentSelectedHisse ? `${window.currentSelectedHisse} · ${window.currentHisseTab || 'Özet Rapor'}` : 'Hisse Detay', icon: hisseTabIcons[window.currentHisseTab || 'Özet Rapor'] || 'fas fa-chart-bar' }
     };
     const meta = pageMeta[currentPage] || { title: 'YUNVest', icon: 'fas fa-chart-pie' };
     if (headerTitleEl) headerTitleEl.textContent = meta.title;
@@ -10926,14 +10947,13 @@ const _renderPageActual = () => {
     switch (currentPage) {
         case 'anasayfa': renderAnasayfa(container); break;
         case 'hisse_degerleme': {
-            if (!window.currentSelectedHisse) {
-                const takipSorted = (State.data && State.data.takipListesi ? [...State.data.takipListesi] : []).sort((a, b) => a.localeCompare(b));
-                const degKeys = Object.keys((State.data && State.data.degerleme) || {}).sort((a, b) => a.localeCompare(b));
-                const stockKeys = Object.keys(window.stockData || {}).sort((a, b) => a.localeCompare(b));
-                window.currentSelectedHisse = takipSorted.find(s => degKeys.includes(s)) || takipSorted[0] || degKeys[0] || stockKeys[0] || 'AKSA';
-            }
+            currentPage = 'hisse_detay';
             window.currentHisseTab = 'Değerleme';
-            if (headerTitleEl) headerTitleEl.textContent = `${window.currentSelectedHisse} · Değerleme`;
+            const sym = ensureSelectedHisse();
+            document.querySelectorAll('.nav-btn[data-target]').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.nav-btn[data-target="hisse_detay"]').forEach(b => b.classList.add('active'));
+            if (headerTitleEl) headerTitleEl.textContent = `${sym} · Değerleme`;
+            if (headerIconEl) headerIconEl.className = hisseTabIcons['Değerleme'];
             renderHisseler(container);
             break;
         }
@@ -10944,7 +10964,15 @@ const _renderPageActual = () => {
         case 'veriler': renderVeriler(container); break;
         case 'notlar': renderNotlar(container); break;
         case 'analizler': renderAnalizler(container); break;
-        case 'hisse_detay': renderHisseler(container); break;
+        case 'hisse_detay': {
+            const sym = ensureSelectedHisse();
+            const activeTabName = window.currentHisseTab || 'Özet Rapor';
+            window.currentHisseTab = activeTabName;
+            if (headerTitleEl) headerTitleEl.textContent = `${sym} · ${activeTabName}`;
+            if (headerIconEl) headerIconEl.className = hisseTabIcons[activeTabName] || 'fas fa-chart-bar';
+            renderHisseler(container);
+            break;
+        }
         case 'ayarlar': renderAyarlar(container); break;
         default: renderAnasayfa(container); break;
     }
