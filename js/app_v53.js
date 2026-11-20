@@ -11574,104 +11574,581 @@ const _renderPageActual = () => {
     }
 };
 
-// --- NOTLAR SAYFASI ---
+// --- NOTLAR SAYFASI (YATIRIM GÜNLÜĞÜ & NOT MERKEZİ) ---
+window.NT_CATEGORIES = [
+    { id: 'genel', label: 'Genel', icon: 'fas fa-sticky-note' },
+    { id: 'strateji', label: 'Strateji', icon: 'fas fa-chess' },
+    { id: 'hisse', label: 'Hisse Fikri', icon: 'fas fa-lightbulb' },
+    { id: 'makro', label: 'Piyasa / Makro', icon: 'fas fa-globe' },
+    { id: 'gorev', label: 'Yapılacaklar', icon: 'fas fa-check-square' }
+];
+window.NT_COLORS = [
+    { hex: '#2563eb', name: 'Mavi' },
+    { hex: '#059669', name: 'Yeşil' },
+    { hex: '#dc2626', name: 'Kırmızı' },
+    { hex: '#d97706', name: 'Kehribar' },
+    { hex: '#7c3aed', name: 'Mor' },
+    { hex: '#0f294a', name: 'Lacivert' }
+];
+
+window.normalizeNoteColor = (color) => {
+    const legacyMap = {
+        '#3498db': '#2563eb',
+        '#2ecc71': '#059669',
+        '#e74c3c': '#dc2626',
+        '#f1c40f': '#d97706',
+        '#9b59b6': '#7c3aed'
+    };
+    const raw = String(color || '').trim().toLowerCase();
+    if (legacyMap[raw]) return legacyMap[raw];
+    if (/^#[0-9a-f]{6}$/i.test(raw)) return raw;
+    return '#2563eb';
+};
+
+window.parseNoteStocks = (raw) => {
+    if (Array.isArray(raw)) {
+        return [...new Set(raw.map(s => String(s || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '')).filter(Boolean))];
+    }
+    return [...new Set(String(raw || '').split(/[\s,;#]+/).map(s => s.trim().toUpperCase().replace(/[^A-Z0-9]/g, '')).filter(s => s.length >= 2 && s.length <= 10))];
+};
+
+window.countNoteChecklist = (content) => {
+    const lines = String(content || '').split('\n');
+    let total = 0, done = 0;
+    lines.forEach(line => {
+        const m = line.match(/^\s*(?:-\s*)?\[( |x|X)\]\s+/);
+        if (m) {
+            total++;
+            if (m[1].toLowerCase() === 'x') done++;
+        }
+    });
+    return { total, done, open: total - done };
+};
+
+window.renderNoteRichContent = (noteId, content) => {
+    const safeId = window.escapeHtml(noteId);
+    const lines = String(content || '').split('\n');
+    const formatInline = (text) => {
+        let escaped = window.escapeHtml(text);
+        escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        escaped = escaped.replace(/(https?:\/\/[^\s<]+)/g, (rawUrl) => {
+            const clean = typeof window.sanitizeUrl === 'function' ? window.sanitizeUrl(rawUrl) : rawUrl;
+            if (!clean) return rawUrl;
+            return `<a href="${window.escapeHtml(clean)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" style="color:#2563eb; text-decoration:underline;">${window.escapeHtml(rawUrl)}</a>`;
+        });
+        return escaped;
+    };
+
+    return lines.map((line, idx) => {
+        const checkMatch = line.match(/^\s*(?:-\s*)?\[( |x|X)\]\s+(.*)$/);
+        if (checkMatch) {
+            const isChecked = checkMatch[1].toLowerCase() === 'x';
+            return `<div class="nt-check-line" onclick="event.stopPropagation();">
+                <input type="checkbox" class="nt-check-box" ${isChecked ? 'checked' : ''} onchange="window.toggleNoteChecklistItem('${safeId}', ${idx})">
+                <span class="nt-check-text${isChecked ? ' done' : ''}">${formatInline(checkMatch[2])}</span>
+            </div>`;
+        }
+        const bulletMatch = line.match(/^\s*[-*•]\s+(.*)$/);
+        if (bulletMatch) {
+            return `<div class="nt-bullet-line"><span class="nt-bullet-dot">•</span><span>${formatInline(bulletMatch[1])}</span></div>`;
+        }
+        if (line.trim() === '') return '<div style="height:6px;"></div>';
+        return `<div>${formatInline(line)}</div>`;
+    }).join('');
+};
+
 window.renderNotlar = (container) => {
-    container.innerHTML = `
-        <div class="header-section" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0px;">
-            <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: var(--text-primary);">Notlarım</h2>
-            <button class="btn" style="background: var(--accent-color); color: #fff;" onclick="window.openNoteModal()"><i class="fas fa-plus"></i> Yeni Not Ekle</button>
-        </div>
-        <div id="notes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; align-items: start; margin-top: -10px;">
-        </div>
-    `;
+    window.notlarTab = window.notlarTab || 'genel';
+    window.notlarViewMode = window.notlarViewMode || 'grid';
+    window.notlarSort = window.notlarSort || 'newest';
+    window.notlarCategoryFilter = window.notlarCategoryFilter || 'all';
+    window.notlarColorFilter = window.notlarColorFilter || 'all';
+    window.notlarPinnedOnly = !!window.notlarPinnedOnly;
+    window.notlarSearchQuery = window.notlarSearchQuery || '';
+    window.notlarExpandedIds = window.notlarExpandedIds || {};
 
-    const grid = document.getElementById('notes-grid');
-    const notes = State.data.notlar || [];
+    window.setNotlarTab = (tab) => { window.notlarTab = tab === 'hisseler' ? 'hisseler' : 'genel'; if (typeof renderPage === 'function') renderPage(); };
+    window.setNotlarViewMode = (mode) => { window.notlarViewMode = mode === 'list' ? 'list' : 'grid'; if (typeof renderPage === 'function') renderPage(); };
+    window.setNotlarSort = (sort) => { window.notlarSort = sort || 'newest'; if (typeof renderPage === 'function') renderPage(); };
+    window.setNotlarCategoryFilter = (cat) => { window.notlarCategoryFilter = cat || 'all'; if (typeof renderPage === 'function') renderPage(); };
+    window.setNotlarColorFilter = (hex) => { window.notlarColorFilter = hex || 'all'; if (typeof renderPage === 'function') renderPage(); };
+    window.toggleNotlarPinnedOnly = () => { window.notlarPinnedOnly = !window.notlarPinnedOnly; if (typeof renderPage === 'function') renderPage(); };
 
-    if (notes.length === 0) {
-        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 4rem 1rem; background: var(--surface-color); border-radius: 12px; border: 1px dashed var(--input-border);">
-            <i class="fas fa-sticky-note" style="font-size: 3rem; opacity: 0.5; margin-bottom: 1rem;"></i><br>
-            Henüz hiç not eklemediniz.<br>
-            <span style="font-size: 0.9rem; opacity: 0.7;">Fikirlerinizi, al-sat stratejilerinizi veya hatırlatıcılarınızı buraya kaydedebilirsiniz.</span>
-        </div>`;
-    } else {
-        notes.sort((a, b) => b.timestamp - a.timestamp).forEach(note => {
-            const card = document.createElement('div');
-            card.className = 'dash-card';
-            card.style.cssText = `position: relative; display: flex; flex-direction: column; background: var(--surface-color); padding: 1.5rem; border-radius: 12px; border-left: 4px solid ${note.color || 'var(--accent-color)'}; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06); transition: transform 0.2s, box-shadow 0.2s;`;
-            card.onmouseover = () => { card.style.transform = 'translateY(-3px)'; card.style.boxShadow = '0 8px 24px rgba(15, 23, 42, 0.12)'; };
-            card.onmouseout = () => { card.style.transform = 'none'; card.style.boxShadow = '0 2px 10px rgba(15, 23, 42, 0.06)'; };
+    const notes = Array.isArray(State.data.notlar) ? State.data.notlar : [];
+    const hisseNotlariObj = (State.data && State.data.hisseNotlari && typeof State.data.hisseNotlari === 'object') ? State.data.hisseNotlari : {};
+    const hisseNotEntries = Object.entries(hisseNotlariObj)
+        .filter(([k, v]) => k && String(v || '').trim().length > 0)
+        .sort((a, b) => a[0].localeCompare(b[0]));
 
-            const dateStr = new Date(note.timestamp).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    // KPI aggregations
+    let pinnedCount = 0, totalChecks = 0, doneChecks = 0, latestTs = 0;
+    const taggedStocksSet = new Set();
+    notes.forEach(n => {
+        if (n.pinned) pinnedCount++;
+        const c = window.countNoteChecklist(n.content);
+        totalChecks += c.total;
+        doneChecks += c.done;
+        const ts = n.updatedAt || n.timestamp || 0;
+        if (ts > latestTs) latestTs = ts;
+        window.parseNoteStocks(n.stocks).forEach(s => taggedStocksSet.add(s));
+    });
+    hisseNotEntries.forEach(([sym]) => taggedStocksSet.add(sym.toUpperCase()));
+    const openChecks = totalChecks - doneChecks;
+    const latestStr = latestTs ? new Date(latestTs).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short' }) : '-';
 
-            const urlRegex = /(https?:\/\/[^\s<]+)/g;
-            const formattedContent = (note.content || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>').replace(urlRegex, '<a href="$1" target="_blank" style="color: var(--accent-color); text-decoration: underline;">$1</a>');
-            const formattedTitle = (note.title || 'Başlıksız').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const getCatMeta = (catId) => window.NT_CATEGORIES.find(c => c.id === catId) || window.NT_CATEGORIES[0];
 
-            card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.85rem;">
-                    <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary); word-break: break-word;">${formattedTitle}</h3>
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: -0.2rem; margin-right: -0.5rem;">
-                        <button class="btn" style="background: transparent; color: var(--danger-color); padding: 0.25rem 0.5rem; font-size: 13.5px;" onclick="window.deleteNote('${note.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
-                        <div style="position: relative;">
-                            <button class="btn" style="background: transparent; color: var(--text-secondary); padding: 0.25rem 0.5rem; font-size: 13.5px;" onclick="window.toggleNoteColorMenu('${note.id}', event)" title="Renk Seçenekleri"><i class="fas fa-ellipsis-v"></i></button>
-                            <div id="note-color-menu-${note.id}" style="display: none; position: absolute; right: 0; top: 100%; background: var(--dropdown-bg); border: 1px solid var(--surface-border); border-radius: 8px; box-shadow: var(--shadow-lg); z-index: 10; padding: 0.5rem; min-width: 150px;">
-                                <div style="display: flex; gap: 0.4rem; justify-content: space-between;">
-                                    <div class="color-swatch" style="width:18px; height:18px; border-radius:50%; background:#3498db; cursor:pointer;" onclick="window.changeNoteColor('${note.id}', '#3498db')"></div>
-                                    <div class="color-swatch" style="width:18px; height:18px; border-radius:50%; background:#2ecc71; cursor:pointer;" onclick="window.changeNoteColor('${note.id}', '#2ecc71')"></div>
-                                    <div class="color-swatch" style="width:18px; height:18px; border-radius:50%; background:#e74c3c; cursor:pointer;" onclick="window.changeNoteColor('${note.id}', '#e74c3c')"></div>
-                                    <div class="color-swatch" style="width:18px; height:18px; border-radius:50%; background:#f1c40f; cursor:pointer;" onclick="window.changeNoteColor('${note.id}', '#f1c40f')"></div>
-                                    <div class="color-swatch" style="width:18px; height:18px; border-radius:50%; background:#9b59b6; cursor:pointer;" onclick="window.changeNoteColor('${note.id}', '#9b59b6')"></div>
+    const buildNoteCardHtml = (note) => {
+        const safeId = window.escapeHtml(note.id);
+        const normColor = window.normalizeNoteColor(note.color);
+        const catMeta = getCatMeta(note.category || 'genel');
+        const stocks = window.parseNoteStocks(note.stocks);
+        const checkInfo = window.countNoteChecklist(note.content);
+        const ts = note.updatedAt || note.timestamp || Date.now();
+        const dateStr = new Date(ts).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const rawContent = String(note.content || '');
+        const lineCount = rawContent.split('\n').length;
+        const isLong = rawContent.length > 340 || lineCount > 8;
+        const isExpanded = !!window.notlarExpandedIds[note.id];
+        const safeTitle = window.escapeHtml(note.title || 'Başlıksız Not');
+
+        const stockChipsHtml = stocks.map(sym => {
+            const safeSym = window.escapeHtml(sym);
+            return `<span class="nt-stock-chip" onclick="event.stopPropagation(); window.goToHisse('${safeSym}')" title="${safeSym} detay sayfasına git">#${safeSym}</span>`;
+        }).join('');
+
+        const checklistBarHtml = checkInfo.total > 0 ? `
+            <div class="nt-check-progress">
+                <span><i class="fas fa-check-square" style="color:#059669;"></i> ${checkInfo.done}/${checkInfo.total}</span>
+                <div class="nt-check-bar"><div class="nt-check-fill" style="width:${Math.round((checkInfo.done / checkInfo.total) * 100)}%;"></div></div>
+            </div>
+        ` : '';
+
+        return `
+            <article class="nt-card${note.pinned ? ' pinned' : ''}" data-note-id="${safeId}" style="border-left-color:${normColor};">
+                <div class="nt-card-head">
+                    <div class="nt-card-title-wrap">
+                        <h3 class="nt-card-title" onclick="window.openNoteModal('${safeId}')" title="Düzenlemek için tıklayın">${safeTitle}</h3>
+                        <div class="nt-meta-badges">
+                            <span class="nt-cat-badge ${catMeta.id}"><i class="${catMeta.icon}" style="font-size:9.5px;"></i> ${catMeta.label}</span>
+                            ${stockChipsHtml}
+                        </div>
+                    </div>
+                    <div class="nt-card-actions">
+                        <button type="button" class="nt-icon-btn${note.pinned ? ' pinned' : ''}" onclick="window.toggleNotePin('${safeId}')" title="${note.pinned ? 'Sabitlemeyi kaldır' : 'Üste sabitle'}"><i class="fas fa-thumbtack"></i></button>
+                        <button type="button" class="nt-icon-btn" onclick="window.openNoteModal('${safeId}')" title="Düzenle"><i class="fas fa-pen"></i></button>
+                        <button type="button" class="nt-icon-btn" onclick="window.copyNoteContent('${safeId}')" title="Kopyala"><i class="fas fa-copy"></i></button>
+                        <div style="position:relative;">
+                            <button type="button" class="nt-icon-btn" onclick="window.toggleNoteColorMenu('${safeId}', event)" title="Renk Değiştir"><i class="fas fa-palette"></i></button>
+                            <div id="note-color-menu-${safeId}" class="nt-color-popover">
+                                <div style="display:flex; gap:6px; align-items:center;">
+                                    ${window.NT_COLORS.map(c => `<button type="button" class="nt-color-dot-btn${normColor === c.hex ? ' active' : ''}" style="background:${c.hex};" title="${c.name}" onclick="window.changeNoteColor('${safeId}', '${c.hex}')"></button>`).join('')}
                                 </div>
                             </div>
                         </div>
+                        <button type="button" class="nt-icon-btn danger" onclick="window.deleteNote('${safeId}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </div>
-                <div id="note-content-display-${note.id}" style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; word-break: break-word; margin-bottom: 6px; cursor: text;" ondblclick="window.enterNoteEditMode('${note.id}')">${formattedContent}</div>
-                <textarea id="note-content-edit-${note.id}" class="form-control" style="display:none; width: 100%; font-size: 14px; line-height: 1.6; font-family: inherit; resize: vertical; margin-bottom: 6px; min-height: 100px; box-sizing: border-box;" onblur="window.saveNoteInline('${note.id}')"></textarea>
-                <div style="font-size: 12px; color: var(--text-secondary); text-align: right; border-top: 1px solid var(--table-border); padding-top: 6px; margin-bottom: -0.5rem;"><i class="far fa-clock"></i> ${dateStr}</div>
-            `;
-            grid.appendChild(card);
-        });
-    }
+                ${checklistBarHtml}
+                <div id="note-content-display-${safeId}" class="nt-content${(isLong && !isExpanded) ? ' clamped' : ''}" ondblclick="window.enterNoteEditMode('${safeId}')" title="Hızlı düzenlemek için çift tıklayın">
+                    ${window.renderNoteRichContent(note.id, rawContent)}
+                </div>
+                <textarea id="note-content-edit-${safeId}" class="nt-input" style="display:none; min-height:110px; resize:vertical; line-height:1.55; font-family:inherit;" onblur="window.saveNoteInline('${safeId}')" onkeydown="if(event.key==='Escape'){window.cancelNoteInline('${safeId}');} else if(event.key==='Enter' && (event.ctrlKey || event.metaKey)){this.blur();}"></textarea>
+                ${isLong ? `<button type="button" class="nt-expand-btn" onclick="window.toggleNoteExpand('${safeId}')">${isExpanded ? 'Daralt' : 'Devamını Oku'}</button>` : ''}
+                <div class="nt-card-footer">
+                    <span><i class="far fa-clock"></i> ${dateStr}</span>
+                    <span>${rawContent.length} karakter</span>
+                </div>
+            </article>
+        `;
+    };
 
+    const buildBodyHtml = () => {
+        const q = (window.notlarSearchQuery || '').trim().toLocaleLowerCase('tr-TR');
+        if (window.notlarTab === 'hisseler') {
+            const filteredHisse = hisseNotEntries.filter(([sym, text]) => {
+                if (!q) return true;
+                return sym.toLocaleLowerCase('tr-TR').includes(q) || String(text).toLocaleLowerCase('tr-TR').includes(q);
+            });
+            if (filteredHisse.length === 0) {
+                return {
+                    count: 0,
+                    html: `<div class="nt-grid"><div class="nt-empty-state">
+                        <i class="fas fa-chart-bar" style="font-size:2.4rem; opacity:0.4; margin-bottom:0.75rem;"></i>
+                        <div style="font-weight:700; color:#0f172a; margin-bottom:4px;">${q ? 'Aramayla eşleşen hisse notu bulunamadı.' : 'Henüz hisse bazlı not eklenmemiş.'}</div>
+                        <div style="font-size:13px;">Takip Listesi, Hisse Değerleme veya sağ üstteki <strong>+ Hisse Notu</strong> butonundan hisse bazlı notlarınızı ekleyebilirsiniz.</div>
+                    </div></div>`
+                };
+            }
+            const cardsHtml = filteredHisse.map(([sym, text]) => {
+                const safeSym = window.escapeHtml(sym);
+                const fiyat = State.getFiyat ? State.getFiyat(sym) : 0;
+                const ticker = (window.tickerData && window.tickerData[sym]) ? window.tickerData[sym] : null;
+                const chp = (ticker && ticker.chp !== undefined && !isNaN(parseFloat(ticker.chp))) ? parseFloat(ticker.chp) : null;
+                const chpPill = chp !== null
+                    ? `<span class="pf-pct-pill ${chp > 0.001 ? 'pos' : (chp < -0.001 ? 'neg' : 'flat')}">${chp > 0 ? '+' : ''}${formatNumber(chp, 2)}%</span>`
+                    : '';
+                return `
+                    <article class="nt-card" style="border-left-color:#0369a1;">
+                        <div class="nt-card-head">
+                            <div class="nt-card-title-wrap">
+                                <div style="display:flex; align-items:center; gap:7px; flex-wrap:wrap;">
+                                    <span class="nt-stock-chip" style="font-size:13px; padding:3px 9px;" onclick="window.goToHisse('${safeSym}')">${safeSym}</span>
+                                    ${fiyat > 0 ? `<span style="font-size:13px; font-weight:700; color:#0f172a;">${formatCurrency(fiyat, 2)}</span>` : ''}
+                                    ${chpPill}
+                                </div>
+                            </div>
+                            <div class="nt-card-actions">
+                                <button type="button" class="nt-icon-btn" onclick="window.openHisseOnTab && window.openHisseOnTab('${safeSym}', 'Değerleme')" title="Değerleme sekmesini aç"><i class="fas fa-gem"></i></button>
+                                <button type="button" class="nt-icon-btn" onclick="window.openHisseNoteModal('${safeSym}')" title="Düzenle"><i class="fas fa-pen"></i></button>
+                                <button type="button" class="nt-icon-btn danger" onclick="window.deleteHisseNoteFromHub('${safeSym}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                            </div>
+                        </div>
+                        <div class="nt-content">${window.renderNoteRichContent('hn_' + sym, String(text))}</div>
+                        <div class="nt-card-footer">
+                            <span>Takip &amp; Değerleme Notu</span>
+                            <span style="color:#0369a1; font-weight:600; cursor:pointer;" onclick="window.goToHisse('${safeSym}')">Hisse Detay →</span>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+            return { count: filteredHisse.length, html: `<div class="nt-grid${window.notlarViewMode === 'list' ? ' list-mode' : ''}">${cardsHtml}</div>` };
+        }
+
+        // Genel Notlarım filtering & sorting
+        const filtered = notes.filter(n => {
+            const cat = n.category || 'genel';
+            const normColor = window.normalizeNoteColor(n.color);
+            if (window.notlarCategoryFilter !== 'all' && cat !== window.notlarCategoryFilter) return false;
+            if (window.notlarColorFilter !== 'all' && normColor !== window.notlarColorFilter) return false;
+            if (window.notlarPinnedOnly && !n.pinned) return false;
+            if (q) {
+                const hay = [
+                    n.title || '',
+                    n.content || '',
+                    getCatMeta(cat).label,
+                    ...window.parseNoteStocks(n.stocks)
+                ].join(' ').toLocaleLowerCase('tr-TR');
+                if (!hay.includes(q)) return false;
+            }
+            return true;
+        });
+
+        const sortFn = (a, b) => {
+            if (window.notlarSort === 'oldest') return (a.timestamp || 0) - (b.timestamp || 0);
+            if (window.notlarSort === 'alpha') return (a.title || 'Başlıksız').localeCompare(b.title || 'Başlıksız', 'tr-TR');
+            return (b.updatedAt || b.timestamp || 0) - (a.updatedAt || a.timestamp || 0);
+        };
+
+        if (filtered.length === 0) {
+            const hasActiveFilters = q || window.notlarCategoryFilter !== 'all' || window.notlarColorFilter !== 'all' || window.notlarPinnedOnly;
+            return {
+                count: 0,
+                html: `<div class="nt-grid"><div class="nt-empty-state">
+                    <i class="fas fa-sticky-note" style="font-size:2.6rem; opacity:0.4; margin-bottom:0.75rem;"></i>
+                    <div style="font-weight:700; color:#0f172a; margin-bottom:4px;">${hasActiveFilters ? 'Seçili filtrelere uyan not bulunamadı.' : 'Henüz hiç not eklemediniz.'}</div>
+                    <div style="font-size:13px; margin-bottom:1rem;">${hasActiveFilters ? 'Aramayı veya filtreleri temizleyerek tüm notlarınızı görebilirsiniz.' : 'Yatırım stratejilerinizi, hisse fikirlerinizi ve yapılacaklar listenizi burada düzenli tutabilirsiniz.'}</div>
+                    ${hasActiveFilters
+                        ? `<button type="button" class="pf-filter-pill active" onclick="window.resetNotlarFilters()">Filtreleri Temizle</button>`
+                        : `<button type="button" class="pf-cta-btn" onclick="window.openNoteModal()"><i class="fas fa-plus"></i> İlk Notunu Ekle</button>`}
+                </div></div>`
+            };
+        }
+
+        const pinnedNotes = filtered.filter(n => n.pinned).sort(sortFn);
+        const otherNotes = filtered.filter(n => !n.pinned).sort(sortFn);
+        const gridCls = `nt-grid${window.notlarViewMode === 'list' ? ' list-mode' : ''}`;
+
+        let sectionsHtml = '';
+        if (pinnedNotes.length > 0) {
+            sectionsHtml += `
+                <div>
+                    <div class="nt-section-heading"><i class="fas fa-thumbtack" style="color:#d97706;"></i> Sabitlenen Notlar (${pinnedNotes.length})</div>
+                    <div class="${gridCls}">${pinnedNotes.map(buildNoteCardHtml).join('')}</div>
+                </div>
+            `;
+        }
+        if (otherNotes.length > 0) {
+            sectionsHtml += `
+                <div>
+                    ${pinnedNotes.length > 0 ? `<div class="nt-section-heading" style="margin-top:0.4rem;"><i class="fas fa-layer-group" style="color:#2563eb;"></i> Diğer Notlar (${otherNotes.length})</div>` : ''}
+                    <div class="${gridCls}">${otherNotes.map(buildNoteCardHtml).join('')}</div>
+                </div>
+            `;
+        }
+        return { count: filtered.length, html: sectionsHtml };
+    };
+
+    const { count: shownCount, html: bodyHtml } = buildBodyHtml();
+
+    container.innerHTML = `
+        <div class="page-section active nt-page">
+            <div class="pf-topbar">
+                <div class="pf-tab-strip">
+                    <button type="button" class="pf-tab-btn ${window.notlarTab === 'genel' ? 'active' : ''}" onclick="window.setNotlarTab('genel')">
+                        <i class="fas fa-sticky-note"></i> Genel Notlarım <span class="pf-tab-count">${notes.length}</span>
+                    </button>
+                    <button type="button" class="pf-tab-btn ${window.notlarTab === 'hisseler' ? 'active' : ''}" onclick="window.setNotlarTab('hisseler')">
+                        <i class="fas fa-chart-bar"></i> Hisse Notları <span class="pf-tab-count">${hisseNotEntries.length}</span>
+                    </button>
+                </div>
+                <div class="pf-topbar-actions">
+                    <div class="pf-currency-toggle" title="Görünüm modu">
+                        <button type="button" class="pf-currency-btn ${window.notlarViewMode === 'grid' ? 'active' : ''}" onclick="window.setNotlarViewMode('grid')" title="Kart Görünümü"><i class="fas fa-th-large"></i></button>
+                        <button type="button" class="pf-currency-btn ${window.notlarViewMode === 'list' ? 'active' : ''}" onclick="window.setNotlarViewMode('list')" title="Liste Görünümü"><i class="fas fa-list"></i></button>
+                    </div>
+                    ${window.notlarTab === 'genel' ? `
+                    <select class="nt-sort-select" onchange="window.setNotlarSort(this.value)" title="Sıralama">
+                        <option value="newest" ${window.notlarSort === 'newest' ? 'selected' : ''}>En Yeni</option>
+                        <option value="oldest" ${window.notlarSort === 'oldest' ? 'selected' : ''}>En Eski</option>
+                        <option value="alpha" ${window.notlarSort === 'alpha' ? 'selected' : ''}>A → Z</option>
+                    </select>` : ''}
+                    <button type="button" class="pf-cta-btn" onclick="${window.notlarTab === 'hisseler' ? 'window.openHisseNoteModal()' : 'window.openNoteModal()'}">
+                        <i class="fas fa-plus"></i> ${window.notlarTab === 'hisseler' ? 'Hisse Notu Ekle' : 'Yeni Not'}
+                    </button>
+                </div>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon-box navy"><i class="fas fa-sticky-note"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Toplam Not</div>
+                        <div class="kpi-value">${notes.length}</div>
+                        <div class="kpi-sub">Hisse Notu: ${hisseNotEntries.length} adet</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon-box slate"><i class="fas fa-thumbtack" style="color:#d97706;"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Sabitlenen</div>
+                        <div class="kpi-value">${pinnedCount}</div>
+                        <div class="kpi-sub">Öncelikli strateji &amp; kurallar</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon-box ${openChecks > 0 ? 'red' : 'green'}"><i class="fas fa-tasks"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Açık Görevler</div>
+                        <div class="kpi-value">${openChecks}</div>
+                        <div class="kpi-sub">${totalChecks > 0 ? `${doneChecks} / ${totalChecks} tamamlandı` : 'Notlara - [ ] ile görev ekleyin'}</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon-box green"><i class="fas fa-tags"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Etiketli Hisse</div>
+                        <div class="kpi-value">${taggedStocksSet.size}</div>
+                        <div class="kpi-sub">Son güncelleme: ${latestStr}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nt-toolbar">
+                <div class="nt-filter-row">
+                    ${window.notlarTab === 'genel' ? `
+                        <button type="button" class="pf-filter-pill ${window.notlarCategoryFilter === 'all' ? 'active' : ''}" onclick="window.setNotlarCategoryFilter('all')">Tümü</button>
+                        ${window.NT_CATEGORIES.map(c => `<button type="button" class="pf-filter-pill ${window.notlarCategoryFilter === c.id ? 'active' : ''}" onclick="window.setNotlarCategoryFilter('${c.id}')">${c.label}</button>`).join('')}
+                        <button type="button" class="pf-filter-pill ${window.notlarPinnedOnly ? 'active' : ''}" onclick="window.toggleNotlarPinnedOnly()" title="Sadece sabitlenenleri göster"><i class="fas fa-thumbtack" style="font-size:11px;"></i> Sabitli</button>
+                        <div class="nt-color-filter" title="Renge göre filtrele">
+                            <button type="button" class="nt-color-dot-btn all${window.notlarColorFilter === 'all' ? ' active' : ''}" onclick="window.setNotlarColorFilter('all')" title="Tüm renkler"></button>
+                            ${window.NT_COLORS.map(c => `<button type="button" class="nt-color-dot-btn${window.notlarColorFilter === c.hex ? ' active' : ''}" style="background:${c.hex};" onclick="window.setNotlarColorFilter('${c.hex}')" title="${c.name}"></button>`).join('')}
+                        </div>
+                    ` : `<span style="font-size:13px; font-weight:600; color:#475569;"><i class="fas fa-info-circle" style="color:#0369a1;"></i> Takip Listesi ve Değerleme'de hisselere eklediğiniz tüm notlar burada senkronize görünür.</span>`}
+                </div>
+                <div style="display:flex; align-items:center; gap:0.65rem;">
+                    <span id="nt-result-count" style="font-size:12px; color:#64748b; font-weight:600;">${shownCount} kayıt</span>
+                    <div class="pf-search-wrap">
+                        <i class="fas fa-search"></i>
+                        <input id="nt-search-input" type="text" class="pf-search-input" placeholder="Not veya hisse ara..." value="${window.escapeHtml(window.notlarSearchQuery)}" oninput="window.filterNotlar(this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <div id="nt-body-slot" style="display:flex; flex-direction:column; gap:1rem;">
+                ${bodyHtml}
+            </div>
+        </div>
+    `;
+
+    // Focus-safe search updater
+    window.updateNotlarBodyOnly = () => {
+        const slot = document.getElementById('nt-body-slot');
+        const cnt = document.getElementById('nt-result-count');
+        if (!slot) return;
+        const res = buildBodyHtml();
+        slot.innerHTML = res.html;
+        if (cnt) cnt.textContent = `${res.count} kayıt`;
+    };
+    window.filterNotlar = (q) => {
+        window.notlarSearchQuery = q || '';
+        window.updateNotlarBodyOnly();
+    };
+    window.resetNotlarFilters = () => {
+        window.notlarCategoryFilter = 'all';
+        window.notlarColorFilter = 'all';
+        window.notlarPinnedOnly = false;
+        window.notlarSearchQuery = '';
+        if (typeof renderPage === 'function') renderPage();
+    };
+
+    // Ensure modern modal exists in DOM (upgrade legacy modal if present)
+    const existingModal = document.getElementById('note-modal');
+    if (existingModal && !existingModal.dataset.upgraded) {
+        existingModal.remove();
+    }
     if (!document.getElementById('note-modal')) {
         const modal = document.createElement('div');
         modal.id = 'note-modal';
-        modal.className = 'app-container';
-        modal.style.cssText = 'display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(4px); z-index: 2000; opacity: 0; transition: opacity 0.3s;';
+        modal.dataset.upgraded = '1';
+        modal.className = 'nt-modal-overlay';
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) window.closeNoteModal();
+        });
         modal.innerHTML = `
-            <div class="glass" style="width: 92%; max-width: 500px; height: min(680px, 86vh); display: flex; flex-direction: column; padding: 1.25rem; border-radius: 12px; position: relative; transform: scale(0.95); transition: transform 0.3s;">
-                <h3 id="note-modal-title" style="margin-top: 0; margin-bottom: 0.85rem; color: var(--text-primary); font-size: 18px; flex-shrink: 0;">Yeni Not Ekle</h3>
-                <input type="hidden" id="note-id-input" value="">
-                <input type="text" id="note-title-input" placeholder="Not Başlığı (İsteğe bağlı)" style="width: 100%; padding: 0.6rem 0.75rem; margin-bottom: 0.6rem; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text-primary); outline: none; font-size: 15px; flex-shrink: 0;">
-                <textarea id="note-content-input" placeholder="Notunuzu buraya yazın..." style="width: 100%; flex: 1; padding: 0.65rem 0.75rem; margin-bottom: 0.65rem; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text-primary); outline: none; font-family: inherit; font-size: 14px; resize: none; line-height: 1.5;"></textarea>
-                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.85rem; align-items: center; flex-shrink: 0;">
-                    <label style="color: var(--text-secondary); font-size: 13.5px; font-weight: 500;">Etiket Rengi:</label>
-                    <div style="display: flex; gap: 0.35rem;" id="note-color-picker">
-                        <div class="color-swatch active" data-color="#3498db" style="width:18px; height:18px; border-radius:50%; background:#3498db; cursor:pointer; border: 2px solid #0f172a;"></div>
-                        <div class="color-swatch" data-color="#2ecc71" style="width:18px; height:18px; border-radius:50%; background:#2ecc71; cursor:pointer; border: 2px solid transparent;"></div>
-                        <div class="color-swatch" data-color="#e74c3c" style="width:18px; height:18px; border-radius:50%; background:#e74c3c; cursor:pointer; border: 2px solid transparent;"></div>
-                        <div class="color-swatch" data-color="#f1c40f" style="width:18px; height:18px; border-radius:50%; background:#f1c40f; cursor:pointer; border: 2px solid transparent;"></div>
-                        <div class="color-swatch" data-color="#9b59b6" style="width:18px; height:18px; border-radius:50%; background:#9b59b6; cursor:pointer; border: 2px solid transparent;"></div>
-                    </div>
-                    <input type="hidden" id="note-color-input" value="#3498db">
+            <div class="nt-modal-box">
+                <div class="nt-modal-head">
+                    <h3 id="note-modal-title" style="margin:0; font-size:16px; font-weight:700; color:#0f172a;">Yeni Not Ekle</h3>
+                    <button type="button" class="nt-icon-btn" onclick="window.closeNoteModal()" title="Kapat"><i class="fas fa-times"></i></button>
                 </div>
-                <div style="display: flex; gap: 0.6rem; flex-shrink: 0;">
-                    <button class="btn" style="flex: 1; background: var(--success-color); padding: 0.55rem; font-size: 14px;" onclick="window.saveNote()"><i class="fas fa-check"></i> Kaydet</button>
-                    <button class="btn" style="flex: 1; background: var(--overlay-hover); color: var(--text-primary); border: 1px solid var(--surface-border); box-shadow: none; padding: 0.55rem; font-size: 14px;" onclick="window.closeNoteModal()">İptal</button>
+                <div class="nt-modal-body">
+                    <input type="hidden" id="note-id-input" value="">
+                    <div>
+                        <label class="nt-field-label" for="note-title-input">Başlık</label>
+                        <input type="text" id="note-title-input" class="nt-input" placeholder="Örn: 2026 Portföy Stratejisi veya AKSA Bilanço Notu">
+                    </div>
+                    <div class="nt-modal-row">
+                        <div>
+                            <label class="nt-field-label" for="note-category-input">Kategori</label>
+                            <select id="note-category-input" class="nt-input">
+                                ${window.NT_CATEGORIES.map(c => `<option value="${c.id}">${c.label}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="nt-field-label" for="note-stocks-input">İlgili Hisseler (virgülle)</label>
+                            <input type="text" id="note-stocks-input" class="nt-input" placeholder="Örn: AKSA, THYAO">
+                        </div>
+                    </div>
+                    <div id="note-quick-stocks-wrap" class="nt-quick-stocks"></div>
+                    <div>
+                        <div class="nt-format-bar">
+                            <label class="nt-field-label" for="note-content-input" style="margin:0;">İçerik</label>
+                            <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                                <button type="button" class="nt-fmt-btn" onclick="window.insertNoteFormat('check')"><i class="fas fa-check-square"></i> Görev</button>
+                                <button type="button" class="nt-fmt-btn" onclick="window.insertNoteFormat('bullet')"><i class="fas fa-list-ul"></i> Madde</button>
+                                <button type="button" class="nt-fmt-btn" onclick="window.insertNoteFormat('bold')"><strong>B</strong> Kalın</button>
+                            </div>
+                        </div>
+                        <textarea id="note-content-input" class="nt-input" style="min-height:190px; resize:vertical; line-height:1.55; font-family:inherit;" placeholder="Notunuzu yazın... (- [ ] ile tıklanabilir görev listesi, **metin** ile kalın yazı oluşturabilirsiniz)" onkeydown="if(event.key==='Enter' && (event.ctrlKey || event.metaKey)){event.preventDefault(); window.saveNote();}"></textarea>
+                    </div>
+                    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.75rem;">
+                        <div style="display:flex; align-items:center; gap:0.55rem;">
+                            <span class="nt-field-label" style="margin:0;">Renk:</span>
+                            <div style="display:flex; gap:6px;" id="note-color-picker">
+                                ${window.NT_COLORS.map((c, idx) => `<button type="button" class="color-swatch nt-color-dot-btn${idx === 0 ? ' active' : ''}" data-color="${c.hex}" style="width:20px; height:20px; background:${c.hex};" title="${c.name}"></button>`).join('')}
+                            </div>
+                            <input type="hidden" id="note-color-input" value="#2563eb">
+                        </div>
+                        <label style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#334155; cursor:pointer;">
+                            <input type="checkbox" id="note-pinned-input" style="width:15px; height:15px; accent-color:#d97706;">
+                            <i class="fas fa-thumbtack" style="color:#d97706;"></i> Üste Sabitle
+                        </label>
+                    </div>
+                </div>
+                <div class="nt-modal-foot">
+                    <span style="font-size:11.5px; color:#64748b;">İpucu: <strong>Ctrl + Enter</strong> ile hızlı kaydet</span>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button type="button" class="pf-filter-pill" onclick="window.closeNoteModal()">İptal</button>
+                        <button type="button" class="pf-cta-btn" onclick="window.saveNote()"><i class="fas fa-check"></i> Kaydet</button>
+                    </div>
                 </div>
             </div>
         `;
         document.body.appendChild(modal);
 
-        document.querySelectorAll('#note-color-picker .color-swatch').forEach(sw => {
-            sw.addEventListener('click', (e) => {
-                document.querySelectorAll('#note-color-picker .color-swatch').forEach(s => s.style.border = '2px solid transparent');
-                e.target.style.border = '2px solid #0f172a';
-                document.getElementById('note-color-input').value = e.target.getAttribute('data-color');
+        modal.querySelectorAll('#note-color-picker .color-swatch').forEach(sw => {
+            sw.addEventListener('click', () => {
+                modal.querySelectorAll('#note-color-picker .color-swatch').forEach(s => s.classList.remove('active'));
+                sw.classList.add('active');
+                document.getElementById('note-color-input').value = sw.getAttribute('data-color');
             });
         });
+    }
+};
+
+window.insertNoteFormat = (type) => {
+    const ta = document.getElementById('note-content-input');
+    if (!ta) return;
+    const start = ta.selectionStart || 0;
+    const end = ta.selectionEnd || 0;
+    const val = ta.value || '';
+    const sel = val.slice(start, end);
+    let inserted = '';
+    if (type === 'check') {
+        const prefix = (start > 0 && val[start - 1] !== '\n') ? '\n- [ ] ' : '- [ ] ';
+        inserted = prefix + (sel || '');
+    } else if (type === 'bullet') {
+        const prefix = (start > 0 && val[start - 1] !== '\n') ? '\n- ' : '- ';
+        inserted = prefix + (sel || '');
+    } else if (type === 'bold') {
+        inserted = `**${sel || 'kalın metin'}**`;
+    }
+    ta.value = val.slice(0, start) + inserted + val.slice(end);
+    ta.focus();
+    const caret = start + inserted.length;
+    ta.setSelectionRange(caret, caret);
+};
+
+window.appendStockToNoteInput = (sym) => {
+    const inp = document.getElementById('note-stocks-input');
+    if (!inp) return;
+    const current = window.parseNoteStocks(inp.value);
+    const clean = String(sym || '').trim().toUpperCase();
+    if (clean && !current.includes(clean)) current.push(clean);
+    inp.value = current.join(', ');
+};
+
+window.toggleNoteExpand = (id) => {
+    window.notlarExpandedIds = window.notlarExpandedIds || {};
+    window.notlarExpandedIds[id] = !window.notlarExpandedIds[id];
+    if (typeof window.updateNotlarBodyOnly === 'function') window.updateNotlarBodyOnly();
+};
+
+window.toggleNotePin = (id) => {
+    if (!Array.isArray(State.data.notlar)) return;
+    const note = State.data.notlar.find(n => n.id === id);
+    if (!note) return;
+    note.pinned = !note.pinned;
+    State.save();
+    if (currentPage === 'notlar') renderPage();
+    if (typeof window.showToast === 'function') window.showToast(note.pinned ? 'Not üste sabitlendi.' : 'Sabitleme kaldırıldı.', 'info', 2000);
+};
+
+window.toggleNoteChecklistItem = (id, lineIdx) => {
+    if (!Array.isArray(State.data.notlar)) return;
+    const note = State.data.notlar.find(n => n.id === id);
+    if (!note) return;
+    const lines = String(note.content || '').split('\n');
+    if (lineIdx < 0 || lineIdx >= lines.length) return;
+    lines[lineIdx] = lines[lineIdx].replace(/^(\s*(?:-\s*)?\[)( |x|X)(\]\s+)/, (_, p1, state, p3) => {
+        return p1 + (state.toLowerCase() === 'x' ? ' ' : 'x') + p3;
+    });
+    note.content = lines.join('\n');
+    note.updatedAt = Date.now();
+    State.save();
+    if (currentPage === 'notlar') renderPage();
+};
+
+window.copyNoteContent = (id) => {
+    const note = (State.data.notlar || []).find(n => n.id === id);
+    if (!note) return;
+    const text = (note.title ? note.title + '\n\n' : '') + (note.content || '');
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        navigator.clipboard.writeText(text).then(() => {
+            if (typeof window.showToast === 'function') window.showToast('Not panoya kopyalandı.', 'success', 2000);
+        }).catch(() => {});
+    } else if (typeof window.showToast === 'function') {
+        window.showToast('Not kopyalandı.', 'info', 1800);
     }
 };
 
@@ -11679,14 +12156,11 @@ window.enterNoteEditMode = (id) => {
     const displayDiv = document.getElementById(`note-content-display-${id}`);
     const editArea = document.getElementById(`note-content-edit-${id}`);
     if (displayDiv && editArea) {
-        const note = State.data.notlar.find(n => n.id === id);
+        const note = (State.data.notlar || []).find(n => n.id === id);
         if (note) {
             editArea.value = note.content || '';
-
-            // Set the exact height before switching display
             const rect = displayDiv.getBoundingClientRect();
-            editArea.style.height = Math.max(100, rect.height) + 'px';
-
+            editArea.style.height = Math.max(110, rect.height + 16) + 'px';
             displayDiv.style.display = 'none';
             editArea.style.display = 'block';
             editArea.focus();
@@ -11694,112 +12168,233 @@ window.enterNoteEditMode = (id) => {
     }
 };
 
+window.cancelNoteInline = (id) => {
+    const editArea = document.getElementById(`note-content-edit-${id}`);
+    const displayDiv = document.getElementById(`note-content-display-${id}`);
+    if (editArea) {
+        editArea.dataset.cancelled = '1';
+        editArea.style.display = 'none';
+    }
+    if (displayDiv) displayDiv.style.display = '';
+};
+
 window.saveNoteInline = (id) => {
     const editArea = document.getElementById(`note-content-edit-${id}`);
-    if (editArea) {
-        const note = State.data.notlar.find(n => n.id === id);
-        if (note && note.content !== editArea.value) {
-            note.content = editArea.value;
-            note.timestamp = Date.now();
-            State.save();
-            if (currentPage === 'notlar') renderPage();
-        } else {
-            const displayDiv = document.getElementById(`note-content-display-${id}`);
-            if (displayDiv) {
-                editArea.style.display = 'none';
-                displayDiv.style.display = 'block';
-            }
-        }
+    if (!editArea) return;
+    if (editArea.dataset.cancelled === '1') {
+        delete editArea.dataset.cancelled;
+        return;
+    }
+    const note = (State.data.notlar || []).find(n => n.id === id);
+    if (note && note.content !== editArea.value) {
+        note.content = editArea.value;
+        note.updatedAt = Date.now();
+        note.timestamp = note.updatedAt;
+        State.save();
+        if (currentPage === 'notlar') renderPage();
+    } else {
+        const displayDiv = document.getElementById(`note-content-display-${id}`);
+        editArea.style.display = 'none';
+        if (displayDiv) displayDiv.style.display = '';
     }
 };
 
 window.changeNoteColor = (id, color) => {
-    const note = State.data.notlar.find(n => n.id === id);
+    const note = (State.data.notlar || []).find(n => n.id === id);
     if (note) {
-        note.color = color;
+        note.color = window.normalizeNoteColor(color);
         State.save();
         if (currentPage === 'notlar') renderPage();
     }
 };
 
-window.openNoteModal = () => {
-    document.getElementById('note-modal-title').innerText = 'Yeni Not Ekle';
-    document.getElementById('note-id-input').value = '';
-    document.getElementById('note-title-input').value = '';
-    document.getElementById('note-content-input').value = '';
+window.openNoteModal = (editId = null) => {
+    const modal = document.getElementById('note-modal');
+    if (!modal) return;
+    const existing = editId ? (State.data.notlar || []).find(n => n.id === editId) : null;
 
-    const swatches = document.querySelectorAll('#note-color-picker .color-swatch');
-    if (swatches.length > 0) {
-        swatches.forEach(s => s.style.border = '2px solid transparent');
-        swatches[0].style.border = '2px solid #0f172a';
-        document.getElementById('note-color-input').value = swatches[0].getAttribute('data-color');
+    document.getElementById('note-modal-title').textContent = existing ? 'Notu Düzenle' : 'Yeni Not Ekle';
+    document.getElementById('note-id-input').value = existing ? existing.id : '';
+    document.getElementById('note-title-input').value = existing ? (existing.title || '') : '';
+    document.getElementById('note-category-input').value = existing ? (existing.category || 'genel') : 'genel';
+    document.getElementById('note-stocks-input').value = existing ? window.parseNoteStocks(existing.stocks).join(', ') : '';
+    document.getElementById('note-content-input').value = existing ? (existing.content || '') : '';
+    document.getElementById('note-pinned-input').checked = existing ? !!existing.pinned : false;
+
+    const activeColor = existing ? window.normalizeNoteColor(existing.color) : '#2563eb';
+    document.getElementById('note-color-input').value = activeColor;
+    modal.querySelectorAll('#note-color-picker .color-swatch').forEach(sw => {
+        sw.classList.toggle('active', sw.getAttribute('data-color') === activeColor);
+    });
+
+    // Populate quick-pick stock chips from takipListesi
+    const quickWrap = document.getElementById('note-quick-stocks-wrap');
+    if (quickWrap) {
+        const takip = (State.data && Array.isArray(State.data.takipListesi)) ? [...State.data.takipListesi].sort().slice(0, 12) : [];
+        quickWrap.innerHTML = takip.length > 0
+            ? `<span style="font-size:11px; color:#64748b; font-weight:600;">Hızlı ekle:</span>` + takip.map(s => {
+                const safeS = window.escapeHtml(s);
+                return `<button type="button" class="nt-quick-stock-pill" onclick="window.appendStockToNoteInput('${safeS}')">+ ${safeS}</button>`;
+            }).join('')
+            : '';
     }
 
-    const modal = document.getElementById('note-modal');
     modal.style.display = 'flex';
+    const escHandler = (e) => {
+        if (e.key === 'Escape') {
+            window.closeNoteModal();
+            document.removeEventListener('keydown', escHandler);
+        }
+    };
+    window._noteModalEscHandler = escHandler;
+    document.addEventListener('keydown', escHandler);
     setTimeout(() => {
-        modal.style.opacity = '1';
-        modal.querySelector('.glass').style.transform = 'scale(1)';
-        document.getElementById('note-content-input').focus();
+        const targetFocus = existing ? document.getElementById('note-content-input') : document.getElementById('note-title-input');
+        if (targetFocus) targetFocus.focus();
     }, 10);
 };
 
 window.closeNoteModal = () => {
     const modal = document.getElementById('note-modal');
-    modal.style.opacity = '0';
-    modal.querySelector('.glass').style.transform = 'scale(0.95)';
-    setTimeout(() => {
-        modal.style.display = 'none';
-    }, 300);
+    if (modal) modal.style.display = 'none';
+    if (window._noteModalEscHandler) {
+        document.removeEventListener('keydown', window._noteModalEscHandler);
+        window._noteModalEscHandler = null;
+    }
 };
 
 window.saveNote = () => {
     const id = document.getElementById('note-id-input').value;
     const title = document.getElementById('note-title-input').value.trim();
     const content = document.getElementById('note-content-input').value.trim();
-    const color = document.getElementById('note-color-input').value;
+    const category = document.getElementById('note-category-input').value || 'genel';
+    const stocks = window.parseNoteStocks(document.getElementById('note-stocks-input').value);
+    const color = window.normalizeNoteColor(document.getElementById('note-color-input').value);
+    const pinned = !!document.getElementById('note-pinned-input').checked;
 
     if (!content) {
         const contentInput = document.getElementById('note-content-input');
-        contentInput.style.borderColor = 'var(--danger-color)';
-        setTimeout(() => contentInput.style.borderColor = 'var(--input-border)', 2000);
+        if (contentInput) {
+            contentInput.style.borderColor = 'var(--danger-color)';
+            contentInput.focus();
+            setTimeout(() => { contentInput.style.borderColor = ''; }, 1800);
+        }
+        if (typeof window.showToast === 'function') window.showToast('Lütfen not içeriğini yazın.', 'warning');
         return;
     }
 
-    if (!State.data.notlar) State.data.notlar = [];
+    if (!Array.isArray(State.data.notlar)) State.data.notlar = [];
+    const nowTs = Date.now();
 
     if (id) {
         const existing = State.data.notlar.find(n => n.id === id);
         if (existing) {
             existing.title = title;
             existing.content = content;
+            existing.category = category;
+            existing.stocks = stocks;
             existing.color = color;
-            existing.timestamp = Date.now();
+            existing.pinned = pinned;
+            existing.updatedAt = nowTs;
+            existing.timestamp = nowTs;
         }
     } else {
         State.data.notlar.push({
-            id: 'note_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-            title: title,
-            content: content,
-            color: color,
-            timestamp: Date.now()
+            id: 'note_' + nowTs + '_' + Math.floor(Math.random() * 1000),
+            title,
+            content,
+            category,
+            stocks,
+            color,
+            pinned,
+            timestamp: nowTs,
+            updatedAt: nowTs
         });
     }
 
     State.save();
     window.closeNoteModal();
-    if (currentPage === 'notlar') {
-        setTimeout(() => renderPage(), 300);
-    }
+    if (typeof window.showToast === 'function') window.showToast(id ? 'Not güncellendi.' : 'Yeni not kaydedildi.', 'success', 2000);
+    if (currentPage === 'notlar') renderPage();
 };
 
 window.deleteNote = async (id) => {
     if (!(await window.showConfirm('Bu notu silmek istediğinize emin misiniz?'))) return;
-    if (State.data.notlar) {
+    if (Array.isArray(State.data.notlar)) {
         State.data.notlar = State.data.notlar.filter(n => n.id !== id);
         State.save();
         if (currentPage === 'notlar') renderPage();
-        window.showToast('Not silindi.', 'info');
+        if (typeof window.showToast === 'function') window.showToast('Not silindi.', 'info');
+    }
+};
+
+window.openHisseNoteModal = (prefillSym = '') => {
+    const existingOverlay = document.getElementById('hisse-note-hub-modal');
+    if (existingOverlay) existingOverlay.remove();
+
+    const symClean = String(prefillSym || '').trim().toUpperCase();
+    const existingText = (symClean && State.data.hisseNotlari && State.data.hisseNotlari[symClean]) ? State.data.hisseNotlari[symClean] : '';
+    const overlay = document.createElement('div');
+    overlay.id = 'hisse-note-hub-modal';
+    overlay.className = 'nt-modal-overlay';
+    overlay.style.display = 'flex';
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    overlay.innerHTML = `
+        <div class="nt-modal-box" style="max-width:500px;">
+            <div class="nt-modal-head">
+                <h3 style="margin:0; font-size:16px; font-weight:700; color:#0f172a;">${symClean ? `${window.escapeHtml(symClean)} Notunu Düzenle` : 'Hisse Notu Ekle'}</h3>
+                <button type="button" class="nt-icon-btn" onclick="document.getElementById('hisse-note-hub-modal').remove()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="nt-modal-body">
+                <div>
+                    <label class="nt-field-label" for="hnh-sym-input">Hisse Kodu</label>
+                    <input id="hnh-sym-input" type="text" class="nt-input" value="${window.escapeHtml(symClean)}" ${symClean ? 'readonly' : ''} placeholder="Örn: AKSA" style="text-transform:uppercase;">
+                </div>
+                <div>
+                    <label class="nt-field-label" for="hnh-text-input">Hisse Notu</label>
+                    <textarea id="hnh-text-input" class="nt-input" style="min-height:150px; resize:vertical; line-height:1.55; font-family:inherit;" placeholder="Bilanço beklentisi, hedef fiyat gerekçesi, riskler...">${window.escapeHtml(existingText)}</textarea>
+                </div>
+            </div>
+            <div class="nt-modal-foot" style="justify-content:flex-end;">
+                <button type="button" class="pf-filter-pill" onclick="document.getElementById('hisse-note-hub-modal').remove()">İptal</button>
+                <button type="button" class="pf-cta-btn" onclick="window.saveHisseNoteFromHub()"><i class="fas fa-check"></i> Kaydet</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    setTimeout(() => {
+        const el = document.getElementById(symClean ? 'hnh-text-input' : 'hnh-sym-input');
+        if (el) el.focus();
+    }, 10);
+};
+
+window.saveHisseNoteFromHub = () => {
+    const symEl = document.getElementById('hnh-sym-input');
+    const txtEl = document.getElementById('hnh-text-input');
+    if (!symEl || !txtEl) return;
+    const sym = symEl.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const txt = txtEl.value.trim();
+    if (!sym) {
+        if (typeof window.showToast === 'function') window.showToast('Lütfen geçerli bir hisse kodu girin.', 'warning');
+        return;
+    }
+    if (!State.data.hisseNotlari) State.data.hisseNotlari = {};
+    if (txt) State.data.hisseNotlari[sym] = txt;
+    else delete State.data.hisseNotlari[sym];
+    State.save();
+    const modal = document.getElementById('hisse-note-hub-modal');
+    if (modal) modal.remove();
+    if (typeof window.showToast === 'function') window.showToast(`${sym} notu kaydedildi.`, 'success', 2000);
+    if (currentPage === 'notlar') renderPage();
+};
+
+window.deleteHisseNoteFromHub = async (sym) => {
+    if (!(await window.showConfirm(`${sym} hisse notunu silmek istediğinize emin misiniz?`))) return;
+    if (State.data.hisseNotlari) {
+        delete State.data.hisseNotlari[sym];
+        State.save();
+        if (currentPage === 'notlar') renderPage();
+        if (typeof window.showToast === 'function') window.showToast(`${sym} notu silindi.`, 'info');
     }
 };
 
