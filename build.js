@@ -36,7 +36,7 @@ itemsToCopy.forEach(item => {
 // Copy only active web JS files into www/js (exclude legacy app_v52.js, unused prices_compiled.js, etc.)
 const wwwJsDir = path.join(wwwDir, 'js');
 fs.mkdirSync(wwwJsDir, { recursive: true });
-['stock_data_compiled.js', 'custom_autocomplete.js', 'app_v53.js'].forEach(jsFile => {
+['stock_data_compiled.js', 'custom_autocomplete.js', 'app_v53.js', 'xlsx.core.min.js'].forEach(jsFile => {
     const src = path.join(__dirname, 'js', jsFile);
     const dest = path.join(wwwJsDir, jsFile);
     if (fs.existsSync(src)) {

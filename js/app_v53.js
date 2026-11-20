@@ -3284,11 +3284,53 @@ const renderHisseler = (container) => {
                 window.shouldRenderDashboardCharts = true;
             } else if (activeTab === 'Bilanço') {
                 const hasBilanco = sData && sData.bilanco && sData.bilanco.headers && sData.bilanco.rows && sData.bilanco.rows.length > 0;
+                const latestPeriod = hasBilanco && sData.bilanco.headers[1] ? sData.bilanco.headers[1] : null;
+                const cloudMeta = window._cloudFinancialsMeta && window._cloudFinancialsMeta[selectedHisse];
+                const safeSelB = window.escapeHtml(selectedHisse);
+                const cloudDateStr = cloudMeta && cloudMeta.updatedAt
+                    ? new Date(cloudMeta.updatedAt).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                    : '';
+
+                const statusBadgeHtml = cloudMeta
+                    ? `<span class="ekstre-badge ekstre-badge-acik" title="Buluta yüklenme: ${window.escapeHtml(cloudDateStr)}"><i class="fas fa-cloud-check"></i> Bulut Güncel (${window.escapeHtml(cloudMeta.latestPeriod || latestPeriod || '-')})</span>`
+                    : (hasBilanco
+                        ? `<span class="ekstre-badge ekstre-badge-hisse">Son Dönem: ${window.escapeHtml(latestPeriod || '-')}</span>`
+                        : `<span class="ekstre-badge ekstre-badge-kapali">Bilanço Yok</span>`);
+
+                const bilancoToolbarHtml = `
+                    <div class="glass" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.65rem; padding:0.75rem 1rem; border-radius:12px;">
+                        <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.6rem;">
+                            <span class="enf-panel-title">
+                                <i class="fas fa-balance-scale" style="color:#0284c7;"></i>
+                                <span>${safeSelB} Finansal Tablolar</span>
+                            </span>
+                            ${statusBadgeHtml}
+                            ${cloudDateStr ? `<span style="font-size:12px; color:#64748b;">Yükleme: ${window.escapeHtml(cloudDateStr)}</span>` : ''}
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+                            ${cloudMeta ? `<button type="button" class="ekstre-ghost-btn reset" onclick="window.deleteCloudFinancials('${safeSelB}')" title="Buluta yüklenen bilançoyu kaldır"><i class="fas fa-trash-alt"></i><span>Bulutu Kaldır</span></button>` : ''}
+                            <button type="button" class="btn ekstre-primary-cta" onclick="window.openBilancoUploadModal('${safeSelB}')">
+                                <i class="fas fa-cloud-arrow-up" style="color:#ffffff !important;"></i>
+                                <span>Bilanço Yükle</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
                 const tBilancoTabDynamic = hasBilanco
                     ? genFintablesBilanco('Bilanço', sData.bilanco.headers, sData.bilanco.rows)
-                    : `<div class="glass ekstre-empty-state" style="border-radius:12px;"><i class="fas fa-balance-scale"></i><strong>${window.escapeHtml(selectedHisse)} için bilanço verisi bulunamadı</strong><span>Bu hissenin Excel mali tablosu eklendiğinde bilanço kalemleri burada görüntülenir.</span></div>`;
+                    : `<div class="glass ekstre-empty-state" style="border-radius:12px;">
+                        <i class="fas fa-balance-scale"></i>
+                        <strong>${safeSelB} için bilanço verisi bulunamadı</strong>
+                        <span>Fintables mali tablo dosyasını yüklediğinizde Bilanço, Gelir Tablosu, Nakit Akışı ve Değerleme verileri anında güncellenir.</span>
+                        <button type="button" class="btn ekstre-primary-cta" style="margin-top:8px;" onclick="window.openBilancoUploadModal('${safeSelB}')">
+                            <i class="fas fa-cloud-arrow-up" style="color:#ffffff !important;"></i>
+                            <span>Bilanço Yükle</span>
+                        </button>
+                    </div>`;
                 contentHtml = `
-                <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
+                <div style="display:flex; flex-direction:column; gap: 0.9rem; margin-top: 0;">
+                    ${bilancoToolbarHtml}
                     ${tBilancoTabDynamic}
                 </div>
                 `;
@@ -4721,6 +4763,10 @@ const renderHisseler = (container) => {
                     </div>
                     <button type="button" class="takip-star-filter-btn ${isStarredH ? 'active' : ''}" style="height:34px; padding:0 10px;" onclick="if(window.toggleTakipStar) window.toggleTakipStar('${safeSel}', event); renderPage();" title="${isStarredH ? 'Yıldızı kaldır' : 'Öncelikli olarak yıldızla'}">
                         <i class="${isStarredH ? 'fas' : 'far'} fa-star" style="color:#f59e0b;"></i>
+                    </button>
+                    <button type="button" class="ekstre-ghost-btn" style="height:34px; color:#0369a1; border-color:#bae6fd; background:#f0f9ff;" onclick="window.openBilancoUploadModal && window.openBilancoUploadModal('${safeSel}')" title="${safeSel} için güncel bilanço dosyası yükle">
+                        <i class="fas fa-cloud-arrow-up"></i>
+                        <span>Bilanço</span>
                     </button>
                     <button type="button" class="ekstre-ghost-btn" style="height:34px; color:#059669; border-color:#a7f3d0; background:#ecfdf5;" onclick="window.openEkstreModal && window.openEkstreModal(null, '${safeSel}')" title="${safeSel} için alım/satım işlemi ekle">
                         <i class="fas fa-plus"></i>
@@ -7811,6 +7857,523 @@ window.deleteFirebasePdf = async (reportId) => {
     }
 };
 
+// --- 100% BROWSER & FIREBASE CLOUD BİLANÇO UPLOAD / SYNC ---
+const CLOUD_FINANCIALS_CACHE_KEY = 'yunvest_cloud_financials_v1';
+window._cloudFinancialsMeta = window._cloudFinancialsMeta || {};
+window._compiledStockDataBackup = window._compiledStockDataBackup || null;
+
+window.ensureXlsxLoaded = () => {
+    if (window.XLSX && typeof window.XLSX.read === 'function') {
+        return Promise.resolve(window.XLSX);
+    }
+    if (window._xlsxLoadPromise) return window._xlsxLoadPromise;
+    window._xlsxLoadPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'js/xlsx.core.min.js';
+        script.async = true;
+        script.onload = () => {
+            if (window.XLSX && typeof window.XLSX.read === 'function') resolve(window.XLSX);
+            else reject(new Error('Tablo ayrıştırıcı yüklenemedi.'));
+        };
+        script.onerror = () => {
+            window._xlsxLoadPromise = null;
+            reject(new Error('Tablo ayrıştırıcı dosyasına erişilemedi (js/xlsx.core.min.js).'));
+        };
+        document.head.appendChild(script);
+    });
+    return window._xlsxLoadPromise;
+};
+
+window.parseBilancoWorkbook = (workbook, XLSXLib) => {
+    const xlsxUtil = (XLSXLib || window.XLSX).utils;
+    if (!workbook || !workbook.SheetNames || workbook.SheetNames.length === 0) {
+        throw new Error('Dosyada okunabilir çalışma sayfası bulunamadı.');
+    }
+
+    const parseSheet = (sheetNamesToTry, isIncomeStatement = false) => {
+        let sName = null;
+        for (const name of sheetNamesToTry) {
+            const found = workbook.SheetNames.find(sn => sn.toLowerCase().includes(name.toLowerCase()));
+            if (found) { sName = found; break; }
+        }
+        if (!sName) return null;
+
+        const sheet = workbook.Sheets[sName];
+        const data = xlsxUtil.sheet_to_json(sheet, { header: 1 });
+        if (!data || data.length === 0) return null;
+
+        const formatNum = (val) => {
+            if (val === undefined || val === null || val === '') return '-';
+            if (typeof val === 'number') return new Intl.NumberFormat('tr-TR').format(val);
+            return val;
+        };
+
+        const numPeriods = Math.max(0, (data[0] ? data[0].length : 1) - 1);
+        const rawHeaders = [];
+        for (let i = 0; i <= numPeriods; i++) rawHeaders.push(data[0][i] || '');
+
+        let maxYear = 0;
+        for (let i = 1; i <= numPeriods; i++) {
+            const h = String(rawHeaders[i] || '');
+            const parts = h.split('/');
+            if (parts.length > 0) {
+                const year = parseInt(parts[0], 10);
+                if (!isNaN(year) && year > maxYear) maxYear = year;
+            }
+        }
+
+        const cutoffYear = maxYear > 0 ? maxYear - 5 : 0;
+        const keepIndices = [0];
+        for (let i = 1; i <= numPeriods; i++) {
+            const h = String(rawHeaders[i] || '');
+            const parts = h.split('/');
+            const year = parseInt(parts[0], 10);
+            if (isNaN(year) || year >= cutoffYear) keepIndices.push(i);
+        }
+
+        const result = { headers: keepIndices.map(idx => rawHeaders[idx]), rows: [] };
+        for (let i = 1; i < data.length; i++) {
+            if (!data[i] || !data[i][0]) continue;
+            const row = [String(data[i][0])];
+            for (let j = 1; j < keepIndices.length; j++) {
+                const cIdx = keepIndices[j];
+                let val = data[i][cIdx];
+                if (val === undefined || val === null || val === '') val = '-';
+                else if (typeof val === 'number') val = formatNum(val);
+                row.push(val);
+            }
+            result.rows.push(row);
+        }
+
+        if (!isIncomeStatement) {
+            const getValueFlex = (rIndex, cIndex) => {
+                if (rIndex === -1 || !data[rIndex]) return 0;
+                const v = data[rIndex][cIndex];
+                if (typeof v === 'number') return v;
+                if (typeof v === 'string') {
+                    const parsed = parseFloat(v.replace(/\./g, '').replace(/,/g, '.'));
+                    return isNaN(parsed) ? 0 : parsed;
+                }
+                return 0;
+            };
+            const findRowIndex = (searchName) => {
+                const cleanSearch = searchName.toLowerCase().replace(/[ıiİI\s]/g, '');
+                for (let i = 0; i < data.length; i++) {
+                    if (!data[i] || !data[i][0]) continue;
+                    const cleanRow = String(data[i][0]).toLowerCase().replace(/[ıiİI\s]/g, '');
+                    if (cleanRow.includes(cleanSearch)) return i;
+                }
+                return -1;
+            };
+            const idxKisa = findRowIndex('Kısa Vadeli Borçlanmalar');
+            const idxKisa2 = findRowIndex('Uzun Vadeli Borçlanmaların Kısa Vadeli Kısımları');
+            const idxUzun = findRowIndex('Uzun Vadeli Borçlanmalar');
+            const idxNakit = findRowIndex('Nakit ve Nakit Benzerleri');
+            const idxFinYat = findRowIndex('Finansal Yatırımlar');
+
+            const rowFinBorc = ['Sistem_Fin_Borc_Eklemesi'];
+            const rowNetBorc = ['Sistem_Net_Borc_Eklemesi'];
+            for (let j = 1; j < keepIndices.length; j++) {
+                const i = keepIndices[j];
+                const finBorc = getValueFlex(idxKisa, i) + getValueFlex(idxKisa2, i) + getValueFlex(idxUzun, i);
+                const netBorc = finBorc - getValueFlex(idxNakit, i) - getValueFlex(idxFinYat, i);
+                rowFinBorc.push(formatNum(finBorc));
+                rowNetBorc.push(formatNum(netBorc));
+            }
+            result.rows.push(rowFinBorc, rowNetBorc);
+        }
+
+        const cleanStr = (s) => String(s).toLocaleLowerCase('tr-TR').replace(/\s+/g, '');
+        const idxBrutKar = result.rows.findIndex(r => r[0] && cleanStr(r[0]) === 'brütkar(zarar)');
+        const idxGenelYon = result.rows.findIndex(r => r[0] && cleanStr(r[0]).includes('genelyönetim'));
+        const idxPazarlama = result.rows.findIndex(r => r[0] && cleanStr(r[0]).includes('pazarlama'));
+        const idxArge = result.rows.findIndex(r => r[0] && cleanStr(r[0]).includes('araştırma'));
+        const idxAmort1 = result.rows.findIndex(r => r[0] && cleanStr(r[0]).includes('amortismangiderleri'));
+        const idxAmort2 = result.rows.findIndex(r => r[0] && cleanStr(r[0]).includes('amortisman'));
+        const hasFavok = result.rows.some(r => r[0] && cleanStr(r[0]) === 'favök');
+
+        if (!hasFavok && idxBrutKar !== -1) {
+            const parseVal = (str) => {
+                if (!str || str === '-') return 0;
+                if (typeof str === 'number') return str;
+                return parseFloat(String(str).replace(/\./g, '').replace(/,/g, '.')) || 0;
+            };
+            const rowFavok = ['FAVÖK'];
+            const rowEsasFaal = ['Esas Faaliyet Karı'];
+            for (let i = 1; i < result.headers.length; i++) {
+                const bk = parseVal(result.rows[idxBrutKar][i]);
+                const gy = idxGenelYon !== -1 ? parseVal(result.rows[idxGenelYon][i]) : 0;
+                const pz = idxPazarlama !== -1 ? parseVal(result.rows[idxPazarlama][i]) : 0;
+                const ar = idxArge !== -1 ? parseVal(result.rows[idxArge][i]) : 0;
+                const esasK = bk + gy + pz + ar;
+                const am = idxAmort1 !== -1 ? Math.abs(parseVal(result.rows[idxAmort1][i])) : (idxAmort2 !== -1 ? Math.abs(parseVal(result.rows[idxAmort2][i])) : 0);
+                rowFavok.push(formatNum(esasK + am));
+                rowEsasFaal.push(formatNum(esasK));
+            }
+            result.rows.push(rowFavok, rowEsasFaal);
+        }
+
+        return result;
+    };
+
+    const parsedBilanco = parseSheet(['Bilanço', 'Bilanço (TL)', workbook.SheetNames[0]], false);
+    const parsedGelirYillik = parseSheet(['Gelir Tablosu (Yıllıklan', 'Gelir Tablosu (Yıllık)', 'Yıllıklan', 'Yıllık'], true);
+    const parsedGelirDonemsel = parseSheet(['Gelir Tablosu (Dönemsel)', 'Gelir Tablosu (Yıllık)', 'Gelir Tablosu'], true);
+    const parsedGelirCeyrek = parseSheet(['Gelir Tablosu (Çeyreklik)'], true);
+    const parsedNakitDonemsel = parseSheet(['Nakit Akış (Dönemsel)', 'Nakit Akım (Dönemsel)', 'Nakit Akış Tablosu', 'Nakit Akım Tablosu', 'Nakit Akış', 'Nakit Akım'], true);
+    const parsedNakitCeyrek = parseSheet(['Nakit Akış (Çeyreklik)', 'Nakit Akım (Çeyreklik)'], true);
+    const parsedNakitYillik = parseSheet(['Nakit Akış (Yıllıklan', 'Nakit Akım (Yıllıklan'], true);
+
+    if (!parsedBilanco || !parsedBilanco.rows || parsedBilanco.rows.length < 3) {
+        throw new Error('Geçerli bir bilanço sayfası algılanamadı.');
+    }
+
+    const parsed = {
+        bilanco: parsedBilanco,
+        gelirDonemsel: parsedGelirDonemsel || parsedBilanco,
+        gelirYillik: parsedGelirYillik || parsedGelirDonemsel || parsedBilanco,
+        gelirCeyrek: parsedGelirCeyrek || parsedBilanco,
+        nakitAkim: parsedNakitYillik || parsedNakitDonemsel || parsedNakitCeyrek || null
+    };
+    if (parsedNakitDonemsel) parsed.nakitDonemsel = parsedNakitDonemsel;
+    if (parsedNakitCeyrek) parsed.nakitCeyrek = parsedNakitCeyrek;
+    if (parsedNakitYillik) parsed.nakitYillik = parsedNakitYillik;
+
+    const sheetsFound = ['Bilanço'];
+    if (parsedGelirDonemsel || parsedGelirYillik || parsedGelirCeyrek) sheetsFound.push('Gelir Tablosu');
+    if (parsedNakitYillik || parsedNakitDonemsel || parsedNakitCeyrek) sheetsFound.push('Nakit Akışı');
+
+    return {
+        parsed,
+        meta: {
+            latestPeriod: String(parsedBilanco.headers[1] || '-'),
+            periodsCount: Math.max(0, parsedBilanco.headers.length - 1),
+            sheetCount: workbook.SheetNames.length,
+            sheetsFound
+        }
+    };
+};
+
+window.hydrateLocalCloudFinancials = () => {
+    try {
+        if (!window.stockData) window.stockData = {};
+        if (!window._compiledStockDataBackup) {
+            window._compiledStockDataBackup = {};
+            Object.keys(window.stockData).forEach(k => { window._compiledStockDataBackup[k] = window.stockData[k]; });
+        }
+        const raw = localStorage.getItem(CLOUD_FINANCIALS_CACHE_KEY);
+        if (!raw) return;
+        const cached = JSON.parse(raw);
+        if (!cached || typeof cached !== 'object') return;
+        Object.entries(cached).forEach(([sym, entry]) => {
+            if (entry && entry.data && entry.data.bilanco) {
+                window.stockData[sym] = entry.data;
+                window._cloudFinancialsMeta[sym] = {
+                    updatedAt: entry.updatedAt || 0,
+                    latestPeriod: entry.latestPeriod || '',
+                    fileName: entry.fileName || ''
+                };
+            }
+        });
+    } catch (e) {
+        console.warn('Cloud financials cache read warning:', e);
+    }
+};
+
+window.initCloudFinancialsSync = () => {
+    window.hydrateLocalCloudFinancials();
+    if (window._unsubscribeCloudFinancials) {
+        try { window._unsubscribeCloudFinancials(); } catch (e) { }
+        window._unsubscribeCloudFinancials = null;
+    }
+    if (!currentUser || typeof db === 'undefined') return;
+
+    window._unsubscribeCloudFinancials = db
+        .collection('app_data')
+        .doc(currentUser.uid)
+        .collection('stock_financials')
+        .onSnapshot((snap) => {
+            if (!window.stockData) window.stockData = {};
+            const cacheObj = {};
+            const freshMeta = {};
+            snap.forEach((doc) => {
+                try {
+                    const d = doc.data();
+                    if (!d || !d.payloadJson) return;
+                    const sym = String(d.hisse || doc.id || '').trim().toUpperCase();
+                    if (!sym) return;
+                    const parsed = JSON.parse(d.payloadJson);
+                    if (parsed && parsed.bilanco) {
+                        window.stockData[sym] = parsed;
+                        const meta = {
+                            updatedAt: d.updatedAt || 0,
+                            latestPeriod: d.latestPeriod || (parsed.bilanco.headers && parsed.bilanco.headers[1]) || '',
+                            fileName: d.fileName || ''
+                        };
+                        freshMeta[sym] = meta;
+                        cacheObj[sym] = { ...meta, data: parsed };
+                    }
+                } catch (e) {
+                    console.warn('Cloud financial doc parse warning:', doc.id, e);
+                }
+            });
+
+            // Restore compiled baseline for any stock removed from cloud
+            Object.keys(window._cloudFinancialsMeta || {}).forEach((oldSym) => {
+                if (!freshMeta[oldSym]) {
+                    if (window._compiledStockDataBackup && window._compiledStockDataBackup[oldSym]) {
+                        window.stockData[oldSym] = window._compiledStockDataBackup[oldSym];
+                    } else {
+                        delete window.stockData[oldSym];
+                    }
+                }
+            });
+
+            window._cloudFinancialsMeta = freshMeta;
+            try { localStorage.setItem(CLOUD_FINANCIALS_CACHE_KEY, JSON.stringify(cacheObj)); } catch (e) { }
+            if (typeof window.recalculateHedefFiyatlar === 'function') window.recalculateHedefFiyatlar();
+            if (typeof renderPage === 'function') renderPage();
+        }, (err) => {
+            console.warn('Cloud financials snapshot error:', err);
+        });
+};
+
+window.saveCloudFinancials = async (hisse, parsed, meta = {}) => {
+    const sym = String(hisse || '').trim().toUpperCase();
+    if (!/^[A-Z0-9]{2,12}$/.test(sym)) throw new Error('Geçersiz hisse kodu.');
+    if (!parsed || !parsed.bilanco) throw new Error('Geçersiz bilanço verisi.');
+
+    const payloadJson = JSON.stringify(parsed);
+    if (payloadJson.length > 950000) {
+        throw new Error('Dosya verisi bulut sınırını (950 KB) aşıyor.');
+    }
+
+    const updatedAt = Date.now();
+    const latestPeriod = meta.latestPeriod || (parsed.bilanco.headers && parsed.bilanco.headers[1]) || '';
+    const fileName = meta.fileName || 'bilanco.xlsx';
+
+    if (!window.stockData) window.stockData = {};
+    if (!window._compiledStockDataBackup) {
+        window._compiledStockDataBackup = {};
+        Object.keys(window.stockData).forEach(k => { window._compiledStockDataBackup[k] = window.stockData[k]; });
+    }
+
+    window.stockData[sym] = parsed;
+    window._cloudFinancialsMeta[sym] = { updatedAt, latestPeriod, fileName };
+
+    try {
+        const prevCache = JSON.parse(localStorage.getItem(CLOUD_FINANCIALS_CACHE_KEY) || '{}') || {};
+        prevCache[sym] = { updatedAt, latestPeriod, fileName, data: parsed };
+        localStorage.setItem(CLOUD_FINANCIALS_CACHE_KEY, JSON.stringify(prevCache));
+    } catch (e) { }
+
+    if (currentUser && typeof db !== 'undefined') {
+        await db.collection('app_data').doc(currentUser.uid).collection('stock_financials').doc(sym).set({
+            hisse: sym,
+            latestPeriod,
+            fileName,
+            updatedAt,
+            payloadJson
+        });
+    }
+
+    if (typeof window.recalculateHedefFiyatlar === 'function') window.recalculateHedefFiyatlar();
+    return { sym, latestPeriod, updatedAt };
+};
+
+window.deleteCloudFinancials = async (hisse) => {
+    const sym = String(hisse || '').trim().toUpperCase();
+    if (!sym) return;
+    if (!(await window.showConfirm(`${sym} için buluta yüklenen güncel bilanço verisini kaldırmak istediğinize emin misiniz?`, 'Evet, Kaldır'))) return;
+
+    try {
+        if (currentUser && typeof db !== 'undefined') {
+            await db.collection('app_data').doc(currentUser.uid).collection('stock_financials').doc(sym).delete();
+        }
+        delete window._cloudFinancialsMeta[sym];
+        if (window._compiledStockDataBackup && window._compiledStockDataBackup[sym]) {
+            window.stockData[sym] = window._compiledStockDataBackup[sym];
+        } else if (window.stockData) {
+            delete window.stockData[sym];
+        }
+        try {
+            const prevCache = JSON.parse(localStorage.getItem(CLOUD_FINANCIALS_CACHE_KEY) || '{}') || {};
+            delete prevCache[sym];
+            localStorage.setItem(CLOUD_FINANCIALS_CACHE_KEY, JSON.stringify(prevCache));
+        } catch (e) { }
+        if (typeof window.recalculateHedefFiyatlar === 'function') window.recalculateHedefFiyatlar();
+        window.showToast(`${sym} bulut bilanço kaydı kaldırıldı.`, 'info');
+        if (typeof renderPage === 'function') renderPage();
+    } catch (err) {
+        window.showToast('Bulut bilançosu kaldırılamadı: ' + (err.message || ''), 'error');
+    }
+};
+
+window.openBilancoUploadModal = (prefillHisse = '') => {
+    const existingOverlay = document.getElementById('bilanco-upload-modal-overlay');
+    if (existingOverlay) existingOverlay.remove();
+
+    const initSym = String(prefillHisse || window.currentSelectedHisse || '').trim().toUpperCase();
+    const overlay = document.createElement('div');
+    overlay.id = 'bilanco-upload-modal-overlay';
+    overlay.className = 'ekstre-modal-overlay';
+    overlay.addEventListener('click', (ev) => { if (ev.target === overlay) overlay.remove(); });
+
+    overlay.innerHTML = `
+        <div class="ekstre-modal-card" role="dialog" aria-modal="true" style="width: min(520px, 100%);">
+            <div class="ekstre-modal-header">
+                <h3>
+                    <i class="fas fa-cloud-arrow-up" style="color: #0284c7;"></i>
+                    <span>Bilanço & Mali Tablo Yükle</span>
+                </h3>
+                <button type="button" class="ekstre-modal-close" aria-label="Kapat" onclick="document.getElementById('bilanco-upload-modal-overlay')?.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="bilanco-upload-form" class="ekstre-modal-body">
+                <div class="ekstre-field">
+                    <label for="bum-hisse">Hisse Kodu</label>
+                    <input type="text" id="bum-hisse" class="form-control" list="bist-hisse-list" style="text-transform:uppercase; font-weight:700;" placeholder="Örn: AKSA, THYAO" value="${window.escapeHtml(initSym)}" autocomplete="off" required>
+                </div>
+
+                <div class="ekstre-field">
+                    <label>Mali Tablo Dosyası (.xlsx / .xls)</label>
+                    <div id="bum-dropzone" class="akis-dropzone">
+                        <i class="fas fa-cloud-arrow-up" style="font-size:26px; color:#0284c7;"></i>
+                        <strong id="bum-drop-title">Fintables dosyasını buraya sürükleyin veya seçin</strong>
+                        <span id="bum-drop-sub" style="font-size:12px; opacity:0.82;">Bilanço, Gelir Tablosu ve Nakit Akışı sayfaları otomatik okunur</span>
+                    </div>
+                    <input type="file" id="bum-file-input" accept=".xlsx,.xls" style="display:none;">
+                </div>
+
+                <div id="bum-preview" class="takip-target-status-bar">
+                    <span><i class="fas fa-info-circle" style="margin-right:6px;"></i>Yüklenen veriler buluta kaydedilir; Özet Rapor, Değerleme ve Takip Listesi anında güncellenir.</span>
+                </div>
+
+                <div class="ekstre-modal-footer" style="margin: 0.25rem -1.35rem -1.25rem -1.35rem;">
+                    <button type="button" class="ekstre-ghost-btn" onclick="document.getElementById('bilanco-upload-modal-overlay')?.remove()">İptal</button>
+                    <button type="submit" id="bum-submit-btn" class="btn" style="padding: 9px 22px;" disabled>
+                        <i class="fas fa-check" style="margin-right: 6px; color: #ffffff !important;"></i>Kaydet ve Güncelle
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const inpHisse = document.getElementById('bum-hisse');
+    const dropzone = document.getElementById('bum-dropzone');
+    const fileInput = document.getElementById('bum-file-input');
+    const dropTitle = document.getElementById('bum-drop-title');
+    const dropSub = document.getElementById('bum-drop-sub');
+    const previewBox = document.getElementById('bum-preview');
+    const submitBtn = document.getElementById('bum-submit-btn');
+
+    let parsedResult = null;
+    let pickedFileName = '';
+
+    // Start lazy-loading SheetJS immediately when modal opens so parsing feels instantaneous
+    window.ensureXlsxLoaded().catch(() => { });
+
+    const tryDetectTickerFromFilename = (fname) => {
+        const base = String(fname || '').replace(/\.[^.]+$/, '').toUpperCase();
+        const tokens = base.split(/[^A-Z0-9]+/).filter(Boolean);
+        const validSet = new Set((State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : (window.defaultStocksArray || []));
+        for (const t of tokens) {
+            if (validSet.has(t)) return t;
+        }
+        return '';
+    };
+
+    const handleFilePicked = async (file) => {
+        if (!file) return;
+        pickedFileName = file.name;
+        parsedResult = null;
+        submitBtn.disabled = true;
+
+        dropzone.classList.remove('has-file');
+        dropTitle.textContent = file.name;
+        dropSub.textContent = 'Dosya ayrıştırılıyor...';
+        previewBox.className = 'takip-target-status-bar above-zone';
+        previewBox.innerHTML = '<span><i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>Finansal tablolar okunuyor...</span>';
+
+        if (!inpHisse.value.trim()) {
+            const detected = tryDetectTickerFromFilename(file.name);
+            if (detected) inpHisse.value = detected;
+        }
+
+        try {
+            const XLSXLib = await window.ensureXlsxLoaded();
+            const arrBuf = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(new Uint8Array(reader.result));
+                reader.onerror = () => reject(new Error('Dosya okunamadı.'));
+                reader.readAsArrayBuffer(file);
+            });
+            const wb = XLSXLib.read(arrBuf, { type: 'array' });
+            const { parsed, meta } = window.parseBilancoWorkbook(wb, XLSXLib);
+            parsedResult = { parsed, meta };
+
+            const sizeKb = Math.max(1, Math.round(JSON.stringify(parsed).length / 1024));
+            dropzone.classList.add('has-file');
+            dropSub.textContent = `${meta.sheetCount} çalışma sayfası okundu · ~${sizeKb} KB`;
+            previewBox.className = 'takip-target-status-bar in-zone';
+            previewBox.innerHTML = `<span><i class="fas fa-check-circle" style="margin-right:6px;"></i><strong>${meta.sheetsFound.join(' · ')}</strong> hazır (${meta.periodsCount} dönem)</span><strong>Son: ${window.escapeHtml(meta.latestPeriod)}</strong>`;
+            submitBtn.disabled = false;
+        } catch (err) {
+            dropSub.textContent = 'Dosya ayrıştırılamadı';
+            previewBox.className = 'takip-target-status-bar';
+            previewBox.innerHTML = `<span style="color:#dc2626;"><i class="fas fa-exclamation-triangle" style="margin-right:6px;"></i>${window.escapeHtml(err.message || 'Dosya okunamadı.')}</span>`;
+        }
+    };
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (f) handleFilePicked(f);
+    });
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files[0]) handleFilePicked(fileInput.files[0]);
+    });
+
+    const onKeyDown = (ke) => {
+        if (ke.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', onKeyDown); }
+    };
+    document.addEventListener('keydown', onKeyDown);
+
+    document.getElementById('bilanco-upload-form').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const sym = (inpHisse.value || '').trim().toUpperCase();
+        if (!sym || !parsedResult) {
+            window.showToast('Lütfen geçerli bir hisse kodu ve mali tablo dosyası seçin.', 'warning');
+            return;
+        }
+        submitBtn.disabled = true;
+        previewBox.className = 'takip-target-status-bar above-zone';
+        previewBox.innerHTML = '<span><i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>Buluta kaydediliyor ve değerlemeler güncelleniyor...</span>';
+        try {
+            await window.saveCloudFinancials(sym, parsedResult.parsed, {
+                latestPeriod: parsedResult.meta.latestPeriod,
+                fileName: pickedFileName
+            });
+            document.removeEventListener('keydown', onKeyDown);
+            overlay.remove();
+            window.showToast(`${sym} mali tabloları (${parsedResult.meta.latestPeriod}) güncellendi!`, 'success');
+            if (typeof renderPage === 'function') renderPage();
+        } catch (err) {
+            submitBtn.disabled = false;
+            previewBox.className = 'takip-target-status-bar';
+            previewBox.innerHTML = `<span style="color:#dc2626;"><i class="fas fa-exclamation-triangle" style="margin-right:6px;"></i>${window.escapeHtml(err.message || 'Kayıt başarısız.')}</span>`;
+            window.showToast(err.message || 'Bilanço kaydedilemedi.', 'error');
+        }
+    });
+};
+
 window.updateFirebasePdfMeta = async (reportId, updates) => {
     const list = State.data.uploadedReports || [];
     const idx = list.findIndex(r => String(r.id) === String(reportId));
@@ -10851,6 +11414,7 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
 
 document.getElementById('logout-btn').addEventListener('click', () => {
     localStorage.removeItem('borsa_app_data');
+    localStorage.removeItem('yunvest_cloud_financials_v1');
     for (let i = 1; i <= 4; i++) {
         localStorage.removeItem('borsa_app_data_backup_' + i);
     }
@@ -10897,10 +11461,15 @@ auth.onAuthStateChanged(user => {
             try { localStorage.setItem('borsa_theme', 'light'); localStorage.setItem('yunvest_theme', 'light'); } catch (e) {}
         };
         initApp();
+        if (typeof window.initCloudFinancialsSync === 'function') window.initCloudFinancialsSync();
         State.init(renderPage);
     } else {
         currentUser = null;
         window.currentUser = null;
+        if (window._unsubscribeCloudFinancials) {
+            try { window._unsubscribeCloudFinancials(); } catch (e) { }
+            window._unsubscribeCloudFinancials = null;
+        }
         if (window._pdfBlobCache) {
             Object.values(window._pdfBlobCache).forEach(url => { try { URL.revokeObjectURL(url); } catch (e) {} });
             window._pdfBlobCache = {};
