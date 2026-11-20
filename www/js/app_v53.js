@@ -1321,352 +1321,1062 @@ window.fetchGuncelFiyatlar = async () => {
 // --- PAGES ---
 const renderPortfoy = (container) => {
     window.portfoyTab = window.portfoyTab || 'varliklar';
-    window.setPortfoyTab = window.setPortfoyTab || ((tab) => {
+    window.portfoyCurrency = window.portfoyCurrency || 'TRY';
+    window.portfoyTypeFilter = window.portfoyTypeFilter || 'all';
+    window.portfoySearchQuery = window.portfoySearchQuery || '';
+    window.portfoyDonutMode = window.portfoyDonutMode || 'menkul';
+    window.portfoyChartRange = window.portfoyChartRange || '1A';
+    window.portfoyChartMode = window.portfoyChartMode || 'tutar';
+    window.portfoyArsivFilter = window.portfoyArsivFilter || 'all';
+    window.portfoyArsivSearch = window.portfoyArsivSearch || '';
+
+    window.setPortfoyTab = (tab) => {
         window.portfoyTab = tab;
         if (typeof renderPage === 'function') renderPage();
-    });
+    };
+    window.setPortfoyCurrency = (cur) => {
+        window.portfoyCurrency = (cur === 'USD') ? 'USD' : 'TRY';
+        if (typeof renderPage === 'function') renderPage();
+    };
+    window.setPortfoyTypeFilter = (flt) => {
+        window.portfoyTypeFilter = flt || 'all';
+        if (typeof renderPage === 'function') renderPage();
+    };
+    window.setPortfoyDonutMode = (mode) => {
+        window.portfoyDonutMode = (mode === 'sinif') ? 'sinif' : 'menkul';
+        if (typeof renderPage === 'function') renderPage();
+    };
+    window.setPortfoyChartMode = (mode) => {
+        window.portfoyChartMode = (mode === 'getiri') ? 'getiri' : 'tutar';
+        if (typeof renderPage === 'function') renderPage();
+    };
+    window.setPortfoyArsivFilter = (flt) => {
+        window.portfoyArsivFilter = flt || 'all';
+        if (typeof renderPage === 'function') renderPage();
+    };
+    window.openHisseOnTab = (h, tab) => {
+        window.currentSelectedHisse = h;
+        window.currentHisseTab = tab || 'Özet Rapor';
+        document.querySelectorAll('#primary-sidebar .nav-btn').forEach(btn => btn.classList.remove('active'));
+        currentPage = 'hisse_detay';
+        if (typeof renderPage === 'function') renderPage();
+        window.scrollTo(0, 0);
+    };
+
     const { portfoyList, arsivList, portfoyBilgileri } = calculatePortfoy(State.data.ekstre, (m) => State.getFiyat(m), State.data.nakitHareketleri);
 
-    let totalOdenen = 0, totalGuncel = 0, totalKar = 0;
+    const fx = (typeof window.getDegerlemeFxRates === 'function') ? window.getDegerlemeFxRates() : { usdKuru: 38.0 };
+    const usdKuru = (fx && fx.usdKuru > 1) ? fx.usdKuru : 38.0;
+    const isUsd = window.portfoyCurrency === 'USD';
+    const curSym = isUsd ? '$' : '₺';
+    const conv = (v) => isUsd ? ((v || 0) / usdKuru) : (v || 0);
+    const fmtM = (v, dec = 0) => formatCurrency(conv(v), dec, curSym);
+    const fmtSignedM = (v, dec = 0) => (v > 0 ? '+' : '') + fmtM(v, dec);
+    const fmtSignedPct = (v, dec = 1) => (v > 0 ? '+' : '') + formatPercent(v, dec);
+
+    const currentYearStr = String(new Date().getFullYear());
+    const getHoldingTarget = (menkul, guncelFiyat) => {
+        const hData = (State.data && State.data.hedefFiyatlar && State.data.hedefFiyatlar[menkul]) ? State.data.hedefFiyatlar[menkul] : null;
+        if (hData) {
+            const candidateYears = [currentYearStr, '2026', '2027', '2028', '2029', '2030'];
+            const seen = new Set();
+            for (const y of candidateYears) {
+                if (seen.has(y)) continue;
+                seen.add(y);
+                const rec = hData[y];
+                if (rec && isFinite(rec.hedefFiyat) && rec.hedefFiyat > 0) {
+                    const pot = guncelFiyat > 0 ? ((rec.hedefFiyat - guncelFiyat) / guncelFiyat) : (isFinite(rec.potansiyel) ? rec.potansiyel : null);
+                    return { hedefFiyat: rec.hedefFiyat, potansiyel: pot, label: y };
+                }
+            }
+        }
+        if (typeof window.getGBHF === 'function') {
+            try {
+                const gbhf = window.getGBHF(menkul);
+                if (gbhf && isFinite(gbhf.hedefFiyat) && gbhf.hedefFiyat > 0) {
+                    const pot = guncelFiyat > 0 ? ((gbhf.hedefFiyat - guncelFiyat) / guncelFiyat) : (gbhf.potansiyel / 100);
+                    return { hedefFiyat: gbhf.hedefFiyat, potansiyel: pot, label: gbhf.period || 'GBHF' };
+                }
+            } catch (e) { }
+        }
+        return null;
+    };
+
+    const rawOpen = portfoyList.filter(p => !p.isNakit);
+    const nakitItemForTable = portfoyList.find(p => p.isNakit);
+    const guncelNakitDeger = State.data.manuelNakitTutar || 0;
+
+    let openOdenen = 0, openGuncel = 0, openKar = 0;
     let hissePortfoyTutar = 0, fonPortfoyTutar = 0;
+    let hisseCount = 0, fonCount = 0;
+    let totalGunlukKar = 0, hasDailyData = false, dailyPosCount = 0, dailyNegCount = 0;
+    let valuedCurrentSum = 0, valuedTargetSum = 0, valuedCount = 0;
 
-    const filteredPortfoy = portfoyList.filter(p => !p.isNakit);
+    const filteredPortfoy = rawOpen.map(p => {
+        const tur = p.menkul.length === 3 ? 'Fon' : 'Hisse';
+        const ticker = (window.tickerData && window.tickerData[p.menkul]) ? window.tickerData[p.menkul] : null;
+        const gunlukYuzde = (ticker && ticker.chp !== undefined && ticker.chp !== null && !isNaN(parseFloat(ticker.chp))) ? parseFloat(ticker.chp) : null;
+        const gunlukKar = (gunlukYuzde !== null && (1 + gunlukYuzde / 100) > 0)
+            ? (p.guncelTutar - (p.guncelTutar / (1 + gunlukYuzde / 100)))
+            : null;
+        const target = tur === 'Hisse' ? getHoldingTarget(p.menkul, p.guncelFiyat) : null;
 
-    window.varliklarSort = window.varliklarSort || { col: null, asc: true };
-    filteredPortfoy.sort((a, b) => {
-        if (!window.varliklarSort.col) {
-            const aTur = a.menkul.length === 3 ? 1 : 0;
-            const bTur = b.menkul.length === 3 ? 1 : 0;
-            if (aTur !== bTur) return aTur - bTur;
-            return b.guncelTutar - a.guncelTutar;
+        openOdenen += p.odenenTutar;
+        openGuncel += p.guncelTutar;
+        openKar += p.kar;
+        if (tur === 'Fon') { fonPortfoyTutar += p.guncelTutar; fonCount++; }
+        else { hissePortfoyTutar += p.guncelTutar; hisseCount++; }
+
+        if (gunlukKar !== null && isFinite(gunlukKar)) {
+            hasDailyData = true;
+            totalGunlukKar += gunlukKar;
+            if (gunlukYuzde > 0.001) dailyPosCount++;
+            else if (gunlukYuzde < -0.001) dailyNegCount++;
         }
 
-        let valA, valB;
-        if (window.varliklarSort.col === 'menkul') {
-            valA = a.menkul; valB = b.menkul;
-            return window.varliklarSort.asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
-        } else if (window.varliklarSort.col === 'odenenTutar') {
-            valA = a.odenenTutar; valB = b.odenenTutar;
-        } else if (window.varliklarSort.col === 'guncelTutar') {
-            valA = a.guncelTutar; valB = b.guncelTutar;
-        } else if (window.varliklarSort.col === 'kar') {
-            valA = a.kar; valB = b.kar;
-        } else if (window.varliklarSort.col === 'karYuzde') {
-            valA = a.karYuzde; valB = b.karYuzde;
-        } else if (window.varliklarSort.col === 'portfoyOrani') {
-            valA = a.portfoyOrani; valB = b.portfoyOrani;
-        } else if (window.varliklarSort.col === 'ilkAlimTarihi') {
-            valA = new Date(a.ilkAlimTarihi).getTime(); valB = new Date(b.ilkAlimTarihi).getTime();
-        } else if (window.varliklarSort.col === 'gecenSure') {
-            valA = new Date(a.ilkAlimTarihi).getTime(); valB = new Date(b.ilkAlimTarihi).getTime();
-            return window.varliklarSort.asc ? valB - valA : valA - valB;
+        if (target && isFinite(target.hedefFiyat) && target.hedefFiyat > 0) {
+            valuedCount++;
+            valuedCurrentSum += p.guncelTutar;
+            valuedTargetSum += p.adet * target.hedefFiyat;
         }
 
-        return window.varliklarSort.asc ? valA - valB : valB - valA;
+        return {
+            ...p,
+            tur,
+            gunlukYuzde,
+            gunlukKar,
+            hedefFiyat: target ? target.hedefFiyat : null,
+            potansiyel: target ? target.potansiyel : null,
+            hedefLabel: target ? target.label : null
+        };
     });
 
-    let portfoyHtml = filteredPortfoy.map((p, i) => {
-        totalOdenen += p.odenenTutar;
-        totalKar += p.kar;
-        totalGuncel += p.guncelTutar;
+    const totalGuncel = openGuncel + guncelNakitDeger;
+    const totalOdenen = openOdenen + guncelNakitDeger;
+    const totalKar = openKar;
+    const openKarYuzde = openOdenen > 0 ? (openKar / openOdenen) : 0;
+    const nakitOran = totalGuncel > 0 ? (guncelNakitDeger / totalGuncel) : 0;
+    const hisseOran = totalGuncel > 0 ? (hissePortfoyTutar / totalGuncel) : 0;
+    const fonOran = totalGuncel > 0 ? (fonPortfoyTutar / totalGuncel) : 0;
 
-        if (p.menkul.length === 3) fonPortfoyTutar += p.guncelTutar;
-        else hissePortfoyTutar += p.guncelTutar;
+    const totalGunlukBase = totalGuncel - totalGunlukKar;
+    const totalGunlukYuzde = (hasDailyData && totalGunlukBase > 0) ? (totalGunlukKar / totalGunlukBase) : null;
+    const coveredUpside = (valuedCount > 0 && valuedCurrentSum > 0) ? ((valuedTargetSum - valuedCurrentSum) / valuedCurrentSum) : null;
+    const impliedPortfolioTarget = totalGuncel + (valuedTargetSum - valuedCurrentSum);
+    const impliedPortfolioUpside = (valuedCount > 0 && totalGuncel > 0) ? ((impliedPortfolioTarget - totalGuncel) / totalGuncel) : null;
 
-        const tur = p.menkul.length === 3 ? 'Fon' : 'Hisse';
-        let fiyatHtml = `<td style="text-align: right !important;">${formatCurrency(p.guncelFiyat)}</td>`;
-        if (tur === 'Fon') {
-            if (p.menkul === 'PRY') {
-                fiyatHtml = `<td style="text-align: right !important;">
-                    <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
-                        <span class="pry-text" style="cursor:pointer;" onclick="this.style.display='none'; this.nextElementSibling.style.display='inline-block'; this.nextElementSibling.focus();" title="Düzenlemek için tıklayın">₺${p.guncelFiyat.toLocaleString('tr-TR', { minimumFractionDigits: 6, maximumFractionDigits: 6 })}</span>
-                        <input type="number" step="0.000001" class="form-control glass-input inline-pry-input" style="display:none; width: 88px; text-align: right; padding: 2px 4px; font-size: 13px; height: 26px;" value="${p.guncelFiyat}" onblur="window.saveVarliklarEdit()" onkeydown="if(event.key==='Enter') window.saveVarliklarEdit()">
+    // Sort open positions
+    window.varliklarSort = window.varliklarSort || { col: null, asc: true };
+    const sortVarliklarList = (list) => {
+        return [...list].sort((a, b) => {
+            if (!window.varliklarSort.col) {
+                const aTur = a.tur === 'Fon' ? 1 : 0;
+                const bTur = b.tur === 'Fon' ? 1 : 0;
+                if (aTur !== bTur) return aTur - bTur;
+                return b.guncelTutar - a.guncelTutar;
+            }
+            const col = window.varliklarSort.col;
+            const asc = window.varliklarSort.asc;
+            if (col === 'menkul') {
+                return asc ? a.menkul.localeCompare(b.menkul) : b.menkul.localeCompare(a.menkul);
+            }
+            if (col === 'tur') {
+                return asc ? a.tur.localeCompare(b.tur) : b.tur.localeCompare(a.tur);
+            }
+            if (col === 'ilkAlimTarihi') {
+                const vA = new Date(a.ilkAlimTarihi || 0).getTime();
+                const vB = new Date(b.ilkAlimTarihi || 0).getTime();
+                return asc ? vA - vB : vB - vA;
+            }
+            if (col === 'gecenSure') {
+                const vA = a.gecenSure || 0;
+                const vB = b.gecenSure || 0;
+                return asc ? vA - vB : vB - vA;
+            }
+            if (col === 'gunlukYuzde') {
+                const vA = a.gunlukYuzde !== null ? a.gunlukYuzde : -Infinity;
+                const vB = b.gunlukYuzde !== null ? b.gunlukYuzde : -Infinity;
+                return asc ? vA - vB : vB - vA;
+            }
+            if (col === 'potansiyel') {
+                const vA = a.potansiyel !== null ? a.potansiyel : -Infinity;
+                const vB = b.potansiyel !== null ? b.potansiyel : -Infinity;
+                return asc ? vA - vB : vB - vA;
+            }
+            const vA = Number(a[col] || 0);
+            const vB = Number(b[col] || 0);
+            return asc ? vA - vB : vB - vA;
+        });
+    };
+
+    const sortedOpen = sortVarliklarList(filteredPortfoy);
+
+    // Concentration metrics (excluding cash or across total portfolio)
+    const byWeightDesc = [...filteredPortfoy].sort((a, b) => b.portfoyOrani - a.portfoyOrani);
+    const maxPos = byWeightDesc[0] || null;
+    const top3Weight = byWeightDesc.slice(0, 3).reduce((s, p) => s + (p.portfoyOrani || 0), 0);
+    const concLevel = (maxPos && maxPos.portfoyOrani >= 0.25) || top3Weight >= 0.65
+        ? { cls: 'high', text: 'Yüksek Yoğunlaşma' }
+        : ((maxPos && maxPos.portfoyOrani >= 0.18) || top3Weight >= 0.50
+            ? { cls: 'warn', text: 'Orta Yoğunlaşma' }
+            : { cls: 'ok', text: 'Dengeli Dağılım' });
+
+    // Archive enrichment & metrics
+    let arsivKarTotal = 0, arsivWinCount = 0, arsivPctSum = 0, arsivDaysSum = 0;
+    let bestArsiv = null, worstArsiv = null;
+    const enrichedArsiv = arsivList.map(a => {
+        const guncelFiyat = State.getFiyat(a.menkul);
+        const sonraYuzde = (a.satisFiyati > 0 && guncelFiyat > 0) ? ((guncelFiyat - a.satisFiyati) / a.satisFiyati) : null;
+        const tasimaGun = calcDaysBetween(a.ilkAlimTarihi, a.sonSatimTarihi);
+        arsivKarTotal += a.kar;
+        if (a.kar >= 0) arsivWinCount++;
+        arsivPctSum += (a.karYuzde || 0);
+        arsivDaysSum += tasimaGun;
+        if (!bestArsiv || a.karYuzde > bestArsiv.karYuzde) bestArsiv = a;
+        if (!worstArsiv || a.karYuzde < worstArsiv.karYuzde) worstArsiv = a;
+        return { ...a, guncelFiyat, sonraYuzde, tasimaGun };
+    });
+    const arsivWinRate = enrichedArsiv.length > 0 ? (arsivWinCount / enrichedArsiv.length) : 0;
+    const arsivAvgPct = enrichedArsiv.length > 0 ? (arsivPctSum / enrichedArsiv.length) : 0;
+    const arsivAvgDays = enrichedArsiv.length > 0 ? Math.round(arsivDaysSum / enrichedArsiv.length) : 0;
+
+    // Build Varlıklarım tbody (reused by focus-safe search)
+    const buildVarliklarTbodyHtml = () => {
+        const q = (window.portfoySearchQuery || '').trim().toUpperCase();
+        const typeFlt = window.portfoyTypeFilter || 'all';
+        const showRows = sortedOpen.filter(p => {
+            if (typeFlt === 'hisse' && p.tur !== 'Hisse') return false;
+            if (typeFlt === 'fon' && p.tur !== 'Fon') return false;
+            if (typeFlt === 'nakit') return false;
+            if (q && !p.menkul.toUpperCase().includes(q) && !p.tur.toUpperCase().includes(q)) return false;
+            return true;
+        });
+
+        const showNakit = (typeFlt === 'all' || typeFlt === 'nakit') && (!q || 'NAKIT'.includes(q) || 'NAKİT'.includes(q));
+
+        let fltOdenen = 0, fltGuncel = 0, fltKar = 0, fltOran = 0, fltDailyKar = 0, fltHasDaily = false;
+        let fltValCurr = 0, fltValTgt = 0;
+
+        let rowsHtml = showRows.map((p, i) => {
+            fltOdenen += p.odenenTutar;
+            fltGuncel += p.guncelTutar;
+            fltKar += p.kar;
+            fltOran += (p.portfoyOrani || 0);
+            if (p.gunlukKar !== null) { fltHasDaily = true; fltDailyKar += p.gunlukKar; }
+            if (p.hedefFiyat && p.hedefFiyat > 0) { fltValCurr += p.guncelTutar; fltValTgt += p.adet * p.hedefFiyat; }
+
+            const safeSym = window.escapeHtml(p.menkul);
+            const turCls = p.tur === 'Fon' ? 'fon' : 'hisse';
+            const priceDec = p.menkul === 'PRY' ? 6 : 2;
+            let fiyatHtml = '';
+            if (p.tur === 'Fon') {
+                const rawDisplay = isUsd
+                    ? fmtM(p.guncelFiyat, p.menkul === 'PRY' ? 5 : 2)
+                    : ('₺' + p.guncelFiyat.toLocaleString('tr-TR', { minimumFractionDigits: priceDec, maximumFractionDigits: priceDec }));
+                const stepAttr = p.menkul === 'PRY' ? '0.000001' : '0.0001';
+                const extraInputCls = p.menkul === 'PRY' ? ' inline-pry-input' : '';
+                const extraTextCls = p.menkul === 'PRY' ? ' pry-text' : '';
+                fiyatHtml = `<td>
+                    <div class="pf-inline-edit-wrap">
+                        <span class="pf-fund-price-text${extraTextCls}" style="cursor:pointer;" onclick="window.startInlinePfEdit(this)" title="Fon fiyatını (₺) düzenlemek için tıklayın">${rawDisplay}</span>
+                        <button type="button" class="pf-inline-edit-btn" onclick="window.startInlinePfEdit(this.previousElementSibling)" title="Fon fiyatını (₺) düzenle"><i class="fas fa-pen"></i></button>
+                        <input type="number" step="${stepAttr}" class="form-control glass-input${extraInputCls}" style="display:none; width: 92px; text-align: right; padding: 2px 5px; font-size: 12.5px; height: 26px;" value="${p.guncelFiyat}" onblur="window.saveFundPriceEdit('${safeSym}', this)" onkeydown="if(event.key==='Enter'){this.blur();} else if(event.key==='Escape'){window.cancelInlinePfEdit(this);}">
                     </div>
                 </td>`;
             } else {
-                fiyatHtml = `<td style="text-align: right !important;">${formatCurrency(p.guncelFiyat)}</td>`;
+                fiyatHtml = `<td>${fmtM(p.guncelFiyat, 2)}</td>`;
             }
+
+            let gunlukHtml = `<td style="color:#94a3b8;">-</td>`;
+            if (p.gunlukYuzde !== null) {
+                const gCls = p.gunlukYuzde > 0.001 ? 'pos' : (p.gunlukYuzde < -0.001 ? 'neg' : 'flat');
+                const gSign = p.gunlukYuzde > 0 ? '+' : '';
+                const gPctTxt = `${gSign}${formatNumber(p.gunlukYuzde, 2)}%`;
+                const gKarTxt = p.gunlukKar !== null ? fmtSignedM(p.gunlukKar, 0) : '';
+                gunlukHtml = `<td>
+                    <span class="pf-pct-pill ${gCls}">${gPctTxt}</span>
+                    ${gKarTxt ? `<span class="pf-sub-metric">${gKarTxt}</span>` : ''}
+                </td>`;
+            }
+
+            let hedefHtml = `<td style="color:#94a3b8;">-</td>`;
+            if (p.hedefFiyat && p.hedefFiyat > 0 && p.potansiyel !== null) {
+                const pCls = p.potansiyel >= 0 ? 'pos' : 'neg';
+                hedefHtml = `<td>
+                    <span class="pf-target-link" onclick="window.openHisseOnTab('${safeSym}', 'Değerleme')" title="${safeSym} Değerleme (${window.escapeHtml(p.hedefLabel || '')}) sekmesini aç">
+                        <span class="pf-pct-pill ${pCls}">${fmtSignedPct(p.potansiyel, 0)}</span>
+                        <span class="pf-sub-metric">${fmtM(p.hedefFiyat, 2)} (${window.escapeHtml(p.hedefLabel || '')})</span>
+                    </span>
+                </td>`;
+            }
+
+            const karCls = p.kar >= 0 ? 'text-success' : 'text-danger';
+            const karPillCls = p.kar >= 0 ? 'pos' : 'neg';
+            const wPct = Math.min(100, Math.max(0, (p.portfoyOrani || 0) * 100));
+            const wHigh = (p.portfoyOrani || 0) >= 0.20 ? ' high' : '';
+
+            return `<tr>
+                <td class="pf-sticky-1">${i + 1}</td>
+                <td class="pf-sticky-2">
+                    <div class="pf-sym-cell">
+                        <span class="pf-sym-link" onclick="window.goToHisse('${safeSym}')">${safeSym}</span>
+                        <button type="button" class="pf-quick-trade-btn" onclick="window.openEkstreModal && window.openEkstreModal(null, '${safeSym}')" title="${safeSym} için alım/satım ekle"><i class="fas fa-plus"></i></button>
+                    </div>
+                </td>
+                <td style="text-align:center;"><span class="pf-type-badge ${turCls}">${p.tur}</span></td>
+                ${fiyatHtml}
+                ${gunlukHtml}
+                <td>${p.adet.toLocaleString('tr-TR')}</td>
+                <td>${fmtM(p.guncelMaliyet, 2)}</td>
+                <td>${fmtM(p.netMaliyet, 2)}</td>
+                <td>${fmtM(p.odenenTutar, 0)}</td>
+                <td style="font-weight:700;">${fmtM(p.guncelTutar, 0)}</td>
+                <td class="${karCls}" style="font-weight:600;">${fmtSignedM(p.kar, 0)}</td>
+                <td><span class="pf-pct-pill ${karPillCls}">${fmtSignedPct(p.karYuzde, 1)}</span></td>
+                ${hedefHtml}
+                <td>
+                    <div class="pf-weight-cell">
+                        <span style="font-weight:600;">${formatPercent(p.portfoyOrani, 1)}</span>
+                        <div class="pf-weight-bar"><div class="pf-weight-fill${wHigh}" style="width:${wPct.toFixed(1)}%;"></div></div>
+                    </div>
+                </td>
+                <td>${formatDate(p.ilkAlimTarihi)}</td>
+                <td>${p.gecenSure} g</td>
+            </tr>`;
+        }).join('');
+
+        if (showNakit) {
+            fltOdenen += guncelNakitDeger;
+            fltGuncel += guncelNakitDeger;
+            fltOran += nakitOran;
+            const nPct = Math.min(100, Math.max(0, nakitOran * 100));
+            rowsHtml += `<tr class="pf-nakit-row">
+                <td class="pf-sticky-1">${showRows.length + 1}</td>
+                <td class="pf-sticky-2"><strong style="color:#047857;">Nakit</strong></td>
+                <td style="text-align:center;"><span class="pf-type-badge nakit">Nakit</span></td>
+                <td style="color:#94a3b8;">-</td>
+                <td style="color:#94a3b8;">-</td>
+                <td style="color:#94a3b8;">-</td>
+                <td style="color:#94a3b8;">-</td>
+                <td style="color:#94a3b8;">-</td>
+                <td>${fmtM(guncelNakitDeger, 0)}</td>
+                <td style="font-weight:700;">
+                    <div class="pf-inline-edit-wrap">
+                        <span style="cursor:pointer;" onclick="window.startInlinePfEdit(this)" title="Nakit tutarını (₺) düzenlemek için tıklayın">${fmtM(guncelNakitDeger, 2)}</span>
+                        <button type="button" class="pf-inline-edit-btn" onclick="window.startInlinePfEdit(this.previousElementSibling)" title="Nakit tutarını (₺) düzenle"><i class="fas fa-pen"></i></button>
+                        <input type="number" step="0.01" class="form-control glass-input" style="display:none; width: 112px; text-align: right; padding: 2px 5px; font-size: 12.5px; height: 26px;" value="${guncelNakitDeger}" onblur="window.saveNakitVarlikEdit(this)" onkeydown="if(event.key==='Enter'){this.blur();} else if(event.key==='Escape'){window.cancelInlinePfEdit(this);}">
+                    </div>
+                </td>
+                <td style="color:#94a3b8;">-</td>
+                <td style="color:#94a3b8;">-</td>
+                <td style="color:#94a3b8;">-</td>
+                <td>
+                    <div class="pf-weight-cell">
+                        <span style="font-weight:600;">${formatPercent(nakitOran, 1)}</span>
+                        <div class="pf-weight-bar"><div class="pf-weight-fill" style="width:${nPct.toFixed(1)}%; background:#059669;"></div></div>
+                    </div>
+                </td>
+                <td style="color:#94a3b8;">-</td>
+                <td style="color:#94a3b8;">-</td>
+            </tr>`;
         }
 
-
-        let menkulHtml = `<td style="text-align: left !important;" class="takip-hisse-link" onclick="window.goToHisse('${p.menkul}')">${p.menkul}</td>`;
-        if (tur === 'Fon') {
-            menkulHtml = `<td style="text-align: left !important;" class="takip-hisse-link" onclick="window.goToHisse('${p.menkul}')">${p.menkul}</td>`;
+        if (showRows.length === 0 && !showNakit) {
+            rowsHtml = `<tr><td colspan="16" style="text-align:center; padding:2rem; color:#64748b;">Arama veya filtre kriterine uyan varlık bulunamadı.</td></tr>`;
+        } else {
+            const fltOpenBase = showNakit ? (fltOdenen - guncelNakitDeger) : fltOdenen;
+            const fltKarPct = fltOpenBase > 0 ? (fltKar / fltOpenBase) : 0;
+            const fltDailyBase = fltGuncel - fltDailyKar;
+            const fltDailyPct = (fltHasDaily && fltDailyBase > 0) ? (fltDailyKar / fltDailyBase) : null;
+            const fltPot = fltValCurr > 0 ? ((fltValTgt - fltValCurr) / fltValCurr) : null;
+            const isFiltered = typeFlt !== 'all' || q !== '';
+            rowsHtml += `<tr class="pf-total-row">
+                <td class="pf-sticky-1"></td>
+                <td class="pf-sticky-2">${isFiltered ? 'FİLTRELİ TOPLAM' : 'TOPLAM'}</td>
+                <td style="text-align:center;">${showRows.length + (showNakit ? 1 : 0)}</td>
+                <td></td>
+                <td class="${fltDailyKar >= 0 ? 'pf-pos-val' : 'pf-neg-val'}">${fltDailyPct !== null ? `${fmtSignedPct(fltDailyPct, 2)}<span class="pf-sub-metric" style="color:inherit; opacity:0.85;">${fmtSignedM(fltDailyKar, 0)}</span>` : '-'}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>${fmtM(fltOdenen, 0)}</td>
+                <td>${fmtM(fltGuncel, 0)}</td>
+                <td class="${fltKar >= 0 ? 'pf-pos-val' : 'pf-neg-val'}">${fmtSignedM(fltKar, 0)}</td>
+                <td class="${fltKar >= 0 ? 'pf-pos-val' : 'pf-neg-val'}">${fltOpenBase > 0 ? fmtSignedPct(fltKarPct, 1) : '-'}</td>
+                <td class="${(fltPot !== null && fltPot >= 0) ? 'pf-pos-val' : 'pf-neg-val'}">${fltPot !== null ? fmtSignedPct(fltPot, 0) : '-'}</td>
+                <td>${formatPercent(fltOran, 1)}</td>
+                <td></td>
+                <td></td>
+            </tr>`;
         }
+        return { rowsHtml, shownCount: showRows.length + (showNakit ? 1 : 0) };
+    };
 
-        return `<tr>
-            <td style="text-align: center !important;">${i + 1}</td>
-            ${menkulHtml}
-            <td style="text-align: left !important;">${tur}</td>
-            ${fiyatHtml}
-            <td style="text-align: right !important;">${p.adet.toLocaleString('tr-TR')}</td>
-            <td style="text-align: right !important;">${formatCurrency(p.guncelMaliyet)}</td>
-            <td style="text-align: right !important;">${formatCurrency(p.netMaliyet)}</td>
-            <td style="text-align: right !important;">${formatCurrency(p.odenenTutar, 0)}</td>
-            <td style="text-align: right !important;">${formatCurrency(p.guncelTutar, 0)}</td>
-            <td class="${p.kar >= 0 ? 'text-success' : 'text-danger'}" style="text-align: right !important;">${formatCurrency(p.kar, 0)}</td>
-            <td class="${p.kar >= 0 ? 'text-success' : 'text-danger'}" style="text-align: right !important;">${formatPercent(p.karYuzde, 0)}</td>
-            <td style="text-align: right !important;">${formatPercent(p.portfoyOrani, 0)}</td>
-            <td style="text-align: right !important;">${formatDate(p.ilkAlimTarihi)}</td>
-            <td style="text-align: right !important;">${p.gecenSure}</td>
-        </tr>`;
-    }).join('');
-
-    const nakitItemForTable = portfoyList.find(p => p.isNakit);
-    let guncelNakitDeger = State.data.manuelNakitTutar || 0;
-    
-    // We add Nakit to totals regardless of value since we now show it
-    totalGuncel += guncelNakitDeger;
-    totalOdenen += guncelNakitDeger;
-    
-    const nakitOran = (totalGuncel > 0) ? (guncelNakitDeger / totalGuncel) : 0;
-
-    portfoyHtml += `<tr>
-        <td style="text-align: center !important;">${filteredPortfoy.length + 1}</td>
-        <td style="text-align: left !important;">Nakit</td>
-        <td style="text-align: left !important;">Nakit</td>
-        <td style="text-align: right !important;"></td>
-        <td style="text-align: right !important;"></td>
-        <td style="text-align: right !important;"></td>
-        <td style="text-align: right !important;"></td>
-        <td style="text-align: right !important;"></td>
-        <td style="text-align: right !important; border-right: 1px solid var(--table-border);">
-            <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
-                <span style="cursor:pointer;" onclick="this.style.display='none'; this.nextElementSibling.style.display='inline-block'; this.nextElementSibling.focus();" title="Düzenlemek için tıklayın">${formatCurrency(guncelNakitDeger, 2)}</span>
-                <input type="number" step="0.01" class="form-control glass-input" style="display:none; width: 108px; text-align: right; padding: 2px 4px; font-size: 13px; height: 26px;" value="${guncelNakitDeger}" onblur="window.saveNakitVarlikEdit(this)" onkeydown="if(event.key==='Enter') window.saveNakitVarlikEdit(this)">
-            </div>
-        </td>
-        <td style="text-align: right !important;"></td>
-        <td style="text-align: right !important;"></td>
-        <td style="text-align: right !important;">${formatPercent(nakitOran, 0)}</td>
-        <td style="text-align: right !important;"></td>
-        <td style="text-align: right !important;"></td>
-    </tr>`;
-
-    let arsivKarTotal = 0;
-
+    // Build Arşiv tbody (reused by focus-safe search)
     window.arsivSort = window.arsivSort || { col: null, asc: true };
-    arsivList.sort((a, b) => {
-        if (!window.arsivSort.col) return 0;
+    const sortArsivList = (list) => {
+        return [...list].sort((a, b) => {
+            if (!window.arsivSort.col) return 0;
+            const col = window.arsivSort.col;
+            const asc = window.arsivSort.asc;
+            if (col === 'menkul') return asc ? a.menkul.localeCompare(b.menkul) : b.menkul.localeCompare(a.menkul);
+            if (col === 'ilkAlimTarihi') return asc ? (new Date(a.ilkAlimTarihi) - new Date(b.ilkAlimTarihi)) : (new Date(b.ilkAlimTarihi) - new Date(a.ilkAlimTarihi));
+            if (col === 'sonSatimTarihi') return asc ? (new Date(a.sonSatimTarihi) - new Date(b.sonSatimTarihi)) : (new Date(b.sonSatimTarihi) - new Date(a.sonSatimTarihi));
+            if (col === 'tasimaSuresi') return asc ? (a.tasimaGun - b.tasimaGun) : (b.tasimaGun - a.tasimaGun);
+            if (col === 'sonraYuzde') {
+                const vA = a.sonraYuzde !== null ? a.sonraYuzde : -Infinity;
+                const vB = b.sonraYuzde !== null ? b.sonraYuzde : -Infinity;
+                return asc ? vA - vB : vB - vA;
+            }
+            const vA = Number(a[col] || 0);
+            const vB = Number(b[col] || 0);
+            return asc ? vA - vB : vB - vA;
+        });
+    };
 
-        let valA, valB;
-        if (window.arsivSort.col === 'menkul') {
-            valA = a.menkul; valB = b.menkul;
-            return window.arsivSort.asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
-        } else if (window.arsivSort.col === 'kar') {
-            valA = a.kar; valB = b.kar;
-        } else if (window.arsivSort.col === 'karYuzde') {
-            valA = a.karYuzde; valB = b.karYuzde;
-        } else if (window.arsivSort.col === 'ilkAlimTarihi') {
-            valA = new Date(a.ilkAlimTarihi).getTime(); valB = new Date(b.ilkAlimTarihi).getTime();
-        } else if (window.arsivSort.col === 'sonSatimTarihi') {
-            valA = new Date(a.sonSatimTarihi).getTime(); valB = new Date(b.sonSatimTarihi).getTime();
-        } else if (window.arsivSort.col === 'tasimaSuresi') {
-            valA = new Date(a.sonSatimTarihi).getTime() - new Date(a.ilkAlimTarihi).getTime();
-            valB = new Date(b.sonSatimTarihi).getTime() - new Date(b.ilkAlimTarihi).getTime();
+    const sortedArsiv = sortArsivList(enrichedArsiv);
+    const buildArsivTbodyHtml = () => {
+        const q = (window.portfoyArsivSearch || '').trim().toUpperCase();
+        const flt = window.portfoyArsivFilter || 'all';
+        const showArsiv = sortedArsiv.filter(a => {
+            if (flt === 'karli' && a.kar < 0) return false;
+            if (flt === 'zararli' && a.kar >= 0) return false;
+            if (q && !a.menkul.toUpperCase().includes(q)) return false;
+            return true;
+        });
+
+        let fltArsivKar = 0, fltArsivPctSum = 0;
+        let htmlRows = showArsiv.map((a, i) => {
+            fltArsivKar += a.kar;
+            fltArsivPctSum += (a.karYuzde || 0);
+            const safeSym = window.escapeHtml(a.menkul);
+            const karCls = a.kar >= 0 ? 'text-success' : 'text-danger';
+            const pillCls = a.kar >= 0 ? 'pos' : 'neg';
+            let sonraHtml = `<td style="color:#94a3b8;">-</td>`;
+            if (a.sonraYuzde !== null) {
+                const sCls = a.sonraYuzde <= 0 ? 'pos' : 'flat';
+                sonraHtml = `<td><span class="pf-pct-pill ${sCls}" title="Satıştan bugüne fiyat değişimi">${fmtSignedPct(a.sonraYuzde, 1)}</span></td>`;
+            }
+            return `<tr>
+                <td class="pf-sticky-1">${i + 1}</td>
+                <td class="pf-sticky-2"><span class="pf-sym-link" onclick="window.goToHisse('${safeSym}')">${safeSym}</span></td>
+                <td>${fmtM(a.guncelFiyat, 2)}</td>
+                <td>${a.adet.toLocaleString('tr-TR')}</td>
+                <td>${fmtM(a.alisFiyati, 2)}</td>
+                <td>${fmtM(a.satisFiyati, 2)}</td>
+                <td class="${karCls}" style="font-weight:600;">${fmtSignedM(a.kar, 0)}</td>
+                <td><span class="pf-pct-pill ${pillCls}">${fmtSignedPct(a.karYuzde, 1)}</span></td>
+                ${sonraHtml}
+                <td>${formatDate(a.ilkAlimTarihi)}</td>
+                <td>${formatDate(a.sonSatimTarihi)}</td>
+                <td>${a.tasimaSuresi}</td>
+            </tr>`;
+        }).join('');
+
+        if (showArsiv.length === 0) {
+            htmlRows = `<tr><td colspan="12" style="text-align:center; padding:2rem; color:#64748b;">Gösterilecek arşivlenmiş işlem bulunamadı.</td></tr>`;
+        } else {
+            const avgP = showArsiv.length > 0 ? (fltArsivPctSum / showArsiv.length) : 0;
+            htmlRows += `<tr class="pf-total-row">
+                <td class="pf-sticky-1"></td>
+                <td class="pf-sticky-2">TOPLAM (${showArsiv.length})</td>
+                <td colspan="4"></td>
+                <td class="${fltArsivKar >= 0 ? 'pf-pos-val' : 'pf-neg-val'}">${fmtSignedM(fltArsivKar, 0)}</td>
+                <td class="${avgP >= 0 ? 'pf-pos-val' : 'pf-neg-val'}">Ort. ${fmtSignedPct(avgP, 1)}</td>
+                <td colspan="4"></td>
+            </tr>`;
         }
+        return { rowsHtml: htmlRows, shownCount: showArsiv.length };
+    };
 
-        return window.arsivSort.asc ? valA - valB : valB - valA;
-    });
+    // Prepare Daily History Data early (needed for Tab 3 summary stats & chart)
+    const now = new Date();
+    const timeInMins = now.getHours() * 60 + now.getMinutes();
+    const dayOfWeek = now.getDay();
+    const isBefore0950 = timeInMins <= (9 * 60 + 50);
+    const isAfter1830 = timeInMins >= (18 * 60 + 30);
 
-    const arsivHtml = arsivList.map((a, i) => {
-        arsivKarTotal += a.kar;
-        const guncelFiyat = State.getFiyat(a.menkul);
-        return `<tr>
-            <td style="text-align: center !important;">${i + 1}</td>
-            <td style="text-align: left !important;" class="takip-hisse-link" onclick="window.goToHisse('${a.menkul}')">${a.menkul}</td>
-            <td style="text-align: right !important;">${formatCurrency(guncelFiyat)}</td>
-            <td style="text-align: right !important;">${a.adet.toLocaleString('tr-TR')}</td>
-            <td style="text-align: right !important;">${formatCurrency(a.alisFiyati)}</td>
-            <td style="text-align: right !important;">${formatCurrency(a.satisFiyati)}</td>
-            <td class="${a.kar >= 0 ? 'text-success' : 'text-danger'}" style="text-align: right !important;">${formatCurrency(a.kar, 0)}</td>
-            <td class="${a.kar >= 0 ? 'text-success' : 'text-danger'}" style="text-align: right !important;">${formatPercent(a.karYuzde, 0)}</td>
-            <td style="text-align: right !important;">${formatDate(a.ilkAlimTarihi)}</td>
-            <td style="text-align: right !important;">${formatDate(a.sonSatimTarihi)}</td>
-            <td style="text-align: right !important;">${a.tasimaSuresi}</td>
-        </tr>`;
-    }).join('');
+    let targetDate = null;
+    if (dayOfWeek === 6) {
+        targetDate = new Date(now); targetDate.setDate(targetDate.getDate() - 1);
+    } else if (dayOfWeek === 0) {
+        targetDate = new Date(now); targetDate.setDate(targetDate.getDate() - 2);
+    } else if (dayOfWeek === 1 && isBefore0950) {
+        targetDate = new Date(now); targetDate.setDate(targetDate.getDate() - 3);
+    } else if (dayOfWeek >= 2 && dayOfWeek <= 5 && isBefore0950) {
+        targetDate = new Date(now); targetDate.setDate(targetDate.getDate() - 1);
+    } else if (isAfter1830) {
+        targetDate = new Date(now);
+    }
 
-    const nakitItem = portfoyList.find(p => p.isNakit);
-    const guncelNakitTutar = nakitItem ? nakitItem.guncelTutar : 0;
+    if (!State.data.portfoyGecmisi) State.data.portfoyGecmisi = [];
+    let needsSave = false;
+    const uniqueGecmis = [];
+    const seenDates = new Set();
+    for (let i = State.data.portfoyGecmisi.length - 1; i >= 0; i--) {
+        const r = State.data.portfoyGecmisi[i];
+        const dw = new Date(r.tarih).getDay();
+        if (dw === 0 || dw === 6) { needsSave = true; continue; }
+        if (!seenDates.has(r.tarih)) {
+            seenDates.add(r.tarih);
+            uniqueGecmis.unshift(r);
+        } else {
+            needsSave = true;
+        }
+    }
+    if (needsSave) {
+        State.data.portfoyGecmisi = uniqueGecmis;
+        State.save();
+    }
+    if (targetDate && portfoyBilgileri.toplamPortfoy > 0) {
+        const yyyyMmDd = targetDate.getFullYear() + '-' + String(targetDate.getMonth() + 1).padStart(2, '0') + '-' + String(targetDate.getDate()).padStart(2, '0');
+        const targetRecord = State.data.portfoyGecmisi.find(r => r.tarih === yyyyMmDd);
+        if (!targetRecord) {
+            State.data.portfoyGecmisi.push({ tarih: yyyyMmDd, tutar: portfoyBilgileri.toplamPortfoy, anapara: portfoyBilgileri.anapara });
+            State.save();
+        } else if (window.pricesLoadedOnce && (targetRecord.tutar !== portfoyBilgileri.toplamPortfoy || targetRecord.anapara !== portfoyBilgileri.anapara)) {
+            targetRecord.tutar = portfoyBilgileri.toplamPortfoy;
+            targetRecord.anapara = portfoyBilgileri.anapara;
+            State.save();
+        }
+    }
 
-
-
-    const getTabBg = (tab) => window.portfoyTab === tab ? 'var(--overlay-bg)' : 'transparent';
-    const getTabColor = (tab) => window.portfoyTab === tab ? 'var(--active-text-color)' : 'var(--text-secondary)';
-    const tabsHtml = `
-        <style>
-            .portfoy-tab-btn:hover { color: var(--active-text-color) !important; background: var(--overlay-bg) !important; }
-        </style>
-        <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-start; overflow-x: auto; white-space: nowrap; width: 100%;">
-            <span class="portfoy-tab-btn" style="cursor: pointer; font-size: 13.5px !important; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: ${getTabBg('varliklar')}; color: ${getTabColor('varliklar')}; transition: color 0.2s;" onclick="window.setPortfoyTab('varliklar')">Varlıklarım</span>
-            <span class="portfoy-tab-btn" style="cursor: pointer; font-size: 13.5px !important; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: ${getTabBg('bilgiler')}; color: ${getTabColor('bilgiler')}; transition: color 0.2s;" onclick="window.setPortfoyTab('bilgiler')">Portföy Bilgileri</span>
-            <span class="portfoy-tab-btn" style="cursor: pointer; font-size: 13.5px !important; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: ${getTabBg('gecmis')}; color: ${getTabColor('gecmis')}; transition: color 0.2s;" onclick="window.setPortfoyTab('gecmis')">Günlük Portföy Değişimi</span>
-            ${!(window.Capacitor && window.Capacitor.isNative) ? `<span class="portfoy-tab-btn" style="cursor: pointer; font-size: 13.5px !important; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: ${getTabBg('arsiv')}; color: ${getTabColor('arsiv')}; transition: color 0.2s;" onclick="window.setPortfoyTab('arsiv')">Arşiv</span>` : ''}
+    // Top Control Bar (Modern Segmented Tabs + Currency Switcher + Quick Add Trade)
+    const isNative = !!(window.Capacitor && window.Capacitor.isNative);
+    const totalPositionsCount = filteredPortfoy.length + (guncelNakitDeger > 0 ? 1 : 0);
+    const topBarHtml = `
+        <div class="pf-topbar">
+            <div class="pf-tab-strip">
+                <button type="button" class="pf-tab-btn ${window.portfoyTab === 'varliklar' ? 'active' : ''}" onclick="window.setPortfoyTab('varliklar')">
+                    <i class="fas fa-briefcase"></i> Varlıklarım <span class="pf-tab-count">${totalPositionsCount}</span>
+                </button>
+                <button type="button" class="pf-tab-btn ${window.portfoyTab === 'bilgiler' ? 'active' : ''}" onclick="window.setPortfoyTab('bilgiler')">
+                    <i class="fas fa-chart-pie"></i> Portföy Bilgileri
+                </button>
+                <button type="button" class="pf-tab-btn ${window.portfoyTab === 'gecmis' ? 'active' : ''}" onclick="window.setPortfoyTab('gecmis')">
+                    <i class="fas fa-chart-area"></i> Günlük Değişim
+                </button>
+                ${!isNative ? `
+                <button type="button" class="pf-tab-btn ${window.portfoyTab === 'arsiv' ? 'active' : ''}" onclick="window.setPortfoyTab('arsiv')">
+                    <i class="fas fa-archive"></i> Arşiv <span class="pf-tab-count">${enrichedArsiv.length}</span>
+                </button>` : ''}
+            </div>
+            <div class="pf-topbar-actions">
+                <div class="pf-currency-toggle" title="Görüntüleme para birimi (1$ = ₺${formatNumber(usdKuru, 2)})">
+                    <button type="button" class="pf-currency-btn ${!isUsd ? 'active' : ''}" onclick="window.setPortfoyCurrency('TRY')">₺ TRY</button>
+                    <button type="button" class="pf-currency-btn ${isUsd ? 'active' : ''}" onclick="window.setPortfoyCurrency('USD')">$ USD</button>
+                </div>
+                <button type="button" class="pf-cta-btn" onclick="window.openEkstreModal && window.openEkstreModal()">
+                    <i class="fas fa-plus"></i> İşlem Ekle
+                </button>
+            </div>
         </div>
     `;
 
-    let tabContentHtml = '';
+    // 4 Executive KPI Cards
+    const kpiKarPos = portfoyBilgileri.kar >= 0;
+    const kpiDailyPos = totalGunlukKar >= 0;
+    const kpiReelPos = portfoyBilgileri.reelGetiriEnflasyon >= 0;
+    const kpiCardsHtml = `
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon-box navy"><i class="fas fa-wallet"></i></div>
+                <div class="kpi-info" style="width:100%;">
+                    <div class="kpi-label">Toplam Portföy</div>
+                    <div class="kpi-value">${fmtM(portfoyBilgileri.toplamPortfoy, 0)}</div>
+                    <div class="pf-kpi-sub-row">
+                        <span>Anapara: <strong>${fmtM(portfoyBilgileri.anapara, 0)}</strong></span>
+                        <span>· Nakit: <strong>${fmtM(guncelNakitDeger, 0)}</strong></span>
+                    </div>
+                    <div class="pf-alloc-mini-bar" title="Hisse ${formatPercent(hisseOran, 0)} · Fon ${formatPercent(fonOran, 0)} · Nakit ${formatPercent(nakitOran, 0)}">
+                        <div style="width:${(hisseOran * 100).toFixed(1)}%; background:#2563eb;"></div>
+                        <div style="width:${(fonOran * 100).toFixed(1)}%; background:#f59e0b;"></div>
+                        <div style="width:${(nakitOran * 100).toFixed(1)}%; background:#10b981;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon-box ${hasDailyData ? (kpiDailyPos ? 'green' : 'red') : 'slate'}"><i class="fas fa-bolt"></i></div>
+                <div class="kpi-info">
+                    <div class="kpi-label">Bugünkü Değişim</div>
+                    <div class="kpi-value" style="color: ${hasDailyData ? (kpiDailyPos ? 'var(--success-color)' : 'var(--danger-color)') : 'var(--text-primary)'};">
+                        ${hasDailyData ? fmtSignedM(totalGunlukKar, 0) : '-'}
+                    </div>
+                    <div class="pf-kpi-sub-row">
+                        ${hasDailyData && totalGunlukYuzde !== null
+                            ? `<span class="pf-kpi-pill ${kpiDailyPos ? 'pos' : 'neg'}">${fmtSignedPct(totalGunlukYuzde, 2)}</span><span>${dailyPosCount} yükselen · ${dailyNegCount} düşen</span>`
+                            : `<span>Canlı gün içi veri bekleniyor</span>`}
+                    </div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon-box ${kpiKarPos ? 'green' : 'red'}"><i class="fas fa-chart-line"></i></div>
+                <div class="kpi-info">
+                    <div class="kpi-label">Toplam Net Kâr / Zarar</div>
+                    <div class="kpi-value" style="color: ${kpiKarPos ? 'var(--success-color)' : 'var(--danger-color)'};">${fmtSignedM(portfoyBilgileri.kar, 0)}</div>
+                    <div class="pf-kpi-sub-row">
+                        <span class="pf-kpi-pill ${kpiKarPos ? 'pos' : 'neg'}">${fmtSignedPct(portfoyBilgileri.nominalGetiri, 1)}</span>
+                        <span>Açık Poz.: ${fmtSignedM(openKar, 0)} (${fmtSignedPct(openKarYuzde, 1)})</span>
+                    </div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon-box ${kpiReelPos ? 'green' : 'red'}"><i class="fas fa-bullseye"></i></div>
+                <div class="kpi-info">
+                    <div class="kpi-label">Reel Getiri (Enflasyon)</div>
+                    <div class="kpi-value" style="color: ${kpiReelPos ? 'var(--success-color)' : 'var(--danger-color)'};">${fmtSignedPct(portfoyBilgileri.reelGetiriEnflasyon, 1)}</div>
+                    <div class="pf-kpi-sub-row">
+                        ${coveredUpside !== null
+                            ? `<span class="pf-kpi-pill ${coveredUpside >= 0 ? 'pos' : 'neg'}">Hedef: ${fmtSignedPct(coveredUpside, 0)}</span><span>${valuedCount} hisse değerlemeli</span>`
+                            : `<span>BIST100'e göre: <strong>${fmtSignedPct(portfoyBilgileri.reelGetiriBist, 1)}</strong></span>`}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 
-    if (window.portfoyTab === 'bilgiler') {
+    // Build active tab HTML
+    let tabContentHtml = '';
+    const thCls = (col, extra = '') => {
+        const active = (window.portfoyTab === 'varliklar' ? window.varliklarSort.col : window.arsivSort.col) === col ? ' pf-th-active' : '';
+        return `class="pf-th-sortable${active}${extra ? ' ' + extra : ''}"`;
+    };
+
+    // Palette for charts & custom HTML legend
+    const pfPalette = ['#1d4ed8', '#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16', '#ef4444', '#06b6d4', '#a855f7', '#eab308', '#3b82f6', '#22c55e', '#d946ef', '#64748b'];
+
+    // Donut data items (used by Tab 1)
+    let donutItems = [];
+    if (window.portfoyDonutMode === 'sinif') {
+        donutItems = [
+            { label: 'Hisse', value: hissePortfoyTutar, color: '#2563eb', clickable: false },
+            { label: 'Fon', value: fonPortfoyTutar, color: '#f59e0b', clickable: false },
+            { label: 'Nakit', value: guncelNakitDeger, color: '#10b981', clickable: false }
+        ].filter(x => x.value > 0);
+    } else {
+        const sortedForChart = [...filteredPortfoy].sort((a, b) => b.guncelTutar - a.guncelTutar);
+        donutItems = sortedForChart.map((p, idx) => ({
+            label: p.menkul,
+            value: p.guncelTutar,
+            color: pfPalette[idx % pfPalette.length],
+            clickable: true
+        }));
+        if (guncelNakitDeger > 0) {
+            donutItems.push({ label: 'Nakit', value: guncelNakitDeger, color: '#10b981', clickable: false });
+        }
+    }
+    const donutTotalVal = donutItems.reduce((s, d) => s + d.value, 0);
+
+    // Period history data (used by Tab 3)
+    let filteredHistoryData = [];
+    let periodStats = null;
+    if (window.portfoyTab === 'gecmis') {
+        let historyData = [...State.data.portfoyGecmisi];
+        historyData.sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
+        if (historyData.length > 0) {
+            const filledData = [];
+            let curr = new Date(historyData[0].tarih);
+            const lastRecordDate = new Date(historyData[historyData.length - 1].tarih);
+            let lastKnownVal = historyData[0].tutar;
+            let lastKnownAnapara = historyData[0].anapara !== undefined ? historyData[0].anapara : historyData[0].tutar;
+            while (curr <= lastRecordDate) {
+                const dw = curr.getDay();
+                if (dw !== 0 && dw !== 6) {
+                    const dStr = curr.getFullYear() + '-' + String(curr.getMonth() + 1).padStart(2, '0') + '-' + String(curr.getDate()).padStart(2, '0');
+                    const existing = historyData.find(r => r.tarih === dStr);
+                    if (existing) {
+                        lastKnownVal = existing.tutar;
+                        lastKnownAnapara = existing.anapara !== undefined ? existing.anapara : existing.tutar;
+                    }
+                    filledData.push({ tarih: dStr, tutar: lastKnownVal, anapara: lastKnownAnapara, isAnlik: false });
+                }
+                curr.setDate(curr.getDate() + 1);
+            }
+            historyData = filledData;
+        }
+        if (dayOfWeek >= 1 && dayOfWeek <= 5 && !isBefore0950 && !isAfter1830 && portfoyBilgileri.toplamPortfoy > 0) {
+            const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+            if (!historyData.find(r => r.tarih === todayStr)) {
+                historyData.push({ tarih: todayStr, tutar: portfoyBilgileri.toplamPortfoy, anapara: portfoyBilgileri.anapara, isAnlik: true });
+            }
+        }
+        const currentRange = window.portfoyChartRange || '1A';
+        if (historyData.length > 0) {
+            const lastDate = new Date(historyData[historyData.length - 1].tarih);
+            let cutoffDate = new Date(lastDate);
+            switch (currentRange) {
+                case '1H': cutoffDate.setDate(cutoffDate.getDate() - 7); break;
+                case '1A': cutoffDate.setMonth(cutoffDate.getMonth() - 1); break;
+                case '6A': cutoffDate.setMonth(cutoffDate.getMonth() - 6); break;
+                case 'YBK': cutoffDate = new Date(lastDate.getFullYear(), 0, 1); break;
+                case '1Y': cutoffDate.setFullYear(cutoffDate.getFullYear() - 1); break;
+                case '5Y': cutoffDate.setFullYear(cutoffDate.getFullYear() - 5); break;
+                case 'MAX': cutoffDate = new Date(0); break;
+            }
+            filteredHistoryData = historyData.filter(d => new Date(d.tarih) >= cutoffDate);
+        }
+        if (filteredHistoryData.length > 0) {
+            const first = filteredHistoryData[0];
+            const last = filteredHistoryData[filteredHistoryData.length - 1];
+            const diffVal = last.tutar - first.tutar;
+            const diffPct = first.tutar > 0 ? (diffVal / first.tutar) : 0;
+            let maxRec = first, minRec = first;
+            let peak = first.tutar, maxDd = 0;
+            filteredHistoryData.forEach(d => {
+                if (d.tutar > maxRec.tutar) maxRec = d;
+                if (d.tutar < minRec.tutar) minRec = d;
+                if (d.tutar > peak) peak = d.tutar;
+                if (peak > 0) {
+                    const dd = (d.tutar - peak) / peak;
+                    if (dd < maxDd) maxDd = dd;
+                }
+            });
+            periodStats = { diffVal, diffPct, maxRec, minRec, maxDd, count: filteredHistoryData.length };
+        }
+    }
+
+    if (window.portfoyTab === 'varliklar') {
+        const { rowsHtml, shownCount } = buildVarliklarTbodyHtml();
+        const gainersCount = filteredPortfoy.filter(p => p.kar >= 0).length;
+        const losersCount = filteredPortfoy.length - gainersCount;
+
+        const legendHtml = donutItems.map(item => {
+            const pct = donutTotalVal > 0 ? (item.value / donutTotalVal) : 0;
+            const safeLbl = window.escapeHtml(item.label);
+            return `<div class="pf-legend-row${item.clickable ? ' clickable' : ''}" ${item.clickable ? `onclick="window.goToHisse('${safeLbl}')"` : ''}>
+                <div class="pf-legend-left">
+                    <span class="pf-legend-dot" style="background:${item.color};"></span>
+                    <span class="pf-legend-label">${safeLbl}</span>
+                </div>
+                <div class="pf-legend-right">
+                    <span class="pf-legend-val">${fmtM(item.value, 0)}</span>
+                    <span class="pf-legend-pct">${formatPercent(pct, 1)}</span>
+                </div>
+            </div>`;
+        }).join('');
+
         tabContentHtml = `
-            <div id="portfoy-bilgiler" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
-                <div class="flex-row" style="align-items: stretch; gap: 2rem; flex-wrap: wrap; padding: 0;">
-                    <div class="table-container" style="margin-bottom: 0; width: max-content; overflow-x: auto;">
-                        <table class="dash-table compact-table" style="width: max-content; white-space: nowrap;">
-                            <tbody>
+            <div id="portfoy-varliklar" class="portfoy-tab-content" style="display:flex; flex-direction:column; gap:1rem;">
+                <div class="pf-card">
+                    <div class="pf-toolbar">
+                        <div class="pf-filter-group">
+                            <button type="button" class="pf-filter-pill ${window.portfoyTypeFilter === 'all' ? 'active' : ''}" onclick="window.setPortfoyTypeFilter('all')">
+                                Tümü <span class="pf-pill-n">(${filteredPortfoy.length + 1})</span>
+                            </button>
+                            <button type="button" class="pf-filter-pill ${window.portfoyTypeFilter === 'hisse' ? 'active' : ''}" onclick="window.setPortfoyTypeFilter('hisse')">
+                                Hisse <span class="pf-pill-n">(${hisseCount})</span>
+                            </button>
+                            <button type="button" class="pf-filter-pill ${window.portfoyTypeFilter === 'fon' ? 'active' : ''}" onclick="window.setPortfoyTypeFilter('fon')">
+                                Fon <span class="pf-pill-n">(${fonCount})</span>
+                            </button>
+                            <button type="button" class="pf-filter-pill ${window.portfoyTypeFilter === 'nakit' ? 'active' : ''}" onclick="window.setPortfoyTypeFilter('nakit')">
+                                Nakit
+                            </button>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap;">
+                            <span id="pf-varliklar-result-count" style="font-size:12px; color:#64748b; font-weight:600;">${shownCount} kalem</span>
+                            <div class="pf-search-wrap">
+                                <i class="fas fa-search"></i>
+                                <input id="pf-varliklar-search" type="text" class="pf-search-input" placeholder="Menkul ara..." value="${window.escapeHtml(window.portfoySearchQuery)}" oninput="window.filterPortfoyVarliklar(this.value)">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pf-table-wrap">
+                        <table class="pf-table varliklar-table">
+                            <thead>
                                 <tr>
-                                    <td style="text-align:left !important; width:50%;">Toplam Portföy</td>
-                                    <td style="text-align:right !important; width:50%; border-right: 1px solid var(--table-border);">${formatCurrency(portfoyBilgileri.toplamPortfoy)}</td>
+                                    <th class="pf-sticky-1 pf-th-center">S.N.</th>
+                                    <th ${thCls('menkul', 'pf-sticky-2 pf-th-left')} onclick="window.toggleVarliklarSort('menkul')">Menkul</th>
+                                    <th ${thCls('tur', 'pf-th-center')} onclick="window.toggleVarliklarSort('tur')">Tür</th>
+                                    <th>Güncel Fiyat</th>
+                                    <th ${thCls('gunlukYuzde')} onclick="window.toggleVarliklarSort('gunlukYuzde')">Günlük</th>
+                                    <th>Adet</th>
+                                    <th>Güncel Maliyet</th>
+                                    <th>Net Maliyet</th>
+                                    <th ${thCls('odenenTutar')} onclick="window.toggleVarliklarSort('odenenTutar')">Ödenen Tutar</th>
+                                    <th ${thCls('guncelTutar')} onclick="window.toggleVarliklarSort('guncelTutar')">Güncel Tutar</th>
+                                    <th ${thCls('kar')} onclick="window.toggleVarliklarSort('kar')">Kâr / Zarar</th>
+                                    <th ${thCls('karYuzde')} onclick="window.toggleVarliklarSort('karYuzde')">Kâr %</th>
+                                    <th ${thCls('potansiyel')} onclick="window.toggleVarliklarSort('potansiyel')">Hedef / Pot.</th>
+                                    <th ${thCls('portfoyOrani')} onclick="window.toggleVarliklarSort('portfoyOrani')">Portföy Oranı</th>
+                                    <th ${thCls('ilkAlimTarihi')} onclick="window.toggleVarliklarSort('ilkAlimTarihi')">İlk Alım</th>
+                                    <th ${thCls('gecenSure')} onclick="window.toggleVarliklarSort('gecenSure')">Süre</th>
                                 </tr>
-                                <tr>
-                                    <td style="text-align:left !important;">Nakit</td>
-                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);">
-                                        <span id="nakit-text">${formatCurrency(guncelNakitTutar, 2)}</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align:left !important;">Hisse Portföyü</td>
-                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);">${formatCurrency(hissePortfoyTutar)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align:left !important;">Fon Portföyü</td>
-                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);">${formatCurrency(fonPortfoyTutar)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align:left !important;">Anapara</td>
-                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);">${formatCurrency(portfoyBilgileri.anapara)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align:left !important;">Kar</td>
-                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);" class="${portfoyBilgileri.kar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(portfoyBilgileri.kar)}</td>
-                                </tr>
-                                <tr style="border-bottom: 1px solid var(--surface-border);">
-                                    <td style="text-align:left !important;">Nominal Getiri Oranı</td>
-                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);" class="${portfoyBilgileri.nominalGetiri >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.nominalGetiri)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align:left !important;">Reel Getiri Oranı (Enflasyon)</td>
-                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);" class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align:left !important;">BIST 100'e Göre Reel Getiri Oranı</td>
-                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);" class="${portfoyBilgileri.reelGetiriBist >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriBist)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align:left !important;">Dolar Kuruna Göre Reel Getiri Oranı</td>
-                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);" class="${portfoyBilgileri.reelGetiriDolar >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriDolar)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align:left !important;">Gram Altına Göre Reel Getiri Oranı</td>
-                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);" class="${portfoyBilgileri.reelGetiriAltin >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriAltin)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align:left !important;">PRY Fonuna Göre Reel Getiri Oranı</td>
-                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);" class="${portfoyBilgileri.reelGetiriPry >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriPry)}</td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align:left !important;">Hedef Portföy</td>
-                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border); cursor: pointer;" ondblclick="window.togglePortfoyEdit()" title="Düzenlemek için çift tıklayın">
-                                        <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
-                                            <span id="hedef-text">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span>
-                                            <input type="number" id="inline-hedef-input" class="form-control glass-input" style="display:none; width: 108px; text-align: right; padding: 2px 4px; font-size: 13px; height: 26px;" value="${portfoyBilgileri.hedefPortfoy}" onblur="window.savePortfoyEdit()" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="text-align:left !important;">Hedefe Ulaşmak İçin Gereken Artış %</td>
-                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);">${formatPercent(portfoyBilgileri.hedefArtis, 0)}</td>
-                                </tr>
+                            </thead>
+                            <tbody id="pf-varliklar-tbody">
+                                ${rowsHtml}
                             </tbody>
                         </table>
                     </div>
-                    <div style="flex: 1; min-width: 300px; max-width: 500px; display: flex; justify-content: center; align-items: center; padding: 1rem;">
-                        <canvas id="chart-ozet" style="max-height: 100%; max-width: 100%;"></canvas>
+                </div>
+
+                <div class="pf-analytics-grid">
+                    <div class="pf-card">
+                        <div class="pf-card-header">
+                            <h3 class="pf-card-title"><i class="fas fa-chart-pie"></i> Varlık Dağılımı</h3>
+                            <div class="pf-currency-toggle">
+                                <button type="button" class="pf-currency-btn ${window.portfoyDonutMode === 'menkul' ? 'active' : ''}" onclick="window.setPortfoyDonutMode('menkul')">Menkul</button>
+                                <button type="button" class="pf-currency-btn ${window.portfoyDonutMode === 'sinif' ? 'active' : ''}" onclick="window.setPortfoyDonutMode('sinif')">Sınıf</button>
+                            </div>
+                        </div>
+                        ${donutItems.length > 0 ? `
+                        <div class="pf-donut-layout">
+                            <div class="pf-donut-canvas-wrap">
+                                <canvas id="chart-varliklar"></canvas>
+                            </div>
+                            <div class="pf-donut-legend">${legendHtml}</div>
+                        </div>
+                        ` : `<div style="padding:2.5rem 1rem; text-align:center; color:#64748b;">Grafik için aktif varlık bulunmuyor.</div>`}
+                        <div class="pf-risk-strip">
+                            <span>En Büyük: <strong>${maxPos ? `${window.escapeHtml(maxPos.menkul)} (${formatPercent(maxPos.portfoyOrani, 1)})` : '-'}</strong> · İlk 3: <strong>${formatPercent(top3Weight, 1)}</strong></span>
+                            <span class="pf-risk-badge ${concLevel.cls}">${concLevel.text}</span>
+                        </div>
+                    </div>
+
+                    <div class="pf-card">
+                        <div class="pf-card-header">
+                            <h3 class="pf-card-title"><i class="fas fa-balance-scale"></i> Kâr / Zarar Katkı Analizi</h3>
+                            <span style="font-size:12px; font-weight:600; color:#475569;">
+                                <span style="color:#059669;">${gainersCount} kârda</span> · <span style="color:#dc2626;">${losersCount} zararda</span>
+                            </span>
+                        </div>
+                        ${filteredPortfoy.length > 0 ? `
+                        <div class="pf-katki-canvas-wrap">
+                            <canvas id="chart-portfoy-katki"></canvas>
+                        </div>
+                        ` : `<div style="padding:2.5rem 1rem; text-align:center; color:#64748b;">Katkı analizi için açık pozisyon bulunmuyor.</div>`}
+                        <div class="pf-risk-strip">
+                            <span>Açık Pozisyon Toplamı: <strong class="${openKar >= 0 ? 'text-success' : 'text-danger'}">${fmtSignedM(openKar, 0)} (${fmtSignedPct(openKarYuzde, 1)})</strong></span>
+                            ${impliedPortfolioUpside !== null
+                                ? `<span>Portföy Hedef Değeri: <strong>${fmtM(impliedPortfolioTarget, 0)} (${fmtSignedPct(impliedPortfolioUpside, 1)})</strong></span>`
+                                : `<span>${filteredPortfoy.length} açık menkul</span>`}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if (window.portfoyTab === 'bilgiler') {
+        const hedefTL = portfoyBilgileri.hedefPortfoy || 0;
+        const goalPct = hedefTL > 0 ? Math.min(100, Math.max(0, (portfoyBilgileri.toplamPortfoy / hedefTL) * 100)) : 0;
+        const goalRemaining = Math.max(0, hedefTL - portfoyBilgileri.toplamPortfoy);
+        const benchmarks = [
+            { name: 'Enflasyon (TÜFE)', val: portfoyBilgileri.reelGetiriEnflasyon },
+            { name: 'BIST 100', val: portfoyBilgileri.reelGetiriBist },
+            { name: 'Dolar (USD)', val: portfoyBilgileri.reelGetiriDolar },
+            { name: 'Gram Altın', val: portfoyBilgileri.reelGetiriAltin },
+            { name: 'PRY Fonu', val: portfoyBilgileri.reelGetiriPry }
+        ];
+        const beatCount = benchmarks.filter(b => b.val >= 0).length;
+
+        tabContentHtml = `
+            <div id="portfoy-bilgiler" class="portfoy-tab-content" style="display:flex; flex-direction:column; gap:1rem;">
+                <div class="pf-goal-card">
+                    <div class="pf-goal-top">
+                        <div>
+                            <div class="pf-goal-title"><i class="fas fa-flag-checkered"></i> Hedef Portföy İlerlemesi</div>
+                            <div class="pf-goal-val-row">
+                                <span id="hedef-text" class="pf-goal-amount">${hedefTL > 0 ? fmtM(hedefTL, 0) : 'Hedef Belirlenmedi'}</span>
+                                <input type="number" id="inline-hedef-input" class="form-control glass-input" style="display:none; width: 150px; text-align: right; padding: 4px 8px; font-size: 14px; height: 32px; background:#fff; color:#0f172a;" value="${hedefTL}" onblur="window.savePortfoyEdit()" onkeydown="if(event.key==='Enter'){this.blur();} else if(event.key==='Escape'){window.togglePortfoyEdit();}">
+                                <button type="button" class="pf-goal-edit-btn" onclick="window.togglePortfoyEdit()" title="Hedef portföy tutarını (₺) düzenle">
+                                    <i class="fas fa-pen"></i> Hedef Düzenle
+                                </button>
+                            </div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:26px; font-weight:800; color:#34d399;">%${formatNumber(goalPct, 1)}</div>
+                            <div style="font-size:12px; color:#cbd5e1;">Tamamlanma Oranı</div>
+                        </div>
+                    </div>
+                    <div class="pf-goal-progress-track">
+                        <div class="pf-goal-progress-fill" style="width:${goalPct.toFixed(1)}%;"></div>
+                    </div>
+                    <div class="pf-goal-stats">
+                        <span>Mevcut Portföy: <strong>${fmtM(portfoyBilgileri.toplamPortfoy, 0)}</strong></span>
+                        <span>Kalan Tutar: <strong>${fmtM(goalRemaining, 0)}</strong></span>
+                        <span>Gereken Artış: <strong>${formatPercent(portfoyBilgileri.hedefArtis, 1)}</strong></span>
+                    </div>
+                </div>
+
+                <div class="pf-analytics-grid">
+                    <div class="pf-card">
+                        <div class="pf-card-header">
+                            <h3 class="pf-card-title"><i class="fas fa-layer-group"></i> Portföy Yapısı &amp; Özet Metrikler</h3>
+                        </div>
+                        <div class="pf-metrics-list">
+                            <div class="pf-metric-row">
+                                <span class="pf-metric-row-label"><span class="pf-legend-dot" style="background:#0f294a;"></span> Toplam Portföy</span>
+                                <span class="pf-metric-row-val">${fmtM(portfoyBilgileri.toplamPortfoy, 0)}</span>
+                            </div>
+                            <div class="pf-metric-row">
+                                <span class="pf-metric-row-label"><span class="pf-legend-dot" style="background:#2563eb;"></span> Hisse Portföyü (${formatPercent(hisseOran, 1)})</span>
+                                <span class="pf-metric-row-val">${fmtM(hissePortfoyTutar, 0)}</span>
+                            </div>
+                            <div class="pf-metric-row">
+                                <span class="pf-metric-row-label"><span class="pf-legend-dot" style="background:#f59e0b;"></span> Fon Portföyü (${formatPercent(fonOran, 1)})</span>
+                                <span class="pf-metric-row-val">${fmtM(fonPortfoyTutar, 0)}</span>
+                            </div>
+                            <div class="pf-metric-row">
+                                <span class="pf-metric-row-label"><span class="pf-legend-dot" style="background:#10b981;"></span> Nakit (${formatPercent(nakitOran, 1)})</span>
+                                <span id="nakit-text" class="pf-metric-row-val">${fmtM(guncelNakitDeger, 2)}</span>
+                            </div>
+                            <div class="pf-metric-row">
+                                <span class="pf-metric-row-label">Toplam Anapara</span>
+                                <span class="pf-metric-row-val">${fmtM(portfoyBilgileri.anapara, 0)}</span>
+                            </div>
+                            <div class="pf-metric-row">
+                                <span class="pf-metric-row-label">Toplam Net Kâr / Zarar</span>
+                                <span class="pf-metric-row-val ${kpiKarPos ? 'text-success' : 'text-danger'}">${fmtSignedM(portfoyBilgileri.kar, 0)} (${fmtSignedPct(portfoyBilgileri.nominalGetiri, 1)})</span>
+                            </div>
+                            <div class="pf-metric-row">
+                                <span class="pf-metric-row-label">Açık Pozisyon Kârı</span>
+                                <span class="pf-metric-row-val ${openKar >= 0 ? 'text-success' : 'text-danger'}">${fmtSignedM(openKar, 0)} (${fmtSignedPct(openKarYuzde, 1)})</span>
+                            </div>
+                            <div class="pf-metric-row">
+                                <span class="pf-metric-row-label">Arşiv (Gerçekleşen) Kâr</span>
+                                <span class="pf-metric-row-val ${arsivKarTotal >= 0 ? 'text-success' : 'text-danger'}">${fmtSignedM(arsivKarTotal, 0)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pf-card">
+                        <div class="pf-card-header">
+                            <h3 class="pf-card-title"><i class="fas fa-trophy"></i> Kıyaslama (Reel Getiri) Analizi</h3>
+                            <span class="pf-kpi-pill ${beatCount >= 3 ? 'pos' : 'neutral'}">${beatCount} / ${benchmarks.length} geçildi</span>
+                        </div>
+                        <div style="position:relative; height:225px; padding:0.85rem 1rem 0.5rem 1rem;">
+                            <canvas id="chart-ozet"></canvas>
+                        </div>
+                        <div class="pf-bench-list">
+                            ${benchmarks.map(b => `
+                                <div class="pf-bench-chip">
+                                    <span class="pf-bench-chip-name">${b.name}</span>
+                                    <span class="pf-bench-chip-val ${b.val >= 0 ? 'text-success' : 'text-danger'}">${fmtSignedPct(b.val, 1)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
             </div>
         `;
     } else if (window.portfoyTab === 'gecmis') {
-        tabContentHtml = `
-            <style>
-            .chart-filter {
-                font-size: 13px !important;
-                color: var(--text-secondary) !important;
-                font-weight: 600 !important;
-                transition: color 0.2s, background 0.2s;
-            }
-            .chart-filter:hover, .chart-filter.active-filter {
-                color: var(--active-text-color) !important;
-            }
-            </style>
-            <div style="display: flex; flex-direction: column; width: 100%; min-height: 350px; margin-bottom: 0;">
-                <div style="padding: 8px 1rem 0 1rem;">
-                    <div id="portfoy-chart-filters" style="display:flex; gap:0.5rem; font-size:13.5px; color:var(--text-primary);">
-                        <span class="chart-filter" data-range="1H" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('1H')">1H</span>
-                        <span class="chart-filter" data-range="1A" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('1A')">1A</span>
-                        <span class="chart-filter" data-range="6A" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('6A')">6A</span>
-                        <span class="chart-filter" data-range="YBK" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('YBK')">YBK</span>
-                        <span class="chart-filter" data-range="1Y" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('1Y')">1Y</span>
-                        <span class="chart-filter" data-range="5Y" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('5Y')">5Y</span>
-                        <span class="chart-filter" data-range="MAX" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('MAX')">Maks.</span>
-                    </div>
+        const ranges = [
+            { id: '1H', label: '1H' },
+            { id: '1A', label: '1A' },
+            { id: '6A', label: '6A' },
+            { id: 'YBK', label: 'YBK' },
+            { id: '1Y', label: '1Y' },
+            { id: '5Y', label: '5Y' },
+            { id: 'MAX', label: 'Maks.' }
+        ];
+        const activeRange = window.portfoyChartRange || '1A';
+        const periodSummaryHtml = periodStats ? `
+            <div class="pf-period-stats">
+                <div class="pf-period-stat">
+                    <span class="pf-period-stat-label">Dönem Değişimi (${activeRange})</span>
+                    <span class="pf-period-stat-val ${periodStats.diffVal >= 0 ? 'text-success' : 'text-danger'}">${fmtSignedM(periodStats.diffVal, 0)}</span>
+                    <span class="pf-period-stat-sub">${fmtSignedPct(periodStats.diffPct, 2)} (${periodStats.count} iş günü)</span>
                 </div>
-                <div style="width: 100%; height: 300px; position: relative; padding: 1rem;">
-                    <canvas id="chart-portfoy-gecmisi"></canvas>
+                <div class="pf-period-stat">
+                    <span class="pf-period-stat-label">Dönem Zirvesi</span>
+                    <span class="pf-period-stat-val">${fmtM(periodStats.maxRec.tutar, 0)}</span>
+                    <span class="pf-period-stat-sub">${formatDate(periodStats.maxRec.tarih)}</span>
+                </div>
+                <div class="pf-period-stat">
+                    <span class="pf-period-stat-label">Dönem Dibi</span>
+                    <span class="pf-period-stat-val">${fmtM(periodStats.minRec.tutar, 0)}</span>
+                    <span class="pf-period-stat-sub">${formatDate(periodStats.minRec.tarih)}</span>
+                </div>
+                <div class="pf-period-stat">
+                    <span class="pf-period-stat-label">Maks. Düşüş (Drawdown)</span>
+                    <span class="pf-period-stat-val ${periodStats.maxDd < -0.05 ? 'text-danger' : ''}">${formatPercent(periodStats.maxDd, 2)}</span>
+                    <span class="pf-period-stat-sub">Zirveden en derin geri çekilme</span>
                 </div>
             </div>
-        `;
-    } else if (window.portfoyTab === 'varliklar') {
-        tabContentHtml = `
-            <div id="portfoy-varliklar" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
+        ` : '';
 
-                <div class="table-container" style="margin-bottom: 0; overflow-x: auto;">
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 0px;">
-                    <div style="width: 100%; overflow-x: auto;">
-                        <table class="dash-table compact-table varliklar-table" style="text-align: center; border-collapse: separate; border-spacing: 0;">
-                            <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
-                                <tr><th>S.N.</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('menkul')">Menkul</th><th>Tür</th><th>Güncel Fiyat</th><th>Adet</th><th>Güncel Maliyet</th><th>Net Maliyet</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('odenenTutar')">Ödenen Tutar</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('guncelTutar')">Güncel Tutar</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('kar')">Kar/Zarar</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('karYuzde')">Kar/Zarar %</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('portfoyOrani')">Portföy Oranı</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('ilkAlimTarihi')">İlk Alım Tarihi</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('gecenSure')">Geçen Süre</th></tr>
-                            </thead>
-                            <tbody>
-                                ${portfoyHtml}
-                                <tr class="total-row">
-                                    <td style="text-align: center !important;"></td>
-                                    <td style="text-align: left !important;">TOPLAM</td>
-                                    <td colspan="5"></td>
-                                    <td style="text-align: right !important;">${formatCurrency(totalOdenen, 0)}</td>
-                                    <td style="text-align: right !important;">${formatCurrency(totalGuncel, 0)}</td>
-                                    <td class="${totalKar >= 0 ? 'text-success' : 'text-danger'}" style="text-align: right !important;">${formatCurrency(totalKar, 0)}</td>
-                                    <td colspan="4"></td>
-                                </tr>
-                            </tbody>
-                        </table>
+        tabContentHtml = `
+            <div id="portfoy-gecmis" class="portfoy-tab-content pf-card">
+                <div class="pf-card-header">
+                    <div id="portfoy-chart-filters" class="pf-range-strip">
+                        ${ranges.map(r => `<button type="button" class="pf-range-btn chart-filter ${activeRange === r.id ? 'active active-filter' : ''}" data-range="${r.id}" onclick="window.setPortfoyChartRange('${r.id}')">${r.label}</button>`).join('')}
                     </div>
-                    <div style="position: relative; width: 330px; height: 330px; display: block; margin: 0 auto;">
-                        <canvas id="chart-varliklar"></canvas>
+                    <div class="pf-currency-toggle">
+                        <button type="button" class="pf-currency-btn ${window.portfoyChartMode === 'tutar' ? 'active' : ''}" onclick="window.setPortfoyChartMode('tutar')">Tutar (${curSym})</button>
+                        <button type="button" class="pf-currency-btn ${window.portfoyChartMode === 'getiri' ? 'active' : ''}" onclick="window.setPortfoyChartMode('getiri')">Getiri (%)</button>
                     </div>
                 </div>
+                ${periodSummaryHtml}
+                <div style="width:100%; height:340px; position:relative; padding:1rem;">
+                    ${filteredHistoryData.length > 0
+                        ? `<canvas id="chart-portfoy-gecmisi"></canvas>`
+                        : `<div style="padding:3rem 1rem; text-align:center; color:#64748b;">Henüz geçmiş veri bulunmuyor. Yeni bir portföy değeri kaydedildiğinde grafik burada oluşturulacaktır.</div>`}
                 </div>
             </div>
         `;
     } else if (window.portfoyTab === 'arsiv') {
+        const { rowsHtml: arsivRowsHtml, shownCount: arsivShownCount } = buildArsivTbodyHtml();
         tabContentHtml = `
-            <div id="portfoy-arsiv" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
-                <div class="table-container" style="margin-bottom: 0; overflow-x: auto; overflow-y: visible;">
-
-                    <table class="dash-table compact-table" style="min-width: 1000px; text-align: center; border-collapse: separate; border-spacing: 0;">
-                        <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
-                            <tr><th>S.N.</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('menkul')">Menkul</th><th>Güncel Fiyat</th><th>Adet</th><th>Alış Fiyatı</th><th>Satış Fiyatı</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('kar')">Kar / Zarar</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('karYuzde')">Kar / Zarar %</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('ilkAlimTarihi')">İlk Alım Tarihi</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('sonSatimTarihi')">Son Satım Tarihi</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('tasimaSuresi')">Taşıma Süresi</th></tr>
-                        </thead>
-                        <tbody>
-                            ${arsivHtml}
-                            <tr class="total-row">
-                                <td style="text-align: center !important;"></td>
-                                <td style="text-align: left !important;">TOPLAM</td>
-                                <td colspan="4"></td>
-                                <td class="${arsivKarTotal >= 0 ? 'text-success' : 'text-danger'}" style="text-align: right !important;">${formatCurrency(arsivKarTotal, 0)}</td>
-                                <td colspan="4"></td>
+            <div id="portfoy-arsiv" class="portfoy-tab-content pf-card">
+                <div class="pf-arsiv-kpis">
+                    <div class="pf-period-stat">
+                        <span class="pf-period-stat-label">Gerçekleşen Toplam Kâr</span>
+                        <span class="pf-period-stat-val ${arsivKarTotal >= 0 ? 'text-success' : 'text-danger'}">${fmtSignedM(arsivKarTotal, 0)}</span>
+                        <span class="pf-period-stat-sub">${enrichedArsiv.length} kapanan pozisyon</span>
+                    </div>
+                    <div class="pf-period-stat">
+                        <span class="pf-period-stat-label">Başarı Oranı (Win Rate)</span>
+                        <span class="pf-period-stat-val">${formatPercent(arsivWinRate, 0)}</span>
+                        <span class="pf-period-stat-sub">${arsivWinCount} kârlı · ${enrichedArsiv.length - arsivWinCount} zararlı</span>
+                    </div>
+                    <div class="pf-period-stat">
+                        <span class="pf-period-stat-label">Ortalama Getiri &amp; Süre</span>
+                        <span class="pf-period-stat-val ${arsivAvgPct >= 0 ? 'text-success' : 'text-danger'}">${fmtSignedPct(arsivAvgPct, 1)}</span>
+                        <span class="pf-period-stat-sub">Ort. taşıma: ${arsivAvgDays} gün</span>
+                    </div>
+                    <div class="pf-period-stat">
+                        <span class="pf-period-stat-label">En İyi / En Kötü İşlem</span>
+                        <span class="pf-period-stat-val" style="font-size:13.5px;">
+                            ${bestArsiv ? `<span class="text-success">${window.escapeHtml(bestArsiv.menkul)} ${fmtSignedPct(bestArsiv.karYuzde, 0)}</span>` : '-'}
+                        </span>
+                        <span class="pf-period-stat-sub">
+                            ${worstArsiv ? `En düşük: <strong class="${worstArsiv.karYuzde >= 0 ? 'text-success' : 'text-danger'}">${window.escapeHtml(worstArsiv.menkul)} ${fmtSignedPct(worstArsiv.karYuzde, 0)}</strong>` : ''}
+                        </span>
+                    </div>
+                </div>
+                <div class="pf-toolbar">
+                    <div class="pf-filter-group">
+                        <button type="button" class="pf-filter-pill ${window.portfoyArsivFilter === 'all' ? 'active' : ''}" onclick="window.setPortfoyArsivFilter('all')">Tümü (${enrichedArsiv.length})</button>
+                        <button type="button" class="pf-filter-pill ${window.portfoyArsivFilter === 'karli' ? 'active' : ''}" onclick="window.setPortfoyArsivFilter('karli')">Kârlı (${arsivWinCount})</button>
+                        <button type="button" class="pf-filter-pill ${window.portfoyArsivFilter === 'zararli' ? 'active' : ''}" onclick="window.setPortfoyArsivFilter('zararli')">Zararlı (${enrichedArsiv.length - arsivWinCount})</button>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.65rem;">
+                        <span id="pf-arsiv-result-count" style="font-size:12px; color:#64748b; font-weight:600;">${arsivShownCount} işlem</span>
+                        <div class="pf-search-wrap">
+                            <i class="fas fa-search"></i>
+                            <input id="pf-arsiv-search" type="text" class="pf-search-input" placeholder="Arşivde ara..." value="${window.escapeHtml(window.portfoyArsivSearch)}" oninput="window.filterPortfoyArsiv(this.value)">
+                        </div>
+                    </div>
+                </div>
+                <div class="pf-table-wrap">
+                    <table class="pf-table">
+                        <thead>
+                            <tr>
+                                <th class="pf-sticky-1 pf-th-center">S.N.</th>
+                                <th ${thCls('menkul', 'pf-sticky-2 pf-th-left')} onclick="window.toggleArsivSort('menkul')">Menkul</th>
+                                <th>Güncel Fiyat</th>
+                                <th>Adet</th>
+                                <th>Alış Fiyatı</th>
+                                <th>Satış Fiyatı</th>
+                                <th ${thCls('kar')} onclick="window.toggleArsivSort('kar')">Kâr / Zarar</th>
+                                <th ${thCls('karYuzde')} onclick="window.toggleArsivSort('karYuzde')">Kâr %</th>
+                                <th ${thCls('sonraYuzde')} onclick="window.toggleArsivSort('sonraYuzde')">Satış Sonrası %</th>
+                                <th ${thCls('ilkAlimTarihi')} onclick="window.toggleArsivSort('ilkAlimTarihi')">İlk Alım</th>
+                                <th ${thCls('sonSatimTarihi')} onclick="window.toggleArsivSort('sonSatimTarihi')">Son Satım</th>
+                                <th ${thCls('tasimaSuresi')} onclick="window.toggleArsivSort('tasimaSuresi')">Taşıma Süresi</th>
                             </tr>
+                        </thead>
+                        <tbody id="pf-arsiv-tbody">
+                            ${arsivRowsHtml}
                         </tbody>
                     </table>
                 </div>
@@ -1674,436 +2384,299 @@ const renderPortfoy = (container) => {
         `;
     }
 
-    const kpiKarPos = portfoyBilgileri.kar >= 0;
-    const kpiGetiriPos = portfoyBilgileri.nominalGetiri >= 0;
-    const kpiCardsHtml = `
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-icon-box navy"><i class="fas fa-wallet"></i></div>
-                <div class="kpi-info">
-                    <div class="kpi-label">Toplam Portföy</div>
-                    <div class="kpi-value">${formatCurrency(portfoyBilgileri.toplamPortfoy, 0)}</div>
-                    <div class="kpi-sub">Hisse: ${formatCurrency(hissePortfoyTutar, 0)} · Fon: ${formatCurrency(fonPortfoyTutar, 0)}</div>
-                </div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon-box slate"><i class="fas fa-coins"></i></div>
-                <div class="kpi-info">
-                    <div class="kpi-label">Toplam Anapara</div>
-                    <div class="kpi-value">${formatCurrency(portfoyBilgileri.anapara, 0)}</div>
-                    <div class="kpi-sub">Nakit: ${formatCurrency(guncelNakitTutar, 0)}</div>
-                </div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon-box ${kpiKarPos ? 'green' : 'red'}"><i class="fas fa-chart-line"></i></div>
-                <div class="kpi-info">
-                    <div class="kpi-label">Net Kâr / Zarar</div>
-                    <div class="kpi-value" style="color: ${kpiKarPos ? 'var(--success-color)' : 'var(--danger-color)'};">${kpiKarPos ? '+' : ''}${formatCurrency(portfoyBilgileri.kar, 0)}</div>
-                    <div class="kpi-sub">Açık Pozisyon: ${filteredPortfoy.length} menkul</div>
-                </div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-icon-box ${kpiGetiriPos ? 'green' : 'red'}"><i class="fas fa-percentage"></i></div>
-                <div class="kpi-info">
-                    <div class="kpi-label">Nominal Getiri</div>
-                    <div class="kpi-value" style="color: ${kpiGetiriPos ? 'var(--success-color)' : 'var(--danger-color)'};">${kpiGetiriPos ? '+' : ''}${formatPercent(portfoyBilgileri.nominalGetiri)}</div>
-                    <div class="kpi-sub">Reel (Enf.): ${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    const html = `
-        <style>
-            .portfoy-tab-content table th {
-                padding: 10px 8px !important;
-                font-size: 13px !important;
-                font-weight: 700 !important;
-            }
-            .portfoy-tab-content table td {
-                font-size: 13.5px !important;
-            }
-        </style>
-        <div class="page-section active" style="display: flex; flex-direction: column; padding: 0px; gap: 1rem;">
+    container.innerHTML = `
+        <div class="page-section active pf-page">
+            ${topBarHtml}
             ${kpiCardsHtml}
-            <div class="glass" style="display: flex; flex-direction: column; padding: 0.75rem 1rem; width: 100%;">
-                <div style="border-bottom: 1px solid var(--surface-border); padding-bottom: 0px; margin-bottom: 0;">
-                    ${tabsHtml}
-                </div>
-                <div style="display: flex; flex-direction: column; width: 100%;">
-                    ${tabContentHtml}
-                </div>
-            </div>
+            ${tabContentHtml}
         </div>
     `;
-    container.innerHTML = html;
 
+    // Focus-safe search updaters
+    window.updatePortfoyVarliklarTableOnly = () => {
+        const tbody = document.getElementById('pf-varliklar-tbody');
+        const cnt = document.getElementById('pf-varliklar-result-count');
+        if (!tbody) return;
+        const { rowsHtml, shownCount } = buildVarliklarTbodyHtml();
+        tbody.innerHTML = rowsHtml;
+        if (cnt) cnt.textContent = `${shownCount} kalem`;
+    };
+    window.filterPortfoyVarliklar = (query) => {
+        window.portfoySearchQuery = query || '';
+        window.updatePortfoyVarliklarTableOnly();
+    };
+    window.updatePortfoyArsivTableOnly = () => {
+        const tbody = document.getElementById('pf-arsiv-tbody');
+        const cnt = document.getElementById('pf-arsiv-result-count');
+        if (!tbody) return;
+        const { rowsHtml, shownCount } = buildArsivTbodyHtml();
+        tbody.innerHTML = rowsHtml;
+        if (cnt) cnt.textContent = `${shownCount} işlem`;
+    };
+    window.filterPortfoyArsiv = (query) => {
+        window.portfoyArsivSearch = query || '';
+        window.updatePortfoyArsivTableOnly();
+    };
+
+    // Inline editing helpers (Nakit, Funds, Goal)
+    window.startInlinePfEdit = (spanEl) => {
+        if (!spanEl) return;
+        const wrap = spanEl.closest('.pf-inline-edit-wrap');
+        if (!wrap) return;
+        const btn = wrap.querySelector('.pf-inline-edit-btn');
+        const inp = wrap.querySelector('input');
+        if (!inp) return;
+        spanEl.style.display = 'none';
+        if (btn) btn.style.display = 'none';
+        inp.style.display = 'inline-block';
+        inp.focus();
+        inp.select();
+    };
+    window.cancelInlinePfEdit = (inputEl) => {
+        if (!inputEl) return;
+        const wrap = inputEl.closest('.pf-inline-edit-wrap');
+        if (!wrap) return;
+        inputEl.dataset.cancelled = '1';
+        inputEl.style.display = 'none';
+        const span = wrap.querySelector('span');
+        const btn = wrap.querySelector('.pf-inline-edit-btn');
+        if (span) span.style.display = '';
+        if (btn) btn.style.display = '';
+    };
 
     window.togglePortfoyEdit = () => {
         const hedefText = document.getElementById('hedef-text');
+        const hedefInput = document.getElementById('inline-hedef-input');
+        if (!hedefText || !hedefInput) return;
         const isEditing = hedefText.style.display === 'none';
-
         hedefText.style.display = isEditing ? 'inline' : 'none';
-        document.getElementById('inline-hedef-input').style.display = isEditing ? 'none' : 'inline-block';
-
+        hedefInput.style.display = isEditing ? 'none' : 'inline-block';
         if (!isEditing) {
-            document.getElementById('inline-hedef-input').focus();
+            hedefInput.focus();
+            hedefInput.select();
         }
     };
 
     window.savePortfoyEdit = () => {
-        const hedefVal = document.getElementById('inline-hedef-input').value;
-
+        const hedefInput = document.getElementById('inline-hedef-input');
+        if (!hedefInput) return;
+        const hedefVal = hedefInput.value;
         if (hedefVal !== '') State.data.hedefPortfoyTL = parseFloat(hedefVal) || 0;
-
         State.save();
-        if (typeof renderPage === "function") renderPage();
+        if (typeof renderPage === 'function') renderPage();
     };
 
     window.saveNakitVarlikEdit = (input) => {
+        if (!input || input.dataset.cancelled === '1') {
+            if (input) delete input.dataset.cancelled;
+            return;
+        }
         const nakitVal = input.value;
         if (nakitVal !== '') State.data.manuelNakitTutar = parseFloat(nakitVal) || 0;
         State.save();
-        if (typeof renderPage === "function") renderPage();
+        if (typeof renderPage === 'function') renderPage();
     };
 
-    window.toggleVarliklarEdit = () => {
-        const isEditing = document.getElementById('varliklar-save-btn').style.display !== 'none';
-
-        const pryText = document.querySelector('.pry-text');
-        const pryInput = document.querySelector('.inline-pry-input');
-
-        if (pryText && pryInput) {
-            pryText.style.display = isEditing ? 'inline' : 'none';
-            pryInput.style.display = isEditing ? 'none' : 'inline-block';
+    window.saveFundPriceEdit = (sym, input) => {
+        if (!input || input.dataset.cancelled === '1') {
+            if (input) delete input.dataset.cancelled;
+            return;
         }
-
-        document.getElementById('varliklar-edit-btn').style.display = isEditing ? 'inline-block' : 'none';
-        document.getElementById('varliklar-save-btn').style.display = isEditing ? 'none' : 'inline-block';
-
-        if (!isEditing && pryInput) {
-            pryInput.focus();
-        }
+        const cleanSym = String(sym || '').trim().toUpperCase();
+        if (!cleanSym || input.value === '') return;
+        const newVal = parseFloat(String(input.value).replace(',', '.'));
+        if (isNaN(newVal) || newVal < 0) return;
+        State.data.manuelFonFiyatlari = State.data.manuelFonFiyatlari || {};
+        State.data.manuelFonFiyatlari[cleanSym] = newVal;
+        State.updateFiyat(cleanSym, newVal);
+        State.save();
+        if (typeof renderPage === 'function') renderPage();
     };
 
     window.saveVarliklarEdit = () => {
         const pryInput = document.querySelector('.inline-pry-input');
         if (pryInput && pryInput.value !== '') {
-            State.data.manuelFonFiyatlari = State.data.manuelFonFiyatlari || {};
-            const newVal = parseFloat(pryInput.value.replace(',', '.'));
-            State.data.manuelFonFiyatlari['PRY'] = newVal;
-            State.updateFiyat('PRY', newVal);
-            State.save();
-            if (typeof renderPage === "function") renderPage();
+            window.saveFundPriceEdit('PRY', pryInput);
         }
     };
 
     window.setPortfoyChartRange = (range) => {
         window.portfoyChartRange = range;
-        const activeTabBtn = document.querySelector('.portfoy-tab-btn[style*="var(--accent-color)"]');
-        const activeTabId = activeTabBtn ? activeTabBtn.getAttribute('data-tab') : 'bilgiler';
-        if (typeof renderPage === "function") {
-            renderPage();
-
-        }
+        if (typeof renderPage === 'function') renderPage();
     };
 
+    // --- CHARTS ---
     if (window.Chart) {
-        if (window.ChartDataLabels) Chart.register(ChartDataLabels);
+        if (window.chartOzetInstance) { window.chartOzetInstance.destroy(); window.chartOzetInstance = null; }
+        if (window.chartVarliklarInstance) { window.chartVarliklarInstance.destroy(); window.chartVarliklarInstance = null; }
+        if (window.chartPortfoyKatkiInstance) { window.chartPortfoyKatkiInstance.destroy(); window.chartPortfoyKatkiInstance = null; }
+        if (window.chartPortfoyGecmisiInstance) { window.chartPortfoyGecmisiInstance.destroy(); window.chartPortfoyGecmisiInstance = null; }
 
-        if (window.chartOzetInstance) window.chartOzetInstance.destroy();
-        if (window.chartVarliklarInstance) window.chartVarliklarInstance.destroy();
-
-        const pieLinesPlugin = {
-            id: 'pieLines',
-            afterDraw(chart) {
-                const ctx = chart.ctx;
-                chart.data.datasets.forEach((dataset, i) => {
-                    let sum = 0;
-                    dataset.data.forEach(d => sum += d);
-
-                    chart.getDatasetMeta(i).data.forEach((arc, index) => {
-                        const dataVal = dataset.data[index];
-                        const percentage = (dataVal * 100 / sum);
-                        
-                        // 0% (veya 0.5'ten küçük) dilimleri gösterme
-                        if (percentage < 0.5) return;
-
-                        const centerPoint = arc.tooltipPosition();
-                        const chartCenter = { x: chart.chartArea.left + chart.chartArea.width / 2, y: chart.chartArea.top + chart.chartArea.height / 2 };
-
-                        let angle = Math.atan2(centerPoint.y - chartCenter.y, centerPoint.x - chartCenter.x);
-                        
-                        // Çizgilerin tam aşağı inip alttaki yazılara (legend) çarpmasını engelle
-                        if (angle > 1.2 && angle < 1.94) {
-                            angle = (angle < 1.57) ? 1.0 : 2.14; 
-                        }
-
-                        const radius = arc.outerRadius;
-
-                        const startX = chartCenter.x + Math.cos(angle) * radius;
-                        const startY = chartCenter.y + Math.sin(angle) * radius;
-
-                        const endX = startX + Math.cos(angle) * 15;
-                        const endY = startY + Math.sin(angle) * 15;
-
-                        ctx.save();
-                        ctx.beginPath();
-                        ctx.moveTo(startX, startY);
-                        ctx.lineTo(endX, endY);
-
-                        const lineLen = 10;
-                        const finalX = endX + (Math.cos(angle) >= 0 ? lineLen : -lineLen);
-                        ctx.lineTo(finalX, endY);
-                        ctx.strokeStyle = 'rgba(15, 23, 42, 0.35)';
-                        ctx.stroke();
-
-                        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-primary').trim() || '#0f172a';
-                        ctx.font = 'normal 12px Inter, Arial';
-                        ctx.textBaseline = 'middle';
-                        ctx.textAlign = Math.cos(angle) >= 0 ? 'left' : 'right';
-
-                        const text = percentage.toFixed(0) + '%';
-                        ctx.fillText(text, finalX + (Math.cos(angle) >= 0 ? 3 : -3), endY);
-                        ctx.restore();
-                    });
-                });
-            }
-        };
-
-        const ctxOzet = document.getElementById('chart-ozet');
-        if (ctxOzet) {
-            if (window.chartOzetInstance) {
-                window.chartOzetInstance.destroy();
-            }
-            window.chartOzetInstance = new Chart(ctxOzet, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Nakit', 'Hisse', 'Fon'],
-                    datasets: [{
-                        data: [guncelNakitTutar, hissePortfoyTutar, fonPortfoyTutar],
-                        backgroundColor: ['#4caf50', '#2196f3', '#ff9800'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    layout: { padding: 40 },
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: getComputedStyle(document.body).getPropertyValue('--text-primary').trim() || '#0f172a',
-                                font: { size: 12 },
-                                boxWidth: 10,
-                                boxHeight: 10,
-                                padding: 15
-                            }
-                        },
-                        datalabels: {
-                            display: false
-                        }
-                    }
-                },
-                plugins: [pieLinesPlugin]
-            });
-        }
-
+        // 1. Varlık Dağılımı Modern Doughnut (center text, clean tooltips, no overlapping lines)
         const ctxVarliklar = document.getElementById('chart-varliklar');
-        if (ctxVarliklar && (filteredPortfoy.length > 0 || (nakitItemForTable && nakitItemForTable.guncelTutar > 0))) {
-            const labels = filteredPortfoy.map(p => p.menkul);
-            const data = filteredPortfoy.map(p => p.guncelTutar);
-
-            if (nakitItemForTable && nakitItemForTable.guncelTutar > 0) {
-                labels.push('Nakit');
-                data.push(nakitItemForTable.guncelTutar);
-            }
-
-            const colors = ['#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800', '#ff5722'];
-
-            if (window.chartVarliklarInstance) {
-                window.chartVarliklarInstance.destroy();
-            }
-
+        if (ctxVarliklar && donutItems.length > 0) {
+            const centerTotalLabel = fmtM(donutTotalVal, 0);
+            const centerSubLabel = window.portfoyDonutMode === 'sinif' ? `${donutItems.length} Sınıf` : `${donutItems.length} Varlık`;
+            const pfCenterTextPlugin = {
+                id: 'pfCenterText',
+                afterDraw(chart) {
+                    const { ctx, chartArea } = chart;
+                    if (!chartArea) return;
+                    const cx = (chartArea.left + chartArea.right) / 2;
+                    const cy = (chartArea.top + chartArea.bottom) / 2;
+                    ctx.save();
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = '#0f172a';
+                    ctx.font = '700 14px Inter, system-ui, sans-serif';
+                    ctx.fillText(centerTotalLabel, cx, cy - 8);
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '600 11px Inter, system-ui, sans-serif';
+                    ctx.fillText(centerSubLabel, cx, cy + 11);
+                    ctx.restore();
+                }
+            };
             window.chartVarliklarInstance = new Chart(ctxVarliklar, {
                 type: 'doughnut',
                 data: {
-                    labels: labels,
+                    labels: donutItems.map(d => d.label),
                     datasets: [{
-                        data: data,
-                        backgroundColor: colors,
-                        borderWidth: 0
+                        data: donutItems.map(d => conv(d.value)),
+                        backgroundColor: donutItems.map(d => d.color),
+                        borderColor: '#ffffff',
+                        borderWidth: 2,
+                        hoverOffset: 6
                     }]
                 },
                 options: {
-                    layout: { padding: 40 },
+                    cutout: '66%',
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                color: getComputedStyle(document.body).getPropertyValue('--text-primary').trim() || '#0f172a',
-                                font: { size: 12 },
-                                boxWidth: 10,
-                                boxHeight: 10,
-                                padding: 10
+                        legend: { display: false },
+                        datalabels: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const rawVal = ctx.parsed || 0;
+                                    const pct = donutTotalVal > 0 ? ((donutItems[ctx.dataIndex].value / donutTotalVal) * 100) : 0;
+                                    return ` ${ctx.label}: ${formatCurrency(rawVal, 0, curSym)} (%${pct.toFixed(1)})`;
+                                }
                             }
-                        },
-                        datalabels: {
-                            display: false
                         }
                     }
                 },
-                plugins: [pieLinesPlugin]
+                plugins: [pfCenterTextPlugin]
             });
         }
 
-        // --- GÜNLÜK PORTFÖY KAYDI VE ÇİZGİ GRAFİĞİ ---
-        const now = new Date();
-        const timeInMins = now.getHours() * 60 + now.getMinutes();
-        const dayOfWeek = now.getDay();
-        const isBefore0950 = timeInMins <= (9 * 60 + 50);
-        const isAfter1830 = timeInMins >= (18 * 60 + 30);
-
-        let targetDate = null;
-        if (dayOfWeek === 6) { // Cumartesi -> Cuma
-            targetDate = new Date(now);
-            targetDate.setDate(targetDate.getDate() - 1);
-        } else if (dayOfWeek === 0) { // Pazar -> Cuma
-            targetDate = new Date(now);
-            targetDate.setDate(targetDate.getDate() - 2);
-        } else if (dayOfWeek === 1 && isBefore0950) { // Pazartesi 09:50 öncesi -> Cuma
-            targetDate = new Date(now);
-            targetDate.setDate(targetDate.getDate() - 3);
-        } else if (dayOfWeek >= 2 && dayOfWeek <= 5 && isBefore0950) { // Salı-Cuma 09:50 öncesi -> Dün
-            targetDate = new Date(now);
-            targetDate.setDate(targetDate.getDate() - 1);
-        } else if (isAfter1830) { // Hafta içi 18:30 sonrası -> Bugün
-            targetDate = new Date(now);
-        }
-
-        if (!State.data.portfoyGecmisi) State.data.portfoyGecmisi = [];
-
-        // Hatalı kaydedilmiş olabilecek hafta sonu (Cumartesi, Pazar) verilerini ve mükerrerleri temizle
-        let needsSave = false;
-        const uniqueGecmis = [];
-        const seenDates = new Set();
-
-        // Sondan başa doğru giderek en güncel kaydı tutalım
-        for (let i = State.data.portfoyGecmisi.length - 1; i >= 0; i--) {
-            const r = State.data.portfoyGecmisi[i];
-            const dw = new Date(r.tarih).getDay();
-            if (dw === 0 || dw === 6) {
-                needsSave = true; // Hafta sonu varsa silincek
-                continue;
-            }
-            if (!seenDates.has(r.tarih)) {
-                seenDates.add(r.tarih);
-                uniqueGecmis.unshift(r);
-            } else {
-                needsSave = true; // Mükerrer bulundu
-            }
-        }
-
-        if (needsSave) {
-            State.data.portfoyGecmisi = uniqueGecmis;
-            State.save();
-        }
-
-        // Hedeflenen kapanış günü için kayıt (yalnızca geçerli/yüklenmiş portföy değeriyle)
-        if (targetDate && portfoyBilgileri.toplamPortfoy > 0) {
-            const yyyyMmDd = targetDate.getFullYear() + '-' + String(targetDate.getMonth() + 1).padStart(2, '0') + '-' + String(targetDate.getDate()).padStart(2, '0');
-            const targetRecord = State.data.portfoyGecmisi.find(r => r.tarih === yyyyMmDd);
-            if (!targetRecord) {
-                State.data.portfoyGecmisi.push({
-                    tarih: yyyyMmDd,
-                    tutar: portfoyBilgileri.toplamPortfoy,
-                    anapara: portfoyBilgileri.anapara
-                });
-                State.save();
-            } else if (window.pricesLoadedOnce && (targetRecord.tutar !== portfoyBilgileri.toplamPortfoy || targetRecord.anapara !== portfoyBilgileri.anapara)) {
-                targetRecord.tutar = portfoyBilgileri.toplamPortfoy;
-                targetRecord.anapara = portfoyBilgileri.anapara;
-                State.save();
-            }
-        }
-
-        const ctxPortfoyGecmisi = document.getElementById('chart-portfoy-gecmisi');
-        if (ctxPortfoyGecmisi) {
-            let historyData = [...State.data.portfoyGecmisi];
-            historyData.sort((a, b) => new Date(a.tarih) - new Date(b.tarih));
-
-            // Aradaki boş günleri doldur
-            if (historyData.length > 0) {
-                const filledData = [];
-                let curr = new Date(historyData[0].tarih);
-                const lastRecordDate = new Date(historyData[historyData.length - 1].tarih);
-                let lastKnownVal = historyData[0].tutar;
-                let lastKnownAnapara = historyData[0].anapara !== undefined ? historyData[0].anapara : historyData[0].tutar;
-
-                while (curr <= lastRecordDate) {
-                    const dw = curr.getDay();
-                    if (dw !== 0 && dw !== 6) { // Hafta sonlarını atla
-                        const dStr = curr.getFullYear() + '-' + String(curr.getMonth() + 1).padStart(2, '0') + '-' + String(curr.getDate()).padStart(2, '0');
-                        const existing = historyData.find(r => r.tarih === dStr);
-                        if (existing) {
-                            lastKnownVal = existing.tutar;
-                            lastKnownAnapara = existing.anapara !== undefined ? existing.anapara : existing.tutar;
+        // 2. Kâr / Zarar Katkı Yatay Bar Grafiği
+        const ctxKatki = document.getElementById('chart-portfoy-katki');
+        if (ctxKatki && filteredPortfoy.length > 0) {
+            const byAbs = [...filteredPortfoy].sort((a, b) => Math.abs(b.kar) - Math.abs(a.kar)).slice(0, 10);
+            byAbs.sort((a, b) => b.kar - a.kar);
+            window.chartPortfoyKatkiInstance = new Chart(ctxKatki, {
+                type: 'bar',
+                data: {
+                    labels: byAbs.map(p => p.menkul),
+                    datasets: [{
+                        label: `Kâr / Zarar (${curSym})`,
+                        data: byAbs.map(p => conv(p.kar)),
+                        backgroundColor: byAbs.map(p => p.kar >= 0 ? 'rgba(5, 150, 105, 0.85)' : 'rgba(220, 38, 38, 0.82)'),
+                        borderRadius: 5,
+                        maxBarThickness: 22
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const item = byAbs[ctx.dataIndex];
+                                    return ` ${fmtSignedM(item.kar, 0)} (${fmtSignedPct(item.karYuzde, 1)})`;
+                                }
+                            }
                         }
-                        filledData.push({ tarih: dStr, tutar: lastKnownVal, anapara: lastKnownAnapara, isAnlik: false });
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(15, 23, 42, 0.06)' },
+                            ticks: {
+                                color: '#64748b',
+                                font: { size: 11 },
+                                callback: (v) => formatCurrency(v, 0, curSym)
+                            }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#0f172a', font: { size: 12, weight: '600' } }
+                        }
                     }
-                    curr.setDate(curr.getDate() + 1);
                 }
-                historyData = filledData;
-            }
+            });
+        }
 
-            // Anlık (Güncel) durumu ekle (Hafta içi piyasa açıkken)
-            if (dayOfWeek >= 1 && dayOfWeek <= 5 && !isBefore0950 && !isAfter1830) {
-                const todayStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
-                if (!historyData.find(r => r.tarih === todayStr)) {
-                    historyData.push({
-                        tarih: todayStr,
-                        tutar: portfoyBilgileri.toplamPortfoy,
-                        anapara: portfoyBilgileri.anapara,
-                        isAnlik: true
-                    });
+        // 3. Portföy Bilgileri: Benchmark Reel Getiri Bar Chart
+        const ctxOzet = document.getElementById('chart-ozet');
+        if (ctxOzet) {
+            const benchLabels = ['Enflasyon', 'BIST 100', 'Dolar', 'Gram Altın', 'PRY Fonu'];
+            const benchVals = [
+                portfoyBilgileri.reelGetiriEnflasyon * 100,
+                portfoyBilgileri.reelGetiriBist * 100,
+                portfoyBilgileri.reelGetiriDolar * 100,
+                portfoyBilgileri.reelGetiriAltin * 100,
+                portfoyBilgileri.reelGetiriPry * 100
+            ];
+            window.chartOzetInstance = new Chart(ctxOzet, {
+                type: 'bar',
+                data: {
+                    labels: benchLabels,
+                    datasets: [{
+                        label: 'Reel Getiri (%)',
+                        data: benchVals,
+                        backgroundColor: benchVals.map(v => v >= 0 ? 'rgba(5, 150, 105, 0.85)' : 'rgba(220, 38, 38, 0.82)'),
+                        borderRadius: 6,
+                        maxBarThickness: 26
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => ` ${ctx.parsed.x >= 0 ? '+' : ''}${ctx.parsed.x.toFixed(1)}%`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(15, 23, 42, 0.07)' },
+                            ticks: { color: '#64748b', font: { size: 11 }, callback: (v) => v + '%' }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: '#0f172a', font: { size: 12, weight: '600' } }
+                        }
+                    }
                 }
-            }
+            });
+        }
 
+        // 4. Günlük Portföy Değişimi: Gradient Area Chart (Tutar / Getiri % modes)
+        const ctxPortfoyGecmisi = document.getElementById('chart-portfoy-gecmisi');
+        if (ctxPortfoyGecmisi && filteredHistoryData.length > 0) {
             const currentRange = window.portfoyChartRange || '1A';
-
-            // Highlight active filter
-            setTimeout(() => {
-                document.querySelectorAll('.chart-filter').forEach(el => {
-                    el.style.background = 'transparent';
-                    el.classList.remove('active-filter');
-                    if (el.dataset.range === currentRange) {
-                        el.style.background = 'var(--overlay-bg)';
-                        el.classList.add('active-filter');
-                    }
-                });
-            }, 0);
-
-            // Filter logic
-            if (historyData.length > 0) {
-                const lastDate = new Date(historyData[historyData.length - 1].tarih);
-                let cutoffDate = new Date(lastDate);
-
-                switch (currentRange) {
-                    case '1H': cutoffDate.setDate(cutoffDate.getDate() - 7); break;
-                    case '1A': cutoffDate.setMonth(cutoffDate.getMonth() - 1); break;
-                    case '6A': cutoffDate.setMonth(cutoffDate.getMonth() - 6); break;
-                    case 'YBK': cutoffDate = new Date(lastDate.getFullYear(), 0, 1); break;
-                    case '1Y': cutoffDate.setFullYear(cutoffDate.getFullYear() - 1); break;
-                    case '5Y': cutoffDate.setFullYear(cutoffDate.getFullYear() - 5); break;
-                    case 'MAX': cutoffDate = new Date(0); break;
-                }
-                historyData = historyData.filter(d => new Date(d.tarih) >= cutoffDate);
-            }
-
-            const labels = historyData.map(d => {
+            const isPctMode = window.portfoyChartMode === 'getiri';
+            const labels = filteredHistoryData.map(d => {
                 const parts = d.tarih.split('-');
                 if (d.isAnlik) return 'Güncel';
                 if (currentRange === 'MAX' || currentRange === '1Y' || currentRange === '5Y') {
@@ -2111,82 +2684,103 @@ const renderPortfoy = (container) => {
                 }
                 return `${parts[2]}.${parts[1]}`;
             });
-            const data = historyData.map(d => d.tutar);
-            const dataAnapara = historyData.map(d => d.anapara !== undefined ? d.anapara : d.tutar);
 
-            if (window.chartPortfoyGecmisiInstance) {
-                window.chartPortfoyGecmisiInstance.destroy();
-            }
+            let gradientBg = 'rgba(5, 150, 105, 0.14)';
+            try {
+                const gCtx = ctxPortfoyGecmisi.getContext('2d');
+                if (gCtx && typeof gCtx.createLinearGradient === 'function') {
+                    const grad = gCtx.createLinearGradient(0, 0, 0, 300);
+                    grad.addColorStop(0, 'rgba(5, 150, 105, 0.28)');
+                    grad.addColorStop(1, 'rgba(5, 150, 105, 0.01)');
+                    gradientBg = grad;
+                }
+            } catch (e) { }
+
+            const datasets = isPctMode
+                ? [{
+                    label: 'Nominal Getiri (%)',
+                    data: filteredHistoryData.map(d => {
+                        const base = d.anapara > 0 ? d.anapara : d.tutar;
+                        return base > 0 ? ((d.tutar - base) / base) * 100 : 0;
+                    }),
+                    borderColor: '#059669',
+                    backgroundColor: gradientBg,
+                    borderWidth: 2.2,
+                    pointRadius: 0,
+                    pointHoverRadius: 5,
+                    fill: true,
+                    tension: 0.2
+                }]
+                : [
+                    {
+                        label: `Portföy (${curSym})`,
+                        data: filteredHistoryData.map(d => conv(d.tutar)),
+                        borderColor: '#059669',
+                        backgroundColor: gradientBg,
+                        borderWidth: 2.2,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        fill: true,
+                        tension: 0.15
+                    },
+                    {
+                        label: `Anapara (${curSym})`,
+                        data: filteredHistoryData.map(d => conv(d.anapara !== undefined ? d.anapara : d.tutar)),
+                        borderColor: '#d97706',
+                        backgroundColor: 'transparent',
+                        borderWidth: 1.8,
+                        borderDash: [5, 4],
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        fill: false,
+                        tension: 0
+                    }
+                ];
 
             window.chartPortfoyGecmisiInstance = new Chart(ctxPortfoyGecmisi, {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Portföy',
-                            data: data,
-                            borderColor: '#059669',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            pointBackgroundColor: '#059669',
-                            pointRadius: 0,
-                            pointHoverRadius: 6,
-                            fill: false,
-                            tension: 0
-                        },
-                        {
-                            label: 'Anapara',
-                            data: dataAnapara,
-                            borderColor: '#d97706',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            pointBackgroundColor: '#d97706',
-                            pointRadius: 0,
-                            pointHoverRadius: 6,
-                            fill: false,
-                            tension: 0
-                        }
-                    ]
-                },
+                data: { labels, datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
-                    },
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
                         legend: { display: true, position: 'bottom', labels: { color: '#475569', font: { size: 12 }, boxWidth: 12 } },
                         datalabels: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: function (context) {
-                                    return ' ' + context.dataset.label + ': ₺' + context.parsed.y.toLocaleString('tr-TR', { maximumFractionDigits: 0 });
+                                label: (context) => {
+                                    if (isPctMode) {
+                                        return ` ${context.dataset.label}: ${context.parsed.y >= 0 ? '+' : ''}${context.parsed.y.toFixed(2)}%`;
+                                    }
+                                    return ` ${context.dataset.label}: ${formatCurrency(context.parsed.y, 0, curSym)}`;
+                                },
+                                afterBody: (items) => {
+                                    if (isPctMode || !items || items.length < 2) return '';
+                                    const pVal = items[0].parsed.y;
+                                    const aVal = items[1].parsed.y;
+                                    const net = pVal - aVal;
+                                    return ` Net Kâr: ${net >= 0 ? '+' : ''}${formatCurrency(net, 0, curSym)}`;
                                 }
                             }
                         }
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(15, 23, 42, 0.08)' },
-                            ticks: { color: '#475569', font: { size: 12 } }
+                            grid: { color: 'rgba(15, 23, 42, 0.06)' },
+                            ticks: { color: '#64748b', font: { size: 11.5 }, maxTicksLimit: 12 }
                         },
                         y: {
-                            grid: { color: 'rgba(15, 23, 42, 0.08)' },
+                            grid: { color: 'rgba(15, 23, 42, 0.06)' },
                             ticks: {
-                                color: '#475569',
-                                font: { size: 12 },
-                                callback: function (value) {
-                                    return value.toLocaleString('tr-TR');
-                                }
+                                color: '#64748b',
+                                font: { size: 11.5 },
+                                callback: (v) => isPctMode ? (v.toFixed(0) + '%') : formatCurrency(v, 0, curSym)
                             }
                         }
                     }
                 }
             });
-        } else {
-            ctxPortfoyGecmisi.parentElement.innerHTML = '<div style="padding: 3rem 1rem; text-align: center; color: var(--text-secondary);">Henüz geçmiş veri bulunmuyor. Yeni bir portföy değeri kaydedildiğinde grafik burada oluşturulacaktır.</div>';
         }
     }
 };
@@ -5451,10 +6045,10 @@ window.toggleArsivSort = (col) => {
     if (window.arsivSort.col === col) {
         window.arsivSort.asc = !window.arsivSort.asc;
     } else {
-        window.arsivSort = { col: col, asc: true };
+        const defaultAsc = (col === 'menkul' || col === 'ilkAlimTarihi');
+        window.arsivSort = { col: col, asc: defaultAsc };
     }
     if (typeof renderPage === 'function') renderPage();
-
 };
 
 const getArsivSortIcon = () => '';
@@ -5464,10 +6058,10 @@ window.toggleVarliklarSort = (col) => {
     if (window.varliklarSort.col === col) {
         window.varliklarSort.asc = !window.varliklarSort.asc;
     } else {
-        window.varliklarSort = { col: col, asc: true };
+        const defaultAsc = (col === 'menkul' || col === 'tur' || col === 'ilkAlimTarihi');
+        window.varliklarSort = { col: col, asc: defaultAsc };
     }
     if (typeof renderPage === 'function') renderPage();
-
 };
 
 const getVarliklarSortIcon = () => '';
@@ -10901,6 +11495,7 @@ const _renderPageActual = () => {
         });
         window.chartOzetInstance = null;
         window.chartVarliklarInstance = null;
+        window.chartPortfoyKatkiInstance = null;
         window.chartPortfoyGecmisiInstance = null;
     }
 
