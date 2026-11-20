@@ -1622,6 +1622,12 @@ input[type="file"]::-webkit-file-upload-button:hover {
     filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5));
 }
 
+table th i.fa-sort,
+table th i.fa-sort-up,
+table th i.fa-sort-down {
+    display: none !important;
+}
+
 .takip-table th { font-size: 12.5px !important; padding: 9px 6px !important; }
 .takip-table td { font-size: 13px !important; padding: 8px 6px !important; }
 

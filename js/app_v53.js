@@ -1580,7 +1580,7 @@ const renderPortfoy = (container) => {
                     <div style="width: 100%; overflow-x: auto;">
                         <table class="dash-table compact-table varliklar-table" style="text-align: center; border-collapse: separate; border-spacing: 0;">
                             <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
-                                <tr><th>S.N.</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('menkul')">Menkul${getVarliklarSortIcon('menkul')}</th><th>Tür</th><th>Güncel Fiyat</th><th>Adet</th><th>Güncel Maliyet</th><th>Net Maliyet</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('odenenTutar')">Ödenen Tutar${getVarliklarSortIcon('odenenTutar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('guncelTutar')">Güncel Tutar${getVarliklarSortIcon('guncelTutar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('kar')">Kar/Zarar${getVarliklarSortIcon('kar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('karYuzde')">Kar/Zarar %${getVarliklarSortIcon('karYuzde')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('portfoyOrani')">Portföy Oranı${getVarliklarSortIcon('portfoyOrani')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('ilkAlimTarihi')">İlk Alım Tarihi${getVarliklarSortIcon('ilkAlimTarihi')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('gecenSure')">Geçen Süre${getVarliklarSortIcon('gecenSure')}</th></tr>
+                                <tr><th>S.N.</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('menkul')">Menkul</th><th>Tür</th><th>Güncel Fiyat</th><th>Adet</th><th>Güncel Maliyet</th><th>Net Maliyet</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('odenenTutar')">Ödenen Tutar</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('guncelTutar')">Güncel Tutar</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('kar')">Kar/Zarar</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('karYuzde')">Kar/Zarar %</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('portfoyOrani')">Portföy Oranı</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('ilkAlimTarihi')">İlk Alım Tarihi</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleVarliklarSort('gecenSure')">Geçen Süre</th></tr>
                             </thead>
                             <tbody>
                                 ${portfoyHtml}
@@ -1610,7 +1610,7 @@ const renderPortfoy = (container) => {
 
                     <table class="dash-table compact-table" style="min-width: 1000px; text-align: center; border-collapse: separate; border-spacing: 0;">
                         <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
-                            <tr><th style="font-size: 14px;">S.N.</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('menkul')">Menkul${getArsivSortIcon('menkul')}</th><th>Güncel Fiyat</th><th>Adet</th><th>Alış Fiyatı</th><th>Satış Fiyatı</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('kar')">Kar / Zarar${getArsivSortIcon('kar')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('karYuzde')">Kar / Zarar %${getArsivSortIcon('karYuzde')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('ilkAlimTarihi')">İlk Alım Tarihi${getArsivSortIcon('ilkAlimTarihi')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('sonSatimTarihi')">Son Satım Tarihi${getArsivSortIcon('sonSatimTarihi')}</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('tasimaSuresi')">Taşıma Süresi${getArsivSortIcon('tasimaSuresi')}</th></tr>
+                            <tr><th>S.N.</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('menkul')">Menkul</th><th>Güncel Fiyat</th><th>Adet</th><th>Alış Fiyatı</th><th>Satış Fiyatı</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('kar')">Kar / Zarar</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('karYuzde')">Kar / Zarar %</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('ilkAlimTarihi')">İlk Alım Tarihi</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('sonSatimTarihi')">Son Satım Tarihi</th><th style="cursor: pointer; user-select: none;" onclick="window.toggleArsivSort('tasimaSuresi')">Taşıma Süresi</th></tr>
                         </thead>
                         <tbody>
                             ${arsivHtml}
@@ -4414,12 +4414,7 @@ window.toggleHisseSort = (col) => {
     if (typeof renderPage === 'function') renderPage();
 };
 
-const getHisseSortIcon = (col) => {
-    if (window.hisseSort && window.hisseSort.col === col) {
-        return window.hisseSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
-    }
-    return ' <i class="fas fa-sort" style="color: rgba(15, 23, 42, 0.3);"></i>';
-};
+const getHisseSortIcon = () => '';
 
 window.toggleHisseTableCollapse = () => {
     window.hisseTableCollapsed = !window.hisseTableCollapsed;
@@ -4437,12 +4432,7 @@ window.toggleArsivSort = (col) => {
 
 };
 
-const getArsivSortIcon = (col) => {
-    if (window.arsivSort && window.arsivSort.col === col) {
-        return window.arsivSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
-    }
-    return ' <i class="fas fa-sort" style="color: rgba(15, 23, 42, 0.3);"></i>';
-};
+const getArsivSortIcon = () => '';
 
 window.toggleVarliklarSort = (col) => {
     if (!window.varliklarSort) window.varliklarSort = { col: null, asc: true };
@@ -4455,12 +4445,7 @@ window.toggleVarliklarSort = (col) => {
 
 };
 
-const getVarliklarSortIcon = (col) => {
-    if (window.varliklarSort && window.varliklarSort.col === col) {
-        return window.varliklarSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
-    }
-    return ' <i class="fas fa-sort" style="color: rgba(15, 23, 42, 0.3);"></i>';
-};
+const getVarliklarSortIcon = () => '';
 
 window.toggleNakitSort = (col) => {
     if (!window.nakitSort) window.nakitSort = { col: null, asc: true };
@@ -4472,12 +4457,7 @@ window.toggleNakitSort = (col) => {
     if (typeof renderPage === 'function') renderPage();
 };
 
-const getNakitSortIcon = (col) => {
-    if (window.nakitSort && window.nakitSort.col === col) {
-        return window.nakitSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
-    }
-    return ' <i class="fas fa-sort" style="color: rgba(15, 23, 42, 0.3);"></i>';
-};
+const getNakitSortIcon = () => '';
 
 window.toggleNakitTableCollapse = () => {
     window.nakitTableCollapsed = !window.nakitTableCollapsed;
@@ -6906,12 +6886,7 @@ window.toggleTakipSort = (col) => {
     if (typeof renderPage === 'function') renderPage();
 };
 
-const getTakipSortIcon = (col) => {
-    if (window.takipSort && window.takipSort.col === col) {
-        return window.takipSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
-    }
-    return ' <i class="fas fa-sort" style="color: rgba(15, 23, 42, 0.3);"></i>';
-};
+const getTakipSortIcon = () => '';
 
 const renderAnasayfa = (container) => {
     try {
@@ -7191,29 +7166,29 @@ const renderAnasayfa = (container) => {
                         <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
                             <tr>
                                 <th style="text-align: center;">S.N</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('hisse')">Hisse${getTakipSortIcon('hisse')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('hisse')">Hisse</th>
                                 <th style="text-align: center;">Fiyat</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('gunlukYuzde')">Gün %${getTakipSortIcon('gunlukYuzde')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('gunlukYuzde')">Gün %</th>
                                 ${window.takipTab === 'degerleme' ? `
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('araHedefFiyat')" title="Gelecek Bilanço Hedef Fiyat">G. B. H. F.${getTakipSortIcon('araHedefFiyat')}</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('araPotansiyel')" title="Gelecek Bilanço Potansiyel">G. B. Pot.${getTakipSortIcon('araPotansiyel')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('araHedefFiyat')" title="Gelecek Bilanço Hedef Fiyat">G. B. H. F.</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('araPotansiyel')" title="Gelecek Bilanço Potansiyel">G. B. Pot.</th>
                                 <th style="text-align: center;" title="2026 Hedef Fiyat">2026 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2026')" title="2026 Potansiyel">2026 Pot.${getTakipSortIcon('pot2026')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2026')" title="2026 Potansiyel">2026 Pot.</th>
                                 <th style="text-align: center;" title="2027 Hedef Fiyat">2027 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2027')" title="2027 Potansiyel">2027 Pot.${getTakipSortIcon('pot2027')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2027')" title="2027 Potansiyel">2027 Pot.</th>
                                 <th style="text-align: center;" title="2028 Hedef Fiyat">2028 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2028')" title="2028 Potansiyel">2028 Pot.${getTakipSortIcon('pot2028')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2028')" title="2028 Potansiyel">2028 Pot.</th>
                                 <th style="text-align: center;" title="2029 Hedef Fiyat">2029 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2029')" title="2029 Potansiyel">2029 Pot.${getTakipSortIcon('pot2029')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2029')" title="2029 Potansiyel">2029 Pot.</th>
                                 <th style="text-align: center;" title="2030 Hedef Fiyat">2030 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2030')" title="2030 Potansiyel">2030 Pot.${getTakipSortIcon('pot2030')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2030')" title="2030 Potansiyel">2030 Pot.</th>
                                 ` : `
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('piyasaDegeri')">Piyasa Değeri${getTakipSortIcon('piyasaDegeri')}</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('piyasaDegeriUsd')">Piyasa Değeri $${getTakipSortIcon('piyasaDegeriUsd')}</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('firmaDegeri')">Firma Değeri${getTakipSortIcon('firmaDegeri')}</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('fdFavok')">FD/FAVÖK${getTakipSortIcon('fdFavok')}</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('fk')">F/K${getTakipSortIcon('fk')}</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pdDd')">PD/DD${getTakipSortIcon('pdDd')}</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('piyasaDegeri')">Piyasa Değeri</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('piyasaDegeriUsd')">Piyasa Değeri $</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('firmaDegeri')">Firma Değeri</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('fdFavok')">FD/FAVÖK</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('fk')">F/K</th>
+                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pdDd')">PD/DD</th>
                                 `}
                             </tr>
                         </thead>
