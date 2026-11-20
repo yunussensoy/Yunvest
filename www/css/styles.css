@@ -2037,6 +2037,219 @@ table th i.fa-sort-down {
 }
 
 /* ==========================================================================
+   Enflasyon Verileri Enhanced UI System
+   ========================================================================== */
+.enf-alert-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    padding: 0.72rem 1rem;
+    border-radius: 12px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+    font-size: 13px;
+}
+
+.enf-alert-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.enf-alert-chips {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.enf-missing-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid #f59e0b;
+    background: #ffffff;
+    color: #b45309;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.enf-missing-chip:hover {
+    background: #f59e0b;
+    color: #ffffff;
+}
+
+.enf-analytics-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr);
+    gap: 0.95rem;
+    align-items: stretch;
+}
+
+.enf-panel-card {
+    background: #ffffff;
+    border: 1px solid var(--surface-border);
+    border-radius: 14px;
+    padding: 1rem 1.15rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.enf-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.enf-panel-title {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #113A5D;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.enf-chart-canvas-wrap {
+    position: relative;
+    height: 255px;
+    width: 100%;
+    flex: 1;
+}
+
+.enf-calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+}
+
+.enf-calc-results {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.8rem 0.95rem;
+    border-radius: 11px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    margin-top: auto;
+}
+
+.enf-calc-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 13px;
+    color: #475569;
+}
+
+.enf-calc-row strong {
+    font-size: 14.5px;
+    font-weight: 800;
+    color: #0f172a;
+    font-variant-numeric: tabular-nums;
+}
+
+.enf-calc-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 2px 0;
+}
+
+.enf-period-main {
+    font-weight: 700;
+    color: #113A5D;
+}
+
+.enf-period-code {
+    font-size: 11.5px;
+    color: #64748b;
+    margin-left: 6px;
+    font-weight: 500;
+}
+
+.enf-rate-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 64px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.enf-rate-low {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+.enf-rate-mid {
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.enf-rate-high {
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.enf-delta-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+/* Matrix Heatmap Table */
+.enf-matrix-table th,
+.enf-matrix-table td {
+    padding: 8px 6px !important;
+    font-size: 12.5px !important;
+}
+
+.enf-matrix-cell {
+    cursor: pointer;
+    font-weight: 700 !important;
+    font-variant-numeric: tabular-nums;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.enf-matrix-cell:hover {
+    box-shadow: inset 0 0 0 1.5px #0284c7;
+}
+
+.enf-matrix-empty {
+    cursor: pointer;
+    color: #cbd5e1 !important;
+    font-weight: 600 !important;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.enf-matrix-empty:hover {
+    background: #e0f2fe !important;
+    color: #0284c7 !important;
+}
+
+.enf-table tbody tr:not(:hover) td.enf-heat-1 { background: rgba(16, 185, 129, 0.11) !important; color: #047857 !important; }
+.enf-table tbody tr:not(:hover) td.enf-heat-2 { background: rgba(245, 158, 11, 0.10) !important; color: #b45309 !important; }
+.enf-table tbody tr:not(:hover) td.enf-heat-3 { background: rgba(249, 115, 22, 0.14) !important; color: #c2410c !important; }
+.enf-table tbody tr:not(:hover) td.enf-heat-4 { background: rgba(239, 68, 68, 0.16) !important; color: #b91c1c !important; }
+
+/* ==========================================================================
    Ekstreler (Hisse & Fon / Nakit İşlemleri) Modern UI System
    ========================================================================== */
 .ekstre-card-shell {
@@ -2746,7 +2959,8 @@ tr.ekstre-group-row:hover td {
     .grid-3-col {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    .dash-grid {
+    .dash-grid,
+    .enf-analytics-grid {
         grid-template-columns: 1fr;
     }
     .header-sub-tag,

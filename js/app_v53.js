@@ -535,10 +535,12 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
 
         if (State.data.enflasyonListesi) {
             State.data.enflasyonListesi.forEach(enf => {
-                const [ey, em] = enf.tarih.split('-');
+                if (!enf || !enf.tarih) return;
+                const [ey, em] = String(enf.tarih).split('-');
                 let enfTarih = new Date(ey, em - 1, 1);
-                if (enfTarih >= nakitTarih) {
-                    compoundingFactor *= (1 + (parseFloat(enf.oran) / 100));
+                const parsedOran = parseFloat(String(enf.oran).replace(',', '.'));
+                if (!isNaN(parsedOran) && enfTarih >= nakitTarih) {
+                    compoundingFactor *= (1 + (parsedOran / 100));
                 }
             });
         }
@@ -584,6 +586,7 @@ const calculatePortfoy = (ekstre, getFiyat, nakitHareketleri) => {
         anapara: anapara,
         kar: toplamGuncelTutar - anapara,
         nominalGetiri: anapara > 0 ? (toplamGuncelTutar - anapara) / anapara : 0,
+        enflasyonAnapara: enflasyonAnapara,
         reelGetiriEnflasyon: reelGetiriEnflasyon,
         reelGetiriAltin: reelAltinDeger > 0 ? (toplamGuncelTutar - reelAltinDeger) / reelAltinDeger : 0,
         reelGetiriDolar: reelDolarDeger > 0 ? (toplamGuncelTutar - reelDolarDeger) / reelDolarDeger : 0,
@@ -5647,110 +5650,33 @@ const renderNakitIslemleri = (container) => {
     renderHisseIslemleri(container);
 };
 
-const renderVeriler = (container) => {
-    // We will place Enflasyon Form, Hedef Portföy input, and Fon Fiyatlari input here.
-    const hedefPortfoy = State.data.hedefPortfoyTL || 0;
+const ENF_MONTHS_TR = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+const ENF_MONTHS_SHORT_TR = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
 
-    // Fon Set
-    const fonSet = new Set();
-    State.data.ekstre.forEach(e => {
-        if (e.menkul !== 'NAKIT' && e.menkul.length === 3) fonSet.add(e.menkul);
-    });
-
-    let fonHtml = '';
-    fonSet.forEach(fon => {
-        const pFiyat = State.getFiyat(fon);
-        fonHtml += `
-            <div style="display:flex; gap: 0.5rem; width: 100%;">
-                <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100%; text-align:right; padding: 0.3rem; font-size: 12px; font-weight: normal; color: var(--text-secondary);" onkeydown="if(event.key === 'Enter') { State.updateFiyat('${fon}', this.value); this.blur(); }">
-                <button class="btn" style="padding: 0; width: 26px; height: 26px; background: transparent; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value);" title="Kaydet"><i class="fas fa-save" style="font-size: 18px; color: var(--success-color) !important;"></i></button>
-            </div>
-        `;
-    });
-
-    container.innerHTML = `
-        <div class="page-section active" style="display: flex; flex-direction: column; gap: 16px;">
-            
-                        
-
-            
-
-            <!-- Enflasyon -->
-            <div class="table-container glass" style="margin-bottom: 0; padding: 0.75rem 1rem 1rem 1rem;">
-                <div class="table-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 16px; font-weight: 700; color: #113A5D;">Aylık Enflasyon Verileri</span>
-                    <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-secondary); border: none; box-shadow: none;" onclick="window.toggleEnfForm()" title="Ekle"><i class="fas fa-plus" style="font-size: 15px;"></i></button>
-                </div>
-                
-                <div style="overflow-x: auto; overflow-y: visible; margin-bottom: 0;">
-                    <table class="dash-table compact-table" style="width: 100%;">
-                        <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 10;">
-                            <tr>
-                                <th style="text-align:center;">Dönem (Yıl-Ay)</th>
-                                <th style="text-align:right;">Aylık Enflasyon (%)</th>
-                                <th style="text-align:right;">Kümülatif Enflasyon (%)</th>
-                                <th style="text-align:center; width: 80px;">İşlem</th>
-                            </tr>
-                        </thead>
-                        <tbody id="enf-form-tbody">
-                            <tr id="enf-form-row" style="display:none; background: var(--overlay-bg);">
-                                <td style="text-align:center;">
-                                    <input type="month" id="i-enf-tarih" class="form-control" style="padding:4px 6px; font-size:13px; height:auto; width:100%;" required>
-                                </td>
-                                <td style="text-align:right;">
-                                    <input type="number" id="i-enf-oran" class="form-control" step="0.01" style="padding:4px 6px; font-size:13px; height:auto; width:100%; text-align:right;" required>
-                                </td>
-                                <td style="text-align:right; color: var(--text-secondary);">-</td>
-                                <td style="text-align:center;">
-                                    <div style="display:flex; gap:0.2rem; justify-content:center;">
-                                        <button class="btn btn-icon" style="color: var(--success-color); font-size: 14px; padding: 4px; border: none; background: transparent;" onclick="window.addEnflasyon(event)" title="Ekle"><i class="fas fa-check"></i></button>
-                                        <button class="btn btn-icon" style="color: var(--danger-color); font-size: 14px; padding: 4px; border: none; background: transparent;" onclick="window.toggleEnfForm()" title="İptal"><i class="fas fa-times"></i></button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                        <tbody id="enf-data-tbody">
-                            <!-- JS ile doldurulacak -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-        </div>
-    `;
-
-    setTimeout(() => {
-        if (typeof window.renderEnflasyonData === 'function') {
-            window.renderEnflasyonData();
-        }
-        const hisselerList = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : window.defaultStocksArray || [];
-        if (typeof window.setupCustomDropdown === 'function') {
-            window.setupCustomDropdown('upload-hisse', hisselerList);
-        }
-    }, 50);
+const parseEnfRate = (val) => {
+    if (typeof val === 'number') return isFinite(val) ? val : NaN;
+    const cleaned = String(val ?? '').trim().replace('%', '').replace(/\s+/g, '').replace(',', '.');
+    const n = parseFloat(cleaned);
+    return isFinite(n) ? n : NaN;
 };
 
-window.toggleEnfForm = () => {
-    const row = document.getElementById('enf-form-row');
-    if (row) {
-        row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
-        if (row.style.display !== 'none') {
-            const today = new Date();
-            const y = today.getFullYear();
-            const m = String(today.getMonth() + 1).padStart(2, '0');
-            document.getElementById('i-enf-tarih').value = `${y}-${m}`;
-            document.getElementById('i-enf-oran').value = '';
-            document.getElementById('i-enf-oran').focus();
-        }
-    }
+const formatEnfPeriodLabel = (ym, shortForm = false) => {
+    const parts = String(ym || '').split('-');
+    if (parts.length !== 2) return String(ym || '');
+    const y = parts[0];
+    const mIdx = parseInt(parts[1], 10) - 1;
+    if (mIdx < 0 || mIdx > 11) return String(ym || '');
+    return shortForm ? `${ENF_MONTHS_SHORT_TR[mIdx]} ${y.slice(-2)}` : `${ENF_MONTHS_TR[mIdx]} ${y}`;
 };
 
-window.renderEnflasyonData = () => {
-    const tbody = document.getElementById('enf-data-tbody');
-    if (!tbody) return;
+const addMonthsYm = (ym, delta) => {
+    const [y, m] = String(ym).split('-').map(Number);
+    const dt = new Date(y, (m - 1) + delta, 1);
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
+};
 
-    let html = '';
-    if (!State.data.enflasyonListesi || State.data.enflasyonListesi.length === 0) {
+const ensureEnflasyonList = () => {
+    if (!Array.isArray(State.data.enflasyonListesi)) {
         State.data.enflasyonListesi = [
             { id: 'enf_1719792000005', tarih: '2026-06', oran: 1.64 },
             { id: 'enf_1719792000004', tarih: '2026-05', oran: 3.37 },
@@ -5760,72 +5686,987 @@ window.renderEnflasyonData = () => {
             { id: 'enf_1719792000000', tarih: '2026-01', oran: 6.70 }
         ];
     }
-    const list = State.data.enflasyonListesi || [];
+    return State.data.enflasyonListesi
+        .filter(x => x && /^\d{4}-\d{2}$/.test(String(x.tarih || '').trim()) && !isNaN(parseEnfRate(x.oran)))
+        .map(x => ({
+            id: x.id || ('enf_' + x.tarih),
+            tarih: String(x.tarih).trim(),
+            oran: parseEnfRate(x.oran)
+        }));
+};
 
-    if (list.length === 0) {
-        html = `<tr><td colspan="4" style="text-align:center; padding:1rem; opacity:0.5;">Henüz enflasyon verisi eklenmemiş.</td></tr>`;
-    } else {
-        const sorted = [...list].sort((a, b) => b.tarih.localeCompare(a.tarih));
+const buildEnflasyonAnalytics = () => {
+    const raw = ensureEnflasyonList();
+    // Deduplicate by tarih keeping latest
+    const byYm = {};
+    raw.forEach(item => { byYm[item.tarih] = item; });
+    const asc = Object.values(byYm).sort((a, b) => a.tarih.localeCompare(b.tarih));
 
-        let cumulative = 1;
-        const ascSorted = [...list].sort((a, b) => a.tarih.localeCompare(b.tarih));
-        const cumMap = {};
-        ascSorted.forEach(item => {
-            cumulative *= (1 + (parseFloat(item.oran) / 100));
-            cumMap[item.tarih] = (cumulative - 1) * 100;
-        });
+    const monthRateMap = {};
+    asc.forEach(it => { monthRateMap[it.tarih] = it.oran; });
 
-        sorted.forEach(item => {
-            const pct = parseFloat(item.oran);
-            const color = pct >= 0 ? 'var(--danger-color)' : 'var(--success-color)';
-            const cumColor = cumMap[item.tarih] >= 0 ? 'var(--danger-color)' : 'var(--success-color)';
-            html += `<tr>
-                <td style="text-align:center;">${item.tarih}</td>
-                <td style="text-align:right; color:${color}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(pct)}%</td>
-                <td style="text-align:right; color:${cumColor}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(cumMap[item.tarih])}%</td>
-                <td style="text-align:center;">
-                    <button class="btn" style="padding: 2px 5px; font-size: 13.5px; background: transparent; color: var(--text-secondary); border: none;" onclick="window.deleteEnflasyon('${item.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
-                </td>
-            </tr>`;
-        });
+    let overallFactor = 1;
+    const yearFactorMap = {};
+    const enriched = asc.map((item, idx) => {
+        const year = item.tarih.slice(0, 4);
+        const factor = 1 + (item.oran / 100);
+        overallFactor *= factor;
+        yearFactorMap[year] = (yearFactorMap[year] || 1) * factor;
+
+        const prevItem = idx > 0 ? asc[idx - 1] : null;
+        const momDiff = prevItem ? (item.oran - prevItem.oran) : null;
+
+        // Exact trailing 12 consecutive calendar months
+        let yoy = null;
+        let hasAll12 = true;
+        let yoyFactor = 1;
+        for (let k = 0; k < 12; k++) {
+            const targetYm = addMonthsYm(item.tarih, -k);
+            if (monthRateMap[targetYm] === undefined) {
+                hasAll12 = false;
+                break;
+            }
+            yoyFactor *= (1 + monthRateMap[targetYm] / 100);
+        }
+        if (hasAll12) yoy = (yoyFactor - 1) * 100;
+
+        return {
+            ...item,
+            year,
+            month: parseInt(item.tarih.slice(5, 7), 10),
+            momDiff,
+            ytd: (yearFactorMap[year] - 1) * 100,
+            yoy,
+            cum: (overallFactor - 1) * 100,
+            cumFactor: overallFactor,
+            index100: 100 * overallFactor
+        };
+    });
+
+    // Missing period detection (internal gaps + trailing gap up to previous completed month)
+    const missingMonths = [];
+    if (enriched.length > 0) {
+        const firstYm = enriched[0].tarih;
+        const lastYm = enriched[enriched.length - 1].tarih;
+        const now = new Date();
+        const prevCompletedYm = addMonthsYm(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`, -1);
+        const scanEnd = prevCompletedYm > lastYm ? prevCompletedYm : lastYm;
+
+        let cursor = firstYm;
+        let guard = 0;
+        while (cursor <= scanEnd && guard < 180) {
+            if (monthRateMap[cursor] === undefined) {
+                missingMonths.push(cursor);
+            }
+            cursor = addMonthsYm(cursor, 1);
+            guard++;
+        }
     }
-    tbody.innerHTML = html;
+
+    // Suggest next natural month when adding a new record
+    let suggestedNextYm = '';
+    if (missingMonths.length > 0) {
+        suggestedNextYm = missingMonths[0];
+    } else if (enriched.length > 0) {
+        suggestedNextYm = addMonthsYm(enriched[enriched.length - 1].tarih, 1);
+    } else {
+        const now = new Date();
+        suggestedNextYm = addMonthsYm(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`, -1);
+    }
+
+    return { asc: enriched, monthRateMap, missingMonths, suggestedNextYm };
+};
+
+const parseBulkEnflasyonLines = (rawText) => {
+    const trMonthMap = {
+        'ocak': '01', 'oca': '01', 'jan': '01', 'january': '01',
+        'subat': '02', 'şubat': '02', 'sub': '02', 'şub': '02', 'feb': '02',
+        'mart': '03', 'mar': '03',
+        'nisan': '04', 'nis': '04', 'apr': '04',
+        'mayis': '05', 'mayıs': '05', 'may': '05',
+        'haziran': '06', 'haz': '06', 'jun': '06',
+        'temmuz': '07', 'tem': '07', 'jul': '07',
+        'agustos': '08', 'ağustos': '08', 'agu': '08', 'ağu': '08', 'aug': '08',
+        'eylul': '09', 'eylül': '09', 'eyl': '09', 'sep': '09',
+        'ekim': '10', 'eki': '10', 'oct': '10',
+        'kasim': '11', 'kasım': '11', 'kas': '11', 'nov': '11',
+        'aralik': '12', 'aralık': '12', 'ara': '12', 'dec': '12'
+    };
+
+    const parsed = [];
+    const skipped = [];
+    const lines = String(rawText || '').split(/\r?\n/);
+
+    lines.forEach((rawLine) => {
+        const line = rawLine.trim();
+        if (!line) return;
+
+        let ym = null;
+        let rest = line;
+
+        // Pattern 1: YYYY-MM or YYYY.MM or YYYY/MM
+        let m = line.match(/\b(20\d{2}|19\d{2})[-./](\d{1,2})\b/);
+        if (m) {
+            const mo = parseInt(m[2], 10);
+            if (mo >= 1 && mo <= 12) {
+                ym = `${m[1]}-${String(mo).padStart(2, '0')}`;
+                rest = line.replace(m[0], ' ');
+            }
+        }
+
+        // Pattern 2: MM.YYYY or MM/YYYY or MM-YYYY
+        if (!ym) {
+            m = line.match(/\b(\d{1,2})[-./](20\d{2}|19\d{2})\b/);
+            if (m) {
+                const mo = parseInt(m[1], 10);
+                if (mo >= 1 && mo <= 12) {
+                    ym = `${m[2]}-${String(mo).padStart(2, '0')}`;
+                    rest = line.replace(m[0], ' ');
+                }
+            }
+        }
+
+        // Pattern 3: Turkish/English Month Name + Year (e.g. "Haziran 2026 1,64")
+        if (!ym) {
+            const lower = line.toLocaleLowerCase('tr-TR');
+            const yMatch = lower.match(/\b(20\d{2}|19\d{2})\b/);
+            if (yMatch) {
+                for (const [key, moStr] of Object.entries(trMonthMap)) {
+                    if (new RegExp(`(^|[^a-zçğıöşü])${key}([^a-zçğıöşü]|$)`, 'i').test(lower)) {
+                        ym = `${yMatch[1]}-${moStr}`;
+                        rest = line.replace(yMatch[0], ' ');
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!ym) {
+            skipped.push(line);
+            return;
+        }
+
+        const numMatches = rest.match(/-?\d+(?:[.,]\d+)?/g);
+        if (!numMatches || numMatches.length === 0) {
+            skipped.push(line);
+            return;
+        }
+        const oran = parseEnfRate(numMatches[numMatches.length - 1]);
+        if (isNaN(oran)) {
+            skipped.push(line);
+            return;
+        }
+        parsed.push({ tarih: ym, oran });
+    });
+
+    // Deduplicate preserving last occurrence
+    const dedup = {};
+    parsed.forEach(p => { dedup[p.tarih] = p; });
+    return { items: Object.values(dedup).sort((a, b) => a.tarih.localeCompare(b.tarih)), skipped };
+};
+
+window.setEnfViewMode = (mode) => {
+    window.enfViewMode = mode;
+    if (typeof renderPage === 'function') renderPage();
+};
+
+window.setEnfChartMode = (mode) => {
+    window.enfChartMode = mode;
+    if (typeof renderPage === 'function') renderPage();
+};
+
+window.setEnfYearFilter = (year) => {
+    window.enfYearFilter = year;
+    if (typeof renderPage === 'function') renderPage();
+};
+
+window.toggleEnfSort = (col) => {
+    if (!window.enfSort) window.enfSort = { col: 'tarih', asc: false };
+    if (window.enfSort.col === col) {
+        window.enfSort.asc = !window.enfSort.asc;
+    } else {
+        window.enfSort = { col, asc: false };
+    }
+    if (typeof renderPage === 'function') renderPage();
+};
+
+window.toggleEnfForm = () => {
+    window.openEnflasyonModal(null);
+};
+
+window.openEnflasyonModal = (editId = null, prefillYm = null) => {
+    const existingOverlay = document.getElementById('enf-modal-overlay');
+    if (existingOverlay) existingOverlay.remove();
+
+    const { asc, suggestedNextYm } = buildEnflasyonAnalytics();
+    const existing = editId
+        ? (State.data.enflasyonListesi || []).find(x => String(x.id) === String(editId))
+        : (prefillYm ? (State.data.enflasyonListesi || []).find(x => x.tarih === prefillYm) : null);
+
+    const initTarih = existing ? existing.tarih : (prefillYm || suggestedNextYm);
+    const initOran = existing ? parseEnfRate(existing.oran) : '';
+
+    const overlay = document.createElement('div');
+    overlay.id = 'enf-modal-overlay';
+    overlay.className = 'ekstre-modal-overlay';
+    overlay.addEventListener('click', (ev) => {
+        if (ev.target === overlay) overlay.remove();
+    });
+
+    overlay.innerHTML = `
+        <div class="ekstre-modal-card" role="dialog" aria-modal="true" style="width: min(440px, 100%);">
+            <div class="ekstre-modal-header">
+                <h3>
+                    <i class="fas ${existing ? 'fa-pen-to-square' : 'fa-plus-circle'}" style="color: #0284c7;"></i>
+                    <span>${existing ? 'Enflasyon Verisini Düzenle' : 'Yeni Aylık Enflasyon Ekle'}</span>
+                </h3>
+                <button type="button" class="ekstre-modal-close" aria-label="Kapat" onclick="document.getElementById('enf-modal-overlay')?.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="enf-modal-form" class="ekstre-modal-body">
+                <div class="ekstre-form-grid-2">
+                    <div class="ekstre-field">
+                        <label for="enf-m-tarih">Dönem (Yıl-Ay)</label>
+                        <input type="month" id="enf-m-tarih" class="form-control" value="${window.escapeHtml(initTarih)}" required>
+                    </div>
+                    <div class="ekstre-field">
+                        <label for="enf-m-oran">Aylık Enflasyon (%)</label>
+                        <input type="number" id="enf-m-oran" class="form-control" step="0.01" placeholder="Örn: 2,45" value="${initOran !== '' && !isNaN(initOran) ? initOran : ''}" required>
+                    </div>
+                </div>
+                <div class="ekstre-hint-bar">
+                    <span><i class="fas fa-info-circle" style="margin-right:5px; color:#0284c7;"></i>Aynı dönem zaten kayıtlıysa oranı otomatik güncellenir.</span>
+                </div>
+                <div class="ekstre-modal-footer" style="margin: 0.25rem -1.35rem -1.25rem -1.35rem;">
+                    <button type="button" class="ekstre-ghost-btn" onclick="document.getElementById('enf-modal-overlay')?.remove()">İptal</button>
+                    <button type="submit" class="btn" style="padding: 9px 22px;">
+                        <i class="fas fa-check" style="margin-right: 6px; color: #ffffff !important;"></i>${existing ? 'Güncelle' : 'Kaydet'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+    const inpTarih = document.getElementById('enf-m-tarih');
+    const inpOran = document.getElementById('enf-m-oran');
+
+    const onKeyDown = (ke) => {
+        if (ke.key === 'Escape') {
+            overlay.remove();
+            document.removeEventListener('keydown', onKeyDown);
+        }
+    };
+    document.addEventListener('keydown', onKeyDown);
+
+    document.getElementById('enf-modal-form').addEventListener('submit', (ev) => {
+        ev.preventDefault();
+        const tarih = (inpTarih.value || '').trim();
+        const oran = parseEnfRate(inpOran.value);
+
+        if (!/^\d{4}-\d{2}$/.test(tarih) || isNaN(oran)) {
+            window.showToast('Lütfen geçerli bir dönem ve enflasyon oranı giriniz.', 'warning');
+            return;
+        }
+
+        if (!Array.isArray(State.data.enflasyonListesi)) State.data.enflasyonListesi = [];
+
+        // If editing and period changed, remove old record id to avoid duplicates
+        if (existing && existing.tarih !== tarih) {
+            State.data.enflasyonListesi = State.data.enflasyonListesi.filter(x => String(x.id) !== String(existing.id));
+        }
+
+        const existingIdx = State.data.enflasyonListesi.findIndex(x => x.tarih === tarih);
+        if (existingIdx !== -1) {
+            State.data.enflasyonListesi[existingIdx].oran = oran;
+        } else {
+            State.data.enflasyonListesi.push({
+                id: existing ? existing.id : ('enf_' + Date.now() + '_' + Math.floor(Math.random() * 1000)),
+                tarih,
+                oran
+            });
+        }
+
+        State.save();
+        document.removeEventListener('keydown', onKeyDown);
+        overlay.remove();
+        window.showToast(`${formatEnfPeriodLabel(tarih)} enflasyon verisi kaydedildi.`, 'success');
+        if (typeof renderPage === 'function') renderPage();
+    });
+
+    setTimeout(() => inpOran.focus(), 30);
+};
+
+window.openEnflasyonBulkModal = () => {
+    const existingOverlay = document.getElementById('enf-bulk-modal-overlay');
+    if (existingOverlay) existingOverlay.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'enf-bulk-modal-overlay';
+    overlay.className = 'ekstre-modal-overlay';
+    overlay.addEventListener('click', (ev) => {
+        if (ev.target === overlay) overlay.remove();
+    });
+
+    overlay.innerHTML = `
+        <div class="ekstre-modal-card" role="dialog" aria-modal="true" style="width: min(520px, 100%);">
+            <div class="ekstre-modal-header">
+                <h3>
+                    <i class="fas fa-file-import" style="color: #0284c7;"></i>
+                    <span>Toplu Enflasyon Verisi Yapıştır</span>
+                </h3>
+                <button type="button" class="ekstre-modal-close" aria-label="Kapat" onclick="document.getElementById('enf-bulk-modal-overlay')?.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="enf-bulk-form" class="ekstre-modal-body">
+                <div class="ekstre-field">
+                    <label for="enf-bulk-text">Her satıra bir dönem ve aylık oran (%) yazın veya yapıştırın</label>
+                    <textarea id="enf-bulk-text" class="takip-note-textarea" style="min-height: 150px; font-family: monospace; font-size: 13px;" placeholder="Örnek formatlar:&#10;2026-07 2,45&#10;08.2026 1.92&#10;Eylül 2026 %2,10"></textarea>
+                </div>
+                <div id="enf-bulk-preview" class="takip-target-status-bar">
+                    <span><i class="fas fa-info-circle" style="margin-right:6px;"></i>YYYY-AA, AA.YYYY veya Türkçe ay adı formatları otomatik tanınır.</span>
+                </div>
+                <div class="ekstre-modal-footer" style="margin: 0.25rem -1.35rem -1.25rem -1.35rem;">
+                    <button type="button" class="ekstre-ghost-btn" onclick="document.getElementById('enf-bulk-modal-overlay')?.remove()">İptal</button>
+                    <button type="submit" class="btn" id="enf-bulk-submit" style="padding: 9px 22px;">
+                        <i class="fas fa-check" style="margin-right: 6px; color: #ffffff !important;"></i>İçe Aktar
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+    const textarea = document.getElementById('enf-bulk-text');
+    const preview = document.getElementById('enf-bulk-preview');
+
+    const refreshPreview = () => {
+        const { items, skipped } = parseBulkEnflasyonLines(textarea.value);
+        if (!textarea.value.trim()) {
+            preview.className = 'takip-target-status-bar';
+            preview.innerHTML = '<span><i class="fas fa-info-circle" style="margin-right:6px;"></i>YYYY-AA, AA.YYYY veya Türkçe ay adı formatları otomatik tanınır.</span>';
+            return;
+        }
+        if (items.length === 0) {
+            preview.className = 'takip-target-status-bar';
+            preview.innerHTML = `<span style="color:#dc2626;"><i class="fas fa-exclamation-triangle" style="margin-right:6px;"></i>Geçerli satır algılanamadı (${skipped.length} satır atlandı).</span>`;
+        } else {
+            preview.className = 'takip-target-status-bar in-zone';
+            preview.innerHTML = `<span><i class="fas fa-check-circle" style="margin-right:6px;"></i><strong>${items.length} dönem</strong> algılandı (${formatEnfPeriodLabel(items[0].tarih, true)} – ${formatEnfPeriodLabel(items[items.length - 1].tarih, true)}).</span>${skipped.length > 0 ? `<span style="color:#b45309;">${skipped.length} atlandı</span>` : ''}`;
+        }
+    };
+
+    textarea.addEventListener('input', refreshPreview);
+
+    const onKeyDown = (ke) => {
+        if (ke.key === 'Escape') {
+            overlay.remove();
+            document.removeEventListener('keydown', onKeyDown);
+        }
+    };
+    document.addEventListener('keydown', onKeyDown);
+
+    document.getElementById('enf-bulk-form').addEventListener('submit', (ev) => {
+        ev.preventDefault();
+        const { items } = parseBulkEnflasyonLines(textarea.value);
+        if (items.length === 0) {
+            window.showToast('İçe aktarılacak geçerli enflasyon satırı bulunamadı.', 'warning');
+            return;
+        }
+        if (!Array.isArray(State.data.enflasyonListesi)) State.data.enflasyonListesi = [];
+        let added = 0, updated = 0;
+        items.forEach((it, idx) => {
+            const existingIdx = State.data.enflasyonListesi.findIndex(x => x.tarih === it.tarih);
+            if (existingIdx !== -1) {
+                State.data.enflasyonListesi[existingIdx].oran = it.oran;
+                updated++;
+            } else {
+                State.data.enflasyonListesi.push({
+                    id: 'enf_' + (Date.now() + idx),
+                    tarih: it.tarih,
+                    oran: it.oran
+                });
+                added++;
+            }
+        });
+        State.save();
+        document.removeEventListener('keydown', onKeyDown);
+        overlay.remove();
+        window.showToast(`${added} yeni dönem eklendi${updated > 0 ? `, ${updated} dönem güncellendi` : ''}.`, 'success');
+        if (typeof renderPage === 'function') renderPage();
+    });
+
+    setTimeout(() => textarea.focus(), 30);
 };
 
 window.addEnflasyon = (e) => {
     if (e) e.preventDefault();
-    const tarih = document.getElementById('i-enf-tarih').value;
-    const oranStr = document.getElementById('i-enf-oran').value;
-
-    if (!tarih || !oranStr) {
+    const tarihEl = document.getElementById('i-enf-tarih');
+    const oranEl = document.getElementById('i-enf-oran');
+    if (!tarihEl || !oranEl) {
+        window.openEnflasyonModal(null);
+        return;
+    }
+    const tarih = tarihEl.value;
+    const oran = parseEnfRate(oranEl.value);
+    if (!tarih || isNaN(oran)) {
         window.showToast('Lütfen tarih ve oran giriniz.', 'warning');
         return;
     }
-
-    if (!State.data.enflasyonListesi) State.data.enflasyonListesi = [];
-
+    if (!Array.isArray(State.data.enflasyonListesi)) State.data.enflasyonListesi = [];
     const existingIdx = State.data.enflasyonListesi.findIndex(x => x.tarih === tarih);
     if (existingIdx !== -1) {
-        State.data.enflasyonListesi[existingIdx].oran = oranStr;
+        State.data.enflasyonListesi[existingIdx].oran = oran;
     } else {
-        State.data.enflasyonListesi.push({
-            id: 'enf_' + Date.now(),
-            tarih: tarih,
-            oran: oranStr
-        });
+        State.data.enflasyonListesi.push({ id: 'enf_' + Date.now(), tarih, oran });
     }
-
     State.save();
-    window.toggleEnfForm();
     if (typeof renderPage === 'function') renderPage();
 };
 
 window.deleteEnflasyon = async (id) => {
-    if (await window.showConfirm('Bu enflasyon verisini silmek istediğinize emin misiniz?')) {
-        State.data.enflasyonListesi = (State.data.enflasyonListesi || []).filter(x => x.id !== id);
+    if (await window.showConfirm('Bu enflasyon verisini silmek istediğinize emin misiniz?', 'Evet, Sil')) {
+        State.data.enflasyonListesi = (State.data.enflasyonListesi || []).filter(x => String(x.id) !== String(id));
         State.save();
         if (typeof renderPage === 'function') renderPage();
         window.showToast('Enflasyon verisi silindi.', 'info');
+    }
+};
+
+window.renderEnflasyonData = () => {
+    if (typeof renderPage === 'function') renderPage();
+};
+
+const renderVeriler = (container) => {
+    window.enfViewMode = window.enfViewMode || 'list';
+    window.enfChartMode = window.enfChartMode || 'cum';
+    window.enfYearFilter = window.enfYearFilter || 'all';
+    window.enfSort = window.enfSort || { col: 'tarih', asc: false };
+
+    const { asc, monthRateMap, missingMonths } = buildEnflasyonAnalytics();
+    const yearsDesc = [...new Set(asc.map(x => x.year))].sort((a, b) => b.localeCompare(a));
+    if (window.enfYearFilter !== 'all' && !yearsDesc.includes(window.enfYearFilter)) {
+        window.enfYearFilter = 'all';
+    }
+
+    const fmtPct2 = (val, showPlus = false) => {
+        if (val === null || val === undefined || isNaN(val) || !isFinite(val)) return '-';
+        const s = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(val));
+        if (val < 0) return '%-' + s;
+        return (showPlus && val > 0 ? '%+' : '%') + s;
+    };
+    const fmtTL = (val, dec = 0) => {
+        if (val === null || val === undefined || isNaN(val) || !isFinite(val)) return '-';
+        return '₺' + new Intl.NumberFormat('tr-TR', { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(val);
+    };
+
+    // --- 4 KPI Cards ---
+    const latest = asc.length > 0 ? asc[asc.length - 1] : null;
+    const latestYearItems = latest ? asc.filter(x => x.year === latest.year) : [];
+    const latestYearAvg = latestYearItems.length > 0
+        ? (latestYearItems.reduce((s, x) => s + x.oran, 0) / latestYearItems.length)
+        : null;
+
+    // Annual (12m) or annualized rate
+    let annualRate = null;
+    let annualIsExact12 = false;
+    let annualMonthsUsed = 0;
+    if (latest) {
+        if (latest.yoy !== null) {
+            annualRate = latest.yoy;
+            annualIsExact12 = true;
+            annualMonthsUsed = 12;
+        } else {
+            // Count consecutive trailing months up to 12
+            let factor = 1;
+            let cnt = 0;
+            for (let k = 0; k < 12; k++) {
+                const ym = addMonthsYm(latest.tarih, -k);
+                if (monthRateMap[ym] === undefined) break;
+                factor *= (1 + monthRateMap[ym] / 100);
+                cnt++;
+            }
+            if (cnt > 0) {
+                annualMonthsUsed = cnt;
+                annualRate = (Math.pow(factor, 12 / cnt) - 1) * 100;
+            }
+        }
+    }
+
+    // Portfolio real return vs inflation
+    let portfoyReelPct = null;
+    let portfoyNominalPct = null;
+    let portfoyEnfEsik = 0;
+    let hasPortfoyData = false;
+    try {
+        if (typeof calculatePortfoy === 'function') {
+            const { portfoyBilgileri } = calculatePortfoy(State.data.ekstre || [], (m) => State.getFiyat(m), State.data.nakitHareketleri || []);
+            if (portfoyBilgileri && portfoyBilgileri.enflasyonAnapara > 0) {
+                hasPortfoyData = true;
+                portfoyReelPct = (portfoyBilgileri.reelGetiriEnflasyon || 0) * 100;
+                portfoyNominalPct = (portfoyBilgileri.nominalGetiri || 0) * 100;
+                portfoyEnfEsik = portfoyBilgileri.enflasyonAnapara || 0;
+            }
+        }
+    } catch (e) { }
+
+    const momDiffTxt = latest && latest.momDiff !== null
+        ? `Önceki aya göre ${latest.momDiff >= 0 ? '+' : ''}${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(latest.momDiff)} puan`
+        : (latest ? 'İlk kayıt dönemi' : 'Veri eklenmemiş');
+    const momDiffColor = latest && latest.momDiff !== null ? (latest.momDiff <= 0 ? '#059669' : '#dc2626') : 'var(--text-secondary)';
+
+    const kpiHtml = `
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon-box ${latest && latest.oran > 3 ? 'red' : 'navy'}"><i class="fas fa-calendar-day"></i></div>
+                <div class="kpi-info">
+                    <div class="kpi-label">Son Açıklanan Ay${latest ? ` (${formatEnfPeriodLabel(latest.tarih, true)})` : ''}</div>
+                    <div class="kpi-value" style="color:${latest ? (latest.oran >= 0 ? 'var(--danger-color)' : 'var(--success-color)') : 'var(--text-primary)'};">${latest ? fmtPct2(latest.oran) : '-'}</div>
+                    <div class="kpi-sub" style="color:${momDiffColor};">${momDiffTxt}</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon-box slate"><i class="fas fa-calendar-check"></i></div>
+                <div class="kpi-info">
+                    <div class="kpi-label">Yıl İçi Kümülatif (${latest ? latest.year : 'YTD'})</div>
+                    <div class="kpi-value">${latest ? fmtPct2(latest.ytd) : '-'}</div>
+                    <div class="kpi-sub">${latestYearItems.length} ay kayıtlı${latestYearAvg !== null ? ` · Aylık ort. ${fmtPct2(latestYearAvg)}` : ''}</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon-box red"><i class="fas fa-fire-flame-curved"></i></div>
+                <div class="kpi-info">
+                    <div class="kpi-label">${annualIsExact12 ? 'Yıllık Enflasyon (Son 12 Ay)' : 'Yıllıklandırılmış Trend'}</div>
+                    <div class="kpi-value" style="color: var(--danger-color);">${annualRate !== null ? fmtPct2(annualRate) : '-'}</div>
+                    <div class="kpi-sub">${annualIsExact12 ? 'Ardışık son 12 ay bileşik' : (annualMonthsUsed > 0 ? `Son ${annualMonthsUsed} ay bazlı projeksiyon` : 'Yeterli veri yok')}${latest ? ` · Seri: ${fmtPct2(latest.cum)}` : ''}</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon-box ${hasPortfoyData ? (portfoyReelPct >= 0 ? 'green' : 'red') : 'navy'}"><i class="fas fa-shield-halved"></i></div>
+                <div class="kpi-info">
+                    <div class="kpi-label">${hasPortfoyData ? 'Portföy Reel Getiri (Enf.)' : 'Alım Gücü Endeksi (100 ₺)'}</div>
+                    <div class="kpi-value" style="color:${hasPortfoyData ? (portfoyReelPct >= 0 ? 'var(--success-color)' : 'var(--danger-color)') : 'var(--text-primary)'};">${hasPortfoyData ? fmtPct2(portfoyReelPct, true) : (latest ? fmtTL(latest.index100, 2) : '-')}</div>
+                    <div class="kpi-sub">${hasPortfoyData ? `Nominal: ${fmtPct2(portfoyNominalPct, true)} · Eşik: ${fmtTL(portfoyEnfEsik, 0)}` : (latest ? `${formatEnfPeriodLabel(asc[0].tarih, true)} bazlı · ${asc.length} dönem` : 'Henüz veri yok')}</div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // --- Missing Months Warning Banner ---
+    const visibleMissing = missingMonths.slice(0, 6);
+    const missingBannerHtml = missingMonths.length > 0 ? `
+        <div class="enf-alert-banner">
+            <div class="enf-alert-left">
+                <i class="fas fa-triangle-exclamation" style="color: #d97706;"></i>
+                <span><strong>${missingMonths.length} eksik dönem</strong> tespit edildi — portföy reel getiri doğruluğu için tamamlayın:</span>
+            </div>
+            <div class="enf-alert-chips">
+                ${visibleMissing.map(ym => `<button type="button" class="enf-missing-chip" onclick="window.openEnflasyonModal(null, '${ym}')" title="${formatEnfPeriodLabel(ym)} verisini ekle"><i class="fas fa-plus"></i> ${formatEnfPeriodLabel(ym, true)}</button>`).join('')}
+                ${missingMonths.length > 6 ? `<span style="font-size:12px; font-weight:600; color:#b45309;">+${missingMonths.length - 6} dönem daha</span>` : ''}
+            </div>
+        </div>
+    ` : '';
+
+    // --- Filtered List & Sorting ---
+    const filteredAsc = window.enfYearFilter === 'all' ? asc : asc.filter(x => x.year === window.enfYearFilter);
+    const listSorted = [...filteredAsc].sort((a, b) => {
+        const col = window.enfSort?.col || 'tarih';
+        const ascDir = !!window.enfSort?.asc;
+        if (col === 'tarih') return ascDir ? a.tarih.localeCompare(b.tarih) : b.tarih.localeCompare(a.tarih);
+        const vA = a[col];
+        const vB = b[col];
+        const aMiss = vA === null || vA === undefined || isNaN(vA);
+        const bMiss = vB === null || vB === undefined || isNaN(vB);
+        if (aMiss && bMiss) return b.tarih.localeCompare(a.tarih);
+        if (aMiss) return 1;
+        if (bMiss) return -1;
+        const diff = ascDir ? (vA - vB) : (vB - vA);
+        return diff !== 0 ? diff : b.tarih.localeCompare(a.tarih);
+    });
+
+    const sortCol = window.enfSort?.col || 'tarih';
+    const sortAsc = !!window.enfSort?.asc;
+    const thCls = (col) => `takip-th-sortable${sortCol === col ? ' takip-th-sorted' : ''}`;
+    const thTitle = (col, base) => `${base}${sortCol === col ? (sortAsc ? ' (Artan)' : ' (Azalan)') : ''}`;
+
+    const rateBadgeClass = (r) => {
+        if (r < 2) return 'enf-rate-low';
+        if (r < 4) return 'enf-rate-mid';
+        return 'enf-rate-high';
+    };
+
+    const matrixHeatClass = (r) => {
+        if (r < 2) return 'enf-heat-1';
+        if (r < 3.5) return 'enf-heat-2';
+        if (r < 5.5) return 'enf-heat-3';
+        return 'enf-heat-4';
+    };
+
+    let tableContentHtml = '';
+    if (window.enfViewMode === 'matrix') {
+        const matrixRowsHtml = yearsDesc.length === 0
+            ? `<tr><td colspan="14" style="padding:2.2rem;"><div class="ekstre-empty-state"><i class="fas fa-table-cells"></i><strong>Henüz enflasyon verisi yok</strong></div></td></tr>`
+            : yearsDesc.map(y => {
+                let yearFactor = 1;
+                let filledMonths = 0;
+                const cells = [];
+                for (let m = 1; m <= 12; m++) {
+                    const ym = `${y}-${String(m).padStart(2, '0')}`;
+                    const rate = monthRateMap[ym];
+                    if (rate !== undefined) {
+                        yearFactor *= (1 + rate / 100);
+                        filledMonths++;
+                        cells.push(`<td class="enf-matrix-cell ${matrixHeatClass(rate)}" onclick="window.openEnflasyonModal(null, '${ym}')" title="${formatEnfPeriodLabel(ym)}: ${fmtPct2(rate)} — Düzenlemek için tıklayın">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(rate)}</td>`);
+                    } else {
+                        cells.push(`<td class="enf-matrix-empty" onclick="window.openEnflasyonModal(null, '${ym}')" title="${formatEnfPeriodLabel(ym)} verisi ekle">+</td>`);
+                    }
+                }
+                const yearTotal = filledMonths > 0 ? (yearFactor - 1) * 100 : null;
+                return `
+                    <tr>
+                        <td style="font-weight: 800 !important; color: #113A5D !important;">${y}</td>
+                        ${cells.join('')}
+                        <td style="text-align: right !important; font-weight: 800 !important; color: ${yearTotal !== null && yearTotal >= 0 ? 'var(--danger-color)' : 'var(--success-color)'} !important;" title="${filledMonths}/12 ay verisi">${yearTotal !== null ? fmtPct2(yearTotal) : '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+
+        tableContentHtml = `
+            <div class="takip-table-scroll">
+                <table class="dash-table compact-table enf-table enf-matrix-table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="width: 66px;">Yıl</th>
+                            ${ENF_MONTHS_SHORT_TR.map(m => `<th>${m}</th>`).join('')}
+                            <th style="text-align: right !important; width: 92px;">Yıllık</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${matrixRowsHtml}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } else {
+        const listRowsHtml = listSorted.length === 0
+            ? `<tr><td colspan="7" style="padding:2.2rem;"><div class="ekstre-empty-state"><i class="fas fa-chart-line"></i><strong>Gösterilecek enflasyon verisi bulunamadı</strong><span>Sağ üstteki "Veri Ekle" veya "Toplu Yapıştır" butonlarını kullanabilirsiniz.</span></div></td></tr>`
+            : listSorted.map(item => {
+                const safeId = window.escapeHtml(item.id);
+                const momHtml = item.momDiff !== null
+                    ? `<span class="enf-delta-tag" style="color:${item.momDiff <= 0 ? '#059669' : '#dc2626'};" title="Bir önceki aya göre fark">${item.momDiff > 0 ? '+' : ''}${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.momDiff)}</span>`
+                    : '';
+                const reel100 = 100 / item.cumFactor;
+                return `
+                    <tr data-tarih="${item.tarih}">
+                        <td style="text-align: left !important;">
+                            <span class="enf-period-main">${formatEnfPeriodLabel(item.tarih)}</span>
+                            <span class="enf-period-code">${item.tarih}</span>
+                        </td>
+                        <td style="text-align: right !important;">
+                            <span class="enf-rate-pill ${rateBadgeClass(item.oran)}">${fmtPct2(item.oran)}</span>${momHtml}
+                        </td>
+                        <td style="text-align: right !important; font-weight: 600 !important; color: var(--text-primary) !important;">${fmtPct2(item.ytd)}</td>
+                        <td style="text-align: right !important; font-weight: 600 !important; color: ${item.yoy !== null ? 'var(--danger-color)' : 'var(--text-secondary)'} !important;" title="${item.yoy !== null ? 'Ardışık son 12 ay bileşik' : '12 ardışık ay tamamlandığında hesaplanır'}">${item.yoy !== null ? fmtPct2(item.yoy) : '-'}</td>
+                        <td style="text-align: right !important; font-weight: 700 !important; color: ${item.cum >= 0 ? 'var(--danger-color)' : 'var(--success-color)'} !important;">${fmtPct2(item.cum)}</td>
+                        <td style="text-align: right !important; font-weight: 600 !important;" title="Başlangıçtaki 100 ₺'nin reel değeri: ${fmtTL(reel100, 2)}">${fmtTL(item.index100, 2)}</td>
+                        <td style="text-align: center !important;">
+                            <div class="ekstre-row-actions">
+                                <button type="button" class="ekstre-action-btn edit" onclick="window.openEnflasyonModal('${safeId}')" title="Düzenle">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button type="button" class="ekstre-action-btn delete" onclick="window.deleteEnflasyon('${safeId}')" title="Sil">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+        // Summary footer for filtered rows
+        let footerHtml = '';
+        if (filteredAsc.length > 0) {
+            const avgMonthly = filteredAsc.reduce((s, x) => s + x.oran, 0) / filteredAsc.length;
+            const periodCompound = (filteredAsc.reduce((f, x) => f * (1 + x.oran / 100), 1) - 1) * 100;
+            const maxRow = filteredAsc.reduce((m, x) => x.oran > m.oran ? x : m, filteredAsc[0]);
+            const minRow = filteredAsc.reduce((m, x) => x.oran < m.oran ? x : m, filteredAsc[0]);
+            footerHtml = `
+                <tfoot>
+                    <tr class="total-row">
+                        <td style="text-align: left !important;">ÖZET (${filteredAsc.length} dönem)</td>
+                        <td style="text-align: right !important;" title="En Yüksek: ${formatEnfPeriodLabel(maxRow.tarih, true)} (${fmtPct2(maxRow.oran)}) · En Düşük: ${formatEnfPeriodLabel(minRow.tarih, true)} (${fmtPct2(minRow.oran)})">Ort: ${fmtPct2(avgMonthly)}</td>
+                        <td colspan="2" style="text-align: right !important;">Dönem Bileşik:</td>
+                        <td style="text-align: right !important;" class="text-danger">${fmtPct2(periodCompound)}</td>
+                        <td style="text-align: right !important;">${fmtTL(100 * (1 + periodCompound / 100), 2)}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            `;
+        }
+
+        tableContentHtml = `
+            <div class="takip-table-scroll">
+                <table class="dash-table compact-table enf-table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th class="${thCls('tarih')}" style="text-align: left !important;" onclick="window.toggleEnfSort('tarih')" title="${thTitle('tarih', 'Döneme Göre Sırala')}">Dönem</th>
+                            <th class="${thCls('oran')}" style="text-align: right !important;" onclick="window.toggleEnfSort('oran')" title="${thTitle('oran', 'Aylık Enflasyona Göre Sırala')}">Aylık (%)</th>
+                            <th class="${thCls('ytd')}" style="text-align: right !important;" onclick="window.toggleEnfSort('ytd')" title="${thTitle('ytd', 'Yıl İçi Kümülatife Göre Sırala')}">Yıl İçi (YTD)</th>
+                            <th class="${thCls('yoy')}" style="text-align: right !important;" onclick="window.toggleEnfSort('yoy')" title="${thTitle('yoy', 'Son 12 Ay Yıllık Enflasyona Göre Sırala')}">Son 12 Ay</th>
+                            <th class="${thCls('cum')}" style="text-align: right !important;" onclick="window.toggleEnfSort('cum')" title="${thTitle('cum', 'Genel Kümülatife Göre Sırala')}">Genel Kümülatif</th>
+                            <th class="${thCls('index100')}" style="text-align: right !important;" onclick="window.toggleEnfSort('index100')" title="${thTitle('index100', '100 TL Alım Gücü Karşılığı')}">100 ₺ Karşılığı</th>
+                            <th style="width: 84px;">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="enf-data-tbody">
+                        ${listRowsHtml}
+                    </tbody>
+                    ${footerHtml}
+                </table>
+            </div>
+        `;
+    }
+
+    const periodOptionsAsc = asc.map(x => `<option value="${x.tarih}">${formatEnfPeriodLabel(x.tarih)}</option>`).join('');
+    const calcDefaultStart = asc.length > 0 ? asc[0].tarih : '';
+    const calcDefaultEnd = asc.length > 0 ? asc[asc.length - 1].tarih : '';
+
+    container.innerHTML = `
+        <div class="page-section active" style="display: flex; flex-direction: column; gap: 0.95rem; padding: 0;">
+            ${kpiHtml}
+            ${missingBannerHtml}
+
+            <!-- Analytics Row: Trend Chart + Purchasing Power Calculator -->
+            <div class="enf-analytics-grid">
+                <div class="enf-panel-card">
+                    <div class="enf-panel-header">
+                        <span class="enf-panel-title">
+                            <i class="fas fa-chart-column" style="color: #0284c7;"></i>
+                            <span>Enflasyon Trendi${window.enfYearFilter !== 'all' ? ` (${window.enfYearFilter})` : ''}</span>
+                        </span>
+                        <div class="ekstre-segmented">
+                            <button type="button" class="ekstre-seg-btn ${window.enfChartMode !== 'yoy' ? 'active' : ''}" onclick="window.setEnfChartMode('cum')">Aylık & Kümülatif</button>
+                            <button type="button" class="ekstre-seg-btn ${window.enfChartMode === 'yoy' ? 'active' : ''}" onclick="window.setEnfChartMode('yoy')">Aylık & Yıllık (12 Ay)</button>
+                        </div>
+                    </div>
+                    <div class="enf-chart-canvas-wrap">
+                        ${filteredAsc.length > 0
+                            ? `<canvas id="enflasyon-trend-chart"></canvas>`
+                            : `<div class="ekstre-empty-state" style="padding: 2rem;"><i class="fas fa-chart-area"></i><span>Grafik için enflasyon verisi ekleyin</span></div>`
+                        }
+                    </div>
+                </div>
+
+                <div class="enf-panel-card">
+                    <div class="enf-panel-header">
+                        <span class="enf-panel-title">
+                            <i class="fas fa-calculator" style="color: #059669;"></i>
+                            <span>Alım Gücü Hesaplayıcı</span>
+                        </span>
+                    </div>
+                    <div class="ekstre-field">
+                        <label for="enf-calc-amount">Başlangıç Tutarı (₺)</label>
+                        <input type="number" id="enf-calc-amount" class="form-control" value="100000" min="0" step="1000">
+                    </div>
+                    <div class="enf-calc-grid">
+                        <div class="ekstre-field">
+                            <label for="enf-calc-start">Başlangıç Dönemi</label>
+                            <select id="enf-calc-start" class="ekstre-select" style="width: 100%; height: 40px;">
+                                ${periodOptionsAsc || '<option value="">Veri yok</option>'}
+                            </select>
+                        </div>
+                        <div class="ekstre-field">
+                            <label for="enf-calc-end">Hedef Dönem</label>
+                            <select id="enf-calc-end" class="ekstre-select" style="width: 100%; height: 40px;">
+                                ${periodOptionsAsc || '<option value="">Veri yok</option>'}
+                            </select>
+                        </div>
+                    </div>
+                    <div id="enf-calc-output" class="enf-calc-results"></div>
+                </div>
+            </div>
+
+            <!-- Main Data Card -->
+            <div class="glass ekstre-card-shell">
+                <div class="ekstre-toolbar-top">
+                    <div class="ekstre-tab-group">
+                        <button type="button" class="ekstre-tab-pill ${window.enfViewMode !== 'matrix' ? 'active' : ''}" onclick="window.setEnfViewMode('list')">
+                            <i class="fas fa-list-ul"></i>
+                            <span>Detaylı Liste</span>
+                            <span class="ekstre-tab-count">${asc.length}</span>
+                        </button>
+                        <button type="button" class="ekstre-tab-pill ${window.enfViewMode === 'matrix' ? 'active' : ''}" onclick="window.setEnfViewMode('matrix')">
+                            <i class="fas fa-table-cells"></i>
+                            <span>Yıllık Matris</span>
+                            <span class="ekstre-tab-count">${yearsDesc.length}</span>
+                        </button>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;">
+                        ${window.enfViewMode !== 'matrix' && yearsDesc.length > 0 ? `
+                        <select class="ekstre-select" aria-label="Yıl filtresi" onchange="window.setEnfYearFilter(this.value)">
+                            <option value="all" ${window.enfYearFilter === 'all' ? 'selected' : ''}>Tüm Yıllar (${asc.length})</option>
+                            ${yearsDesc.map(y => `<option value="${y}" ${window.enfYearFilter === y ? 'selected' : ''}>${y} Yılı</option>`).join('')}
+                        </select>
+                        ` : ''}
+                        <button type="button" class="ekstre-ghost-btn" onclick="window.openEnflasyonBulkModal()" title="Çoklu dönem enflasyon verisi yapıştır">
+                            <i class="fas fa-file-import"></i>
+                            <span>Toplu Yapıştır</span>
+                        </button>
+                        <button type="button" class="btn ekstre-primary-cta" onclick="window.openEnflasyonModal(null)">
+                            <i class="fas fa-plus" style="color: #ffffff !important;"></i>
+                            <span>Veri Ekle</span>
+                        </button>
+                    </div>
+                </div>
+
+                ${tableContentHtml}
+            </div>
+        </div>
+    `;
+
+    // --- Wire Live Purchasing Power Calculator ---
+    const calcAmt = document.getElementById('enf-calc-amount');
+    const calcStart = document.getElementById('enf-calc-start');
+    const calcEnd = document.getElementById('enf-calc-end');
+    const calcOut = document.getElementById('enf-calc-output');
+
+    if (calcStart && calcDefaultStart) calcStart.value = calcDefaultStart;
+    if (calcEnd && calcDefaultEnd) calcEnd.value = calcDefaultEnd;
+
+    const updateEnfCalc = () => {
+        if (!calcOut) return;
+        const amt = parseFloat(String(calcAmt?.value || '0').replace(',', '.')) || 0;
+        const sYm = calcStart?.value || '';
+        const eYm = calcEnd?.value || '';
+
+        if (!sYm || !eYm || asc.length === 0) {
+            calcOut.innerHTML = '<div class="enf-calc-row"><span>Hesaplama için en az bir dönem verisi gerekir.</span></div>';
+            return;
+        }
+        const fromYm = sYm <= eYm ? sYm : eYm;
+        const toYm = sYm <= eYm ? eYm : sYm;
+        const rangeItems = asc.filter(x => x.tarih >= fromYm && x.tarih <= toYm);
+        const factor = rangeItems.reduce((f, x) => f * (1 + x.oran / 100), 1);
+        const compPct = (factor - 1) * 100;
+        const requiredAmt = amt * factor;
+        const realValue = factor > 0 ? (amt / factor) : amt;
+        const erosionPct = factor > 0 ? ((1 / factor) - 1) * 100 : 0;
+
+        calcOut.innerHTML = `
+            <div class="enf-calc-row">
+                <span>Bileşik Enflasyon (${rangeItems.length} ay)</span>
+                <strong style="color: #dc2626;">${fmtPct2(compPct)}</strong>
+            </div>
+            <div class="enf-calc-divider"></div>
+            <div class="enf-calc-row">
+                <span>Alım Gücünü Koruyan Tutar</span>
+                <strong style="color: #113A5D;">${fmtTL(requiredAmt, 0)}</strong>
+            </div>
+            <div class="enf-calc-row">
+                <span>Sabit Paranın Reel Karşılığı</span>
+                <strong style="color: #059669;">${fmtTL(realValue, 0)} <span style="font-size:11.5px; color:#dc2626; font-weight:600;">(${fmtPct2(erosionPct)})</span></strong>
+            </div>
+        `;
+    };
+
+    calcAmt?.addEventListener('input', updateEnfCalc);
+    calcStart?.addEventListener('change', updateEnfCalc);
+    calcEnd?.addEventListener('change', updateEnfCalc);
+    updateEnfCalc();
+
+    // --- Render Chart.js Trend Graph ---
+    if (window._enflasyonChartInstance) {
+        try { window._enflasyonChartInstance.destroy(); } catch (e) { }
+        window._enflasyonChartInstance = null;
+    }
+
+    const chartCanvas = document.getElementById('enflasyon-trend-chart');
+    if (chartCanvas && filteredAsc.length > 0 && typeof Chart !== 'undefined') {
+        const labels = filteredAsc.map(x => formatEnfPeriodLabel(x.tarih, true));
+        const monthlyData = filteredAsc.map(x => Number(x.oran.toFixed(2)));
+
+        const useYoy = window.enfChartMode === 'yoy';
+        const hasAnyYoy = filteredAsc.some(x => x.yoy !== null);
+        const lineData = useYoy
+            ? filteredAsc.map(x => hasAnyYoy ? (x.yoy !== null ? Number(x.yoy.toFixed(2)) : null) : Number(x.ytd.toFixed(2)))
+            : filteredAsc.map(x => Number(x.cum.toFixed(2)));
+        const lineLabel = useYoy ? (hasAnyYoy ? 'Son 12 Ay (%)' : 'Yıl İçi YTD (%)') : 'Kümülatif (%)';
+
+        window._enflasyonChartInstance = new Chart(chartCanvas.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Aylık Enflasyon (%)',
+                        data: monthlyData,
+                        backgroundColor: 'rgba(2, 132, 199, 0.72)',
+                        hoverBackgroundColor: 'rgba(3, 105, 161, 0.92)',
+                        borderRadius: 6,
+                        maxBarThickness: 36,
+                        yAxisID: 'y'
+                    },
+                    {
+                        type: 'line',
+                        label: lineLabel,
+                        data: lineData,
+                        borderColor: '#dc2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.08)',
+                        borderWidth: 2.5,
+                        pointRadius: 3.5,
+                        pointBackgroundColor: '#dc2626',
+                        tension: 0.25,
+                        spanGaps: true,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    datalabels: { display: false },
+                    legend: {
+                        position: 'top',
+                        align: 'end',
+                        labels: { boxWidth: 12, usePointStyle: true, font: { size: 12, weight: '600' } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => {
+                                if (ctx.parsed.y === null || ctx.parsed.y === undefined) return `${ctx.dataset.label}: -`;
+                                return `${ctx.dataset.label}: %${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(ctx.parsed.y)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11.5 } }
+                    },
+                    y: {
+                        position: 'left',
+                        beginAtZero: true,
+                        title: { display: true, text: 'Aylık (%)', font: { size: 11 } },
+                        ticks: { callback: (v) => '%' + v, font: { size: 11 } },
+                        grid: { color: 'rgba(148, 163, 184, 0.16)' }
+                    },
+                    y1: {
+                        position: 'right',
+                        beginAtZero: true,
+                        title: { display: true, text: lineLabel, font: { size: 11 } },
+                        ticks: { callback: (v) => '%' + v, font: { size: 11 } },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
     }
 };
 
