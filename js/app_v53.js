@@ -1568,7 +1568,16 @@ const renderPortfoy = (container) => {
             const safeSym = window.escapeHtml(p.menkul);
             const turCls = p.tur === 'Fon' ? 'fon' : 'hisse';
             const priceDec = p.menkul === 'PRY' ? 6 : 2;
-            let fiyatHtml = '';
+            let gunlukSubHtml = '';
+            if (p.gunlukYuzde !== null) {
+                const gColor = p.gunlukYuzde > 0.001 ? '#059669' : (p.gunlukYuzde < -0.001 ? '#dc2626' : '#64748b');
+                const gSign = p.gunlukYuzde > 0 ? '+' : '';
+                const gPctTxt = `${gSign}${formatNumber(p.gunlukYuzde, 2)}%`;
+                const gKarTxt = p.gunlukKar !== null ? ` · ${fmtSignedM(p.gunlukKar, 0)}` : '';
+                gunlukSubHtml = `<span class="pf-sub-metric" style="color:${gColor}; font-weight:600;">${gPctTxt}${gKarTxt}</span>`;
+            }
+
+            let fiyatGunlukHtml = '';
             if (p.tur === 'Fon') {
                 const rawDisplay = isUsd
                     ? fmtM(p.guncelFiyat, p.menkul === 'PRY' ? 5 : 2)
@@ -1576,26 +1585,18 @@ const renderPortfoy = (container) => {
                 const stepAttr = p.menkul === 'PRY' ? '0.000001' : '0.0001';
                 const extraInputCls = p.menkul === 'PRY' ? ' inline-pry-input' : '';
                 const extraTextCls = p.menkul === 'PRY' ? ' pry-text' : '';
-                fiyatHtml = `<td>
+                fiyatGunlukHtml = `<td>
                     <div class="pf-inline-edit-wrap">
-                        <span class="pf-fund-price-text${extraTextCls}" style="cursor:pointer;" onclick="window.startInlinePfEdit(this)" title="Fon fiyatını (₺) düzenlemek için tıklayın">${rawDisplay}</span>
+                        <span class="pf-fund-price-text${extraTextCls}" style="cursor:pointer; font-weight:600;" onclick="window.startInlinePfEdit(this)" title="Fon fiyatını (₺) düzenlemek için tıklayın">${rawDisplay}</span>
                         <button type="button" class="pf-inline-edit-btn" onclick="window.startInlinePfEdit(this.previousElementSibling)" title="Fon fiyatını (₺) düzenle"><i class="fas fa-pen"></i></button>
-                        <input type="number" step="${stepAttr}" class="form-control glass-input${extraInputCls}" style="display:none; width: 92px; text-align: right; padding: 2px 5px; font-size: 12.5px; height: 26px;" value="${p.guncelFiyat}" onblur="window.saveFundPriceEdit('${safeSym}', this)" onkeydown="if(event.key==='Enter'){this.blur();} else if(event.key==='Escape'){window.cancelInlinePfEdit(this);}">
+                        <input type="number" step="${stepAttr}" class="form-control glass-input${extraInputCls}" style="display:none; width: 86px; text-align: right; padding: 2px 5px; font-size: 12px; height: 24px;" value="${p.guncelFiyat}" onblur="window.saveFundPriceEdit('${safeSym}', this)" onkeydown="if(event.key==='Enter'){this.blur();} else if(event.key==='Escape'){window.cancelInlinePfEdit(this);}">
                     </div>
+                    ${gunlukSubHtml}
                 </td>`;
             } else {
-                fiyatHtml = `<td>${fmtM(p.guncelFiyat, 2)}</td>`;
-            }
-
-            let gunlukHtml = `<td style="color:#94a3b8;">-</td>`;
-            if (p.gunlukYuzde !== null) {
-                const gCls = p.gunlukYuzde > 0.001 ? 'pos' : (p.gunlukYuzde < -0.001 ? 'neg' : 'flat');
-                const gSign = p.gunlukYuzde > 0 ? '+' : '';
-                const gPctTxt = `${gSign}${formatNumber(p.gunlukYuzde, 2)}%`;
-                const gKarTxt = p.gunlukKar !== null ? fmtSignedM(p.gunlukKar, 0) : '';
-                gunlukHtml = `<td>
-                    <span class="pf-pct-pill ${gCls}">${gPctTxt}</span>
-                    ${gKarTxt ? `<span class="pf-sub-metric">${gKarTxt}</span>` : ''}
+                fiyatGunlukHtml = `<td>
+                    <span style="font-weight:600;">${fmtM(p.guncelFiyat, 2)}</span>
+                    ${gunlukSubHtml}
                 </td>`;
             }
 
@@ -1605,7 +1606,7 @@ const renderPortfoy = (container) => {
                 hedefHtml = `<td>
                     <span class="pf-target-link" onclick="window.openHisseOnTab('${safeSym}', 'Değerleme')" title="${safeSym} Değerleme (${window.escapeHtml(p.hedefLabel || '')}) sekmesini aç">
                         <span class="pf-pct-pill ${pCls}">${fmtSignedPct(p.potansiyel, 0)}</span>
-                        <span class="pf-sub-metric">${fmtM(p.hedefFiyat, 2)} (${window.escapeHtml(p.hedefLabel || '')})</span>
+                        <span class="pf-sub-metric">${fmtM(p.hedefFiyat, 2)}</span>
                     </span>
                 </td>`;
             }
@@ -1618,17 +1619,20 @@ const renderPortfoy = (container) => {
             return `<tr>
                 <td class="pf-sticky-1">${i + 1}</td>
                 <td class="pf-sticky-2">
-                    <div class="pf-sym-cell">
-                        <span class="pf-sym-link" onclick="window.goToHisse('${safeSym}')">${safeSym}</span>
-                        <button type="button" class="pf-quick-trade-btn" onclick="window.openEkstreModal && window.openEkstreModal(null, '${safeSym}')" title="${safeSym} için alım/satım ekle"><i class="fas fa-plus"></i></button>
+                    <div class="pf-sym-stack">
+                        <div class="pf-sym-cell">
+                            <span class="pf-sym-link" onclick="window.goToHisse('${safeSym}')">${safeSym}</span>
+                            <button type="button" class="pf-quick-trade-btn" onclick="window.openEkstreModal && window.openEkstreModal(null, '${safeSym}')" title="${safeSym} için alım/satım ekle"><i class="fas fa-plus"></i></button>
+                        </div>
+                        <span class="pf-type-badge micro ${turCls}">${p.tur}</span>
                     </div>
                 </td>
-                <td style="text-align:center;"><span class="pf-type-badge ${turCls}">${p.tur}</span></td>
-                ${fiyatHtml}
-                ${gunlukHtml}
+                ${fiyatGunlukHtml}
                 <td>${p.adet.toLocaleString('tr-TR')}</td>
-                <td>${fmtM(p.guncelMaliyet, 2)}</td>
-                <td>${fmtM(p.netMaliyet, 2)}</td>
+                <td>
+                    <span>${fmtM(p.guncelMaliyet, 2)}</span>
+                    <span class="pf-sub-metric" title="Net Maliyet">Net: ${fmtM(p.netMaliyet, 2)}</span>
+                </td>
                 <td>${fmtM(p.odenenTutar, 0)}</td>
                 <td style="font-weight:700;">${fmtM(p.guncelTutar, 0)}</td>
                 <td class="${karCls}" style="font-weight:600;">${fmtSignedM(p.kar, 0)}</td>
@@ -1640,8 +1644,10 @@ const renderPortfoy = (container) => {
                         <div class="pf-weight-bar"><div class="pf-weight-fill${wHigh}" style="width:${wPct.toFixed(1)}%;"></div></div>
                     </div>
                 </td>
-                <td>${formatDate(p.ilkAlimTarihi)}</td>
-                <td>${p.gecenSure} g</td>
+                <td>
+                    <span>${formatDate(p.ilkAlimTarihi)}</span>
+                    <span class="pf-sub-metric">${p.gecenSure} gün</span>
+                </td>
             </tr>`;
         }).join('');
 
@@ -1652,10 +1658,12 @@ const renderPortfoy = (container) => {
             const nPct = Math.min(100, Math.max(0, nakitOran * 100));
             rowsHtml += `<tr class="pf-nakit-row">
                 <td class="pf-sticky-1">${showRows.length + 1}</td>
-                <td class="pf-sticky-2"><strong style="color:#047857;">Nakit</strong></td>
-                <td style="text-align:center;"><span class="pf-type-badge nakit">Nakit</span></td>
-                <td style="color:#94a3b8;">-</td>
-                <td style="color:#94a3b8;">-</td>
+                <td class="pf-sticky-2">
+                    <div class="pf-sym-stack">
+                        <strong style="color:#047857;">Nakit</strong>
+                        <span class="pf-type-badge micro nakit">Nakit</span>
+                    </div>
+                </td>
                 <td style="color:#94a3b8;">-</td>
                 <td style="color:#94a3b8;">-</td>
                 <td style="color:#94a3b8;">-</td>
@@ -1664,7 +1672,7 @@ const renderPortfoy = (container) => {
                     <div class="pf-inline-edit-wrap">
                         <span style="cursor:pointer;" onclick="window.startInlinePfEdit(this)" title="Nakit tutarını (₺) düzenlemek için tıklayın">${fmtM(guncelNakitDeger, 2)}</span>
                         <button type="button" class="pf-inline-edit-btn" onclick="window.startInlinePfEdit(this.previousElementSibling)" title="Nakit tutarını (₺) düzenle"><i class="fas fa-pen"></i></button>
-                        <input type="number" step="0.01" class="form-control glass-input" style="display:none; width: 112px; text-align: right; padding: 2px 5px; font-size: 12.5px; height: 26px;" value="${guncelNakitDeger}" onblur="window.saveNakitVarlikEdit(this)" onkeydown="if(event.key==='Enter'){this.blur();} else if(event.key==='Escape'){window.cancelInlinePfEdit(this);}">
+                        <input type="number" step="0.01" class="form-control glass-input" style="display:none; width: 102px; text-align: right; padding: 2px 5px; font-size: 12px; height: 24px;" value="${guncelNakitDeger}" onblur="window.saveNakitVarlikEdit(this)" onkeydown="if(event.key==='Enter'){this.blur();} else if(event.key==='Escape'){window.cancelInlinePfEdit(this);}">
                     </div>
                 </td>
                 <td style="color:#94a3b8;">-</td>
@@ -1677,12 +1685,11 @@ const renderPortfoy = (container) => {
                     </div>
                 </td>
                 <td style="color:#94a3b8;">-</td>
-                <td style="color:#94a3b8;">-</td>
             </tr>`;
         }
 
         if (showRows.length === 0 && !showNakit) {
-            rowsHtml = `<tr><td colspan="16" style="text-align:center; padding:2rem; color:#64748b;">Arama veya filtre kriterine uyan varlık bulunamadı.</td></tr>`;
+            rowsHtml = `<tr><td colspan="12" style="text-align:center; padding:2rem; color:#64748b;">Arama veya filtre kriterine uyan varlık bulunamadı.</td></tr>`;
         } else {
             const fltOpenBase = showNakit ? (fltOdenen - guncelNakitDeger) : fltOdenen;
             const fltKarPct = fltOpenBase > 0 ? (fltKar / fltOpenBase) : 0;
@@ -1690,13 +1697,10 @@ const renderPortfoy = (container) => {
             const fltDailyPct = (fltHasDaily && fltDailyBase > 0) ? (fltDailyKar / fltDailyBase) : null;
             const fltPot = fltValCurr > 0 ? ((fltValTgt - fltValCurr) / fltValCurr) : null;
             const isFiltered = typeFlt !== 'all' || q !== '';
-            rowsHtml += `<tr class="pf-total-row">
+            rowsHtml += `<tr class="total-row pf-total-row">
                 <td class="pf-sticky-1"></td>
-                <td class="pf-sticky-2">${isFiltered ? 'FİLTRELİ TOPLAM' : 'TOPLAM'}</td>
-                <td style="text-align:center;">${showRows.length + (showNakit ? 1 : 0)}</td>
-                <td></td>
-                <td class="${fltDailyKar >= 0 ? 'pf-pos-val' : 'pf-neg-val'}">${fltDailyPct !== null ? `${fmtSignedPct(fltDailyPct, 2)}<span class="pf-sub-metric" style="color:inherit; opacity:0.85;">${fmtSignedM(fltDailyKar, 0)}</span>` : '-'}</td>
-                <td></td>
+                <td class="pf-sticky-2">${isFiltered ? 'FİLTRELİ TOPLAM' : 'TOPLAM'} (${showRows.length + (showNakit ? 1 : 0)})</td>
+                <td class="${fltDailyKar >= 0 ? 'pf-pos-val' : 'pf-neg-val'}">${fltDailyPct !== null ? `${fmtSignedPct(fltDailyPct, 2)}<span class="pf-sub-metric" style="color:inherit; font-weight:700;">${fmtSignedM(fltDailyKar, 0)}</span>` : '-'}</td>
                 <td></td>
                 <td></td>
                 <td>${fmtM(fltOdenen, 0)}</td>
@@ -1705,7 +1709,6 @@ const renderPortfoy = (container) => {
                 <td class="${fltKar >= 0 ? 'pf-pos-val' : 'pf-neg-val'}">${fltOpenBase > 0 ? fmtSignedPct(fltKarPct, 1) : '-'}</td>
                 <td class="${(fltPot !== null && fltPot >= 0) ? 'pf-pos-val' : 'pf-neg-val'}">${fltPot !== null ? fmtSignedPct(fltPot, 0) : '-'}</td>
                 <td>${formatPercent(fltOran, 1)}</td>
-                <td></td>
                 <td></td>
             </tr>`;
         }
@@ -1762,28 +1765,32 @@ const renderPortfoy = (container) => {
                 <td class="pf-sticky-2"><span class="pf-sym-link" onclick="window.goToHisse('${safeSym}')">${safeSym}</span></td>
                 <td>${fmtM(a.guncelFiyat, 2)}</td>
                 <td>${a.adet.toLocaleString('tr-TR')}</td>
-                <td>${fmtM(a.alisFiyati, 2)}</td>
-                <td>${fmtM(a.satisFiyati, 2)}</td>
+                <td>
+                    <span style="font-weight:600;">${fmtM(a.satisFiyati, 2)}</span>
+                    <span class="pf-sub-metric">Alış: ${fmtM(a.alisFiyati, 2)}</span>
+                </td>
                 <td class="${karCls}" style="font-weight:600;">${fmtSignedM(a.kar, 0)}</td>
                 <td><span class="pf-pct-pill ${pillCls}">${fmtSignedPct(a.karYuzde, 1)}</span></td>
                 ${sonraHtml}
-                <td>${formatDate(a.ilkAlimTarihi)}</td>
-                <td>${formatDate(a.sonSatimTarihi)}</td>
+                <td>
+                    <span>${formatDate(a.sonSatimTarihi)}</span>
+                    <span class="pf-sub-metric">Alım: ${formatDate(a.ilkAlimTarihi)}</span>
+                </td>
                 <td>${a.tasimaSuresi}</td>
             </tr>`;
         }).join('');
 
         if (showArsiv.length === 0) {
-            htmlRows = `<tr><td colspan="12" style="text-align:center; padding:2rem; color:#64748b;">Gösterilecek arşivlenmiş işlem bulunamadı.</td></tr>`;
+            htmlRows = `<tr><td colspan="10" style="text-align:center; padding:2rem; color:#64748b;">Gösterilecek arşivlenmiş işlem bulunamadı.</td></tr>`;
         } else {
             const avgP = showArsiv.length > 0 ? (fltArsivPctSum / showArsiv.length) : 0;
-            htmlRows += `<tr class="pf-total-row">
+            htmlRows += `<tr class="total-row pf-total-row">
                 <td class="pf-sticky-1"></td>
                 <td class="pf-sticky-2">TOPLAM (${showArsiv.length})</td>
-                <td colspan="4"></td>
+                <td colspan="3"></td>
                 <td class="${fltArsivKar >= 0 ? 'pf-pos-val' : 'pf-neg-val'}">${fmtSignedM(fltArsivKar, 0)}</td>
                 <td class="${avgP >= 0 ? 'pf-pos-val' : 'pf-neg-val'}">Ort. ${fmtSignedPct(avgP, 1)}</td>
-                <td colspan="4"></td>
+                <td colspan="3"></td>
             </tr>`;
         }
         return { rowsHtml: htmlRows, shownCount: showArsiv.length };
@@ -2085,22 +2092,18 @@ const renderPortfoy = (container) => {
                         <table class="pf-table varliklar-table">
                             <thead>
                                 <tr>
-                                    <th class="pf-sticky-1 pf-th-center">S.N.</th>
+                                    <th class="pf-sticky-1 pf-th-center">#</th>
                                     <th ${thCls('menkul', 'pf-sticky-2 pf-th-left')} onclick="window.toggleVarliklarSort('menkul')">Menkul</th>
-                                    <th ${thCls('tur', 'pf-th-center')} onclick="window.toggleVarliklarSort('tur')">Tür</th>
-                                    <th>Güncel Fiyat</th>
-                                    <th ${thCls('gunlukYuzde')} onclick="window.toggleVarliklarSort('gunlukYuzde')">Günlük</th>
+                                    <th ${thCls('gunlukYuzde')} onclick="window.toggleVarliklarSort('gunlukYuzde')">Fiyat / Günlük</th>
                                     <th>Adet</th>
-                                    <th>Güncel Maliyet</th>
-                                    <th>Net Maliyet</th>
-                                    <th ${thCls('odenenTutar')} onclick="window.toggleVarliklarSort('odenenTutar')">Ödenen Tutar</th>
+                                    <th>Maliyet</th>
+                                    <th ${thCls('odenenTutar')} onclick="window.toggleVarliklarSort('odenenTutar')">Ödenen</th>
                                     <th ${thCls('guncelTutar')} onclick="window.toggleVarliklarSort('guncelTutar')">Güncel Tutar</th>
                                     <th ${thCls('kar')} onclick="window.toggleVarliklarSort('kar')">Kâr / Zarar</th>
                                     <th ${thCls('karYuzde')} onclick="window.toggleVarliklarSort('karYuzde')">Kâr %</th>
                                     <th ${thCls('potansiyel')} onclick="window.toggleVarliklarSort('potansiyel')">Hedef / Pot.</th>
-                                    <th ${thCls('portfoyOrani')} onclick="window.toggleVarliklarSort('portfoyOrani')">Portföy Oranı</th>
-                                    <th ${thCls('ilkAlimTarihi')} onclick="window.toggleVarliklarSort('ilkAlimTarihi')">İlk Alım</th>
-                                    <th ${thCls('gecenSure')} onclick="window.toggleVarliklarSort('gecenSure')">Süre</th>
+                                    <th ${thCls('portfoyOrani')} onclick="window.toggleVarliklarSort('portfoyOrani')">Oran</th>
+                                    <th ${thCls('gecenSure')} onclick="window.toggleVarliklarSort('gecenSure')">Alım / Süre</th>
                                 </tr>
                             </thead>
                             <tbody id="pf-varliklar-tbody">
@@ -2361,18 +2364,16 @@ const renderPortfoy = (container) => {
                     <table class="pf-table">
                         <thead>
                             <tr>
-                                <th class="pf-sticky-1 pf-th-center">S.N.</th>
+                                <th class="pf-sticky-1 pf-th-center">#</th>
                                 <th ${thCls('menkul', 'pf-sticky-2 pf-th-left')} onclick="window.toggleArsivSort('menkul')">Menkul</th>
-                                <th>Güncel Fiyat</th>
+                                <th>Güncel</th>
                                 <th>Adet</th>
-                                <th>Alış Fiyatı</th>
-                                <th>Satış Fiyatı</th>
+                                <th>Satış / Alış</th>
                                 <th ${thCls('kar')} onclick="window.toggleArsivSort('kar')">Kâr / Zarar</th>
                                 <th ${thCls('karYuzde')} onclick="window.toggleArsivSort('karYuzde')">Kâr %</th>
-                                <th ${thCls('sonraYuzde')} onclick="window.toggleArsivSort('sonraYuzde')">Satış Sonrası %</th>
-                                <th ${thCls('ilkAlimTarihi')} onclick="window.toggleArsivSort('ilkAlimTarihi')">İlk Alım</th>
-                                <th ${thCls('sonSatimTarihi')} onclick="window.toggleArsivSort('sonSatimTarihi')">Son Satım</th>
-                                <th ${thCls('tasimaSuresi')} onclick="window.toggleArsivSort('tasimaSuresi')">Taşıma Süresi</th>
+                                <th ${thCls('sonraYuzde')} onclick="window.toggleArsivSort('sonraYuzde')">Satış Sonrası</th>
+                                <th ${thCls('sonSatimTarihi')} onclick="window.toggleArsivSort('sonSatimTarihi')">Satım / Alım</th>
+                                <th ${thCls('tasimaSuresi')} onclick="window.toggleArsivSort('tasimaSuresi')">Süre</th>
                             </tr>
                         </thead>
                         <tbody id="pf-arsiv-tbody">
