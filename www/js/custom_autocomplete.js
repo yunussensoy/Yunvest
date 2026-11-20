@@ -7,31 +7,38 @@ document.addEventListener('DOMContentLoaded', () => {
             display: none;
             position: absolute;
             z-index: 10000;
-            background: var(--surface-color, #1e1e2d);
-            border: 1px solid var(--surface-border, rgba(255,255,255,0.1));
+            background: var(--surface-color, #ffffff);
+            border: 1px solid var(--surface-border, #e2e8f0);
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
             max-height: 200px;
             overflow-y: auto;
             flex-direction: column;
-            padding: 0.5rem 0;
+            padding: 0.35rem 0;
             margin-top: 5px;
         }
         .custom-autocomplete-item {
             padding: 0.5rem 1rem;
-            color: #cccccc;
+            color: var(--text-secondary, #475569);
             font-size: 13px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.15s, color 0.15s;
+        }
+        .custom-autocomplete-item strong {
+            color: var(--text-primary, #0f172a);
         }
         .custom-autocomplete-item:hover, .custom-autocomplete-item.active {
-            background: var(--accent-color, #3498db);
+            background: var(--overlay-bg, #eff6ff);
+            color: var(--accent-color, #2563eb);
+        }
+        .custom-autocomplete-item:hover strong, .custom-autocomplete-item.active strong {
+            color: var(--accent-color, #2563eb);
         }
         .custom-autocomplete-dropdown::-webkit-scrollbar {
             width: 6px;
         }
         .custom-autocomplete-dropdown::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
+            background: #cbd5e1;
             border-radius: 3px;
         }
     `;
@@ -64,12 +71,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const div = document.createElement('div');
             div.className = 'custom-autocomplete-item';
             if (val && item.toUpperCase().startsWith(val.toUpperCase())) {
-                div.innerHTML = `<strong style="color: #ffffff;">${item.substr(0, val.length)}</strong>${item.substr(val.length)}`;
+                div.innerHTML = `<strong>${item.substr(0, val.length)}</strong>${item.substr(val.length)}`;
             } else {
                 div.textContent = item;
             }
             if (index === activeIndex) div.classList.add('active');
-            
+
             div.addEventListener('mousedown', (e) => {
                 e.preventDefault(); // Prevent input blur
                 if (currentInput) {
@@ -106,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             currentInput = target;
             activeIndex = -1;
-            
+
             // Read options from the datalist OR window.hisseListesi
             let allItems = [];
             if (window.hisseListesi) {
@@ -180,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.addEventListener('focusin', onInputFocus);
-    
+
     // Global click outside to close
     document.addEventListener('click', (e) => {
         if (currentInput && e.target !== currentInput && !dropdown.contains(e.target)) {

@@ -1,10 +1,10 @@
-const CACHE_NAME = 'yunvest-pwa-cache-v62';
+const CACHE_NAME = 'yunvest-pwa-cache-v65';
 const urlsToCache = [
   '/',
   '/index.html',
   '/css/styles.css',
-  '/js/app_v51.js',
-  '/js/renderHisse.js'
+  '/js/custom_autocomplete.js',
+  '/js/app_v53.js'
 ];
 
 self.addEventListener('install', event => {
@@ -12,7 +12,6 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        // Cache core assets on install, but don't fail if some are missing
         return cache.addAll(urlsToCache).catch(err => console.log('Caching partial failed', err));
       })
   );
@@ -34,12 +33,9 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // PWA requires a fetch handler to show the install prompt.
-  // Using Network First strategy as fallback.
   event.respondWith(
     fetch(event.request).catch(() => {
       return caches.match(event.request);
     })
   );
 });
-

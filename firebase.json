@@ -1,0 +1,45 @@
+{
+  "hosting": {
+    "target": "yunvest",
+    "public": "www",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+          { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        ]
+      },
+      {
+        "source": "/index.html",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+        ]
+      },
+      {
+        "source": "/sw.js",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+        ]
+      },
+      {
+        "source": "/js/stock_data_compiled.js",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=3600, stale-while-revalidate=86400" }
+        ]
+      },
+      {
+        "source": "/img/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=86400" }
+        ]
+      }
+    ]
+  }
+}

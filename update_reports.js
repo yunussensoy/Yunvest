@@ -59,8 +59,8 @@ process.cwd = originalCwd;
 
 mockWindow.stockReports = reports;
 
-// Serialize back
-const newContent = `window.stockData = ${JSON.stringify(mockWindow.stockData, null, 2)};\nwindow.stockReports = ${JSON.stringify(mockWindow.stockReports, null, 2)};\n`;
+// Serialize compactly to reduce bundle size by ~50%
+const newContent = `window.stockData=${JSON.stringify(mockWindow.stockData)};window.stockReports=${JSON.stringify(mockWindow.stockReports)};\n`;
 
 fs.writeFileSync(stockDataPath, newContent, 'utf8');
 console.log("Updated stock_data_compiled.js with dynamic reports and Excel data.");

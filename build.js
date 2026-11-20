@@ -18,7 +18,6 @@ const itemsToCopy = [
     'manifest.json',
     'sw.js',
     'css',
-    'js',
     'img',
     'Hisseler'
 ];
@@ -31,6 +30,18 @@ itemsToCopy.forEach(item => {
         console.log(`Copied ${item}`);
     } else {
         console.warn(`Warning: ${item} not found.`);
+    }
+});
+
+// Copy only active web JS files into www/js (exclude legacy app_v52.js, unused prices_compiled.js, etc.)
+const wwwJsDir = path.join(wwwDir, 'js');
+fs.mkdirSync(wwwJsDir, { recursive: true });
+['stock_data_compiled.js', 'custom_autocomplete.js', 'app_v53.js'].forEach(jsFile => {
+    const src = path.join(__dirname, 'js', jsFile);
+    const dest = path.join(wwwJsDir, jsFile);
+    if (fs.existsSync(src)) {
+        fs.copyFileSync(src, dest);
+        console.log(`Copied js/${jsFile}`);
     }
 });
 

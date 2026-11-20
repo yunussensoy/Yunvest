@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "exchangepro-48000"
+  },
+  "targets": {
+    "exchangepro-48000": {
+      "hosting": {
+        "yunvest": [
+          "yunvest"
+        ]
+      }
+    }
+  }
+}

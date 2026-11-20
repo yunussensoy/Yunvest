@@ -1,4 +1,119 @@
 
+// --- GLOBAL SECURITY, UI & LIVE PRICE HELPERS ---
+window.livePrices = window.livePrices || {};
+window.pricesLoadedOnce = false;
+
+window.escapeHtml = (val) => {
+    if (val === null || val === undefined) return '';
+    return String(val)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
+window.sanitizeUrl = (url) => {
+    if (!url) return '';
+    const trimmed = String(url).trim();
+    try {
+        const parsed = new URL(trimmed, window.location.origin);
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+            return parsed.href;
+        }
+    } catch (e) {}
+    return '';
+};
+
+window.showToast = (message, type = 'info', duration = 3500) => {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+    }
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+    const toast = document.createElement('div');
+    toast.className = 'yunvest-toast ' + (icons[type] ? type : 'info');
+    toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${window.escapeHtml(message)}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.classList.add('hiding');
+        setTimeout(() => toast.remove(), 220);
+    }, duration);
+};
+
+window.showConfirm = (message, okLabel = 'Evet, Sil') => {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('theme-confirm-modal');
+        const msgEl = document.getElementById('theme-confirm-message');
+        const okBtn = document.getElementById('theme-confirm-ok-btn');
+        if (!modal || !msgEl) {
+            resolve(window.confirm(message));
+            return;
+        }
+        msgEl.textContent = message;
+        if (okBtn) okBtn.textContent = okLabel;
+        window._resolveConfirm = (result) => {
+            modal.style.display = 'none';
+            window._resolveConfirm = null;
+            document.removeEventListener('keydown', escHandler);
+            resolve(!!result);
+        };
+        const escHandler = (e) => {
+            if (e.key === 'Escape' && window._resolveConfirm) {
+                window._resolveConfirm(false);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+        modal.style.display = 'flex';
+    });
+};
+
+window.manualRefreshPrices = async () => {
+    const btn = document.getElementById('live-price-refresh-btn');
+    const txt = document.getElementById('live-price-status-text');
+    if (btn) btn.classList.add('loading');
+    if (txt) txt.textContent = 'Güncelleniyor...';
+    try {
+        await Promise.all([
+            window.fetchGuncelFiyatlar ? window.fetchGuncelFiyatlar() : Promise.resolve(),
+            window.fetchTickerData ? window.fetchTickerData() : Promise.resolve()
+        ]);
+        window.showToast('Piyasa fiyatları güncellendi.', 'success', 2200);
+    } catch (e) {
+        window.showToast('Fiyatlar güncellenirken hata oluştu.', 'error');
+    } finally {
+        if (btn) btn.classList.remove('loading');
+    }
+};
+
+window.filterTakipTable = (query) => {
+    const q = (query || '').trim().toUpperCase();
+    window.takipSearchQuery = query || '';
+    const rows = document.querySelectorAll('.takip-table tbody tr[data-hisse]');
+    rows.forEach((tr) => {
+        const sym = (tr.getAttribute('data-hisse') || '').toUpperCase();
+        tr.style.display = (!q || sym.includes(q)) ? '' : 'none';
+    });
+};
+
+window.filterEkstreTable = (query) => {
+    const q = (query || '').trim().toUpperCase();
+    window.ekstreSearchQuery = query || '';
+    const rows = document.querySelectorAll('#hisse-tbody tr');
+    rows.forEach((tr) => {
+        const text = (tr.textContent || '').toUpperCase();
+        tr.style.display = (!q || text.includes(q)) ? '' : 'none';
+    });
+};
+
+
 window.toggleExpandCard = function (btnElement) {
     const card = btnElement.closest('.dash-card');
     const titleText = card.querySelector('.dash-title span').innerText;
@@ -8,12 +123,12 @@ window.toggleExpandCard = function (btnElement) {
     if (!modal) {
         modal = document.createElement('div');
         modal.id = 'chart-expand-modal';
-        modal.style.cssText = 'display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 20000;';
+        modal.style.cssText = 'display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(4px); z-index: 20000;';
         modal.innerHTML = `
-            <div class="glass" style="width: 85%; height: 60vh; min-height: 400px; max-height: 600px; padding: 2rem; position: relative; border-radius: 12px; display: flex; flex-direction: column; background: var(--overlay-bg); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
+            <div class="glass" style="width: 85%; height: 60vh; min-height: 400px; max-height: 600px; padding: 2rem; position: relative; border-radius: 12px; display: flex; flex-direction: column; background: var(--surface-color); border: 1px solid var(--surface-border); box-shadow: var(--shadow-lg);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <h3 id="expanded-chart-title" style="color: var(--text-primary); margin: 0; font-size: 1.2rem; font-weight: 600;">Grafik</h3>
-                    <i class="fas fa-times" style="font-size: 1.5rem; cursor: pointer; color: #ccc; transition: color 0.3s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='#ccc'" onclick="window.closeExpandedChart()"></i>
+                    <i class="fas fa-times" style="font-size: 1.5rem; cursor: pointer; color: var(--text-secondary); transition: color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-secondary)'" onclick="window.closeExpandedChart()"></i>
                 </div>
                 <div id="expanded-chart-body" style="flex: 1; position: relative; min-height: 0; width: 100%;">
                 </div>
@@ -101,15 +216,15 @@ const toTitleCase = (str) => {
 
 
 const genFintablesBilanco = (title, headers, rows) => {
-    const docIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; vertical-align:middle; color:#888;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
-    const leftArrow = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; color:#555;"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
+    const docIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; vertical-align:middle; color:var(--text-secondary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
+    const leftArrow = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; color:var(--text-secondary);"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
     const rightArrow = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; color:var(--text-primary);"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
 
-    let html = `<div style="background:#111216; border-radius:12px; border:1px solid rgba(255,255,255,0.05); overflow:hidden; font-family:var(--font-family);">
+    let html = `<div style="background:var(--surface-color); border-radius:12px; border:1px solid var(--surface-border); overflow:hidden; font-family:var(--font-family);">
         <div style="overflow-x:auto;">
             <table style="width:100%; border-collapse:collapse; color:var(--text-primary); font-size:13px; text-align:right;">
                 <thead>
-                    <tr style="background:#111216; border-bottom:1px solid var(--table-border);">
+                    <tr style="background:var(--table-header-bg); border-bottom:1px solid var(--surface-border);">
                         <th style="text-align:left; padding:16px; font-size:15px; font-weight:700;  white-space:nowrap;">Bilanço Kalemleri</th>`;
 
     headers.forEach((h, i) => {
@@ -127,15 +242,15 @@ const genFintablesBilanco = (title, headers, rows) => {
         const rowName = r[0] ? r[0].trim() : '';
         const isMainCat = mainCategories.includes(rowName.toLocaleLowerCase('tr-TR'));
 
-        let trStyle = isMainCat ? `background:rgba(255,255,255,0.03); font-weight:600;` : `transition: background 0.2s;`;
-        html += `<tr style="${trStyle} border-bottom:1px solid rgba(255,255,255,0.03);" onmouseover="this.style.background='rgba(255,255,255,0.08)'" onmouseout="this.style.background='${isMainCat ? 'rgba(255,255,255,0.03)' : 'transparent'}'">`;
+        let trStyle = isMainCat ? `background:#f1f5f9; font-weight:600;` : `transition: background 0.2s;`;
+        html += `<tr style="${trStyle} border-bottom:1px solid var(--table-border);" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='${isMainCat ? '#f1f5f9' : 'transparent'}'">`;
 
         r.forEach((cell, i) => {
             if (i === 0) {
-                let cellColor = isMainCat ? '#fff' : '#aaa';
+                let cellColor = isMainCat ? 'var(--text-primary)' : 'var(--text-secondary)';
                 html += `<td style="text-align:left; padding:12px 16px; color:${cellColor}; white-space:nowrap; border-right:none;">${cell}</td>`;
             } else {
-                html += `<td style="padding:12px 16px; color:#e0e0e0; white-space:nowrap; border-right:none;">${cell}</td>`;
+                html += `<td style="padding:12px 16px; color:var(--text-primary); white-space:nowrap; border-right:none;">${cell}</td>`;
             }
         });
         html += `</tr>`;
@@ -525,7 +640,15 @@ const State = {
                 });
             }
             if (this.data.hisseFiyatlari) {
-                this.data.hisseFiyatlari.forEach(h => { if (h.menkul) h.menkul = h.menkul.trim().toUpperCase(); });
+                this.data.hisseFiyatlari.forEach(h => {
+                    if (h.menkul) {
+                        h.menkul = h.menkul.trim().toUpperCase();
+                        if (h.fiyat > 0 && !window.livePrices[h.menkul]) {
+                            window.livePrices[h.menkul] = h.fiyat;
+                        }
+                    }
+                });
+                this.pruneHisseFiyatlari();
             } else {
                 this.data.hisseFiyatlari = [];
             }
@@ -697,19 +820,24 @@ const State = {
             this.data.lastUpdated = Date.now() + (1000 * 60 * 60 * 24 * 365 * 10);
             this.lastSaveTime = Date.now();
 
-            // ROLLING BACKUP SYSTEM
+            this.pruneHisseFiyatlari();
+
+            // SINGLE ROLLING BACKUP (avoids 5x localStorage bloat)
             try {
-                for (let i = 4; i >= 1; i--) {
-                    const prev = localStorage.getItem(`borsa_app_data_backup_${i}`);
-                    if (prev) localStorage.setItem(`borsa_app_data_backup_${i + 1}`, prev);
-                }
                 const currentLocal = localStorage.getItem('borsa_app_data');
                 if (currentLocal) localStorage.setItem('borsa_app_data_backup_1', currentLocal);
+                for (let i = 2; i <= 5; i++) localStorage.removeItem('borsa_app_data_backup_' + i);
             } catch (e) {
-                console.error('Backup error', e);
+                console.warn('Backup skipped:', e);
             }
 
-            try { localStorage.setItem('borsa_app_data', JSON.stringify(this.data)); } catch (e) { console.warn('Quota exceeded, clearing backups'); for (let i = 1; i <= 4; i++) localStorage.removeItem('borsa_app_data_backup_' + i); localStorage.setItem('borsa_app_data', JSON.stringify(this.data)); }
+            try {
+                localStorage.setItem('borsa_app_data', JSON.stringify(this.data));
+            } catch (e) {
+                console.warn('Quota exceeded, clearing backup');
+                localStorage.removeItem('borsa_app_data_backup_1');
+                try { localStorage.setItem('borsa_app_data', JSON.stringify(this.data)); } catch (e2) {}
+            }
 
             // FILE SYSTEM BACKUP (ABSOLUTELY BULLETPROOF)
             try {
@@ -725,7 +853,10 @@ const State = {
         }
         if (skipFirebase) return;
         if (!currentUser || !this.data) return;
-        db.collection('app_data').doc(currentUser.uid).set(this.data);
+        db.collection('app_data').doc(currentUser.uid).set(this.data).catch(err => {
+            console.error('Firestore kayıt hatası:', err);
+            window.showToast('Buluta kaydedilirken hata oluştu: ' + (err.message || 'Bağlantı hatası'), 'error');
+        });
     },
 
 
@@ -857,28 +988,58 @@ const State = {
         }
     },
 
+    getRelevantSymbols() {
+        const set = new Set(['DOLAR', 'GRAM ALTIN', 'BIST', 'USDTRY', 'EURTRY']);
+        if (!this.data) return set;
+        (this.data.takipListesi || []).forEach(s => { if (s) set.add(String(s).trim().toUpperCase()); });
+        (this.data.ekstre || []).forEach(e => { if (e && e.menkul) set.add(String(e.menkul).trim().toUpperCase()); });
+        if (this.data.manuelFonFiyatlari) {
+            Object.keys(this.data.manuelFonFiyatlari).forEach(k => set.add(k.trim().toUpperCase()));
+        }
+        if (window.currentSelectedHisse) set.add(String(window.currentSelectedHisse).trim().toUpperCase());
+        return set;
+    },
+
+    pruneHisseFiyatlari() {
+        if (!this.data || !Array.isArray(this.data.hisseFiyatlari)) return;
+        const relevant = this.getRelevantSymbols();
+        const seen = new Set();
+        this.data.hisseFiyatlari = this.data.hisseFiyatlari.filter(h => {
+            if (!h || !h.menkul) return false;
+            const sym = h.menkul.trim().toUpperCase();
+            if (!relevant.has(sym) || seen.has(sym)) return false;
+            seen.add(sym);
+            return true;
+        });
+    },
+
     getFiyat(menkul) {
         if (!menkul) return 0;
         let m = menkul.trim().toUpperCase();
         if (m === 'NAKIT') return 1;
+        if (window.livePrices && window.livePrices[m] > 0) return window.livePrices[m];
         if (!this.data || !this.data.hisseFiyatlari) return 0;
         const h = this.data.hisseFiyatlari.find(x => x.menkul.trim().toUpperCase() === m);
         return h ? h.fiyat : 0;
     },
 
-    updateFiyat(menkul, fiyat, skipSave = false) {
+    updateFiyat(menkul, fiyat, skipSave = false, isLiveMarket = false) {
         if (!menkul) return;
         let m = menkul.trim().toUpperCase();
+        const numVal = parseFloat(fiyat);
+        if (isNaN(numVal)) return;
+        window.livePrices[m] = numVal;
         if (!this.data) return;
+        if (isLiveMarket && !this.getRelevantSymbols().has(m)) return;
         if (!this.data.hisseFiyatlari) this.data.hisseFiyatlari = [];
         let hf = this.data.hisseFiyatlari.find(h => h.menkul.trim().toUpperCase() === m);
         if (hf) {
-            hf.fiyat = parseFloat(fiyat);
+            hf.fiyat = numVal;
             hf.tarih = new Date().toISOString();
         } else {
-            this.data.hisseFiyatlari.push({ menkul: m, fiyat: parseFloat(fiyat), tarih: new Date().toISOString() });
+            this.data.hisseFiyatlari.push({ menkul: m, fiyat: numVal, tarih: new Date().toISOString() });
         }
-        if (!skipSave) this.save(true, false);
+        if (!skipSave) this.save(false, true);
     }
 };
 
@@ -925,6 +1086,10 @@ window.isFetchingGuncelFiyatlar = false;
 window.fetchGuncelFiyatlar = async () => {
     if (window.isFetchingGuncelFiyatlar) return;
     window.isFetchingGuncelFiyatlar = true;
+    const refreshBtn = document.getElementById('live-price-refresh-btn');
+    const statusText = document.getElementById('live-price-status-text');
+    if (refreshBtn) refreshBtn.classList.add('loading');
+    if (statusText) statusText.textContent = 'Güncelleniyor...';
     try {
     // 1. Dolar ve Altın (TradingView)
     try {
@@ -938,11 +1103,11 @@ window.fetchGuncelFiyatlar = async () => {
             const usdObj = trJson.data.find(x => x.s === 'FX:USDTRY');
             const onsObj = trJson.data.find(x => x.s === 'OANDA:XAUUSD');
             if (usdObj) {
-                State.updateFiyat('DOLAR', usdObj.d[0], true);
+                State.updateFiyat('DOLAR', usdObj.d[0], true, true);
             }
             if (usdObj && onsObj) {
                 const graPrice = (onsObj.d[0] * usdObj.d[0]) / 31.1035;
-                State.updateFiyat('GRAM ALTIN', graPrice, true);
+                State.updateFiyat('GRAM ALTIN', graPrice, true, true);
             }
         }
     } catch (e) {
@@ -973,7 +1138,7 @@ window.fetchGuncelFiyatlar = async () => {
                 window.tickerData = window.tickerData || {};
                 window.tickerData[menkul] = { c: fiyat, chp: degisim };
                 if (menkul === "ALTIN") menkul = "ALTINS1"; // Darphane Altın Sertifikası Eşleştirmesi
-                State.updateFiyat(menkul, fiyat, true);
+                State.updateFiyat(menkul, fiyat, true, true);
                 if (!State.bistStocks.includes(menkul)) State.bistStocks.push(menkul);
             });
             tvBasarili = true;
@@ -1010,7 +1175,7 @@ window.fetchGuncelFiyatlar = async () => {
                             const meta = yfData.chart.result[0].meta;
                             const fiyat = meta.regularMarketPrice;
                             if (fiyat) {
-                                State.updateFiyat(menkul, fiyat, true);
+                                State.updateFiyat(menkul, fiyat, true, true);
                                 window.tickerData = window.tickerData || {};
                                 let degisim = 0;
                                 if (meta.previousClose && meta.previousClose > 0) {
@@ -1045,10 +1210,10 @@ window.fetchGuncelFiyatlar = async () => {
                         const tefasRes = await window.fetchWithTimeout(tefasUrl);
                         if (tefasRes.ok) {
                             const html = await tefasRes.text();
-                            let match = html.match(/"sonFiyat\\":([\\d\\.]+)/);
-                            if (!match) match = html.match(/"sonFiyat":([\\d\\.]+)/);
+                            let match = html.match(/"sonFiyat\\":([\d.]+)/);
+                            if (!match) match = html.match(/"sonFiyat":([\d.]+)/);
                             if (match) {
-                                State.updateFiyat(menkul, parseFloat(match[1]), true);
+                                State.updateFiyat(menkul, parseFloat(match[1]), true, true);
                             }
                         }
                     } catch (err) { }
@@ -1073,7 +1238,7 @@ window.fetchGuncelFiyatlar = async () => {
                     const gasData = await gasRes.json();
                     for (const sym in gasData) {
                         if (gasData[sym] > 0) {
-                            State.updateFiyat(sym, gasData[sym], true);
+                            State.updateFiyat(sym, gasData[sym], true, true);
                         }
                     }
                 }
@@ -1084,12 +1249,21 @@ window.fetchGuncelFiyatlar = async () => {
     }
 
     ensureDatalist();
+    window.pricesLoadedOnce = true;
     State.save(true, false);
-    if (typeof renderPage === 'function' && (currentPage === 'giris' || currentPage === 'hedef' || currentPage === 'gorunum')) {
+    const nowTime = new Date();
+    const hhmm = String(nowTime.getHours()).padStart(2, '0') + ':' + String(nowTime.getMinutes()).padStart(2, '0');
+    if (statusText) statusText.textContent = hhmm;
+
+    const mainEl = document.getElementById('main-content');
+    const activeEl = document.activeElement;
+    const isEditingField = mainEl && activeEl && mainEl.contains(activeEl) && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeEl.tagName);
+    if (typeof renderPage === 'function' && !isEditingField && (currentPage === 'anasayfa' || currentPage === 'portfoy' || currentPage === 'hisse_detay')) {
         renderPage();
     }
     } finally {
         window.isFetchingGuncelFiyatlar = false;
+        if (refreshBtn) refreshBtn.classList.remove('loading');
     }
 };
 
@@ -1205,7 +1379,7 @@ const renderPortfoy = (container) => {
         <td style="text-align: right !important;"></td>
         <td style="text-align: right !important;"></td>
         <td style="text-align: right !important;"></td>
-        <td style="text-align: right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">
+        <td style="text-align: right !important; border-right: 1px solid var(--table-border);">
             <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
                 <span style="cursor:pointer;" onclick="this.style.display='none'; this.nextElementSibling.style.display='inline-block'; this.nextElementSibling.focus();" title="Düzenlemek için tıklayın">${formatCurrency(guncelNakitDeger, 2)}</span>
                 <input type="number" step="0.01" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${guncelNakitDeger}" onblur="window.saveNakitVarlikEdit(this)" onkeydown="if(event.key==='Enter') window.saveNakitVarlikEdit(this)">
@@ -1292,57 +1466,57 @@ const renderPortfoy = (container) => {
                             <tbody>
                                 <tr>
                                     <td style="text-align:left !important; width:50%;">Toplam Portföy</td>
-                                    <td style="text-align:right !important; width:50%; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.toplamPortfoy)}</td>
+                                    <td style="text-align:right !important; width:50%; border-right: 1px solid var(--table-border);">${formatCurrency(portfoyBilgileri.toplamPortfoy)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Nakit</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">
+                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);">
                                         <span id="nakit-text">${formatCurrency(guncelNakitTutar, 2)}</span>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Hisse Portföyü</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(hissePortfoyTutar)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);">${formatCurrency(hissePortfoyTutar)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Fon Portföyü</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(fonPortfoyTutar)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);">${formatCurrency(fonPortfoyTutar)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Anapara</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatCurrency(portfoyBilgileri.anapara)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);">${formatCurrency(portfoyBilgileri.anapara)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Kar</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.kar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(portfoyBilgileri.kar)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);" class="${portfoyBilgileri.kar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(portfoyBilgileri.kar)}</td>
                                 </tr>
-                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                                <tr style="border-bottom: 1px solid var(--surface-border);">
                                     <td style="text-align:left !important;">Nominal Getiri Oranı</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.nominalGetiri >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.nominalGetiri)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);" class="${portfoyBilgileri.nominalGetiri >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.nominalGetiri)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Reel Getiri Oranı (Enflasyon)</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);" class="${portfoyBilgileri.reelGetiriEnflasyon >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">BIST 100'e Göre Reel Getiri Oranı</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.reelGetiriBist >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriBist)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);" class="${portfoyBilgileri.reelGetiriBist >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriBist)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Dolar Kuruna Göre Reel Getiri Oranı</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.reelGetiriDolar >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriDolar)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);" class="${portfoyBilgileri.reelGetiriDolar >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriDolar)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Gram Altına Göre Reel Getiri Oranı</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.reelGetiriAltin >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriAltin)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);" class="${portfoyBilgileri.reelGetiriAltin >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriAltin)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">PRY Fonuna Göre Reel Getiri Oranı</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);" class="${portfoyBilgileri.reelGetiriPry >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriPry)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);" class="${portfoyBilgileri.reelGetiriPry >= 0 ? 'text-success' : 'text-danger'}">${formatPercent(portfoyBilgileri.reelGetiriPry)}</td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Hedef Portföy</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03); cursor: pointer;" ondblclick="window.togglePortfoyEdit()" title="Düzenlemek için çift tıklayın">
+                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border); cursor: pointer;" ondblclick="window.togglePortfoyEdit()" title="Düzenlemek için çift tıklayın">
                                         <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
                                             <span id="hedef-text">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span>
                                             <input type="number" id="inline-hedef-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${portfoyBilgileri.hedefPortfoy}" onblur="window.savePortfoyEdit()" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
@@ -1351,7 +1525,7 @@ const renderPortfoy = (container) => {
                                 </tr>
                                 <tr>
                                     <td style="text-align:left !important;">Hedefe Ulaşmak İçin Gereken Artış %</td>
-                                    <td style="text-align:right !important; border-right: 1px solid rgba(255, 255, 255, 0.03);">${formatPercent(portfoyBilgileri.hedefArtis, 0)}</td>
+                                    <td style="text-align:right !important; border-right: 1px solid var(--table-border);">${formatPercent(portfoyBilgileri.hedefArtis, 0)}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1367,7 +1541,7 @@ const renderPortfoy = (container) => {
             <style>
             .chart-filter {
                 font-size: 12px !important;
-                color: #cccccc !important;
+                color: var(--text-secondary) !important;
                 font-weight: normal !important;
                 transition: color 0.2s, background 0.2s;
             }
@@ -1405,14 +1579,14 @@ const renderPortfoy = (container) => {
                             </thead>
                             <tbody>
                                 ${portfoyHtml}
-                                <tr class="total-row" style="background: transparent !important;">
-                                    <td style="text-align: center !important; font-weight: normal !important; border: none; background: transparent !important;"></td>
-                                    <td style="text-align: left !important; font-weight: normal !important; border: none; background: transparent !important;">TOPLAM</td>
-                                    <td colspan="5" style="text-align: right !important; font-weight: normal !important; border: none; background: transparent !important;"></td>
-                                    <td style="text-align: right !important; font-weight: normal !important; border: none; background: transparent !important;">${formatCurrency(totalOdenen, 0)}</td>
-                                    <td style="text-align: right !important; font-weight: normal !important; border: none; background: transparent !important;">${formatCurrency(totalGuncel, 0)}</td>
-                                    <td style="text-align: right !important; font-weight: normal !important; border: none; background: transparent !important; color: ${totalKar >= 0 ? 'var(--success-color)' : 'var(--danger-color)'} !important;">${formatCurrency(totalKar, 0)}</td>
-                                    <td colspan="4" style="text-align: right !important; font-weight: normal !important; border: none; background: transparent !important;"></td>
+                                <tr class="total-row">
+                                    <td style="text-align: center !important;"></td>
+                                    <td style="text-align: left !important;">TOPLAM</td>
+                                    <td colspan="5"></td>
+                                    <td style="text-align: right !important;">${formatCurrency(totalOdenen, 0)}</td>
+                                    <td style="text-align: right !important;">${formatCurrency(totalGuncel, 0)}</td>
+                                    <td class="${totalKar >= 0 ? 'text-success' : 'text-danger'}" style="text-align: right !important;">${formatCurrency(totalKar, 0)}</td>
+                                    <td colspan="4"></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1426,8 +1600,8 @@ const renderPortfoy = (container) => {
         `;
     } else if (window.portfoyTab === 'arsiv') {
         tabContentHtml = `
-            <div id="portfoy-arsiv" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0; flex: 1; height: calc(100vh - 140px);">
-                <div class="table-container custom-scroll" style="margin-bottom: 0; overflow-x: auto; overflow-y: auto; height: 100%;">
+            <div id="portfoy-arsiv" class="portfoy-tab-content" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 0;">
+                <div class="table-container" style="margin-bottom: 0; overflow-x: auto; overflow-y: visible;">
 
                     <table class="dash-table compact-table" style="min-width: 1000px; text-align: center; border-collapse: separate; border-spacing: 0;">
                         <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
@@ -1435,12 +1609,12 @@ const renderPortfoy = (container) => {
                         </thead>
                         <tbody>
                             ${arsivHtml}
-                            <tr class="total-row" style="background: transparent !important;">
-                                <td style="text-align: center !important; font-weight: normal !important; border: none; background: transparent !important;"></td>
-                                <td style="text-align: left !important; font-weight: normal !important; border: none; background: transparent !important;">TOPLAM</td>
-                                <td colspan="4" style="text-align: right !important; font-weight: normal !important; border: none; background: transparent !important;"></td>
-                                <td style="text-align: right !important; font-weight: normal !important; border: none; background: transparent !important; color: ${arsivKarTotal >= 0 ? 'var(--success-color)' : 'var(--danger-color)'} !important;">${formatCurrency(arsivKarTotal, 0)}</td>
-                                <td colspan="4" style="text-align: right !important; font-weight: normal !important; border: none; background: transparent !important;"></td>
+                            <tr class="total-row">
+                                <td style="text-align: center !important;"></td>
+                                <td style="text-align: left !important;">TOPLAM</td>
+                                <td colspan="4"></td>
+                                <td class="${arsivKarTotal >= 0 ? 'text-success' : 'text-danger'}" style="text-align: right !important;">${formatCurrency(arsivKarTotal, 0)}</td>
+                                <td colspan="4"></td>
                             </tr>
                         </tbody>
                     </table>
@@ -1449,21 +1623,59 @@ const renderPortfoy = (container) => {
         `;
     }
 
+    const kpiKarPos = portfoyBilgileri.kar >= 0;
+    const kpiGetiriPos = portfoyBilgileri.nominalGetiri >= 0;
+    const kpiCardsHtml = `
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon-box navy"><i class="fas fa-wallet"></i></div>
+                <div class="kpi-info">
+                    <div class="kpi-label">Toplam Portföy</div>
+                    <div class="kpi-value">${formatCurrency(portfoyBilgileri.toplamPortfoy, 0)}</div>
+                    <div class="kpi-sub">Hisse: ${formatCurrency(hissePortfoyTutar, 0)} · Fon: ${formatCurrency(fonPortfoyTutar, 0)}</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon-box slate"><i class="fas fa-coins"></i></div>
+                <div class="kpi-info">
+                    <div class="kpi-label">Toplam Anapara</div>
+                    <div class="kpi-value">${formatCurrency(portfoyBilgileri.anapara, 0)}</div>
+                    <div class="kpi-sub">Nakit: ${formatCurrency(guncelNakitTutar, 0)}</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon-box ${kpiKarPos ? 'green' : 'red'}"><i class="fas fa-chart-line"></i></div>
+                <div class="kpi-info">
+                    <div class="kpi-label">Net Kâr / Zarar</div>
+                    <div class="kpi-value" style="color: ${kpiKarPos ? 'var(--success-color)' : 'var(--danger-color)'};">${kpiKarPos ? '+' : ''}${formatCurrency(portfoyBilgileri.kar, 0)}</div>
+                    <div class="kpi-sub">Açık Pozisyon: ${filteredPortfoy.length} menkul</div>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon-box ${kpiGetiriPos ? 'green' : 'red'}"><i class="fas fa-percentage"></i></div>
+                <div class="kpi-info">
+                    <div class="kpi-label">Nominal Getiri</div>
+                    <div class="kpi-value" style="color: ${kpiGetiriPos ? 'var(--success-color)' : 'var(--danger-color)'};">${kpiGetiriPos ? '+' : ''}${formatPercent(portfoyBilgileri.nominalGetiri)}</div>
+                    <div class="kpi-sub">Reel (Enf.): ${formatPercent(portfoyBilgileri.reelGetiriEnflasyon)}</div>
+                </div>
+            </div>
+        </div>
+    `;
+
     const html = `
         <style>
             .portfoy-tab-content table th {
-                padding: 12px 4px !important;
-            }
-            .portfoy-tab-content table th, .portfoy-tab-content table td {
+                padding: 10px 6px !important;
                 font-size: 12px !important;
-                font-weight: normal !important;
+                font-weight: 600 !important;
             }
-            table .total-row td, .std-table .total-row td, .dash-table .total-row td {
+            .portfoy-tab-content table td {
                 font-size: 12px !important;
             }
         </style>
         <div class="page-section active" style="display: flex; flex-direction: column; padding: 0px; gap: 1rem;">
-            <div class="glass" style="display: flex; flex-direction: column; padding: 0.5rem 1rem; width: 100%;">
+            ${kpiCardsHtml}
+            <div class="glass" style="display: flex; flex-direction: column; padding: 0.75rem 1rem; width: 100%;">
                 <div style="border-bottom: 1px solid var(--surface-border); padding-bottom: 0px; margin-bottom: 0;">
                     ${tabsHtml}
                 </div>
@@ -1592,10 +1804,10 @@ const renderPortfoy = (container) => {
                         const lineLen = 10;
                         const finalX = endX + (Math.cos(angle) >= 0 ? lineLen : -lineLen);
                         ctx.lineTo(finalX, endY);
-                        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+                        ctx.strokeStyle = 'rgba(15, 23, 42, 0.35)';
                         ctx.stroke();
 
-                        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-primary').trim() || '#fff';
+                        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('--text-primary').trim() || '#0f172a';
                         ctx.font = 'normal 12px Inter, Arial';
                         ctx.textBaseline = 'middle';
                         ctx.textAlign = Math.cos(angle) >= 0 ? 'left' : 'right';
@@ -1631,7 +1843,7 @@ const renderPortfoy = (container) => {
                         legend: {
                             position: 'bottom',
                             labels: {
-                                color: getComputedStyle(document.body).getPropertyValue('--text-primary').trim() || '#fff',
+                                color: getComputedStyle(document.body).getPropertyValue('--text-primary').trim() || '#0f172a',
                                 font: { size: 12 },
                                 boxWidth: 10,
                                 boxHeight: 10,
@@ -1681,7 +1893,7 @@ const renderPortfoy = (container) => {
                         legend: {
                             position: 'bottom',
                             labels: {
-                                color: getComputedStyle(document.body).getPropertyValue('--text-primary').trim() || '#fff',
+                                color: getComputedStyle(document.body).getPropertyValue('--text-primary').trim() || '#0f172a',
                                 font: { size: 12 },
                                 boxWidth: 10,
                                 boxHeight: 10,
@@ -1749,8 +1961,8 @@ const renderPortfoy = (container) => {
             State.save();
         }
 
-        // Hedeflenen kapanış günü için kayıt
-        if (targetDate) {
+        // Hedeflenen kapanış günü için kayıt (yalnızca geçerli/yüklenmiş portföy değeriyle)
+        if (targetDate && portfoyBilgileri.toplamPortfoy > 0) {
             const yyyyMmDd = targetDate.getFullYear() + '-' + String(targetDate.getMonth() + 1).padStart(2, '0') + '-' + String(targetDate.getDate()).padStart(2, '0');
             const targetRecord = State.data.portfoyGecmisi.find(r => r.tarih === yyyyMmDd);
             if (!targetRecord) {
@@ -1760,12 +1972,10 @@ const renderPortfoy = (container) => {
                     anapara: portfoyBilgileri.anapara
                 });
                 State.save();
-            } else {
-                if (targetRecord.tutar !== portfoyBilgileri.toplamPortfoy || targetRecord.anapara !== portfoyBilgileri.anapara) {
-                    targetRecord.tutar = portfoyBilgileri.toplamPortfoy;
-                    targetRecord.anapara = portfoyBilgileri.anapara;
-                    State.save();
-                }
+            } else if (window.pricesLoadedOnce && (targetRecord.tutar !== portfoyBilgileri.toplamPortfoy || targetRecord.anapara !== portfoyBilgileri.anapara)) {
+                targetRecord.tutar = portfoyBilgileri.toplamPortfoy;
+                targetRecord.anapara = portfoyBilgileri.anapara;
+                State.save();
             }
         }
 
@@ -1819,7 +2029,7 @@ const renderPortfoy = (container) => {
                     el.style.background = 'transparent';
                     el.classList.remove('active-filter');
                     if (el.dataset.range === currentRange) {
-                        el.style.background = 'rgba(255,255,255,0.1)';
+                        el.style.background = 'var(--overlay-bg)';
                         el.classList.add('active-filter');
                     }
                 });
@@ -1865,10 +2075,10 @@ const renderPortfoy = (container) => {
                         {
                             label: 'Portföy',
                             data: data,
-                            borderColor: '#2ecc71',
+                            borderColor: '#059669',
                             backgroundColor: 'transparent',
                             borderWidth: 2,
-                            pointBackgroundColor: '#2ecc71',
+                            pointBackgroundColor: '#059669',
                             pointRadius: 0,
                             pointHoverRadius: 6,
                             fill: false,
@@ -1877,10 +2087,10 @@ const renderPortfoy = (container) => {
                         {
                             label: 'Anapara',
                             data: dataAnapara,
-                            borderColor: '#f39c12',
+                            borderColor: '#d97706',
                             backgroundColor: 'transparent',
                             borderWidth: 2,
-                            pointBackgroundColor: '#f39c12',
+                            pointBackgroundColor: '#d97706',
                             pointRadius: 0,
                             pointHoverRadius: 6,
                             fill: false,
@@ -1896,7 +2106,7 @@ const renderPortfoy = (container) => {
                         intersect: false,
                     },
                     plugins: {
-                        legend: { display: true, position: 'bottom', labels: { color: '#aaa', font: { size: 10 }, boxWidth: 12 } },
+                        legend: { display: true, position: 'bottom', labels: { color: '#475569', font: { size: 10 }, boxWidth: 12 } },
                         datalabels: { display: false },
                         tooltip: {
                             callbacks: {
@@ -1908,13 +2118,13 @@ const renderPortfoy = (container) => {
                     },
                     scales: {
                         x: {
-                            grid: { color: 'rgba(255, 255, 255, 0.03)' },
-                            ticks: { color: '#aaa', font: { size: 10 } }
+                            grid: { color: 'rgba(15, 23, 42, 0.08)' },
+                            ticks: { color: '#475569', font: { size: 10 } }
                         },
                         y: {
-                            grid: { color: 'rgba(255, 255, 255, 0.03)' },
+                            grid: { color: 'rgba(15, 23, 42, 0.08)' },
                             ticks: {
-                                color: '#aaa',
+                                color: '#475569',
                                 font: { size: 10 },
                                 callback: function (value) {
                                     return value.toLocaleString('tr-TR');
@@ -1960,7 +2170,7 @@ const renderHisseler = (container) => {
                     <div style="font-size: 3rem; margin-bottom: 1rem; color: #2b579a;">📄</div>
                     <h3 style="color: var(--text-primary); margin-bottom: 1rem;">${hisseAdi} - Notlar</h3>
                     <p style="color: var(--text-secondary); margin-bottom: 0;">Word dosyası bilgisayarınıza / uygulamanıza yönlendirildi.</p>
-                    <a href="${filePath}" target="_blank" style="display: inline-block; padding: 0.8rem 2rem; background: #2b579a; color: var(--text-primary); text-decoration: none; border-radius: var(--border-radius); font-weight: bold; transition: all 0.3s ease;">
+                    <a href="${filePath}" target="_blank" style="display: inline-block; padding: 0.8rem 2rem; background: #2563eb; color: #ffffff; text-decoration: none; border-radius: var(--border-radius); font-weight: bold; transition: all 0.3s ease;">
                         Eğer açılmadıysa buraya tıklayın
                     </a>
                     <iframe src="${filePath}" style="display:none;"></iframe>
@@ -1969,7 +2179,7 @@ const renderHisseler = (container) => {
         }
         return `
             <div style="margin-top: 0;">
-                <embed src="${filePath}" type="application/pdf" width="100%" height="800px" style="border-radius: var(--border-radius); border: 1px solid rgba(255,255,255,0.05);" />
+                <embed src="${filePath}" type="application/pdf" width="100%" height="800px" style="border-radius: var(--border-radius); border: 1px solid var(--surface-border);" />
             </div>
         `;
     };
@@ -2054,7 +2264,7 @@ const renderHisseler = (container) => {
             if (!State.data.genelNotlar) State.data.genelNotlar = [];
             const colors = ['#f1c40f', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6', '#e67e22'];
             let notesHtml = State.data.genelNotlar.map(not => `
-                <div class="sticky-note" style="background-color: ${not.color || '#f1c40f'}; padding: 1rem; border-radius: 8px; color: #000; box-shadow: 0 4px 6px rgba(0,0,0,0.3); position: relative; display: flex; flex-direction: column; min-height: 200px;">
+                <div class="sticky-note" style="background-color: ${not.color || '#f1c40f'}; padding: 1rem; border-radius: 8px; color: #000; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12); position: relative; display: flex; flex-direction: column; min-height: 200px;">
                     <textarea 
                         style="flex: 1; background: transparent; border: none; color: #000; font-family: 'Comic Sans MS', 'Gochi Hand', sans-serif; font-size: 1.1rem; resize: none; outline: none;" 
                         oninput="window.updateGenelNot('${not.id}', this.value)"
@@ -2064,7 +2274,7 @@ const renderHisseler = (container) => {
                         <div style="display:flex; gap: 4px;">
                             ${colors.map(col => `<div onclick="window.changeGenelNotColor('${not.id}', '${col}')" style="width:15px; height:15px; border-radius:50%; background:${col}; cursor:pointer; border: 1px solid rgba(0,0,0,0.2);"></div>`).join('')}
                         </div>
-                        <button class="btn btn-icon" style="padding: 2px; background: transparent; color: #888888; border: none;" onclick="window.deleteGenelNot('${not.id}')"><i class="fas fa-trash-alt"></i></button>
+                        <button class="btn btn-icon" style="padding: 2px; background: transparent; color: var(--text-secondary); border: none;" onclick="window.deleteGenelNot('${not.id}')"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -2085,7 +2295,7 @@ const renderHisseler = (container) => {
             if (!window.addGenelNot) {
                 window.addGenelNot = () => { State.data.genelNotlar.push({ id: Date.now().toString(), text: '', color: '#f1c40f' }); State.save(); renderUI(); };
                 window.updateGenelNot = (id, text) => { const not = State.data.genelNotlar.find(n => n.id === id); if (not) { not.text = text; State.save(); } };
-                window.deleteGenelNot = (id) => { if (confirm('Bu notu silmek istediğinize emin misiniz?')) { State.data.genelNotlar = State.data.genelNotlar.filter(n => n.id !== id); State.save(); renderUI(); } };
+                window.deleteGenelNot = async (id) => { if (await window.showConfirm('Bu notu silmek istediğinize emin misiniz?')) { State.data.genelNotlar = State.data.genelNotlar.filter(n => n.id !== id); State.save(); renderUI(); window.showToast('Not silindi.', 'info'); } };
                 window.changeGenelNotColor = (id, color) => { const not = State.data.genelNotlar.find(n => n.id === id); if (not) { not.color = color; State.save(); renderUI(); } };
             }
         } else {
@@ -2205,9 +2415,9 @@ const renderHisseler = (container) => {
                     const pct = ((current - previous) / Math.abs(previous)) * 100;
                     const isNegative = pct < 0;
 
-                    let color = isNegative ? '#e74c3c' : '#2ecc71';
+                    let color = isNegative ? '#dc2626' : '#059669';
                     if (options.reverseColor) {
-                        color = isNegative ? '#2ecc71' : '#e74c3c';
+                        color = isNegative ? '#059669' : '#dc2626';
                     }
 
                     const text = isNegative ? `% -${Math.abs(pct).toFixed(0)}` : `% ${Math.abs(pct).toFixed(0)}`;
@@ -2549,24 +2759,24 @@ const renderHisseler = (container) => {
                 <style>
                 .compact-table { table-layout: auto !important; width: 100%; border-collapse: collapse; }
                 .compact-table th, .compact-table td { padding: 0.6rem 0.5rem !important; white-space: nowrap; }
-                .compact-table th { font-size: 12px !important; font-weight: normal !important; color: var(--text-primary) !important; height: 39px; }
-                .compact-table td:first-child { font-size: 12px !important; font-weight: normal !important; color: #cccccc !important; }
+                .compact-table th { font-size: 12px !important; font-weight: 600 !important; color: var(--text-primary) !important; height: 39px; }
+                .compact-table td:first-child { font-size: 12px !important; font-weight: normal !important; color: var(--text-primary) !important; }
                 .compact-table tr { height: 39px !important; }
-                .compact-table td { font-size: 12px !important; font-weight: normal !important; color: #cccccc; height: 34px !important; line-height: 1 !important; }
+                .compact-table td { font-size: 12px !important; font-weight: normal !important; color: var(--text-muted); height: 34px !important; line-height: 1 !important; }
                 /* nav-btn override removed to protect main sidebar */
                 .nav-dropdown-content a { font-size: 12px !important; font-weight: normal !important; }
                 .dash-title { font-size: 12px !important; font-weight: normal !important; color: var(--text-primary) !important; }
                 .compact-card { padding: 1.2rem !important; }
                 .gauge-container { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 80px; height: 50px; }
-                .gauge-bg { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid rgba(255,255,255,0.1); border-bottom: none; box-sizing: border-box; }
-                .gauge-fill { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid #2ecc71; border-bottom: none; box-sizing: border-box; transform-origin: bottom center; transform: rotate(0deg); transition: transform 1s; }
+                .gauge-bg { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid #e2e8f0; border-bottom: none; box-sizing: border-box; }
+                .gauge-fill { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid #059669; border-bottom: none; box-sizing: border-box; transform-origin: bottom center; transform: rotate(0deg); transition: transform 1s; }
                 .gauge-text { position: absolute; bottom: 0; font-size: 12px; font-weight: normal; color: var(--text-primary); line-height: 1; }
-                .gauge-label { font-size: 12px; font-weight: normal; color: #aaa; margin-top: 4px; text-align: center; }
+                .gauge-label { font-size: 12px; font-weight: normal; color: var(--text-secondary); margin-top: 4px; text-align: center; }
                 </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
                         
                         <!-- Row 1: Özet Gelir & Bilanço -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: stretch;">
+                        <div class="grid-2-col">
                             <div class="dash-card compact-card" style="margin-bottom:0;">
                                 ${gelirHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadı</div>'}
                             </div>
@@ -2576,7 +2786,7 @@ const renderHisseler = (container) => {
                         </div>
 
                         <!-- Row 2: Çarpanlar, Karne, Şirket Detayları -->
-                        <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch;">
+                        <div class="grid-3-col">
                             
                             <!-- Çarpanlar -->
                             <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
@@ -2613,7 +2823,7 @@ const renderHisseler = (container) => {
                                         <div style="width:${pctKisa}%; background:#fd79a8;" title="Kısa Vade Yükümlülükler: %${pctKisa}"></div>
                                         <div style="width:${pctUzun}%; background:#636e72;" title="Uzun Vade Yükümlülükler: %${pctUzun}"></div>
                                     </div>
-                                    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 1rem; font-size: 12px; font-weight: normal; color:#aaa;">
+                                    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 1rem; font-size: 12px; font-weight: normal; color:var(--text-secondary);">
                                         <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#6c5ce7;"></div>Özkaynaklar: %${pctOz}</div>
                                         <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#fd79a8;"></div>Kısa Vade Yük.: %${pctKisa}</div>
                                         <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#636e72;"></div>Uzun Vade Yük.: %${pctUzun}</div>
@@ -2713,7 +2923,7 @@ const renderHisseler = (container) => {
                 </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
                     
-                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
+                    <div class="grid-3-col" style="margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Satış Gelirleri (Çeyreklik)</span>
@@ -2747,7 +2957,7 @@ const renderHisseler = (container) => {
                         <div style="flex:1; min-height:400px; min-width: 0; position:relative;"><canvas id="chart-combined-satislar"></canvas></div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
+                    <div class="grid-3-col" style="margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Brüt Kar (Çeyreklik)</span>
@@ -2781,7 +2991,7 @@ const renderHisseler = (container) => {
                         <div style="flex:1; min-height:400px; min-width: 0; position:relative;"><canvas id="chart-combined-brut"></canvas></div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
+                    <div class="grid-3-col" style="margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Esas Faaliyet Karı (Çeyreklik)</span>
@@ -2812,7 +3022,7 @@ const renderHisseler = (container) => {
                         <div style="flex:1; min-height:400px; min-width: 0; position:relative;"><canvas id="chart-combined-faaliyet"></canvas></div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
+                    <div class="grid-3-col" style="margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>FAVÖK (Çeyreklik)</span>
@@ -2843,7 +3053,7 @@ const renderHisseler = (container) => {
                         <div style="flex:1; min-height:400px; min-width: 0; position:relative;"><canvas id="chart-combined-favok"></canvas></div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 1rem; align-items: stretch; margin-bottom: 1rem;">
+                    <div class="grid-3-col" style="margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
                             <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Net Kar (Çeyreklik)</span>
@@ -2899,7 +3109,7 @@ const renderHisseler = (container) => {
                 .compact-card { padding: 1rem 0.5rem !important; }
                 </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="grid-2-col">
                         <div class="dash-card" style="margin-bottom: 0;">
                             <div class="dash-title">Çeyreklik Nakit Akışı</div>
                             <div style="position: relative; height: 250px;"><canvas id="chart-nakit-q"></canvas></div>
@@ -3030,10 +3240,10 @@ const renderHisseler = (container) => {
                         dotsHtml = `
                         <div style="position:absolute; right:0; top:0; bottom:0; padding:0 8px; display:flex; align-items:center; cursor:pointer;" onmouseenter="document.querySelectorAll('.currency-dropdown').forEach(el => el.style.display='none'); this.querySelector('.currency-dropdown').style.display='block';" onmouseleave="this.querySelector('.currency-dropdown').style.display='none';">
                             <i class="fas fa-ellipsis-v" style="color:var(--text-secondary);"></i>
-                            <div class="currency-dropdown" style="display:none; position:absolute; right:0; top:100%; background:#1e1e1e; border:1px solid #444; border-radius:4px; z-index:999; padding:5px; box-shadow: 0 4px 6px rgba(0,0,0,0.5); text-align:left;">
-                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'TRY' ? '#ffffff' : '#cccccc'}; font-size:12px; font-weight:normal; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'TRY'); this.parentElement.style.display='none';">₺ TRY</div>
-                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'USD' ? '#ffffff' : '#cccccc'}; font-size:12px; font-weight:normal; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'USD'); this.parentElement.style.display='none';">$ USD</div>
-                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'EUR' ? '#ffffff' : '#cccccc'}; font-size:12px; font-weight:normal; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'EUR'); this.parentElement.style.display='none';">€ EUR</div>
+                            <div class="currency-dropdown" style="display:none; position:absolute; right:0; top:100%; background:var(--dropdown-bg); border:1px solid var(--surface-border); border-radius:6px; z-index:999; padding:5px; box-shadow: var(--shadow-md); text-align:left;">
+                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'TRY' ? 'var(--accent-color)' : 'var(--text-secondary)'}; font-size:12px; font-weight:${curCurrency === 'TRY' ? '600' : 'normal'}; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'TRY'); this.parentElement.style.display='none';">₺ TRY</div>
+                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'USD' ? 'var(--accent-color)' : 'var(--text-secondary)'}; font-size:12px; font-weight:${curCurrency === 'USD' ? '600' : 'normal'}; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'USD'); this.parentElement.style.display='none';">$ USD</div>
+                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'EUR' ? 'var(--accent-color)' : 'var(--text-secondary)'}; font-size:12px; font-weight:${curCurrency === 'EUR' ? '600' : 'normal'}; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'EUR'); this.parentElement.style.display='none';">€ EUR</div>
                             </div>
                         </div>`;
                     }
@@ -3045,7 +3255,7 @@ const renderHisseler = (container) => {
                 headerHtml += `</tr>`;
 
                 let html = `<div class="dash-card" style="display:flex; flex-direction:column; margin-top: 0;">
-                    <style>.degerleme-table td, .degerleme-table th, .degerleme-table input { color: #cccccc !important; }</style>
+                    <style>.degerleme-table td, .degerleme-table th, .degerleme-table input { color: var(--text-primary) !important; }</style>
                     <div style="overflow-x:auto;">
                     <table class="dash-table compact-table degerleme-table" style="width: 100%; min-width: 1200px; table-layout: fixed !important;" onclick="document.querySelectorAll('.currency-dropdown').forEach(el => el.style.display='none');">
                             <thead>${headerHtml}</thead>
@@ -3287,10 +3497,10 @@ const renderHisseler = (container) => {
                         let extraStyle = '';
                         if (!isPast && r.isTarget && displayVal !== '---') {
                             const numPot = ((parseFloat(String(displayVal).replace('₺', '').replace(/\./g, '').replace(',', '.')) - guncelFiyat) / guncelFiyat) * 100;
-                            extraStyle = numPot > 0 ? 'color: #2ecc71 !important; font-weight: normal; font-size:1.1rem;' : 'color: #e74c3c !important; font-weight: normal; font-size:1.1rem;';
+                            extraStyle = numPot > 0 ? 'color: #059669 !important; font-weight: 600; font-size:1.1rem;' : 'color: #dc2626 !important; font-weight: 600; font-size:1.1rem;';
                         }
                         if (!isPast && r.key === 'potansiyel' && val !== '---') {
-                            extraStyle = val > 0 ? 'color: #2ecc71 !important; font-weight: normal;' : 'color: #e74c3c !important; font-weight: normal;';
+                            extraStyle = val > 0 ? 'color: #059669 !important; font-weight: 500;' : 'color: #dc2626 !important; font-weight: 500;';
                         }
 
                         const pSafe = p.replace('/', '-');
@@ -3325,7 +3535,7 @@ const renderHisseler = (container) => {
                 html += `</tbody></table></div>`; // End of table wrapper
                 html += `
                     <div style="margin-top: 1rem; border-top: 1px solid var(--surface-border); padding-top: 1rem;">
-                        <textarea id="degerleme-not-input" class="form-control" style="width: 100%; height: 60px; resize: vertical; font-size: 12px; font-family: inherit; margin-bottom: 0.5rem; color: #cccccc;" placeholder="Bu hisse için değerleme notlarınızı buraya yazabilirsiniz..." onblur="window.saveDegerlemeNotUnified('${selectedHisse}')">${combinedNot}</textarea>
+                        <textarea id="degerleme-not-input" class="form-control" style="width: 100%; height: 60px; resize: vertical; font-size: 12px; font-family: inherit; margin-bottom: 0.5rem; color: var(--text-primary);" placeholder="Bu hisse için değerleme notlarınızı buraya yazabilirsiniz..." onblur="window.saveDegerlemeNotUnified('${selectedHisse}')">${combinedNot}</textarea>
                     </div>
                 </div>`; // End of dash-card
                 contentHtml += html;
@@ -3439,20 +3649,20 @@ const renderHisseler = (container) => {
                 });
 
                 let tableHtml = `
-                <div class="dash-card" style="display: flex; flex-direction: column; flex: 1; padding-bottom: 0; margin-bottom: 0; min-height: 0;">
+                <div class="dash-card" style="display: flex; flex-direction: column; padding-bottom: 0.75rem; margin-bottom: 0;">
                     <div style="display: flex; align-items: center; justify-content: center; padding: 3px 5px; border-bottom: 1px solid var(--table-border); position: relative;">
                         <div style="font-size: 15px; font-weight: normal; color: var(--text-primary); text-align: center;">Akış</div>
-                        <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: #888888; border: none; box-shadow: none; position: absolute; right: 5px;" onclick="window.toggleInlineAnaliz()" title="Yeni Not Ekle"><i class="fas fa-plus" style="font-size: 15px;"></i></button>
+                        <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-secondary); border: none; box-shadow: none; position: absolute; right: 5px;" onclick="window.toggleInlineAnaliz()" title="Yeni Not Ekle"><i class="fas fa-plus" style="font-size: 15px;"></i></button>
                     </div>
                     
                                             <div id="inline-analiz-row" class="glass" style="display: none; flex-direction: column; gap: 1rem; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--accent-color);">
     <input type="hidden" id="analiz-hisse" value="${selectedHisse || ''}">
     
     <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--table-border); padding-bottom: 0.5rem;">
-        <label style="color: #cccccc; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+        <label style="color: var(--text-primary); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
             <input type="radio" name="akisTipi" value="analiz" checked onchange="window.toggleAkisTipi()"> Genel Analiz/Rapor
         </label>
-        <label style="color: #cccccc; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+        <label style="color: var(--text-primary); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
             <input type="radio" name="akisTipi" value="kisisel" onchange="window.toggleAkisTipi()"> Kişisel Not
         </label>
     </div>
@@ -3460,35 +3670,35 @@ const renderHisseler = (container) => {
     <div id="akis-genel-inputs" style="display: flex; gap: 1rem; flex-wrap: wrap;">
         <!-- 1. Link -->
         <div style="flex: 2; min-width: 250px;">
-            <label style="font-size: 0.8rem; color: #cccccc;">Link</label>
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Link</label>
             <input type="text" id="analiz-baglanti" class="form-control" style="width:100%;" placeholder="https://...">
         </div>
         
         <!-- 2. Analist/Şirket -->
         <div style="flex: 1; min-width: 150px;">
-            <label style="font-size: 0.8rem; color: #cccccc;">Analist/Şirket</label>
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Analist/Şirket</label>
             <input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%;" placeholder="Örn: Ak Yatırım">
         </div>
         
         <!-- 3. Tarih -->
         <div style="flex: 1; min-width: 120px;">
-            <label style="font-size: 0.8rem; color: #cccccc;">Tarih</label>
-            <input type="date" id="analiz-tarih" class="form-control" style="width:100%; color-scheme: dark;" value="${today}">
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Tarih</label>
+            <input type="date" id="analiz-tarih" class="form-control" style="width:100%; color-scheme: light;" value="${today}">
         </div>
         
         <!-- 4. Başlık -->
         <div style="flex: 1.5; min-width: 200px;">
-            <label style="font-size: 0.8rem; color: #cccccc;">Başlık (Opsiyonel)</label>
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Başlık (Opsiyonel)</label>
             <input type="text" id="analiz-baslik" class="form-control" style="width:100%;" placeholder="Not/Rapor/Video Başlığı">
         </div>
         
         <!-- 5. Dosya Ekle -->
         <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column;">
-            <label style="font-size: 0.8rem; color: #cccccc;">Dosya Ekle (Opsiyonel)</label>
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Dosya Ekle (Opsiyonel)</label>
             <style>
                 #upload-file { display: none; }
             </style>
-            <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç" style="padding: 3px 7px 3px 4px; background: #000000; color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; border: none; font-size: 12px; font-weight: normal; margin-top: 2px;">
+            <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç" style="padding: 5px 10px 5px 7px; background: var(--accent-color); color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; border: none; font-size: 12px; font-weight: normal; margin-top: 2px;">
                 <span class="fa-stack" style="font-size: 8px; width: 2em; height: 2em;"><i class="fas fa-folder-open fa-stack-2x" style="color: #ffffff;"></i></span>
                 <span style="margin-left: 5px;">PDF Seç</span>
             </label>
@@ -3499,7 +3709,7 @@ const renderHisseler = (container) => {
     <!-- 6. Notunuz -->
     <div style="display: flex; flex-direction: column; width: 100%;">
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <label style="font-size: 0.8rem; color: #cccccc;">Notunuz</label>
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Notunuz</label>
             <textarea id="analiz-not" class="form-control" style="width:100%; min-height: 50px; resize: vertical;" placeholder="Notlarınızı buraya yazın..."></textarea>
         </div>
         
@@ -3511,7 +3721,7 @@ const renderHisseler = (container) => {
         </div>
     </div>
 </div>
-                      <div class="table-container custom-scroll" style="overflow-x: auto; overflow-y: auto; flex: 1; min-height: 0;">
+                      <div class="table-container" style="overflow-x: auto; overflow-y: visible; margin-bottom: 0;">
                       <table class="dash-table compact-table" style="width:100%; min-width:800px; border-collapse:collapse;">
                           <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
                             <tr style="border-bottom:1px solid var(--table-border); background:var(--table-header-bg);">
@@ -3534,56 +3744,58 @@ const renderHisseler = (container) => {
                     unifiedList.forEach(item => {
                         if (item.type === 'report') {
                             const r = item.data;
-                            let filePath = 'Hisseler/' + selectedHisse + '/' + r.file;
+                            let filePath = 'Hisseler/' + encodeURIComponent(selectedHisse) + '/' + encodeURIComponent(r.file);
+                            const safeRName = window.escapeHtml(r.name !== '-' && r.name ? r.name : r.file);
+                            const safeRComp = window.escapeHtml(r.company !== '-' ? r.company : '-');
                             tableHtml += `
                             <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
-                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">
-                                    <a href="${filePath}" target="_blank" style="text-decoration: none;" title="PDF'i Görüntüle">
-                                        <i class="fas fa-file-pdf" style="color: #3b82f6; font-size: 12px; transition: color 0.2s;" onmouseover="this.style.color='#ffffff';" onmouseout="this.style.color='#3b82f6';"></i>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">
+                                    <a href="${filePath}" target="_blank" rel="noopener noreferrer" style="text-decoration: none;" title="PDF'i Görüntüle">
+                                        <i class="fas fa-file-pdf" style="color: #dc2626; font-size: 14px;"></i>
                                     </a>
                                 </td>
-                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">
-                                    ${r.name !== '-' && r.name ? r.name : r.file}
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">
+                                    <a href="${filePath}" target="_blank" rel="noopener noreferrer" style="color: var(--text-primary); text-decoration: none; font-weight: 500;">${safeRName}</a>
                                 </td>
-                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${item.gosterimTarih}</td>
-                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${r.company !== '-' ? r.company : '-'}</td>
-                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">-</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(item.gosterimTarih)}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${safeRComp}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">-</td>
                                 <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
-                                    <button class="btn btn-icon" style="background: transparent; color: #888888; padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteAnaliz('${r.id || r.file}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                                    <a href="${filePath}" target="_blank" rel="noopener noreferrer" class="btn btn-icon" style="display:inline-flex; align-items:center; justify-content:center; color: var(--accent-color); padding: 2px !important; font-size: 13px; text-decoration: none;" title="Raporu Aç"><i class="fas fa-external-link-alt"></i></a>
                                 </td>
                             </tr>
                             `;
                         } else {
                             const a = item.data;
-                            let platformIcon = '<i class="fas fa-sticky-note" style="color: #888; font-size: 12px;"></i>';
-                            let titleText = a.baslik || '-';
+                            let platformIcon = '<i class="fas fa-sticky-note" style="color: var(--text-secondary); font-size: 12px;"></i>';
+                            let titleText = window.escapeHtml(a.baslik || '-');
                             let titleLinkHtml = titleText;
+                            const safeHref = window.sanitizeUrl(a.baglanti);
                             
-                            if (a.baglanti) {
-                                let iconStr = 'fas fa-external-link-alt" style="color: #888; font-size: 12px;';
-                                if (a.baglanti.includes('youtube.com') || a.baglanti.includes('youtu.be')) { 
-                                    iconStr = 'fab fa-youtube" style="color:#FF0000; font-size: 12px;'; 
-                                } else if (a.baglanti.includes('twitter.com') || a.baglanti.includes('x.com')) { 
+                            if (safeHref) {
+                                let iconStr = 'fas fa-external-link-alt" style="color: var(--accent-color); font-size: 12px;';
+                                if (safeHref.includes('youtube.com') || safeHref.includes('youtu.be')) { 
+                                    iconStr = 'fab fa-youtube" style="color:#FF0000; font-size: 13px;'; 
+                                } else if (safeHref.includes('twitter.com') || safeHref.includes('x.com')) { 
                                     iconStr = 'fa-brands fa-x-twitter" style="color: var(--text-primary); font-size: 12px;'; 
                                 }
-                                platformIcon = `<a href="${a.baglanti}" target="_blank" style="text-decoration: none;" title="Bağlantıya Git"><i class="${iconStr}"></i></a>`;
-                                titleLinkHtml = titleText;
+                                platformIcon = `<a href="${window.escapeHtml(safeHref)}" target="_blank" rel="noopener noreferrer" style="text-decoration: none;" title="Bağlantıya Git"><i class="${iconStr}"></i></a>`;
                             } else if (a.isKisiselNot) {
                                 platformIcon = '<i class="fas fa-user-edit" style="color: var(--accent-color); font-size: 12px;"></i>';
                             }
                             
                             tableHtml += `
                             <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
-                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${platformIcon}</td>
-                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">${titleLinkHtml}</td>
-                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${item.gosterimTarih}</td>
-                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${a.borsaci || '-'}</td>
-                                <td style="font-size:12px; font-weight:normal; color:#cccccc; text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${a.notText || '-'}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${platformIcon}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">${titleLinkHtml}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(item.gosterimTarih)}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(a.borsaci || '-')}</td>
+                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${window.escapeHtml(a.notText || '-')}</td>
                                 <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
                                     <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-icon" style="background: transparent; color: #888888; padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                                    <button class="btn btn-icon" style="background: transparent; color: var(--text-secondary); padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                                 </td>
                             </tr>
                             `;
@@ -3647,12 +3859,12 @@ const renderHisseler = (container) => {
             }
 
             container.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 1rem; height: 100%;">
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
                 ${stockHeaderHtml}
-                <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--table-border); border-radius: 12px; flex-wrap: wrap; align-items: center; background: var(--overlay-bg); flex-shrink: 0;">
+                <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border: 1px solid var(--surface-border); border-radius: 12px; flex-wrap: wrap; align-items: center; background: var(--surface-color); box-shadow: var(--shadow-sm); flex-shrink: 0;">
                     ${tabsHtml}
                 </div>
-                <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0; flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0;">
+                <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0;">
                     ${contentHtml}
                 </div>
             </div>
@@ -3719,7 +3931,7 @@ const renderHisseler = (container) => {
                             datalabels: { display: false }
                         },
                         scales: {
-                            x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
+                            x: { ticks: { color: '#475569', font: { size: 10 } }, grid: { display: false } },
                             y: { ticks: { display: false }, grid: { display: false }, border: { display: false } }
                         }
                     };
@@ -3744,8 +3956,8 @@ const renderHisseler = (container) => {
                                 }
                             },
                             scales: {
-                                x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } },
-                                y: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } }
+                                x: { ticks: { font: { size: 10 }, color: '#475569' }, grid: { color: 'rgba(15, 23, 42, 0.08)' } },
+                                y: { ticks: { font: { size: 10 }, color: '#475569' }, grid: { color: 'rgba(15, 23, 42, 0.08)' } }
                             }
                         };
                         const pinkColor = '#d6336c';
@@ -3809,22 +4021,22 @@ const renderHisseler = (container) => {
                                     responsive: true,
                                     maintainAspectRatio: false,
                                     plugins: {
-                                        legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10, color: '#aaa' } } },
+                                        legend: { display: true, position: 'bottom', labels: { boxWidth: 10, color: '#475569', font: { size: 10 } } },
                                         tooltip: {
                                             callbacks: {
                                                 label: (ctx) => '%' + (ctx.parsed.y || 0).toFixed(1)
                                             }
                                         },
                                         datalabels: {
-                                            color: '#fff',
+                                            color: '#0f172a',
                                             align: 'top',
                                             formatter: (value) => '%' + (value || 0).toFixed(1),
                                             font: { size: 10, weight: 'bold' }
                                         }
                                     },
                                     scales: {
-                                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', callback: v => '%' + v } },
-                                        x: { grid: { display: false }, ticks: { color: '#888', maxRotation: 45, minRotation: 45, font: { size: 10 } } }
+                                        y: { grid: { color: 'rgba(15, 23, 42, 0.08)' }, ticks: { color: '#475569', callback: v => '%' + v } },
+                                        x: { grid: { display: false }, ticks: { color: '#475569', maxRotation: 45, minRotation: 45, font: { size: 10 } } }
                                     }
                                 }
                             });
@@ -3842,7 +4054,7 @@ const renderHisseler = (container) => {
                         ...cOpts,
                         plugins: {
                             ...cOpts.plugins,
-                            legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10, color: '#aaa' } } },
+                            legend: { display: true, position: 'bottom', labels: { boxWidth: 10, color: '#475569', font: { size: 10 } } },
                             tooltip: {
                                 ...cOpts.plugins.tooltip,
                                 callbacks: {
@@ -3857,17 +4069,17 @@ const renderHisseler = (container) => {
                             }
                         },
                         scales: {
-                            x: { ticks: { font: { size: 10 }, color: 'rgba(255,255,255,0.5)' }, grid: { color: 'rgba(255, 255, 255, 0.03)' } },
+                            x: { ticks: { font: { size: 10 }, color: '#475569' }, grid: { color: 'rgba(15, 23, 42, 0.08)' } },
                             y: {
                                 ticks: {
-                                    font: { size: 10 }, color: 'rgba(255,255,255,0.5)',
+                                    font: { size: 10 }, color: '#475569',
                                     callback: function (value) {
                                         if (Math.abs(value) >= 1e9) return (value / 1e9).toFixed(1) + 'Mlyr';
                                         if (Math.abs(value) >= 1e6) return (value / 1e6).toFixed(1) + 'Mn';
                                         return value;
                                     }
                                 },
-                                grid: { color: 'rgba(255, 255, 255, 0.03)' }
+                                grid: { color: 'rgba(15, 23, 42, 0.08)' }
                             }
                         }
                     };
@@ -4005,12 +4217,12 @@ const renderHisseler = (container) => {
                                 },
                                 scales: {
                                     x: {
-                                        ticks: { color: '#ccc', font: { size: 10 } },
-                                        grid: { color: 'rgba(255,255,255,0.05)' }
+                                        ticks: { color: '#475569', font: { size: 10 } },
+                                        grid: { color: 'rgba(15, 23, 42, 0.08)' }
                                     },
                                     y: {
-                                        ticks: { color: '#ccc', font: { size: 10 } },
-                                        grid: { color: 'rgba(255,255,255,0.05)' }
+                                        ticks: { color: '#475569', font: { size: 10 } },
+                                        grid: { color: 'rgba(15, 23, 42, 0.08)' }
                                     }
                                 }
                             }
@@ -4063,7 +4275,7 @@ const renderHisseler = (container) => {
                             options: {
                                 responsive: true, maintainAspectRatio: false,
                                 plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function (c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } },
-                                scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } }
+                                scales: { x: { ticks: { color: '#475569', font: { size: 10 } }, grid: { color: 'rgba(15, 23, 42, 0.08)' } }, y: { ticks: { color: '#475569', font: { size: 10 } }, grid: { color: 'rgba(15, 23, 42, 0.08)' } } }
                             }
                         });
                     }
@@ -4075,7 +4287,7 @@ const renderHisseler = (container) => {
                     const ctxFaaliyetYillik = document.getElementById('chart-yillik-faaliyet');
                     if (ctxFaaliyetYillik) { let ex = Chart.getChart(ctxFaaliyetYillik); if (ex) ex.destroy(); new Chart(ctxFaaliyetYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
                     const ctxFaaliyetCombined = document.getElementById('chart-combined-faaliyet');
-                    if (ctxFaaliyetCombined) { let ex = Chart.getChart(ctxFaaliyetCombined); if (ex) ex.destroy(); new Chart(ctxFaaliyetCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.faaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function (c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+                    if (ctxFaaliyetCombined) { let ex = Chart.getChart(ctxFaaliyetCombined); if (ex) ex.destroy(); new Chart(ctxFaaliyetCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.faaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yFaaliyet, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function (c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#475569', font: { size: 10 } }, grid: { color: 'rgba(15, 23, 42, 0.08)' } }, y: { ticks: { color: '#475569', font: { size: 10 } }, grid: { color: 'rgba(15, 23, 42, 0.08)' } } } } }); }
 
                     // --- FAVÖK ---
                     const ctxFavokCeyreklik2 = document.getElementById('chart-ceyreklik-favok2');
@@ -4085,7 +4297,7 @@ const renderHisseler = (container) => {
                     const ctxFavokYillik = document.getElementById('chart-yillik-favok');
                     if (ctxFavokYillik) { let ex = Chart.getChart(ctxFavokYillik); if (ex) ex.destroy(); new Chart(ctxFavokYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
                     const ctxFavokCombined = document.getElementById('chart-combined-favok');
-                    if (ctxFavokCombined) { let ex = Chart.getChart(ctxFavokCombined); if (ex) ex.destroy(); new Chart(ctxFavokCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.favok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function (c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+                    if (ctxFavokCombined) { let ex = Chart.getChart(ctxFavokCombined); if (ex) ex.destroy(); new Chart(ctxFavokCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.favok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yFavok, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function (c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#475569', font: { size: 10 } }, grid: { color: 'rgba(15, 23, 42, 0.08)' } }, y: { ticks: { color: '#475569', font: { size: 10 } }, grid: { color: 'rgba(15, 23, 42, 0.08)' } } } } }); }
 
                     // --- Net Kar ---
                     const ctxNetKarCeyreklik2 = document.getElementById('chart-ceyreklik-netkar2');
@@ -4095,7 +4307,7 @@ const renderHisseler = (container) => {
                     const ctxNetKarYillik = document.getElementById('chart-yillik-netkar');
                     if (ctxNetKarYillik) { let ex = Chart.getChart(ctxNetKarYillik); if (ex) ex.destroy(); new Chart(ctxNetKarYillik, { type: 'bar', data: { labels: labels, datasets: [{ data: dData.yNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 4 }] }, options: barOpts }); }
                     const ctxNetKarCombined = document.getElementById('chart-combined-netkar');
-                    if (ctxNetKarCombined) { let ex = Chart.getChart(ctxNetKarCombined); if (ex) ex.destroy(); new Chart(ctxNetKarCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.netkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function (c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }, y: { ticks: { color: '#ccc', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } } } } }); }
+                    if (ctxNetKarCombined) { let ex = Chart.getChart(ctxNetKarCombined); if (ex) ex.destroy(); new Chart(ctxNetKarCombined, { type: 'bar', data: { labels: labels, datasets: [{ label: 'Çeyreklik', data: dData.netkar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Dönemsel', data: dData.dNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }, { label: 'Yıllıklandırılmış', data: dData.yNetKar, backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1, borderRadius: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function (c) { let v = c.raw; return c.dataset.label + ': ' + (v ? new Intl.NumberFormat('tr-TR').format(v) : '-'); } } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#475569', font: { size: 10 } }, grid: { color: 'rgba(15, 23, 42, 0.08)' } }, y: { ticks: { color: '#475569', font: { size: 10 } }, grid: { color: 'rgba(15, 23, 42, 0.08)' } } } } }); }
 
 
                     // Clear the temporary data
@@ -4118,11 +4330,11 @@ const renderHisseler = (container) => {
                 if (typeof window.fetchIsYatirimData === 'function') {
                     await window.fetchIsYatirimData(hisse);
                 } else {
-                    alert('Güncelleme modülü bulunamadı.');
+                    window.showToast('Güncelleme modülü bulunamadı.', 'warning');
                 }
             } catch (e) {
                 console.error(e);
-                alert('Güncelleme sırasında hata oluştu.');
+                window.showToast('Güncelleme sırasında hata oluştu.', 'error');
             } finally {
                 if (btn) {
                     btn.innerHTML = originalHtml;
@@ -4157,7 +4369,7 @@ const getHisseSortIcon = (col) => {
     if (window.hisseSort && window.hisseSort.col === col) {
         return window.hisseSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
     }
-    return ' <i class="fas fa-sort" style="color: rgba(255,255,255,0.3);"></i>';
+    return ' <i class="fas fa-sort" style="color: rgba(15, 23, 42, 0.3);"></i>';
 };
 
 window.toggleHisseTableCollapse = () => {
@@ -4180,7 +4392,7 @@ const getArsivSortIcon = (col) => {
     if (window.arsivSort && window.arsivSort.col === col) {
         return window.arsivSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
     }
-    return ' <i class="fas fa-sort" style="color: rgba(255,255,255,0.3);"></i>';
+    return ' <i class="fas fa-sort" style="color: rgba(15, 23, 42, 0.3);"></i>';
 };
 
 window.toggleVarliklarSort = (col) => {
@@ -4198,7 +4410,7 @@ const getVarliklarSortIcon = (col) => {
     if (window.varliklarSort && window.varliklarSort.col === col) {
         return window.varliklarSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
     }
-    return ' <i class="fas fa-sort" style="color: rgba(255,255,255,0.3);"></i>';
+    return ' <i class="fas fa-sort" style="color: rgba(15, 23, 42, 0.3);"></i>';
 };
 
 window.toggleNakitSort = (col) => {
@@ -4215,7 +4427,7 @@ const getNakitSortIcon = (col) => {
     if (window.nakitSort && window.nakitSort.col === col) {
         return window.nakitSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
     }
-    return ' <i class="fas fa-sort" style="color: rgba(255,255,255,0.3);"></i>';
+    return ' <i class="fas fa-sort" style="color: rgba(15, 23, 42, 0.3);"></i>';
 };
 
 window.toggleNakitTableCollapse = () => {
@@ -4283,7 +4495,7 @@ const renderHisseIslemleri = (container) => {
         const isCollapsed = window.hisseGroupCollapsed[g.menkul] !== false;
         const iconClass = isCollapsed ? 'fa-chevron-right' : 'fa-chevron-down';
 
-        ekstreRowsHtml += `<tr class="group-header-row" style="background: rgba(255,255,255,0.05); font-weight: bold; cursor: pointer;" onclick="window.toggleHisseGroup('${g.menkul}')">
+        ekstreRowsHtml += `<tr class="group-header-row" style="background: #eff6ff; font-weight: 600; cursor: pointer;" onclick="window.toggleHisseGroup('${g.menkul}')">
             <td colspan="8" style="text-align: left !important; color: var(--accent-color); padding-left: 1rem !important;">
                 <i class="fas ${iconClass}" style="margin-right: 8px; width: 12px; display: inline-block; text-align: center;"></i>${g.menkul}
             </td>
@@ -4295,7 +4507,7 @@ const renderHisseIslemleri = (container) => {
                 const tur = isFon ? 'Fon' : 'Hisse';
 
                 if (e.id === window.currentEditId) {
-                    ekstreRowsHtml += `<tr style="background: rgba(0,0,0,0.4);">
+                    ekstreRowsHtml += `<tr style="background: #eff6ff;">
                         <td>${rowIndex++}</td>
                         <td>
                             <select id="edit-tur" class="form-control" style="width:100%; font-size:12px; padding:2px;" onchange="window.updateEditDatalist()">
@@ -4310,7 +4522,7 @@ const renderHisseIslemleri = (container) => {
                         <td><input type="text" id="edit-tutar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}" disabled></td>
                         <td>
                             <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveEditEkstre('${e.id}')">Kaydet</button>
-                            <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--input-bg);" onclick="window.cancelEdit()">İptal</button>
+                            <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--overlay-hover); color: var(--text-primary); border: 1px solid var(--surface-border); box-shadow: none;" onclick="window.cancelEdit()">İptal</button>
                         </td>
                     </tr>`;
                 } else {
@@ -4323,8 +4535,8 @@ const renderHisseIslemleri = (container) => {
                         <td class="${e.adet >= 0 ? 'text-success' : 'text-danger'}">${e.adet.toLocaleString('tr-TR')}</td>
                         <td>${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}</td>
                         <td>
-                            <button class="btn" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditEkstre('${e.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
-                            <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; color: #888888; border: none;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                            <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; box-shadow: none; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditEkstre('${e.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
+                            <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; color: var(--text-secondary); border: none;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     </tr>`;
                 }
@@ -4350,14 +4562,17 @@ const renderHisseIslemleri = (container) => {
         window.ekstreTab = tab;
         if (typeof renderPage === 'function') renderPage();
     });
-    const getTabBg = (tab) => window.ekstreTab === tab ? 'rgba(255,255,255,0.1)' : 'transparent';
-    const getTabColor = (tab) => window.ekstreTab === tab ? '#ffffff' : 'var(--text-secondary)';
+    const getTabBg = (tab) => window.ekstreTab === tab ? 'var(--overlay-bg)' : 'transparent';
+    const getTabColor = (tab) => window.ekstreTab === tab ? 'var(--active-text-color)' : 'var(--text-secondary)';
 
     container.innerHTML = `
         <style>
-            .ekstre-table th, .ekstre-table td {
+            .ekstre-table th {
                 font-size: 12px !important;
-                font-weight: normal !important;
+                font-weight: 600 !important;
+            }
+            .ekstre-table td {
+                font-size: 12px !important;
             }
             .ekstre-table thead, .ekstre-table thead tr, .ekstre-table thead th {
                 position: sticky;
@@ -4374,7 +4589,10 @@ const renderHisseIslemleri = (container) => {
                         <span style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 4px 8px; border-radius: 4px; background: ${getTabBg('hisse')}; color: ${getTabColor('hisse')};" onclick="window.setEkstreTab('hisse')">Hisse ve Fon İşlemleri</span>
                         <span style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 4px 8px; border-radius: 4px; background: ${getTabBg('nakit')}; color: ${getTabColor('nakit')};" onclick="window.setEkstreTab('nakit')">Nakit İşlemleri</span>
                     </div>
-                    <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: #888888; border: none; box-shadow: none;" onclick="window.toggleInlineForm(window.ekstreTab)"><i class="fas fa-plus" style="font-size: 15px;"></i></button>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        ${window.ekstreTab === 'hisse' ? `<div class="search-input-wrap"><i class="fas fa-search"></i><input type="text" class="inline-search-input" placeholder="Menkul ara..." value="${window.escapeHtml(window.ekstreSearchQuery || '')}" oninput="window.filterEkstreTable(this.value)"></div>` : ''}
+                        <button class="btn" style="padding: 4px 8px; display: flex; align-items: center; justify-content: center; background: var(--overlay-bg); color: var(--accent-color); border: 1px solid #bfdbfe; box-shadow: none;" onclick="window.toggleInlineForm(window.ekstreTab)" title="Yeni İşlem Ekle"><i class="fas fa-plus" style="font-size: 13px;"></i></button>
+                    </div>
                 </div>
                 <div id="ekstreler-tables-wrapper" style="display: flex; flex-direction: column; width: 100%;">
                     <div class="page-section ${window.ekstreTab === 'hisse' ? 'active' : ''}" style="${window.ekstreTab === 'hisse' ? '' : 'display: none !important;'} margin-top: 0;">
@@ -4385,7 +4603,7 @@ const renderHisseIslemleri = (container) => {
                         <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleHisseTableCollapse()"><i class="fas ${window.hisseTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 8%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tur')">Tür${getHisseSortIcon('tur')}</th><th style="width: 12%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('menkul')">Menkul${getHisseSortIcon('menkul')}</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tarih')">Tarih${getHisseSortIcon('tarih')}</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tutar')">Tutar${getHisseSortIcon('tutar')}</th><th style="width: 18%;">İşlem</th></tr>
                     </thead>
                     <tbody id="hisse-ekle-section" style="display: none;">
-                        <tr style="background: rgba(0,0,0,0.4);">
+                        <tr style="background: #eff6ff;">
                             <td style="text-align: center;">-</td>
                             <td>
                                 <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px;" onchange="window.updateInlineDatalist()">
@@ -4399,8 +4617,8 @@ const renderHisseIslemleri = (container) => {
                             <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Adet" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
                             <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" disabled></td>
                             <td>
-                                <button class="btn" id="i-submit-btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineHisse()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
-                                <button class="btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('hisse')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
+                                <button class="btn" id="i-submit-btn" style="padding: 2px 4px; font-size: 14px; background: transparent; box-shadow: none; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineHisse()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
+                                <button class="btn" style="padding: 2px 4px; font-size: 14px; background: transparent; box-shadow: none; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('hisse')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
                             </td>
                         </tr>
                     </tbody>
@@ -4472,10 +4690,11 @@ const renderHisseIslemleri = (container) => {
         }
     };
 
-    window.deleteEkstre = (id) => {
-        if (confirm('Bu işlemi silmek istediğinize emin misiniz?')) {
+    window.deleteEkstre = async (id) => {
+        if (await window.showConfirm('Bu işlemi silmek istediğinize emin misiniz?')) {
             State.deleteEkstre(id);
             if (typeof renderPage === 'function') renderPage();
+            window.showToast('İşlem silindi.', 'info');
         }
     };
 
@@ -4548,7 +4767,7 @@ const renderNakitIslemleri = (container, append = false) => {
 
     const nakitRows = nakitHareketleriList.map((n, i) => {
         if (n.id === window.currentNakitEditId) {
-            return `<tr style="background: rgba(0,0,0,0.4);">
+            return `<tr style="background: #eff6ff;">
                 <td>${i + 1}</td>
                 <td><input type="date" id="edit-n-tarih" class="form-control" style="width:100%; font-size:12px; padding:2px; text-align:right;" value="${n.tarih}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
                 <td><input type="number" step="0.01" id="edit-n-tutar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.tutar}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
@@ -4558,15 +4777,15 @@ const renderNakitIslemleri = (container, append = false) => {
                 <td><input type="text" inputmode="decimal" id="edit-n-pry" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.pry || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
                 <td>
                     <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveEditNakit('${n.id}')">Kaydet</button>
-                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--input-bg);" onclick="window.cancelNakitEdit()">İptal</button>
+                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--overlay-hover); color: var(--text-primary); border: 1px solid var(--surface-border); box-shadow: none;" onclick="window.cancelNakitEdit()">İptal</button>
                 </td>
             </tr>`;
         }
         return `<tr>
             <td>${i + 1}</td><td style="text-align: right;">${formatDate(n.tarih)}</td><td class="${n.tutar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(n.tutar, 0)}</td><td>${formatNumber(n.bist100)}</td><td>${formatNumber(n.dolar)}</td><td>${formatNumber(n.gramAltin)}</td><td>${formatNumber(n.pry, 6)}</td>
             <td>
-                <button class="btn" style="padding: 2px 4px; font-size: 12px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditNakit('${n.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
-                <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; color: #888888; border: none;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; box-shadow: none; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditNakit('${n.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
+                <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; color: var(--text-secondary); border: none;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
             </td>
         </tr>`;
     }).join('');
@@ -4582,7 +4801,7 @@ const renderNakitIslemleri = (container, append = false) => {
                         <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleNakitTableCollapse()"><i class="fas ${window.nakitTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tarih')">Tarih${getNakitSortIcon('tarih')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tutar')">Tutar${getNakitSortIcon('tutar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('bist100')">XU100${getNakitSortIcon('bist100')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('dolar')">USDTRY${getNakitSortIcon('dolar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('gramAltin')">GRAMALTIN${getNakitSortIcon('gramAltin')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('pry')">PRY${getNakitSortIcon('pry')}</th><th style="width: 20%;">İşlem</th></tr>
                     </thead>
                     <tbody id="nakit-ekle-section" style="display: none;">
-                        <tr style="background: rgba(0,0,0,0.4);">
+                        <tr style="background: #eff6ff;">
                             <td style="text-align: center;">-</td>
                             <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
                             <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
@@ -4591,8 +4810,8 @@ const renderNakitIslemleri = (container, append = false) => {
                             <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
                             <td><input type="text" inputmode="decimal" id="n-pry" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="PRY" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
                             <td>
-                                <button class="btn" id="n-submit-btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineNakitEntry()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
-                                <button class="btn" style="padding: 2px 4px; font-size: 14px; background: #000000; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('nakit')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
+                                <button class="btn" id="n-submit-btn" style="padding: 2px 4px; font-size: 14px; background: transparent; box-shadow: none; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineNakitEntry()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
+                                <button class="btn" style="padding: 2px 4px; font-size: 14px; background: transparent; box-shadow: none; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('nakit')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
                             </td>
                         </tr>
                     </tbody>
@@ -4612,25 +4831,13 @@ const renderNakitIslemleri = (container, append = false) => {
         container.innerHTML = htmlContent;
     }
 
-    window.toggleInlineForm = (type) => {
-        const section = document.getElementById(`${type}-ekle-section`);
-        if (section) {
-            section.style.display = section.style.display === 'none' ? '' : 'none';
-        }
-        if (type === 'nakit' && typeof window.cancelNakitEdit === 'function') window.cancelNakitEdit();
-        else if (typeof window.cancelEdit === 'function') window.cancelEdit();
+    // (window.toggleInlineForm defined in renderHisseIslemleri)
 
-        // focus the first input if opening
-        if (section && section.style.display === '') {
-            const firstInput = section.querySelector('input, select');
-            if (firstInput) firstInput.focus();
-        }
-    };
-
-    window.deleteNakit = (id) => {
-        if (confirm('Bu nakit hareketini silmek istediğinize emin misiniz?')) {
+    window.deleteNakit = async (id) => {
+        if (await window.showConfirm('Bu nakit hareketini silmek istediğinize emin misiniz?')) {
             State.deleteNakitHareket(id);
             if (typeof renderPage === 'function') renderPage();
+            window.showToast('Nakit hareketi silindi.', 'info');
         }
     };
     window.setEditNakit = (id) => {
@@ -4686,7 +4893,7 @@ const renderVeriler = (container) => {
         fonHtml += `
             <div style="display:flex; gap: 0.5rem; width: 100%;">
                 <input type="number" step="0.000001" id="v-fon-input-${fon}" value="${pFiyat}" class="form-control" style="width: 100%; text-align:right; padding: 0.3rem; font-size: 12px; font-weight: normal; color: var(--text-secondary);" onkeydown="if(event.key === 'Enter') { State.updateFiyat('${fon}', this.value); this.blur(); }">
-                <button class="btn" style="padding: 0; width: 26px; height: 26px; background: #000000; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value);" title="Kaydet"><i class="fas fa-save" style="font-size: 18px; color: var(--success-color) !important;"></i></button>
+                <button class="btn" style="padding: 0; width: 26px; height: 26px; background: transparent; border: none; box-shadow: none; color: var(--success-color); display: flex; align-items: center; justify-content: center; border-radius: 4px;" onclick="State.updateFiyat('${fon}', document.getElementById('v-fon-input-${fon}').value);" title="Kaydet"><i class="fas fa-save" style="font-size: 18px; color: var(--success-color) !important;"></i></button>
             </div>
         `;
     });
@@ -4702,10 +4909,10 @@ const renderVeriler = (container) => {
             <div class="table-container glass" style="margin-bottom: 0;">
                 <div class="table-header" style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 13px; color: var(--text-primary);">Aylık Enflasyon Verileri</span>
-                    <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: #888888; border: none; box-shadow: none;" onclick="window.toggleEnfForm()" title="Ekle"><i class="fas fa-plus" style="font-size: 14px;"></i></button>
+                    <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-secondary); border: none; box-shadow: none;" onclick="window.toggleEnfForm()" title="Ekle"><i class="fas fa-plus" style="font-size: 14px;"></i></button>
                 </div>
                 
-                <div style="max-height: 400px; overflow-y: auto; margin-bottom: 0;">
+                <div style="overflow-x: auto; overflow-y: visible; margin-bottom: 0;">
                     <table class="dash-table compact-table" style="width: 100%;">
                         <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 10;">
                             <tr style="font-size: 12px; font-weight: normal;">
@@ -4807,7 +5014,7 @@ window.renderEnflasyonData = () => {
                 <td style="text-align:right; color:${color}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(pct)}%</td>
                 <td style="text-align:right; color:${cumColor}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(cumMap[item.tarih])}%</td>
                 <td style="text-align:center;">
-                    <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; color: #888888; border: none;" onclick="window.deleteEnflasyon('${item.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                    <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; color: var(--text-secondary); border: none;" onclick="window.deleteEnflasyon('${item.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                 </td>
             </tr>`;
         });
@@ -4821,7 +5028,7 @@ window.addEnflasyon = (e) => {
     const oranStr = document.getElementById('i-enf-oran').value;
 
     if (!tarih || !oranStr) {
-        alert('Lütfen tarih ve oran giriniz.');
+        window.showToast('Lütfen tarih ve oran giriniz.', 'warning');
         return;
     }
 
@@ -4843,11 +5050,12 @@ window.addEnflasyon = (e) => {
     if (typeof renderPage === 'function') renderPage();
 };
 
-window.deleteEnflasyon = (id) => {
-    if (confirm('Bu enflasyon verisini silmek istediğinize emin misiniz?')) {
+window.deleteEnflasyon = async (id) => {
+    if (await window.showConfirm('Bu enflasyon verisini silmek istediğinize emin misiniz?')) {
         State.data.enflasyonListesi = (State.data.enflasyonListesi || []).filter(x => x.id !== id);
         State.save();
         if (typeof renderPage === 'function') renderPage();
+        window.showToast('Enflasyon verisi silindi.', 'info');
     }
 };
 
@@ -4917,14 +5125,16 @@ window.saveUnifiedAnaliz = async () => {
     let finalTarih = tarih;
     let finalBaslik = baslik;
     
+    const activeUser = currentUser || window.currentUser;
+    const activeUserName = (activeUser && (activeUser.displayName || (activeUser.email ? activeUser.email.split('@')[0] : ''))) || 'Kişisel Not';
     if (akisTipi === 'kisisel') {
         isKisiselNot = true;
-        finalBorsaci = window.currentUser ? window.currentUser.displayName : 'Yunus Şensoy';
+        finalBorsaci = activeUserName;
         const d = new Date();
         finalTarih = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
         finalBaslik = '-';
     } else {
-        isKisiselNot = !!(borsaci === 'Yunus Şensoy' || (window.currentUser && borsaci === window.currentUser.displayName));
+        isKisiselNot = !!(activeUserName && borsaci === activeUserName);
     }
 
     if (fileInput && fileInput.files && fileInput.files.length > 0) {
@@ -4943,11 +5153,20 @@ window.saveUnifiedAnaliz = async () => {
         });
 
         try {
+            if (!currentUser) {
+                window.showToast('Dosya yüklemek için giriş yapmalısınız.', 'error');
+                return;
+            }
+            const idToken = await currentUser.getIdToken();
             const base64Content = await toBase64(file);
-            const response = await fetch('/api/upload', {
+            const uploadApiUrl = window.location.hostname.endsWith('.vercel.app') ? '/api/upload' : 'https://yunvest.vercel.app/api/upload';
+            const response = await fetch(uploadApiUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fileContent: base64Content, fileName: file.name, hisse: hisse })
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + idToken
+                },
+                body: JSON.stringify({ content: base64Content, filename: file.name, hisse: hisse })
             });
 
             if (response.ok) {
@@ -4980,9 +5199,9 @@ window.saveUnifiedAnaliz = async () => {
         }
     } else {
         if (isKisiselNot) {
-            if (!notText || !hisse) { alert('Lütfen Hisse ve Notlar alanlarını doldurun.'); return; }
+            if (!notText || !hisse) { window.showToast('Lütfen Hisse ve Notlar alanlarını doldurun.', 'warning'); return; }
         } else {
-            if (!tarih || !borsaci || !hisse) { alert('Lütfen Tarih, Analist/Şirket ve Hisse alanlarını doldurun.'); return; }
+            if (!tarih || !borsaci || !hisse) { window.showToast('Lütfen Tarih, Analist/Şirket ve Hisse alanlarını doldurun.', 'warning'); return; }
         }
 
         if (!State.data.analizler) State.data.analizler = [];
@@ -5003,7 +5222,6 @@ window.saveUnifiedAnaliz = async () => {
         if(document.getElementById('analiz-not')) document.getElementById('analiz-not').value = '';
         
         State.save();
-        State.save();
         const row = document.getElementById('inline-analiz-row');
         if (row) row.style.display = 'none';
         window.currentEditingAnalizId = null;
@@ -5019,7 +5237,7 @@ window.addAnaliz = () => {
         const notTextEl = document.getElementById('analiz-not');
 
         if (!tarihEl || !borsaciEl || !hisseEl) {
-            alert('DOM elements not found! ' + (!tarihEl ? 'tarih ' : '') + (!borsaciEl ? 'borsaci ' : '') + (!hisseEl ? 'hisse' : ''));
+            window.showToast('Form alanları yüklenemedi.', 'error');
             return;
         }
 
@@ -5036,12 +5254,12 @@ window.addAnaliz = () => {
 
         if (isKisiselNot) {
             if (!notText || !hisse) {
-                alert('Lütfen Hisse ve Notlar alanlarını doldurun.');
+                window.showToast('Lütfen Hisse ve Notlar alanlarını doldurun.', 'warning');
                 return;
             }
         } else {
             if (!tarih || !borsaci || !hisse) {
-                alert('Lütfen Tarih, Analist ve Hisse alanlarını doldurun.');
+                window.showToast('Lütfen Tarih, Analist ve Hisse alanlarını doldurun.', 'warning');
                 return;
             }
         }
@@ -5096,7 +5314,7 @@ window.addAnaliz = () => {
         if (row) row.style.display = 'none';
 
     } catch (e) {
-        alert('Hata oluştu: ' + e.message);
+        window.showToast('Hata oluştu: ' + e.message, 'error');
         console.error(e);
     }
 };
@@ -5127,9 +5345,9 @@ window.editAnaliz = (id) => {
         const nEl = document.getElementById('analiz-not');
         if (nEl) nEl.value = analiz.notText || '';
 
-        const radioAnaliz = document.querySelector('input[name="notTipi"][value="analiz"]');
-        const radioKisisel = document.querySelector('input[name="notTipi"][value="kisisel"]');
-        const detayAlanlari = document.getElementById('analiz-detay-alanlari');
+        const radioAnaliz = document.querySelector('input[name="akisTipi"][value="analiz"]') || document.querySelector('input[name="notTipi"][value="analiz"]');
+        const radioKisisel = document.querySelector('input[name="akisTipi"][value="kisisel"]') || document.querySelector('input[name="notTipi"][value="kisisel"]');
+        const detayAlanlari = document.getElementById('akis-genel-inputs') || document.getElementById('analiz-detay-alanlari');
 
         if (analiz.isKisiselNot) {
             if (radioKisisel) radioKisisel.checked = true;
@@ -5140,7 +5358,6 @@ window.editAnaliz = (id) => {
         }
 
         if (lEl && !analiz.isKisiselNot) {
-            console.log("Yunvest Debug: Focusing Link element (lEl)");
             setTimeout(() => { 
                 if (lEl) {
                     lEl.focus(); 
@@ -5155,11 +5372,12 @@ window.editAnaliz = (id) => {
     }, 50);
 };
 
-window.deleteAnaliz = (id) => {
-    if (!confirm('Bu analizi silmek istediğinize emin misiniz?')) return;
+window.deleteAnaliz = async (id) => {
+    if (!(await window.showConfirm('Bu analizi silmek istediğinize emin misiniz?'))) return;
     State.data.analizler = State.data.analizler.filter(a => String(a.id) !== String(id));
     State.save();
     renderPage();
+    window.showToast('Analiz kaydı silindi.', 'info');
 };
 
 window.setupCustomDropdown = (inputId, optionsList) => {
@@ -5191,11 +5409,11 @@ window.setupCustomDropdown = (inputId, optionsList) => {
         list.style.flexDirection = 'column';
         list.style.padding = '0.5rem 0';
         list.style.borderRadius = '12px';
-        list.style.boxShadow = '0 4px 15px rgba(0,0,0,0.8)';
+        list.style.boxShadow = 'var(--shadow-lg)';
         list.style.marginTop = '5px';
         // Give list a massive z-index
         list.style.zIndex = '99999';
-        list.style.background = '#1e1e24';
+        list.style.background = 'var(--dropdown-bg)';
         list.style.border = '1px solid var(--surface-border)';
         wrapper.appendChild(list);
     }
@@ -5229,7 +5447,7 @@ window.setupCustomDropdown = (inputId, optionsList) => {
                 item.className = 'custom-dropdown-item';
                 item.style.padding = '10px 15px';
                 item.style.cursor = 'pointer';
-                item.style.color = '#fff';
+                item.style.color = 'var(--text-primary)';
                 item.style.textAlign = 'left';
                 item.style.background = 'transparent';
 
@@ -5273,7 +5491,7 @@ window.setupCustomDropdown = (inputId, optionsList) => {
         const items = list.querySelectorAll('.custom-dropdown-item');
         items.forEach((item, index) => {
             if (index === activeIndex) {
-                item.style.background = 'rgba(255,255,255,0.1)';
+                item.style.background = 'var(--overlay-bg)';
                 item.scrollIntoView({ block: 'nearest' });
             } else {
                 item.style.background = 'transparent';
@@ -5333,18 +5551,19 @@ const renderAnalizler = (container) => {
     const borsaciOptions = uniqueBorsacilar.map(b => `<option value="${b}">`).join('');
 
     let tableRows = analizler.map(a => {
-        const linkHtml = a.baglanti ? `<a href="${a.baglanti}" target="_blank" style="color: var(--accent-color); text-decoration: none;"><i class="fas fa-external-link-alt"></i> Link</a>` : '-';
+        const safeHref = window.sanitizeUrl(a.baglanti);
+        const linkHtml = safeHref ? `<a href="${window.escapeHtml(safeHref)}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-color); text-decoration: none;"><i class="fas fa-external-link-alt"></i> Link</a>` : '-';
         return `
             <tr>
-                <td style="text-align: right; white-space: nowrap; width: 100px; color: var(--text-secondary);">${a.tarih ? a.tarih.split('-').reverse().join('.') : ''}</td>
-                <td style="text-align: left; word-break: break-word; width: 140px; padding-left: 10px; color: var(--text-secondary);">${(a.borsaci || '').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu, '').trim()}</td>
-                <td style="text-align: left; font-weight: bold; white-space: nowrap; width: 100px; padding-left: 10px;">${a.hisse}</td>
+                <td style="text-align: right; white-space: nowrap; width: 100px; color: var(--text-secondary);">${window.escapeHtml(a.tarih ? a.tarih.split('-').reverse().join('.') : '')}</td>
+                <td style="text-align: left; word-break: break-word; width: 140px; padding-left: 10px; color: var(--text-secondary);">${window.escapeHtml((a.borsaci || '').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}]/gu, '').trim())}</td>
+                <td style="text-align: left; font-weight: bold; white-space: nowrap; width: 100px; padding-left: 10px;">${window.escapeHtml(a.hisse)}</td>
                 <td style="text-align: left; white-space: nowrap; width: 100px; padding-left: 10px;">${linkHtml}</td>
-                <td style="text-align: left; word-break: break-word; width: 100%;">${a.notText || ''}</td>
+                <td style="text-align: left; word-break: break-word; width: 100%;">${window.escapeHtml(a.notText || '')}</td>
                 <td style="text-align: center; white-space: nowrap; width: 90px;">
                     <div style="display: flex; gap: 0.5rem; justify-content: center;">
                         <button class="btn btn-icon" style="color: var(--accent-color);" onclick="window.editAnaliz(${a.id})" title="Düzenle"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-icon" style="background: transparent; color: #888888; padding: 2px; font-size: 14px; border: none;" onclick="window.deleteAnaliz(${a.id})" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                        <button class="btn btn-icon" style="background: transparent; color: var(--text-secondary); padding: 2px; font-size: 14px; border: none;" onclick="window.deleteAnaliz(${a.id})" title="Sil"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </td>
             </tr>
@@ -5379,8 +5598,8 @@ const renderAnalizler = (container) => {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr id="inline-analiz-row" style="display: none; background: rgba(0,0,0,0.4);">
-                                <td><input type="date" id="analiz-tarih" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px; text-align:right; color-scheme: dark;" value="${today}"></td>
+                            <tr id="inline-analiz-row" style="display: none; background: #eff6ff;">
+                                <td><input type="date" id="analiz-tarih" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px; text-align:right; color-scheme: light;" value="${today}"></td>
                                 <td><input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px; text-align:left;" placeholder="Analist"></td>
                                 <td><input type="text" id="analiz-hisse" list="bist-hisse-list" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px; text-transform:uppercase; text-align:left;" placeholder="Hisse"></td>
                                 <td><input type="text" id="analiz-baglanti" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px; text-align:left;" placeholder="Link"></td>
@@ -5467,17 +5686,17 @@ const renderAyarlar = (container) => {
             if (unEl) unEl.innerText = newName;
             return db.collection('users').doc(currentUser.uid).set({ phone: newPhone, displayName: newName }, { merge: true });
         }).then(() => {
-            alert('Profil güncellendi!');
-        }).catch(err => alert(err.message));
+            window.showToast('Profil güncellendi!', 'success');
+        }).catch(err => window.showToast(err.message, 'error'));
     });
 
     document.getElementById('password-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const newPass = document.getElementById('profile-new-password').value;
         currentUser.updatePassword(newPass).then(() => {
-            alert('Parola başarıyla güncellendi!');
+            window.showToast('Parola başarıyla güncellendi!', 'success');
             document.getElementById('password-form').reset();
-        }).catch(err => alert(err.message));
+        }).catch(err => window.showToast(err.message, 'error'));
     });
 };
 window.getGBHF = (hisse) => {
@@ -5614,18 +5833,18 @@ const renderHedef = (container) => {
             if (window.stockData && window.stockData[hisse]) {
                 guncelPct = parseFloat(window.stockData[hisse].yuzde) || 0;
             }
-            const gColor = guncelPct >= 0 ? '#2ecc71' : '#e74c3c';
+            const gColor = guncelPct >= 0 ? '#059669' : '#dc2626';
             const guncelFiyatHtml = `<td style="text-align: right !important;">${fmtDec(guncelFiyat)}<br><span style="color:${gColor}; font-size:10px;">${guncelPct > 0 ? '+' : ''}${guncelPct.toFixed(2)}%</span></td>`;
 
             const renderCell = (year) => {
                 if (!hData[year]) return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
-                const color = hData[year].potansiyel > 0 ? '#2ecc71' : '#e74c3c';
+                const color = hData[year].potansiyel > 0 ? '#059669' : '#dc2626';
                 return `<td style="text-align: right !important;">${fmtDec(hData[year].hedefFiyat)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
             };
 
             let gbhfHtml = `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
             if (gbhfData) {
-                const color = gbhfData.potansiyel > 0 ? '#2ecc71' : '#e74c3c';
+                const color = gbhfData.potansiyel > 0 ? '#059669' : '#dc2626';
                 gbhfHtml = `<td style="text-align: right !important; color:${color} !important; font-weight:bold;" title="${gbhfData.period}">${fmtDec(gbhfData.hedefFiyat)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(gbhfData.potansiyel)}</td>`;
             }
 
@@ -5677,7 +5896,7 @@ const renderHedef = (container) => {
                     </tbody>
                 </table>
             </div>
-            <p style="font-size:0.85rem; color:#aaa;"><i class="fas fa-info-circle"></i> Tablodaki değerler, Hisseler > Anasayfa > Değerleme panelinde girdiğiniz tahminlere göre otomatik hesaplanır ve buraya yansır.</p>
+            <p style="font-size:0.85rem; color:var(--text-secondary);"><i class="fas fa-info-circle"></i> Tablodaki değerler, Hisseler > Anasayfa > Değerleme panelinde girdiğiniz tahminlere göre otomatik hesaplanır ve buraya yansır.</p>
         </div>
     `;
 };
@@ -5770,7 +5989,7 @@ window.addHisseToTakipFromModal = () => {
 
     const validStocks = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : (window.defaultStocksArray || []);
     if (!validStocks.includes(val)) {
-        alert('Geçersiz hisse kodu: ' + val);
+        window.showToast('Geçersiz hisse kodu: ' + val, 'warning');
         return;
     }
 
@@ -5783,7 +6002,7 @@ window.addHisseToTakipFromModal = () => {
         window.renderTakipEditList();
         if (currentPage === 'anasayfa') renderPage();
     } else {
-        alert('Bu hisse zaten takip listesinde.');
+        window.showToast('Bu hisse zaten takip listesinde.', 'info');
     }
 };
 
@@ -5808,7 +6027,7 @@ const getTakipSortIcon = (col) => {
     if (window.takipSort && window.takipSort.col === col) {
         return window.takipSort.asc ? ' <i class="fas fa-sort-up"></i>' : ' <i class="fas fa-sort-down"></i>';
     }
-    return ' <i class="fas fa-sort" style="color: rgba(255,255,255,0.3);"></i>';
+    return ' <i class="fas fa-sort" style="color: rgba(15, 23, 42, 0.3);"></i>';
 };
 
 const renderAnasayfa = (container) => {
@@ -6000,7 +6219,7 @@ const renderAnasayfa = (container) => {
 
         const formatGunluk = (val) => {
             if (val === null || val === undefined || isNaN(val)) return `<td style="text-align: right !important;">-</td>`;
-            const color = val > 0 ? '#2ecc71' : (val < 0 ? '#e74c3c' : 'var(--text-primary)');
+            const color = val > 0 ? '#059669' : (val < 0 ? '#dc2626' : 'var(--text-primary)');
             const formatted = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(val));
             const prefix = val > 0 ? '%+' : (val < 0 ? '%-' : '%');
             return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${prefix}${formatted}</td>`;
@@ -6009,13 +6228,13 @@ const renderAnasayfa = (container) => {
         const hData = State.data.hedefFiyatlar && State.data.hedefFiyatlar[hisse] ? State.data.hedefFiyatlar[hisse] : null;
         const renderCell = (year) => {
             if (!hData || !hData[year]) return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
-            const color = hData[year].potansiyel > 0 ? '#2ecc71' : '#e74c3c';
+            const color = hData[year].potansiyel > 0 ? '#059669' : '#dc2626';
             return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtDec(hData[year].hedefFiyat)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
         };
 
         const renderAraCell = (hf, pot, period) => {
             if (hf === -Infinity || pot === -Infinity) return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
-            const color = pot > 0 ? '#2ecc71' : '#e74c3c';
+            const color = pot > 0 ? '#059669' : '#dc2626';
             return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtDec(hf)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(pot)}</td>`;
         };
 
@@ -6039,10 +6258,11 @@ const renderAnasayfa = (container) => {
 
         const restHtml = window.takipTab === 'degerleme' ? degerlemeHtml : oranlarHtml;
 
+        const safeHisse = window.escapeHtml(hisse);
         rowsHtml += `
-            <tr>
+            <tr data-hisse="${safeHisse}">
                 <td style="text-align: center !important;">${i + 1}</td>
-                <td class="takip-hisse-link" style="text-align: left !important;" onclick="window.goToHisse('${hisse}')">${hisse}</td>
+                <td class="takip-hisse-link" style="text-align: left !important;" onclick="window.goToHisse('${safeHisse}')">${safeHisse}</td>
                 <td style="text-align: right !important;">${fmtDec(fiyat)}</td>
                 ${formatGunluk(gunlukYuzde)}
                 ${restHtml}
@@ -6057,24 +6277,33 @@ const renderAnasayfa = (container) => {
 
     container.innerHTML = `
         <style>
-            .takip-table th, .takip-table td {
+            .takip-table th {
                 font-size: 12px !important;
-                font-weight: normal !important;
+                font-weight: 600 !important;
+            }
+            .takip-table td {
+                font-size: 12px !important;
             }
         </style>
-        <div class="page-section active" style="display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 0px;">
+        <div class="page-section active" style="display: flex; flex-direction: column; padding: 0px;">
 
             <!-- Takip Listesi Tablosu -->
-            <div class="glass" style="display: flex; flex-direction: column; flex: 1; overflow: hidden; padding: 0.5rem 1rem 1rem 1rem;">
+            <div class="glass" style="display: flex; flex-direction: column; padding: 0.75rem 1rem 1rem 1rem;">
 
-                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; justify-content: space-between; align-items: center;">
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.65rem; justify-content: space-between; align-items: center;">
                     <div style="display: flex; gap: 0.5rem;">
-                        <span style="cursor: pointer; font-size: 12px; font-weight: normal; padding: 4px 8px; border-radius: 4px; color: ${window.takipTab === 'degerleme' ? 'var(--active-text-color)' : 'var(--text-secondary)'}; background: ${window.takipTab === 'degerleme' ? 'var(--overlay-bg)' : 'transparent'}" onclick="window.setTakipTab('degerleme')">Değerleme</span>
-                        <span style="cursor: pointer; font-size: 12px; font-weight: normal; padding: 4px 8px; border-radius: 4px; color: ${window.takipTab === 'oranlar' ? 'var(--active-text-color)' : 'var(--text-secondary)'}; background: ${window.takipTab === 'oranlar' ? 'var(--overlay-bg)' : 'transparent'}" onclick="window.setTakipTab('oranlar')">Oranlar</span>
+                        <span style="cursor: pointer; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 7px; color: ${window.takipTab === 'degerleme' ? 'var(--active-text-color)' : 'var(--text-secondary)'}; background: ${window.takipTab === 'degerleme' ? 'var(--overlay-bg)' : 'transparent'}" onclick="window.setTakipTab('degerleme')">Değerleme</span>
+                        <span style="cursor: pointer; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 7px; color: ${window.takipTab === 'oranlar' ? 'var(--active-text-color)' : 'var(--text-secondary)'}; background: ${window.takipTab === 'oranlar' ? 'var(--overlay-bg)' : 'transparent'}" onclick="window.setTakipTab('oranlar')">Oranlar</span>
                     </div>
-                    <span id="takip-edit-btn" class="fas fa-pen" style="color: var(--text-secondary); cursor: pointer; font-size: 13px; padding: 4px;" onclick="window.toggleTakipEditModal(event)"></span>
+                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                        <div class="search-input-wrap">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="takip-search-input" class="inline-search-input" placeholder="Hisse ara..." value="${window.escapeHtml(window.takipSearchQuery || '')}" oninput="window.filterTakipTable(this.value)">
+                        </div>
+                        <span id="takip-edit-btn" class="fas fa-pen" style="color: var(--text-secondary); cursor: pointer; font-size: 13px; padding: 6px; border-radius: 6px; background: var(--input-bg); border: 1px solid var(--surface-border);" title="Takip Listesini Düzenle" onclick="window.toggleTakipEditModal(event)"></span>
+                    </div>
                 </div>
-                <div style="flex: 1; overflow: auto; min-height: 0; border-radius: 8px;">
+                <div style="overflow-x: auto; overflow-y: visible; border-radius: 8px;">
                     <table class="dash-table compact-table takip-table" style="text-align: center; border-collapse: separate; border-spacing: 0;">
                         <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
                             <tr>
@@ -6113,11 +6342,12 @@ const renderAnasayfa = (container) => {
             </div>
         </div>
     `;
+    if (window.takipSearchQuery) window.filterTakipTable(window.takipSearchQuery);
     } catch(err) {
-        container.innerHTML = `<div style="padding: 20px; color: #ff6b6b; font-family: monospace; font-size: 14px;">
+        container.innerHTML = `<div style="padding: 20px; color: var(--danger-color); font-family: monospace; font-size: 14px;">
             <h3>Takip Listesi Yüklenirken Hata Oluştu!</h3>
             <p>${err.message}</p>
-            <pre style="margin-top: 10px; color: #ffcccc;">${err.stack}</pre>
+            <pre style="margin-top: 10px; color: #991b1b;">${err.stack}</pre>
         </div>`;
     }
 };
@@ -6136,7 +6366,7 @@ window.confirmAddHisse = () => {
         const defaultStocks = ["THYAO", "KCHOL", "TUPRS", "AKBNK", "GARAN", "ISCTR", "YKBNK", "SISE", "BIMAS", "FROTO", "EREGL", "SAHOL", "ASELS", "TCELL", "ENKAI", "PGSUS", "PETKM", "TOASO", "TTKOM", "ARCLK"];
         const validStocks = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : defaultStocks;
         if (!validStocks.includes(hisseKodu)) {
-            alert('Lütfen geçerli bir BİST hisse kodu giriniz veya listeden seçiniz.');
+            window.showToast('Lütfen geçerli bir BİST hisse kodu giriniz veya listeden seçiniz.', 'warning');
             return;
         }
         if (!State.data.takipListesi) State.data.takipListesi = [];
@@ -6166,22 +6396,23 @@ window.exportData = () => {
     URL.revokeObjectURL(url);
 };
 
-window.forceSyncToWeb = () => {
+window.forceSyncToWeb = async () => {
     if (!currentUser) {
-        alert("Web'e eşitlemek için giriş yapmalısınız!");
+        window.showToast("Web'e eşitlemek için giriş yapmalısınız!", 'warning');
         return;
     }
     if (!State.data || !State.data.ekstre || State.data.ekstre.length === 0) {
-        alert("Eşitlenecek yerel veri bulunamadı!");
+        window.showToast("Eşitlenecek yerel veri bulunamadı!", 'warning');
         return;
     }
-    if (confirm("Bu işlem bilgisayarınızdaki TÜM verileri zorla Web'e yükleyecek. Emin misiniz?")) {
+    if (await window.showConfirm("Bu işlem bilgisayarınızdaki TÜM verileri zorla Web'e yükleyecek. Emin misiniz?", "Evet, Yükle")) {
         State.data.dataUpdated = Date.now();
         State.data.lastUpdated = Date.now() + (1000 * 60 * 60 * 24 * 365 * 10);
+        State.pruneHisseFiyatlari();
         db.collection('app_data').doc(currentUser.uid).set(State.data).then(() => {
-            alert("Verileriniz başarıyla Web'e yüklendi! Artık telefonunuzdan veya webden görebilirsiniz.");
+            window.showToast("Verileriniz başarıyla Web'e yüklendi!", 'success');
         }).catch(err => {
-            alert("Hata oluştu: " + err.message);
+            window.showToast("Hata oluştu: " + err.message, 'error');
         });
     }
 };
@@ -6190,14 +6421,15 @@ window.importData = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
         try {
             const importedData = JSON.parse(ev.target.result);
             if (!importedData || typeof importedData !== 'object') throw new Error("Geçersiz veri");
 
-            if (confirm("Bu işlem dosyadan yüklediğiniz verileri mevcut verilerinizle BİRLEŞTİRECEK (Nakit hareketleri, hisse notları vb. kaybolmayacak). Onaylıyor musunuz?")) {
+            if (await window.showConfirm("Dosyadan yüklediğiniz veriler mevcut verilerinizle BİRLEŞTİRECEK. Onaylıyor musunuz?", "Evet, Birleştir")) {
                 const mergeData = (target, source) => {
                     for (const key of Object.keys(source)) {
+                        if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
                         if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
                             if (!target[key]) target[key] = {};
                             mergeData(target[key], source[key]);
@@ -6225,11 +6457,11 @@ window.importData = async (e) => {
 
                 State.data = mergeData(State.data || {}, importedData);
                 State.save();
-                alert("Veriler başarıyla birleştirildi!");
+                window.showToast("Veriler başarıyla birleştirildi!", "success");
                 if (typeof renderPage === 'function') renderPage();
             }
         } catch (err) {
-            alert("Dosya okunamadı: " + err.message);
+            window.showToast("Dosya okunamadı: " + err.message, "error");
         }
         e.target.value = '';
     };
@@ -6266,7 +6498,7 @@ window.confirmRemoveHisse = () => {
             document.getElementById('hisse-sil-modal').style.display = 'none';
             input.value = '';
         } else {
-            alert(hisseKodu + ' takip listesinde bulunamadı!');
+            window.showToast(hisseKodu + ' takip listesinde bulunamadı!', 'warning');
         }
     }
 };
@@ -6287,13 +6519,14 @@ window.openRemoveModal = () => {
     }
 };
 
-window.removeTakip = (hisse) => {
+window.removeTakip = async (hisse) => {
     if (!hisse) return;
-    if (confirm(hisse + ' hissesini takip listesinden çıkarmak istediğinize emin misiniz?')) {
+    if (await window.showConfirm(hisse + ' hissesini takip listesinden çıkarmak istediğinize emin misiniz?')) {
         State.removeTakip(hisse);
         window.currentSelectedHisse = null;
         if (typeof window.updateGlobalHisseDropdown === 'function') window.updateGlobalHisseDropdown();
         if (typeof renderPage === 'function') renderPage();
+        window.showToast(hisse + ' takip listesinden çıkarıldı.', 'info');
     }
 };
 
@@ -6325,11 +6558,11 @@ window.updateGlobalHisseDropdown = () => {
         let dropdownHtml = '';
         const sortedTakip = [...State.data.takipListesi].sort((a, b) => a.localeCompare(b));
         sortedTakip.forEach(h => {
-            dropdownHtml += `<div class="hisse-menu-item" style="padding: 0.3rem 0.8rem; cursor: pointer; border-bottom: 1px solid var(--table-border); font-size: 13px; color: #eee;" onclick="window.openHisseFromDropdown('${h}')">${h}</div>`;
+            dropdownHtml += `<div class="hisse-menu-item" style="padding: 0.3rem 0.8rem; cursor: pointer; border-bottom: 1px solid var(--table-border); font-size: 13px; color: var(--text-primary);" onclick="window.openHisseFromDropdown('${h}')">${h}</div>`;
         });
         dropdownHtml += `<div style="display:flex; justify-content:flex-end; align-items:center; padding: 0.3rem 0.8rem;">
             <div style="font-size: 1rem; font-weight:bold; cursor: pointer; color: var(--accent-color);" onclick="document.getElementById('hisse-modal').style.display='flex'; window.hideHisseDropdown(); document.getElementById('modal-hisse-input').focus();">+</div>
-            <div style="font-size: 1.5rem; font-weight:bold; cursor: pointer; color: #ff6b6b; margin-top:-4px;" onclick="window.openRemoveModal()">-</div>
+            <div style="font-size: 1.5rem; font-weight:bold; cursor: pointer; color: var(--danger-color); margin-top:-4px;" onclick="window.openRemoveModal()">-</div>
         </div>`;
         hisseDropdown.innerHTML = dropdownHtml;
     }
@@ -6354,10 +6587,35 @@ window.toggleSidebar = () => {
             sidebar.classList.toggle('show-mobile');
             if (overlay) overlay.classList.toggle('show-mobile');
         } else {
-            sidebar.classList.toggle('collapsed');
+            const isCollapsed = sidebar.classList.toggle('collapsed');
+            sidebar.classList.toggle('expanded', !isCollapsed);
+            try { localStorage.setItem('yunvest_sidebar_collapsed', String(isCollapsed)); } catch (e) {}
         }
     }
 };
+
+window.toggleUserMenu = (e) => {
+    if (e) e.stopPropagation();
+    const card = document.getElementById('user-dropdown-card');
+    const pill = document.getElementById('user-name-btn');
+    if (!card || !pill) return;
+    const isOpen = card.classList.toggle('open');
+    pill.classList.toggle('open', isOpen);
+};
+
+window.closeUserMenu = () => {
+    const card = document.getElementById('user-dropdown-card');
+    const pill = document.getElementById('user-name-btn');
+    if (card) card.classList.remove('open');
+    if (pill) pill.classList.remove('open');
+};
+
+document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('user-menu-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+        window.closeUserMenu();
+    }
+});
 
 window.openSecondarySidebar = (title) => {
     const sidebar = document.getElementById('secondary-sidebar');
@@ -6390,10 +6648,9 @@ const renderPage = () => {
 };
 
 const _renderPageActual = () => {
-    // update active nav
+    // update active nav (both desktop sidebar & mobile bottom nav)
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    const activeBtn = document.querySelector(`.nav-btn[data-target="${currentPage}"]`);
-    if (activeBtn) activeBtn.classList.add('active');
+    document.querySelectorAll(`.nav-btn[data-target="${currentPage}"]`).forEach(b => b.classList.add('active'));
 
     const container = document.getElementById('main-content');
     if (!container) return;
@@ -6407,11 +6664,25 @@ const _renderPageActual = () => {
         window.chartPortfoyGecmisiInstance = null;
     }
 
-    // Top Bar visibility:
+    // Market Ticker Strip visibility + Fixed Dark Top Header Active Page Badge
     const topBar = document.querySelector('.top-bar');
     if (topBar) {
-        topBar.style.display = currentPage === 'anasayfa' ? 'flex' : 'none';
+        topBar.classList.toggle('ticker-hidden', currentPage !== 'anasayfa');
     }
+    const headerTitleEl = document.getElementById('header-active-title');
+    const headerIconEl = document.getElementById('header-active-icon');
+    const pageMeta = {
+        anasayfa: { title: 'Takip Listesi', icon: 'fas fa-list-ul' },
+        portfoy: { title: 'Portföy', icon: 'fas fa-briefcase' },
+        hisse_islemleri: { title: 'Ekstreler', icon: 'fas fa-receipt' },
+        veriler: { title: 'Enflasyon Verileri', icon: 'fas fa-chart-line' },
+        notlar: { title: 'Notlarım', icon: 'fas fa-sticky-note' },
+        ayarlar: { title: 'Hesap Ayarları', icon: 'fas fa-user-cog' },
+        hisse_detay: { title: window.currentSelectedHisse || 'Hisse Detay', icon: 'fas fa-chart-bar' }
+    };
+    const meta = pageMeta[currentPage] || { title: 'YUNVest', icon: 'fas fa-chart-pie' };
+    if (headerTitleEl) headerTitleEl.textContent = meta.title;
+    if (headerIconEl) headerIconEl.className = meta.icon;
 
     switch (currentPage) {
         case 'anasayfa': renderAnasayfa(container); break;
@@ -6432,7 +6703,7 @@ const _renderPageActual = () => {
 window.renderNotlar = (container) => {
     container.innerHTML = `
         <div class="header-section" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0px;">
-            <h2 style="margin: 0; font-size: 17px; font-weight: 700; background: linear-gradient(90deg, #fff, #aaa); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Notlarım</h2>
+            <h2 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--text-primary);">Notlarım</h2>
             <button class="btn" style="background: var(--accent-color); color: #fff;" onclick="window.openNoteModal()"><i class="fas fa-plus"></i> Yeni Not Ekle</button>
         </div>
         <div id="notes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; align-items: start; margin-top: -10px;">
@@ -6443,7 +6714,7 @@ window.renderNotlar = (container) => {
     const notes = State.data.notlar || [];
 
     if (notes.length === 0) {
-        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 4rem 1rem; background: rgba(255,255,255,0.02); border-radius: 12px; border: 1px dashed rgba(255,255,255,0.1);">
+        grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-secondary); padding: 4rem 1rem; background: var(--surface-color); border-radius: 12px; border: 1px dashed var(--input-border);">
             <i class="fas fa-sticky-note" style="font-size: 3rem; opacity: 0.5; margin-bottom: 1rem;"></i><br>
             Henüz hiç not eklemediniz.<br>
             <span style="font-size: 0.9rem; opacity: 0.7;">Fikirlerinizi, al-sat stratejilerinizi veya hatırlatıcılarınızı buraya kaydedebilirsiniz.</span>
@@ -6452,14 +6723,14 @@ window.renderNotlar = (container) => {
         notes.sort((a, b) => b.timestamp - a.timestamp).forEach(note => {
             const card = document.createElement('div');
             card.className = 'dash-card';
-            card.style.cssText = `position: relative; display: flex; flex-direction: column; background: var(--surface-color); padding: 1.5rem; border-radius: 12px; border-left: 4px solid ${note.color || 'var(--accent-color)'}; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s;`;
-            card.onmouseover = () => { card.style.transform = 'translateY(-3px)'; card.style.boxShadow = '0 8px 25px rgba(0,0,0,0.4)'; };
-            card.onmouseout = () => { card.style.transform = 'none'; card.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)'; };
+            card.style.cssText = `position: relative; display: flex; flex-direction: column; background: var(--surface-color); padding: 1.5rem; border-radius: 12px; border-left: 4px solid ${note.color || 'var(--accent-color)'}; box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06); transition: transform 0.2s, box-shadow 0.2s;`;
+            card.onmouseover = () => { card.style.transform = 'translateY(-3px)'; card.style.boxShadow = '0 8px 24px rgba(15, 23, 42, 0.12)'; };
+            card.onmouseout = () => { card.style.transform = 'none'; card.style.boxShadow = '0 2px 10px rgba(15, 23, 42, 0.06)'; };
 
             const dateStr = new Date(note.timestamp).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
             const urlRegex = /(https?:\/\/[^\s<]+)/g;
-            const formattedContent = (note.content || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>').replace(urlRegex, '<a href="$1" target="_blank" style="color: #3498db; text-decoration: underline;">$1</a>');
+            const formattedContent = (note.content || '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>').replace(urlRegex, '<a href="$1" target="_blank" style="color: var(--accent-color); text-decoration: underline;">$1</a>');
             const formattedTitle = (note.title || 'Başlıksız').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
             card.innerHTML = `
@@ -6469,7 +6740,7 @@ window.renderNotlar = (container) => {
                         <button class="btn" style="background: transparent; color: var(--danger-color); padding: 0.2rem 0.5rem; font-size: 12px;" onclick="window.deleteNote('${note.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                         <div style="position: relative;">
                             <button class="btn" style="background: transparent; color: var(--text-secondary); padding: 0.2rem 0.5rem; font-size: 12px;" onclick="window.toggleNoteColorMenu('${note.id}', event)" title="Renk Seçenekleri"><i class="fas fa-ellipsis-v"></i></button>
-                            <div id="note-color-menu-${note.id}" style="display: none; position: absolute; right: 0; top: 100%; background: #2c2c2e; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.7); z-index: 10; padding: 0.5rem; min-width: 150px;">
+                            <div id="note-color-menu-${note.id}" style="display: none; position: absolute; right: 0; top: 100%; background: var(--dropdown-bg); border: 1px solid var(--surface-border); border-radius: 8px; box-shadow: var(--shadow-lg); z-index: 10; padding: 0.5rem; min-width: 150px;">
                                 <div style="display: flex; gap: 0.4rem; justify-content: space-between;">
                                     <div class="color-swatch" style="width:18px; height:18px; border-radius:50%; background:#3498db; cursor:pointer;" onclick="window.changeNoteColor('${note.id}', '#3498db')"></div>
                                     <div class="color-swatch" style="width:18px; height:18px; border-radius:50%; background:#2ecc71; cursor:pointer;" onclick="window.changeNoteColor('${note.id}', '#2ecc71')"></div>
@@ -6483,7 +6754,7 @@ window.renderNotlar = (container) => {
                 </div>
                 <div id="note-content-display-${note.id}" style="color: var(--text-secondary); font-size: calc(0.95rem - 3px); line-height: 1.6; word-break: break-word; margin-bottom: 6px; cursor: text;" ondblclick="window.enterNoteEditMode('${note.id}')">${formattedContent}</div>
                 <textarea id="note-content-edit-${note.id}" class="form-control" style="display:none; width: 100%; font-size: calc(0.95rem - 3px); line-height: 1.6; font-family: inherit; resize: vertical; margin-bottom: 6px; min-height: 100px; box-sizing: border-box;" onblur="window.saveNoteInline('${note.id}')"></textarea>
-                <div style="font-size: 0.75rem; color: #777; text-align: right; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; margin-bottom: -0.5rem;"><i class="far fa-clock"></i> ${dateStr}</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); text-align: right; border-top: 1px solid var(--table-border); padding-top: 6px; margin-bottom: -0.5rem;"><i class="far fa-clock"></i> ${dateStr}</div>
             `;
             grid.appendChild(card);
         });
@@ -6493,17 +6764,17 @@ window.renderNotlar = (container) => {
         const modal = document.createElement('div');
         modal.id = 'note-modal';
         modal.className = 'app-container';
-        modal.style.cssText = 'display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 2000; opacity: 0; transition: opacity 0.3s;';
+        modal.style.cssText = 'display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(4px); z-index: 2000; opacity: 0; transition: opacity 0.3s;';
         modal.innerHTML = `
-            <div class="glass" style="width: 90%; max-width: 500px; height: 700px; display: flex; flex-direction: column; padding: 1rem; border-radius: 8px; position: relative; transform: scale(0.95); transition: transform 0.3s;">
+            <div class="glass" style="width: 92%; max-width: 500px; height: min(680px, 86vh); display: flex; flex-direction: column; padding: 1rem; border-radius: 8px; position: relative; transform: scale(0.95); transition: transform 0.3s;">
                 <h3 id="note-modal-title" style="margin-top: 0; margin-bottom: 0.8rem; color: var(--text-primary); font-size: calc(1.2rem - 3px); flex-shrink: 0;">Yeni Not Ekle</h3>
                 <input type="hidden" id="note-id-input" value="">
-                <input type="text" id="note-title-input" placeholder="Not Başlığı (İsteğe bağlı)" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: var(--text-primary); outline: none; font-size: calc(1.2rem - 3px); flex-shrink: 0;">
-                <textarea id="note-content-input" placeholder="Notunuzu buraya yazın..." style="width: 100%; flex: 1; padding: 0.5rem; margin-bottom: 0.5rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: var(--text-primary); outline: none; font-family: inherit; font-size: calc(0.95rem - 3px); resize: none; line-height: 1.4;"></textarea>
+                <input type="text" id="note-title-input" placeholder="Not Başlığı (İsteğe bağlı)" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; color: var(--text-primary); outline: none; font-size: calc(1.2rem - 3px); flex-shrink: 0;">
+                <textarea id="note-content-input" placeholder="Notunuzu buraya yazın..." style="width: 100%; flex: 1; padding: 0.5rem; margin-bottom: 0.5rem; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; color: var(--text-primary); outline: none; font-family: inherit; font-size: calc(0.95rem - 3px); resize: none; line-height: 1.4;"></textarea>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.8rem; align-items: center; flex-shrink: 0;">
-                    <label style="color: #ccc; font-size: calc(0.95rem - 3px);">Etiket Rengi:</label>
+                    <label style="color: var(--text-secondary); font-size: calc(0.95rem - 3px);">Etiket Rengi:</label>
                     <div style="display: flex; gap: 0.3rem;" id="note-color-picker">
-                        <div class="color-swatch active" data-color="#3498db" style="width:18px; height:18px; border-radius:50%; background:#3498db; cursor:pointer; border: 2px solid #fff;"></div>
+                        <div class="color-swatch active" data-color="#3498db" style="width:18px; height:18px; border-radius:50%; background:#3498db; cursor:pointer; border: 2px solid #0f172a;"></div>
                         <div class="color-swatch" data-color="#2ecc71" style="width:18px; height:18px; border-radius:50%; background:#2ecc71; cursor:pointer; border: 2px solid transparent;"></div>
                         <div class="color-swatch" data-color="#e74c3c" style="width:18px; height:18px; border-radius:50%; background:#e74c3c; cursor:pointer; border: 2px solid transparent;"></div>
                         <div class="color-swatch" data-color="#f1c40f" style="width:18px; height:18px; border-radius:50%; background:#f1c40f; cursor:pointer; border: 2px solid transparent;"></div>
@@ -6513,7 +6784,7 @@ window.renderNotlar = (container) => {
                 </div>
                 <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
                     <button class="btn" style="flex: 1; background: var(--success-color); padding: 0.4rem; font-size: calc(0.95rem - 3px);" onclick="window.saveNote()"><i class="fas fa-check"></i> Kaydet</button>
-                    <button class="btn" style="flex: 1; background: rgba(255,255,255,0.1); padding: 0.4rem; font-size: calc(0.95rem - 3px);" onclick="window.closeNoteModal()">İptal</button>
+                    <button class="btn" style="flex: 1; background: var(--overlay-hover); color: var(--text-primary); border: 1px solid var(--surface-border); box-shadow: none; padding: 0.4rem; font-size: calc(0.95rem - 3px);" onclick="window.closeNoteModal()">İptal</button>
                 </div>
             </div>
         `;
@@ -6522,7 +6793,7 @@ window.renderNotlar = (container) => {
         document.querySelectorAll('#note-color-picker .color-swatch').forEach(sw => {
             sw.addEventListener('click', (e) => {
                 document.querySelectorAll('#note-color-picker .color-swatch').forEach(s => s.style.border = '2px solid transparent');
-                e.target.style.border = '2px solid #fff';
+                e.target.style.border = '2px solid #0f172a';
                 document.getElementById('note-color-input').value = e.target.getAttribute('data-color');
             });
         });
@@ -6585,7 +6856,7 @@ window.openNoteModal = () => {
     const swatches = document.querySelectorAll('#note-color-picker .color-swatch');
     if (swatches.length > 0) {
         swatches.forEach(s => s.style.border = '2px solid transparent');
-        swatches[0].style.border = '2px solid #fff';
+        swatches[0].style.border = '2px solid #0f172a';
         document.getElementById('note-color-input').value = swatches[0].getAttribute('data-color');
     }
 
@@ -6616,7 +6887,7 @@ window.saveNote = () => {
     if (!content) {
         const contentInput = document.getElementById('note-content-input');
         contentInput.style.borderColor = 'var(--danger-color)';
-        setTimeout(() => contentInput.style.borderColor = 'rgba(255,255,255,0.1)', 2000);
+        setTimeout(() => contentInput.style.borderColor = 'var(--input-border)', 2000);
         return;
     }
 
@@ -6647,12 +6918,13 @@ window.saveNote = () => {
     }
 };
 
-window.deleteNote = (id) => {
-    if (!confirm('Bu notu silmek istediğinize emin misiniz?')) return;
+window.deleteNote = async (id) => {
+    if (!(await window.showConfirm('Bu notu silmek istediğinize emin misiniz?'))) return;
     if (State.data.notlar) {
         State.data.notlar = State.data.notlar.filter(n => n.id !== id);
         State.save();
         if (currentPage === 'notlar') renderPage();
+        window.showToast('Not silindi.', 'info');
     }
 };
 
@@ -6731,18 +7003,18 @@ window.fetchTickerData = async () => {
                     if (item.data.Change !== null && item.data.Change !== undefined) {
                         let changeStr = String(item.data.Change).replace('%', '').replace(',', '.');
                         const change = parseFloat(changeStr);
-                        const color = change > 0 ? 'var(--success-color)' : (change < 0 ? 'var(--danger-color)' : 'var(--text-secondary)');
-                        let displayChange = change.toFixed(2).replace('.', ',');
+                        const badgeCls = change > 0 ? 'pos' : (change < 0 ? 'neg' : 'flat');
+                        let displayChange = isNaN(change) ? '0,00' : change.toFixed(2).replace('.', ',');
                         if (change > 0 && !displayChange.startsWith('+')) displayChange = '+' + displayChange;
-                        changeHtml = `<span style="font-size: 12px; font-weight: 400; color: ${color}; margin-left: 0.3rem;">%${displayChange}</span>`;
+                        changeHtml = `<span class="ticker-change-badge ${badgeCls}">%${displayChange}</span>`;
                     }
 
                     const val = item.data.Selling || item.data.Buying || 0;
 
-                    return `<div style="display: flex; flex-direction: column; align-items: flex-start; min-width: 100px; flex: 1; justify-content: center;">
-                        <span style="color: var(--text-secondary); font-size: 12px; font-weight: 500; margin-bottom: 0.1rem; letter-spacing: 0.5px;">${item.label}</span>
-                        <div style="font-size: 12px; font-weight: 400; color: var(--text-primary);">
-                            ${val} ${changeHtml}
+                    return `<div class="ticker-pill-item">
+                        <span class="ticker-pill-label">${item.label}</span>
+                        <div class="ticker-pill-value-row">
+                            <span>${val}</span> ${changeHtml}
                         </div>
                     </div>`;
                 }).join('');
@@ -6794,8 +7066,9 @@ const initApp = () => {
 
     ensureDatalist();
 
-    const savedTheme = localStorage.getItem('borsa_theme') || 'dark';
-    document.body.setAttribute('data-theme', savedTheme);
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.body.setAttribute('data-theme', 'light');
+    try { localStorage.setItem('borsa_theme', 'light'); localStorage.setItem('yunvest_theme', 'light'); } catch (e) {}
 
     const navButtons = document.querySelectorAll('.nav-btn[data-target]');
     navButtons.forEach(btn => {
@@ -6866,13 +7139,13 @@ document.getElementById('auth-form').addEventListener('submit', (e) => {
     if (isLoginMode) {
         auth.signInWithEmailAndPassword(email, password).catch(err => {
             if (errorDiv) { errorDiv.style.display = 'block'; errorDiv.innerText = "Hata: " + err.message; }
-            else alert(err.message);
+            else window.showToast(err.message, 'error');
             btn.innerText = originalBtnText;
             btn.disabled = false;
         });
     } else {
         if (errorDiv) { errorDiv.style.display = 'block'; errorDiv.innerText = "Yeni üye alımı güvenlik nedeniyle kapatılmıştır."; }
-        else alert("Yeni üye alımı güvenlik nedeniyle kapatılmıştır.");
+        else window.showToast("Yeni üye alımı güvenlik nedeniyle kapatılmıştır.", "warning");
         btn.innerText = originalBtnText;
         btn.disabled = false;
     }
@@ -6893,6 +7166,7 @@ document.getElementById('logout-btn').addEventListener('click', () => {
 auth.onAuthStateChanged(user => {
     if (user) {
         currentUser = user;
+        window.currentUser = user;
         document.getElementById('auth-container').style.display = 'none';
         document.getElementById('app').style.display = 'flex';
         let displayName = user.displayName;
@@ -6901,16 +7175,34 @@ auth.onAuthStateChanged(user => {
             displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
         }
         const unEl = document.getElementById('user-name');
-        if (unEl) unEl.innerText = displayName || 'Kullanıcı';
+        const finalName = displayName || 'Kullanıcı';
+        if (unEl) unEl.innerText = finalName;
+        const avatarEl = document.getElementById('user-avatar-letter');
+        if (avatarEl) avatarEl.innerText = finalName.charAt(0).toUpperCase();
+        const ddNameEl = document.getElementById('dropdown-user-name');
+        if (ddNameEl) ddNameEl.innerText = finalName;
+        const ddEmailEl = document.getElementById('dropdown-user-email');
+        if (ddEmailEl) ddEmailEl.innerText = user.email || '';
 
-        window.setTheme = (newTheme) => {
-            document.body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('borsa_theme', newTheme);
+        // Restore persisted sidebar collapse state on desktop
+        try {
+            const sidebar = document.getElementById('primary-sidebar');
+            if (sidebar && window.innerWidth > 768 && localStorage.getItem('yunvest_sidebar_collapsed') === 'true') {
+                sidebar.classList.add('collapsed');
+                sidebar.classList.remove('expanded');
+            }
+        } catch (e) {}
+
+        window.setTheme = () => {
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.body.setAttribute('data-theme', 'light');
+            try { localStorage.setItem('borsa_theme', 'light'); localStorage.setItem('yunvest_theme', 'light'); } catch (e) {}
         };
         initApp();
         State.init(renderPage);
     } else {
         currentUser = null;
+        window.currentUser = null;
         if (State.unsubscribe) State.unsubscribe();
         document.getElementById('auth-container').style.display = 'flex';
         document.getElementById('app').style.display = 'none';
@@ -6965,7 +7257,7 @@ input._searchAutocompleteHandler = function () {
             div.style.fontSize = '12px';
             div.style.color = 'var(--text-secondary)';
             div.className = 'autocomplete-item';
-            div.onmouseover = () => div.style.background = 'rgba(255,255,255,0.1)';
+            div.onmouseover = () => div.style.background = 'var(--overlay-bg)';
             div.onmouseout = () => div.style.background = 'transparent';
 
             div.addEventListener('mousedown', function (e) {
@@ -7294,12 +7586,19 @@ window.uploadRapor = async () => {
     });
 
     try {
+        if (!currentUser) {
+            window.showToast('Dosya yüklemek için giriş yapmalısınız.', 'error');
+            return;
+        }
+        const idToken = await currentUser.getIdToken();
         const base64Content = await toBase64(file);
 
-        const response = await fetch('/api/upload', {
+        const uploadApiUrl = window.location.hostname.endsWith('.vercel.app') ? '/api/upload' : 'https://yunvest.vercel.app/api/upload';
+        const response = await fetch(uploadApiUrl, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + idToken
             },
             body: JSON.stringify({
                 hisse: hisse,
@@ -7345,16 +7644,15 @@ window.uploadRapor = async () => {
         style.id = 'takip-link-style';
         style.textContent = `
             table td.takip-hisse-link[onclick] {
-                color: var(--text-muted) !important;
-                font-weight: normal !important;
+                color: var(--text-primary) !important;
+                font-weight: 500 !important;
                 cursor: pointer !important;
                 text-decoration: none !important;
-                transition: color 0.2s ease, text-shadow 0.2s ease !important;
+                transition: color 0.2s ease !important;
             }
             table td.takip-hisse-link[onclick]:hover {
-                color: #ffffff !important;
-                text-decoration: none !important;
-                text-shadow: 0 0 8px rgba(255,255,255,0.3) !important;
+                color: var(--accent-color) !important;
+                text-decoration: underline !important;
             }
             .takip-table th {
                 color: var(--text-primary) !important;
