@@ -1331,7 +1331,7 @@ const renderPortfoy = (container) => {
                 fiyatHtml = `<td style="text-align: right !important;">
                     <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
                         <span class="pry-text" style="cursor:pointer;" onclick="this.style.display='none'; this.nextElementSibling.style.display='inline-block'; this.nextElementSibling.focus();" title="Düzenlemek için tıklayın">₺${p.guncelFiyat.toLocaleString('tr-TR', { minimumFractionDigits: 6, maximumFractionDigits: 6 })}</span>
-                        <input type="number" step="0.000001" class="form-control glass-input inline-pry-input" style="display:none; width: 80px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${p.guncelFiyat}" onblur="window.saveVarliklarEdit()" onkeydown="if(event.key==='Enter') window.saveVarliklarEdit()">
+                        <input type="number" step="0.000001" class="form-control glass-input inline-pry-input" style="display:none; width: 88px; text-align: right; padding: 2px 4px; font-size: 13px; height: 26px;" value="${p.guncelFiyat}" onblur="window.saveVarliklarEdit()" onkeydown="if(event.key==='Enter') window.saveVarliklarEdit()">
                     </div>
                 </td>`;
             } else {
@@ -1384,7 +1384,7 @@ const renderPortfoy = (container) => {
         <td style="text-align: right !important; border-right: 1px solid var(--table-border);">
             <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
                 <span style="cursor:pointer;" onclick="this.style.display='none'; this.nextElementSibling.style.display='inline-block'; this.nextElementSibling.focus();" title="Düzenlemek için tıklayın">${formatCurrency(guncelNakitDeger, 2)}</span>
-                <input type="number" step="0.01" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${guncelNakitDeger}" onblur="window.saveNakitVarlikEdit(this)" onkeydown="if(event.key==='Enter') window.saveNakitVarlikEdit(this)">
+                <input type="number" step="0.01" class="form-control glass-input" style="display:none; width: 108px; text-align: right; padding: 2px 4px; font-size: 13px; height: 26px;" value="${guncelNakitDeger}" onblur="window.saveNakitVarlikEdit(this)" onkeydown="if(event.key==='Enter') window.saveNakitVarlikEdit(this)">
             </div>
         </td>
         <td style="text-align: right !important;"></td>
@@ -1450,10 +1450,10 @@ const renderPortfoy = (container) => {
             .portfoy-tab-btn:hover { color: var(--active-text-color) !important; background: var(--overlay-bg) !important; }
         </style>
         <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: flex-start; overflow-x: auto; white-space: nowrap; width: 100%;">
-            <span class="portfoy-tab-btn" style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 6px 12px; border-radius: 4px; background: ${getTabBg('varliklar')}; color: ${getTabColor('varliklar')}; transition: color 0.2s;" onclick="window.setPortfoyTab('varliklar')">Varlıklarım</span>
-            <span class="portfoy-tab-btn" style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 6px 12px; border-radius: 4px; background: ${getTabBg('bilgiler')}; color: ${getTabColor('bilgiler')}; transition: color 0.2s;" onclick="window.setPortfoyTab('bilgiler')">Portföy Bilgileri</span>
-            <span class="portfoy-tab-btn" style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 6px 12px; border-radius: 4px; background: ${getTabBg('gecmis')}; color: ${getTabColor('gecmis')}; transition: color 0.2s;" onclick="window.setPortfoyTab('gecmis')">Günlük Portföy Değişimi</span>
-            ${!(window.Capacitor && window.Capacitor.isNative) ? `<span class="portfoy-tab-btn" style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 6px 12px; border-radius: 4px; background: ${getTabBg('arsiv')}; color: ${getTabColor('arsiv')}; transition: color 0.2s;" onclick="window.setPortfoyTab('arsiv')">Arşiv</span>` : ''}
+            <span class="portfoy-tab-btn" style="cursor: pointer; font-size: 13.5px !important; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: ${getTabBg('varliklar')}; color: ${getTabColor('varliklar')}; transition: color 0.2s;" onclick="window.setPortfoyTab('varliklar')">Varlıklarım</span>
+            <span class="portfoy-tab-btn" style="cursor: pointer; font-size: 13.5px !important; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: ${getTabBg('bilgiler')}; color: ${getTabColor('bilgiler')}; transition: color 0.2s;" onclick="window.setPortfoyTab('bilgiler')">Portföy Bilgileri</span>
+            <span class="portfoy-tab-btn" style="cursor: pointer; font-size: 13.5px !important; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: ${getTabBg('gecmis')}; color: ${getTabColor('gecmis')}; transition: color 0.2s;" onclick="window.setPortfoyTab('gecmis')">Günlük Portföy Değişimi</span>
+            ${!(window.Capacitor && window.Capacitor.isNative) ? `<span class="portfoy-tab-btn" style="cursor: pointer; font-size: 13.5px !important; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: ${getTabBg('arsiv')}; color: ${getTabColor('arsiv')}; transition: color 0.2s;" onclick="window.setPortfoyTab('arsiv')">Arşiv</span>` : ''}
         </div>
     `;
 
@@ -1521,7 +1521,7 @@ const renderPortfoy = (container) => {
                                     <td style="text-align:right !important; border-right: 1px solid var(--table-border); cursor: pointer;" ondblclick="window.togglePortfoyEdit()" title="Düzenlemek için çift tıklayın">
                                         <div style="display:flex; justify-content:flex-end; align-items:center; gap:0.5rem;">
                                             <span id="hedef-text">${formatCurrency(portfoyBilgileri.hedefPortfoy, 0)}</span>
-                                            <input type="number" id="inline-hedef-input" class="form-control glass-input" style="display:none; width: 100px; text-align: right; padding: 2px 4px; font-size: 12px; height: 24px;" value="${portfoyBilgileri.hedefPortfoy}" onblur="window.savePortfoyEdit()" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
+                                            <input type="number" id="inline-hedef-input" class="form-control glass-input" style="display:none; width: 108px; text-align: right; padding: 2px 4px; font-size: 13px; height: 26px;" value="${portfoyBilgileri.hedefPortfoy}" onblur="window.savePortfoyEdit()" onkeydown="if(event.key==='Enter') window.savePortfoyEdit()">
                                         </div>
                                     </td>
                                 </tr>
@@ -1542,9 +1542,9 @@ const renderPortfoy = (container) => {
         tabContentHtml = `
             <style>
             .chart-filter {
-                font-size: 12px !important;
+                font-size: 13px !important;
                 color: var(--text-secondary) !important;
-                font-weight: normal !important;
+                font-weight: 600 !important;
                 transition: color 0.2s, background 0.2s;
             }
             .chart-filter:hover, .chart-filter.active-filter {
@@ -1553,7 +1553,7 @@ const renderPortfoy = (container) => {
             </style>
             <div style="display: flex; flex-direction: column; width: 100%; min-height: 350px; margin-bottom: 0;">
                 <div style="padding: 8px 1rem 0 1rem;">
-                    <div id="portfoy-chart-filters" style="display:flex; gap:0.5rem; font-size:13px; color:var(--text-primary);">
+                    <div id="portfoy-chart-filters" style="display:flex; gap:0.5rem; font-size:13.5px; color:var(--text-primary);">
                         <span class="chart-filter" data-range="1H" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('1H')">1H</span>
                         <span class="chart-filter" data-range="1A" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('1A')">1A</span>
                         <span class="chart-filter" data-range="6A" style="cursor:pointer; padding:2px 6px; border-radius:4px;" onclick="window.setPortfoyChartRange('6A')">6A</span>
@@ -1667,12 +1667,12 @@ const renderPortfoy = (container) => {
     const html = `
         <style>
             .portfoy-tab-content table th {
-                padding: 10px 6px !important;
-                font-size: 12px !important;
-                font-weight: 600 !important;
+                padding: 10px 8px !important;
+                font-size: 13px !important;
+                font-weight: 700 !important;
             }
             .portfoy-tab-content table td {
-                font-size: 12px !important;
+                font-size: 13.5px !important;
             }
         </style>
         <div class="page-section active" style="display: flex; flex-direction: column; padding: 0px; gap: 1rem;">
@@ -2108,7 +2108,7 @@ const renderPortfoy = (container) => {
                         intersect: false,
                     },
                     plugins: {
-                        legend: { display: true, position: 'bottom', labels: { color: '#475569', font: { size: 10 }, boxWidth: 12 } },
+                        legend: { display: true, position: 'bottom', labels: { color: '#475569', font: { size: 12 }, boxWidth: 12 } },
                         datalabels: { display: false },
                         tooltip: {
                             callbacks: {
@@ -2121,13 +2121,13 @@ const renderPortfoy = (container) => {
                     scales: {
                         x: {
                             grid: { color: 'rgba(15, 23, 42, 0.08)' },
-                            ticks: { color: '#475569', font: { size: 10 } }
+                            ticks: { color: '#475569', font: { size: 12 } }
                         },
                         y: {
                             grid: { color: 'rgba(15, 23, 42, 0.08)' },
                             ticks: {
                                 color: '#475569',
-                                font: { size: 10 },
+                                font: { size: 12 },
                                 callback: function (value) {
                                     return value.toLocaleString('tr-TR');
                                 }
@@ -2248,10 +2248,10 @@ const renderHisseler = (container) => {
             'Bilanço': 'fas fa-balance-scale'
         };
 
-        const makeBtn = (t) => `<button class="nav-btn ${activeTab === t ? 'active' : ''}" style="margin:0; font-size:12px; font-weight:normal; padding:0.4rem 0.8rem; white-space:nowrap;" onclick="window.setHisseTab('${t}')"><i class="${tabIcons[t] || 'fas fa-file'}" style="margin-right:4px;"></i>${t}</button>`;
+        const makeBtn = (t) => `<button class="nav-btn ${activeTab === t ? 'active' : ''}" style="margin:0; font-size:13.5px; font-weight:600; padding:0.45rem 0.9rem; white-space:nowrap;" onclick="window.setHisseTab('${t}')"><i class="${tabIcons[t] || 'fas fa-file'}" style="margin-right:5px;"></i>${t}</button>`;
         const makeDropdown = (title, items) => `
             <div class="nav-dropdown">
-                <button class="nav-btn ${items.includes(activeTab) ? 'active' : ''}" style="margin:0; font-size:12px; font-weight:normal; padding:0.4rem 0.8rem; white-space:nowrap;"><i class="fas fa-caret-down" style="margin-right:4px;"></i>${title}</button>
+                <button class="nav-btn ${items.includes(activeTab) ? 'active' : ''}" style="margin:0; font-size:13.5px; font-weight:600; padding:0.45rem 0.9rem; white-space:nowrap;"><i class="fas fa-caret-down" style="margin-right:5px;"></i>${title}</button>
                 <div class="nav-dropdown-content">
                     ${items.map(t => `<a onclick="window.setHisseTab('${t}')">${t}</a>`).join('')}
                 </div>
@@ -2478,7 +2478,7 @@ const renderHisseler = (container) => {
                     gelirHtml = `<table class="dash-table compact-table">
                         <thead>
                             <tr style="border-bottom: 1px solid var(--table-border);">
-                                <th style="text-align:left !important; font-size:13px !important; color: var(--text-primary) !important; font-weight:normal !important;">Özet Gelir Tablosu</th>
+                                <th style="text-align:left !important; font-size:13.5px !important; color: var(--table-header-text) !important; font-weight:700 !important;">Özet Gelir Tablosu</th>
                                 <th style="text-align:center !important;">${p1}</th>
                                 <th style="text-align:center !important;">${p2}</th>
                                 <th style="text-align:center !important;">%</th>
@@ -2555,7 +2555,7 @@ const renderHisseler = (container) => {
                     bilancoHtml = `<table class="dash-table compact-table">
                         <thead>
                             <tr style="border-bottom: 1px solid var(--table-border);">
-                                <th style="text-align:left !important; font-size:13px !important; color: var(--text-primary) !important; font-weight:normal !important;">Özet Bilanço</th>
+                                <th style="text-align:left !important; font-size:13.5px !important; color: var(--table-header-text) !important; font-weight:700 !important;">Özet Bilanço</th>
                                 <th style="text-align:center !important;">${bp1}</th>
                                 <th style="text-align:center !important;">${bp2}</th>
                                 <th style="text-align:center !important;">%</th>
@@ -2760,20 +2760,20 @@ const renderHisseler = (container) => {
                 contentHtml = `
                 <style>
                 .compact-table { table-layout: auto !important; width: 100%; border-collapse: collapse; }
-                .compact-table th, .compact-table td { padding: 0.6rem 0.5rem !important; white-space: nowrap; }
-                .compact-table th { font-size: 12px !important; font-weight: 600 !important; color: var(--text-primary) !important; height: 39px; }
-                .compact-table td:first-child { font-size: 12px !important; font-weight: normal !important; color: var(--text-primary) !important; }
-                .compact-table tr { height: 39px !important; }
-                .compact-table td { font-size: 12px !important; font-weight: normal !important; color: var(--text-muted); height: 34px !important; line-height: 1 !important; }
+                .compact-table th, .compact-table td { padding: 0.6rem 0.55rem !important; white-space: nowrap; }
+                .compact-table th { font-size: 13px !important; font-weight: 700 !important; color: var(--table-header-text) !important; height: 40px; }
+                .compact-table td:first-child { font-size: 13.5px !important; font-weight: 500 !important; color: var(--text-primary) !important; }
+                .compact-table tr { height: 40px !important; }
+                .compact-table td { font-size: 13.5px !important; font-weight: normal !important; color: var(--text-muted); height: 36px !important; line-height: 1.2 !important; }
                 /* nav-btn override removed to protect main sidebar */
-                .nav-dropdown-content a { font-size: 12px !important; font-weight: normal !important; }
-                .dash-title { font-size: 12px !important; font-weight: normal !important; color: var(--text-primary) !important; }
+                .nav-dropdown-content a { font-size: 13.5px !important; font-weight: 500 !important; }
+                .dash-title { font-size: 15px !important; font-weight: 700 !important; color: #113A5D !important; }
                 .compact-card { padding: 1.2rem !important; }
                 .gauge-container { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 80px; height: 50px; }
                 .gauge-bg { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid #e2e8f0; border-bottom: none; box-sizing: border-box; }
                 .gauge-fill { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid #059669; border-bottom: none; box-sizing: border-box; transform-origin: bottom center; transform: rotate(0deg); transition: transform 1s; }
-                .gauge-text { position: absolute; bottom: 0; font-size: 12px; font-weight: normal; color: var(--text-primary); line-height: 1; }
-                .gauge-label { font-size: 12px; font-weight: normal; color: var(--text-secondary); margin-top: 4px; text-align: center; }
+                .gauge-text { position: absolute; bottom: 0; font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1; }
+                .gauge-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-top: 4px; text-align: center; }
                 </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
                         
@@ -2792,7 +2792,7 @@ const renderHisseler = (container) => {
                             
                             <!-- Çarpanlar -->
                             <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
-                                <div class="dash-title" style="font-size: 12px; font-weight: normal; margin-bottom: 1rem;">Çarpanlar</div>
+                                <div class="dash-title" style="font-size: 15px; font-weight: 700; margin-bottom: 1rem;">Çarpanlar</div>
                                 <table class="dash-table compact-table" style="flex: 1;">
                                     <tbody>
                                         <tr style="border-bottom: 1px solid var(--table-border);">
@@ -2818,14 +2818,14 @@ const renderHisseler = (container) => {
 
                             <!-- Kaynak Dağılımı -->
                             <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
-                                <div class="dash-title" style="font-size: 12px; font-weight: normal; margin-bottom: 0.8rem;">Kaynak Dağılımı</div>
+                                <div class="dash-title" style="font-size: 15px; font-weight: 700; margin-bottom: 0.8rem;">Kaynak Dağılımı</div>
                                 <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
                                     <div style="display:flex; height: 12px; border-radius: 6px; overflow:hidden; margin-bottom: 1.5rem;">
                                         <div style="width:${pctOz}%; background:#6c5ce7;" title="Özkaynaklar: %${pctOz}"></div>
                                         <div style="width:${pctKisa}%; background:#fd79a8;" title="Kısa Vade Yükümlülükler: %${pctKisa}"></div>
                                         <div style="width:${pctUzun}%; background:#636e72;" title="Uzun Vade Yükümlülükler: %${pctUzun}"></div>
                                     </div>
-                                    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 1rem; font-size: 12px; font-weight: normal; color:var(--text-secondary);">
+                                    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 1rem; font-size: 13px; font-weight: 500; color:var(--text-secondary);">
                                         <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#6c5ce7;"></div>Özkaynaklar: %${pctOz}</div>
                                         <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#fd79a8;"></div>Kısa Vade Yük.: %${pctKisa}</div>
                                         <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#636e72;"></div>Uzun Vade Yük.: %${pctUzun}</div>
@@ -2835,7 +2835,7 @@ const renderHisseler = (container) => {
 
                             <!-- Şirket Detayları -->
                             <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
-                                <div class="dash-title" style="font-size: 12px; font-weight: normal; margin-bottom: 1rem;">Şirket Detayları</div>
+                                <div class="dash-title" style="font-size: 15px; font-weight: 700; margin-bottom: 1rem;">Şirket Detayları</div>
                                 <table class="dash-table compact-table" style="flex: 1;">
                                     <tbody>
                                         <tr style="border-bottom: 1px solid var(--table-border);">
@@ -2861,32 +2861,32 @@ const renderHisseler = (container) => {
 
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 12px; font-weight: normal;">Brüt Kar Marjı</div>
+                            <div class="dash-title" style="font-size: 15px; font-weight: 700;">Brüt Kar Marjı</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-bkm"></canvas></div>
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 12px; font-weight: normal;">FAVÖK Marjı</div>
+                            <div class="dash-title" style="font-size: 15px; font-weight: 700;">FAVÖK Marjı</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-fkm"></canvas></div>
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 12px; font-weight: normal;">Net Kar Marjı</div>
+                            <div class="dash-title" style="font-size: 15px; font-weight: 700;">Net Kar Marjı</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-nkm"></canvas></div>
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 12px; font-weight: normal;">Cari Oran</div>
+                            <div class="dash-title" style="font-size: 15px; font-weight: 700;">Cari Oran</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-cari"></canvas></div>
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 12px; font-weight: normal;">Kaldıraç Oranı</div>
+                            <div class="dash-title" style="font-size: 15px; font-weight: 700;">Kaldıraç Oranı</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-kaldirac"></canvas></div>
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 12px; font-weight: normal;">Özkaynak Karlılığı</div>
+                            <div class="dash-title" style="font-size: 15px; font-weight: 700;">Özkaynak Karlılığı</div>
                             <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-roe"></canvas></div>
                         </div>
                     </div>
@@ -2920,14 +2920,14 @@ const renderHisseler = (container) => {
                 contentHtml = `
                 <style>
                 .compact-table { table-layout: auto !important; width: 100%; }
-                .compact-table th, .compact-table td { padding: 0.4rem 0.3rem !important; white-space: nowrap; font-size: 0.8rem !important; }
+                .compact-table th, .compact-table td { padding: 0.45rem 0.4rem !important; white-space: nowrap; font-size: 13px !important; }
                 .compact-card { padding: 1rem 0.5rem !important; }
                 </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
                     
                     <div class="grid-3-col" style="margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Satış Gelirleri (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2935,7 +2935,7 @@ const renderHisseler = (container) => {
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Satış Gelirleri (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2943,7 +2943,7 @@ const renderHisseler = (container) => {
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Satış Gelirleri (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2952,7 +2952,7 @@ const renderHisseler = (container) => {
                     </div>
 
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                             <span>Satış Gelirleri</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -2961,7 +2961,7 @@ const renderHisseler = (container) => {
 
                     <div class="grid-3-col" style="margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Brüt Kar (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2969,7 +2969,7 @@ const renderHisseler = (container) => {
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Brüt Kar (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2977,7 +2977,7 @@ const renderHisseler = (container) => {
                         </div>
 
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Brüt Kar (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -2986,7 +2986,7 @@ const renderHisseler = (container) => {
                     </div>
 
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                             <span>Brüt Kar</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -2995,21 +2995,21 @@ const renderHisseler = (container) => {
 
                     <div class="grid-3-col" style="margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Esas Faaliyet Karı (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-faaliyet"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Esas Faaliyet Karı (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-faaliyet"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Esas Faaliyet Karı (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -3017,7 +3017,7 @@ const renderHisseler = (container) => {
                         </div>
                     </div>
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                             <span>Esas Faaliyet Karı</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -3026,21 +3026,21 @@ const renderHisseler = (container) => {
 
                     <div class="grid-3-col" style="margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>FAVÖK (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-favok2"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>FAVÖK (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-favok"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>FAVÖK (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -3048,7 +3048,7 @@ const renderHisseler = (container) => {
                         </div>
                     </div>
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                             <span>FAVÖK</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -3057,21 +3057,21 @@ const renderHisseler = (container) => {
 
                     <div class="grid-3-col" style="margin-bottom: 1rem;">
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Net Kar (Çeyreklik)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-ceyreklik-netkar2"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Net Kar (Dönemsel)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
                             <div style="flex:1; min-height:250px; min-width: 0; position:relative;"><canvas id="chart-donemsel-netkar"></canvas></div>
                         </div>
                         <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                            <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                                 <span>Net Kar (Yıllıklandırılmış)</span>
                                 <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                             </div>
@@ -3079,7 +3079,7 @@ const renderHisseler = (container) => {
                         </div>
                     </div>
                     <div class="dash-card" style="margin-bottom:1rem; display:flex; flex-direction:column; padding: 1.2rem;">
-                        <div class="dash-title" style="position:relative; font-size: 13px !important; color: var(--text-primary) !important; font-weight: normal !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
+                        <div class="dash-title" style="position:relative; font-size: 15px !important; color: #113A5D !important; font-weight: 700 !important; text-align: left !important; justify-content: flex-start !important; padding-right: 20px;">
                             <span>Net Kar</span>
                             <i class="fas fa-expand" style="position:absolute; right:0; top:50%; transform:translateY(-50%); cursor:pointer; color:var(--text-secondary);" title="Büyüt" onclick="window.toggleExpandCard(this)"></i>
                         </div>
@@ -3094,7 +3094,7 @@ const renderHisseler = (container) => {
                 contentHtml = `
                 <style>
                 .compact-table { table-layout: auto !important; width: 100%; }
-                .compact-table th, .compact-table td { padding: 0.4rem 0.3rem !important; white-space: nowrap; font-size: 0.8rem !important; }
+                .compact-table th, .compact-table td { padding: 0.45rem 0.4rem !important; white-space: nowrap; font-size: 13px !important; }
                 .compact-card { padding: 1rem 0.5rem !important; }
                 </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
@@ -3107,7 +3107,7 @@ const renderHisseler = (container) => {
                 contentHtml = `
                 <style>
                 .compact-table { table-layout: auto !important; width: 100%; }
-                .compact-table th, .compact-table td { padding: 0.4rem 0.3rem !important; white-space: nowrap; font-size: 0.8rem !important; }
+                .compact-table th, .compact-table td { padding: 0.45rem 0.4rem !important; white-space: nowrap; font-size: 13px !important; }
                 .compact-card { padding: 1rem 0.5rem !important; }
                 </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
@@ -3243,13 +3243,13 @@ const renderHisseler = (container) => {
                         <div style="position:absolute; right:0; top:0; bottom:0; padding:0 8px; display:flex; align-items:center; cursor:pointer;" onmouseenter="document.querySelectorAll('.currency-dropdown').forEach(el => el.style.display='none'); this.querySelector('.currency-dropdown').style.display='block';" onmouseleave="this.querySelector('.currency-dropdown').style.display='none';">
                             <i class="fas fa-ellipsis-v" style="color:var(--text-secondary);"></i>
                             <div class="currency-dropdown" style="display:none; position:absolute; right:0; top:100%; background:var(--dropdown-bg); border:1px solid var(--surface-border); border-radius:6px; z-index:999; padding:5px; box-shadow: var(--shadow-md); text-align:left;">
-                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'TRY' ? 'var(--accent-color)' : 'var(--text-secondary)'}; font-size:12px; font-weight:${curCurrency === 'TRY' ? '600' : 'normal'}; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'TRY'); this.parentElement.style.display='none';">₺ TRY</div>
-                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'USD' ? 'var(--accent-color)' : 'var(--text-secondary)'}; font-size:12px; font-weight:${curCurrency === 'USD' ? '600' : 'normal'}; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'USD'); this.parentElement.style.display='none';">$ USD</div>
-                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'EUR' ? 'var(--accent-color)' : 'var(--text-secondary)'}; font-size:12px; font-weight:${curCurrency === 'EUR' ? '600' : 'normal'}; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'EUR'); this.parentElement.style.display='none';">€ EUR</div>
+                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'TRY' ? 'var(--accent-color)' : 'var(--text-secondary)'}; font-size:13px; font-weight:${curCurrency === 'TRY' ? '600' : 'normal'}; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'TRY'); this.parentElement.style.display='none';">₺ TRY</div>
+                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'USD' ? 'var(--accent-color)' : 'var(--text-secondary)'}; font-size:13px; font-weight:${curCurrency === 'USD' ? '600' : 'normal'}; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'USD'); this.parentElement.style.display='none';">$ USD</div>
+                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'EUR' ? 'var(--accent-color)' : 'var(--text-secondary)'}; font-size:13px; font-weight:${curCurrency === 'EUR' ? '600' : 'normal'}; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'EUR'); this.parentElement.style.display='none';">€ EUR</div>
                             </div>
                         </div>`;
                     }
-                    headerHtml += `<th style="font-size: 12px; text-align:center; position:relative; ${colWidthStyle}">
+                    headerHtml += `<th style="font-size: 13px; text-align:center; position:relative; ${colWidthStyle}">
                         <div>${p}</div>
                         ${dotsHtml}
                     </th>`;
@@ -3537,7 +3537,7 @@ const renderHisseler = (container) => {
                 html += `</tbody></table></div>`; // End of table wrapper
                 html += `
                     <div style="margin-top: 1rem; border-top: 1px solid var(--surface-border); padding-top: 1rem;">
-                        <textarea id="degerleme-not-input" class="form-control" style="width: 100%; height: 60px; resize: vertical; font-size: 12px; font-family: inherit; margin-bottom: 0.5rem; color: var(--text-primary);" placeholder="Bu hisse için değerleme notlarınızı buraya yazabilirsiniz..." onblur="window.saveDegerlemeNotUnified('${selectedHisse}')">${combinedNot}</textarea>
+                        <textarea id="degerleme-not-input" class="form-control" style="width: 100%; height: 64px; resize: vertical; font-size: 13.5px; font-family: inherit; margin-bottom: 0.5rem; color: var(--text-primary);" placeholder="Bu hisse için değerleme notlarınızı buraya yazabilirsiniz..." onblur="window.saveDegerlemeNotUnified('${selectedHisse}')">${combinedNot}</textarea>
                     </div>
                 </div>`; // End of dash-card
                 contentHtml += html;
@@ -3670,8 +3670,8 @@ const renderHisseler = (container) => {
 
                 let tableHtml = `
                 <div class="dash-card" style="display: flex; flex-direction: column; padding-bottom: 0.75rem; margin-bottom: 0;">
-                    <div style="display: flex; align-items: center; justify-content: center; padding: 3px 5px; border-bottom: 1px solid var(--table-border); position: relative;">
-                        <div style="font-size: 15px; font-weight: normal; color: var(--text-primary); text-align: center;">Akış</div>
+                    <div style="display: flex; align-items: center; justify-content: center; padding: 5px 6px; border-bottom: 1px solid var(--table-border); position: relative;">
+                        <div style="font-size: 16px; font-weight: 700; color: #113A5D; text-align: center;">Akış</div>
                         <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-secondary); border: none; box-shadow: none; position: absolute; right: 5px;" onclick="window.toggleInlineAnaliz()" title="Yeni Not Ekle"><i class="fas fa-plus" style="font-size: 15px;"></i></button>
                     </div>
                     
@@ -3690,54 +3690,54 @@ const renderHisseler = (container) => {
     <div id="akis-genel-inputs" style="display: flex; gap: 1rem; flex-wrap: wrap;">
         <!-- 1. Link -->
         <div style="flex: 2; min-width: 250px;">
-            <label style="font-size: 0.8rem; color: var(--text-secondary);">Link</label>
+            <label style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">Link</label>
             <input type="text" id="analiz-baglanti" class="form-control" style="width:100%;" placeholder="https://...">
         </div>
         
         <!-- 2. Analist/Şirket -->
         <div style="flex: 1; min-width: 150px;">
-            <label style="font-size: 0.8rem; color: var(--text-secondary);">Analist/Şirket</label>
+            <label style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">Analist/Şirket</label>
             <input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%;" placeholder="Örn: Ak Yatırım">
         </div>
         
         <!-- 3. Tarih -->
         <div style="flex: 1; min-width: 120px;">
-            <label style="font-size: 0.8rem; color: var(--text-secondary);">Tarih</label>
+            <label style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">Tarih</label>
             <input type="date" id="analiz-tarih" class="form-control" style="width:100%; color-scheme: light;" value="${today}">
         </div>
         
         <!-- 4. Başlık -->
         <div style="flex: 1.5; min-width: 200px;">
-            <label style="font-size: 0.8rem; color: var(--text-secondary);">Başlık (Opsiyonel)</label>
+            <label style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">Başlık (Opsiyonel)</label>
             <input type="text" id="analiz-baslik" class="form-control" style="width:100%;" placeholder="Not/Rapor/Video Başlığı">
         </div>
         
         <!-- 5. Dosya Ekle -->
         <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column;">
-            <label style="font-size: 0.8rem; color: var(--text-secondary);">Dosya Ekle (Opsiyonel)</label>
+            <label style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">Dosya Ekle (Opsiyonel)</label>
             <style>
                 #upload-file { display: none; }
             </style>
-            <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç" style="padding: 5px 10px 5px 7px; background: var(--accent-color); color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 4px; cursor: pointer; border: none; font-size: 12px; font-weight: normal; margin-top: 2px;">
-                <span class="fa-stack" style="font-size: 8px; width: 2em; height: 2em;"><i class="fas fa-folder-open fa-stack-2x" style="color: #ffffff;"></i></span>
+            <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç" style="padding: 7px 12px 7px 9px; background: var(--accent-color); color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; border: none; font-size: 13.5px; font-weight: 600; margin-top: 2px;">
+                <span class="fa-stack" style="font-size: 9px; width: 2em; height: 2em;"><i class="fas fa-folder-open fa-stack-2x" style="color: #ffffff;"></i></span>
                 <span style="margin-left: 5px;">PDF Seç</span>
             </label>
-            <input type="file" id="upload-file" accept="application/pdf" onchange="const f = this.files[0]; if(f) this.previousElementSibling.innerHTML = '<i class=\'fas fa-file-pdf\' style=\'color:var(--danger-color); font-size: 14px;\'></i> <span style=\'color: #fff; margin-left: 5px; font-size:11px;\'>' + (f.name.length > 15 ? f.name.substring(0,15)+'...' : f.name) + '</span>'">
+            <input type="file" id="upload-file" accept="application/pdf" onchange="const f = this.files[0]; if(f) this.previousElementSibling.innerHTML = '<i class=\'fas fa-file-pdf\' style=\'color:var(--danger-color); font-size: 15px;\'></i> <span style=\'color: #fff; margin-left: 5px; font-size:12.5px;\'>' + (f.name.length > 15 ? f.name.substring(0,15)+'...' : f.name) + '</span>'">
         </div>
     </div>
     
     <!-- 6. Notunuz -->
     <div style="display: flex; flex-direction: column; width: 100%;">
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <label style="font-size: 0.8rem; color: var(--text-secondary);">Notunuz</label>
-            <textarea id="analiz-not" class="form-control" style="width:100%; min-height: 50px; resize: vertical;" placeholder="Notlarınızı buraya yazın..."></textarea>
+            <label style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">Notunuz</label>
+            <textarea id="analiz-not" class="form-control" style="width:100%; min-height: 56px; resize: vertical;" placeholder="Notlarınızı buraya yazın..."></textarea>
         </div>
         
-        <div id="upload-status" style="font-size: 12px; font-weight: normal; min-height: 0; width: 100%; margin-top: 0.5rem; display: none;"></div>
+        <div id="upload-status" style="font-size: 13px; font-weight: normal; min-height: 0; width: 100%; margin-top: 0.5rem; display: none;"></div>
         
         <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 0.5rem;">
-            <button class="btn" style="background: var(--danger-color); color: #fff; padding: 6px 16px;" onclick="window.toggleInlineAnaliz()">İptal</button>
-            <button class="btn" style="background: var(--success-color); color: #fff; padding: 6px 16px;" onclick="window.saveUnifiedAnaliz()">Kaydet</button>
+            <button class="btn" style="background: var(--danger-color); color: #fff; padding: 7px 16px;" onclick="window.toggleInlineAnaliz()">İptal</button>
+            <button class="btn" style="background: var(--success-color); color: #fff; padding: 7px 16px;" onclick="window.saveUnifiedAnaliz()">Kaydet</button>
         </div>
     </div>
 </div>
@@ -3745,13 +3745,13 @@ const renderHisseler = (container) => {
                       <table class="dash-table compact-table" style="width:100%; min-width:800px; border-collapse:collapse;">
                           <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
                             <tr style="border-bottom:1px solid var(--table-border); background:var(--table-header-bg);">
-                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">S.N.</th>
-                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Platform</th>
-                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">Başlık</th>
-                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Tarih</th>
-                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">Analist/Şirket</th>
-                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:middle;">Notlar</th>
-                                <th style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:center !important; padding:8px 5px; vertical-align:middle; width:1%; white-space:nowrap;">İşlem</th>
+                                <th style="font-size:13px; font-weight:700; color:var(--table-header-text); text-align:center !important; padding:10px 6px; vertical-align:middle; width:1%; white-space:nowrap;">S.N.</th>
+                                <th style="font-size:13px; font-weight:700; color:var(--table-header-text); text-align:center !important; padding:10px 6px; vertical-align:middle; width:1%; white-space:nowrap;">Platform</th>
+                                <th style="font-size:13px; font-weight:700; color:var(--table-header-text); text-align:left !important; padding:10px 6px; vertical-align:middle; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">Başlık</th>
+                                <th style="font-size:13px; font-weight:700; color:var(--table-header-text); text-align:center !important; padding:10px 6px; vertical-align:middle; width:1%; white-space:nowrap;">Tarih</th>
+                                <th style="font-size:13px; font-weight:700; color:var(--table-header-text); text-align:left !important; padding:10px 6px; vertical-align:middle; width:1%; white-space:nowrap;">Analist/Şirket</th>
+                                <th style="font-size:13px; font-weight:700; color:var(--table-header-text); text-align:left !important; padding:10px 6px; vertical-align:middle;">Notlar</th>
+                                <th style="font-size:13px; font-weight:700; color:var(--table-header-text); text-align:center !important; padding:10px 6px; vertical-align:middle; width:1%; white-space:nowrap;">İşlem</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -3769,20 +3769,20 @@ const renderHisseler = (container) => {
                             const safeRComp = window.escapeHtml(r.company !== '-' ? r.company : '-');
                             tableHtml += `
                             <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">
                                     <a href="${filePath}" target="_blank" rel="noopener noreferrer" style="text-decoration: none;" title="PDF'i Görüntüle">
-                                        <i class="fas fa-file-pdf" style="color: #dc2626; font-size: 14px;"></i>
+                                        <i class="fas fa-file-pdf" style="color: #dc2626; font-size: 15px;"></i>
                                     </a>
                                 </td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:9px 6px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">
                                     <a href="${filePath}" target="_blank" rel="noopener noreferrer" style="color: var(--text-primary); text-decoration: none; font-weight: 500;">${safeRName}</a>
                                 </td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(item.gosterimTarih)}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${safeRComp}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">-</td>
-                                <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
-                                    <a href="${filePath}" target="_blank" rel="noopener noreferrer" class="btn btn-icon" style="display:inline-flex; align-items:center; justify-content:center; color: var(--accent-color); padding: 2px !important; font-size: 13px; text-decoration: none;" title="Raporu Aç"><i class="fas fa-external-link-alt"></i></a>
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(item.gosterimTarih)}</td>
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${safeRComp}</td>
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:9px 6px; vertical-align:top !important; white-space:pre-wrap;">-</td>
+                                <td style="padding:9px 6px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
+                                    <a href="${filePath}" target="_blank" rel="noopener noreferrer" class="btn btn-icon" style="display:inline-flex; align-items:center; justify-content:center; color: var(--accent-color); padding: 2px !important; font-size: 14px; text-decoration: none;" title="Raporu Aç"><i class="fas fa-external-link-alt"></i></a>
                                 </td>
                             </tr>
                             `;
@@ -3794,52 +3794,52 @@ const renderHisseler = (container) => {
                             const safeNote = window.escapeHtml(r.notText || '-');
                             tableHtml += `
                             <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">
                                     <a href="javascript:void(0)" onclick="window.openFirebasePdf('${safeId}')" style="text-decoration: none;" title="PDF'i Görüntüle">
-                                        <i class="fas fa-file-pdf" style="color: #dc2626; font-size: 14px;"></i>
+                                        <i class="fas fa-file-pdf" style="color: #dc2626; font-size: 15px;"></i>
                                     </a>
                                 </td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:9px 6px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">
                                     <a href="javascript:void(0)" onclick="window.openFirebasePdf('${safeId}')" style="color: var(--text-primary); text-decoration: none; font-weight: 500;">${safeName}</a>
                                 </td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(item.gosterimTarih)}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${safeComp}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${safeNote}</td>
-                                <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
-                                    <button class="btn btn-icon" style="color: var(--accent-color); padding: 2px 4px !important; font-size: 13px;" onclick="window.openFirebasePdf('${safeId}')" title="PDF'i Aç"><i class="fas fa-external-link-alt"></i></button>
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(item.gosterimTarih)}</td>
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${safeComp}</td>
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:9px 6px; vertical-align:top !important; white-space:pre-wrap;">${safeNote}</td>
+                                <td style="padding:9px 6px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
+                                    <button class="btn btn-icon" style="color: var(--accent-color); padding: 2px 4px !important; font-size: 14px;" onclick="window.openFirebasePdf('${safeId}')" title="PDF'i Aç"><i class="fas fa-external-link-alt"></i></button>
                                     <button class="btn btn-icon" style="background: transparent; color: var(--text-secondary); padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteFirebasePdf('${safeId}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                                 </td>
                             </tr>
                             `;
                         } else {
                             const a = item.data;
-                            let platformIcon = '<i class="fas fa-sticky-note" style="color: var(--text-secondary); font-size: 12px;"></i>';
+                            let platformIcon = '<i class="fas fa-sticky-note" style="color: var(--text-secondary); font-size: 13.5px;"></i>';
                             let titleText = window.escapeHtml(a.baslik || '-');
                             let titleLinkHtml = titleText;
                             const safeHref = window.sanitizeUrl(a.baglanti);
                             
                             if (safeHref) {
-                                let iconStr = 'fas fa-external-link-alt" style="color: var(--accent-color); font-size: 12px;';
+                                let iconStr = 'fas fa-external-link-alt" style="color: var(--accent-color); font-size: 13.5px;';
                                 if (safeHref.includes('youtube.com') || safeHref.includes('youtu.be')) { 
-                                    iconStr = 'fab fa-youtube" style="color:#FF0000; font-size: 13px;'; 
+                                    iconStr = 'fab fa-youtube" style="color:#FF0000; font-size: 14.5px;'; 
                                 } else if (safeHref.includes('twitter.com') || safeHref.includes('x.com')) { 
-                                    iconStr = 'fa-brands fa-x-twitter" style="color: var(--text-primary); font-size: 12px;'; 
+                                    iconStr = 'fa-brands fa-x-twitter" style="color: var(--text-primary); font-size: 13.5px;'; 
                                 }
                                 platformIcon = `<a href="${window.escapeHtml(safeHref)}" target="_blank" rel="noopener noreferrer" style="text-decoration: none;" title="Bağlantıya Git"><i class="${iconStr}"></i></a>`;
                             } else if (a.isKisiselNot) {
-                                platformIcon = '<i class="fas fa-user-edit" style="color: var(--accent-color); font-size: 12px;"></i>';
+                                platformIcon = '<i class="fas fa-user-edit" style="color: var(--accent-color); font-size: 13.5px;"></i>';
                             }
                             
                             tableHtml += `
                             <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${platformIcon}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">${titleLinkHtml}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(item.gosterimTarih)}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:8px 5px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(a.borsaci || '-')}</td>
-                                <td style="font-size:12px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:8px 5px; vertical-align:top !important; white-space:pre-wrap;">${window.escapeHtml(a.notText || '-')}</td>
-                                <td style="padding:8px 5px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${platformIcon}</td>
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:9px 6px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">${titleLinkHtml}</td>
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(item.gosterimTarih)}</td>
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(a.borsaci || '-')}</td>
+                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:9px 6px; vertical-align:top !important; white-space:pre-wrap;">${window.escapeHtml(a.notText || '-')}</td>
+                                <td style="padding:9px 6px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
                                     <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
                                     <button class="btn btn-icon" style="background: transparent; color: var(--text-secondary); padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                                 </td>
@@ -3882,13 +3882,13 @@ const renderHisseler = (container) => {
                 else if (!isPos) initChangeStr = '-' + initChangeStr;
 
                 stockHeaderHtml = `
-            <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 0; flex-shrink: 0;">
+            <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 0; flex-shrink: 0;">
                 <div>
-                    <h1 style="margin: 0; font-size: 16px; font-weight: 800; letter-spacing: 1px; color: var(--text-primary);">${selectedHisse}</h1>
+                    <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 0.5px; color: var(--text-primary);">${selectedHisse}</h1>
                 </div>
                 <div style="display: flex; align-items: baseline; gap: 0.8rem;">
-                    <div style="font-size: 16px; font-weight: bold; color: var(--text-primary);">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)} ₺</div>
-                    <div id="hisse-header-change" style="font-size: 13px; font-weight: 600; color: ${hColor}; display: block;">
+                    <div style="font-size: 18px; font-weight: 700; color: var(--text-primary);">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)} ₺</div>
+                    <div id="hisse-header-change" style="font-size: 14px; font-weight: 600; color: ${hColor}; display: block;">
                         <i class="fas fa-caret-${isPos ? 'up' : 'down'}"></i> %${initChangeStr}
                     </div>
                 </div>
@@ -4556,19 +4556,19 @@ const renderHisseIslemleri = (container) => {
                     ekstreRowsHtml += `<tr style="background: #eff6ff;">
                         <td>${rowIndex++}</td>
                         <td>
-                            <select id="edit-tur" class="form-control" style="width:100%; font-size:12px; padding:2px;" onchange="window.updateEditDatalist()">
+                            <select id="edit-tur" class="form-control" style="width:100%; font-size:13px; padding:3px;" onchange="window.updateEditDatalist()">
                                 <option value="Hisse" ${!isFon ? 'selected' : ''}>Hisse</option>
                                 <option value="Fon" ${isFon ? 'selected' : ''}>Fon</option>
                             </select>
                         </td>
-                        <td><input type="text" id="edit-menkul" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.menkul}" list="${isFon ? 'fon-list' : 'bist-hisse-list'}"></td>
-                        <td><input type="date" id="edit-tarih" class="form-control" style="width:100%; font-size:12px; padding:2px; text-align:right;" value="${e.tarih}"></td>
-                        <td><input type="number" step="0.000001" id="edit-fiyat" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.fiyat}"></td>
-                        <td><input type="number" step="0.0001" id="edit-adet" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${e.adet}"></td>
-                        <td><input type="text" id="edit-tutar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}" disabled></td>
+                        <td><input type="text" id="edit-menkul" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${e.menkul}" list="${isFon ? 'fon-list' : 'bist-hisse-list'}"></td>
+                        <td><input type="date" id="edit-tarih" class="form-control" style="width:100%; font-size:13px; padding:3px; text-align:right;" value="${e.tarih}"></td>
+                        <td><input type="number" step="0.000001" id="edit-fiyat" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${e.fiyat}"></td>
+                        <td><input type="number" step="0.0001" id="edit-adet" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${e.adet}"></td>
+                        <td><input type="text" id="edit-tutar" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}" disabled></td>
                         <td>
-                            <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveEditEkstre('${e.id}')">Kaydet</button>
-                            <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--overlay-hover); color: var(--text-primary); border: 1px solid var(--surface-border); box-shadow: none;" onclick="window.cancelEdit()">İptal</button>
+                            <button class="btn" style="padding: 0.2rem 0.45rem; font-size: 13px; background: var(--accent-color);" onclick="window.saveEditEkstre('${e.id}')">Kaydet</button>
+                            <button class="btn" style="padding: 0.2rem 0.45rem; font-size: 13px; background: var(--overlay-hover); color: var(--text-primary); border: 1px solid var(--surface-border); box-shadow: none;" onclick="window.cancelEdit()">İptal</button>
                         </td>
                     </tr>`;
                 } else {
@@ -4581,8 +4581,8 @@ const renderHisseIslemleri = (container) => {
                         <td class="${e.adet >= 0 ? 'text-success' : 'text-danger'}">${e.adet.toLocaleString('tr-TR')}</td>
                         <td>${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}</td>
                         <td>
-                            <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; box-shadow: none; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditEkstre('${e.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
-                            <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; color: var(--text-secondary); border: none;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                            <button class="btn" style="padding: 2px 5px; font-size: 13.5px; background: transparent; box-shadow: none; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditEkstre('${e.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
+                            <button class="btn" style="padding: 2px 5px; font-size: 13.5px; background: transparent; color: var(--text-secondary); border: none;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                         </td>
                     </tr>`;
                 }
@@ -4614,11 +4614,11 @@ const renderHisseIslemleri = (container) => {
     container.innerHTML = `
         <style>
             .ekstre-table th {
-                font-size: 12px !important;
-                font-weight: 600 !important;
+                font-size: 13px !important;
+                font-weight: 700 !important;
             }
             .ekstre-table td {
-                font-size: 12px !important;
+                font-size: 13.5px !important;
             }
             .ekstre-table thead, .ekstre-table thead tr, .ekstre-table thead th {
                 position: sticky;
@@ -4629,15 +4629,15 @@ const renderHisseIslemleri = (container) => {
         </style>
         <datalist id="fon-list">${fonDatalistOptions}</datalist>
         <div class="page-section active" style="display: flex; flex-direction: column; padding: 0px; gap: 0;">
-            <div class="glass" style="display: flex; flex-direction: column; padding: 0.5rem 1rem; width: 100%;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--surface-border); padding-bottom: 0px; margin-bottom: 8px;">
+            <div class="glass" style="display: flex; flex-direction: column; padding: 0.65rem 1rem; width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--surface-border); padding-bottom: 6px; margin-bottom: 8px;">
                     <div style="display: flex; gap: 0.5rem; align-items: center; overflow-x: auto; white-space: nowrap;">
-                        <span style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 4px 8px; border-radius: 4px; background: ${getTabBg('hisse')}; color: ${getTabColor('hisse')};" onclick="window.setEkstreTab('hisse')">Hisse ve Fon İşlemleri</span>
-                        <span style="cursor: pointer; font-size: 12px !important; font-weight: normal; padding: 4px 8px; border-radius: 4px; background: ${getTabBg('nakit')}; color: ${getTabColor('nakit')};" onclick="window.setEkstreTab('nakit')">Nakit İşlemleri</span>
+                        <span style="cursor: pointer; font-size: 13.5px !important; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: ${getTabBg('hisse')}; color: ${getTabColor('hisse')};" onclick="window.setEkstreTab('hisse')">Hisse ve Fon İşlemleri</span>
+                        <span style="cursor: pointer; font-size: 13.5px !important; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: ${getTabBg('nakit')}; color: ${getTabColor('nakit')};" onclick="window.setEkstreTab('nakit')">Nakit İşlemleri</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         ${window.ekstreTab === 'hisse' ? `<div class="search-input-wrap"><i class="fas fa-search"></i><input type="text" class="inline-search-input" placeholder="Menkul ara..." value="${window.escapeHtml(window.ekstreSearchQuery || '')}" oninput="window.filterEkstreTable(this.value)"></div>` : ''}
-                        <button class="btn" style="padding: 4px 8px; display: flex; align-items: center; justify-content: center; background: var(--overlay-bg); color: var(--accent-color); border: 1px solid #bfdbfe; box-shadow: none;" onclick="window.toggleInlineForm(window.ekstreTab)" title="Yeni İşlem Ekle"><i class="fas fa-plus" style="font-size: 13px;"></i></button>
+                        <button class="btn" style="padding: 6px 10px; display: flex; align-items: center; justify-content: center; background: var(--overlay-bg); color: var(--accent-color); border: 1px solid #bfdbfe; box-shadow: none;" onclick="window.toggleInlineForm(window.ekstreTab)" title="Yeni İşlem Ekle"><i class="fas fa-plus" style="font-size: 14px;"></i></button>
                     </div>
                 </div>
                 <div id="ekstreler-tables-wrapper" style="display: flex; flex-direction: column; width: 100%;">
@@ -4652,16 +4652,16 @@ const renderHisseIslemleri = (container) => {
                         <tr style="background: #eff6ff;">
                             <td style="text-align: center;">-</td>
                             <td>
-                                <select id="i-tur" class="form-control" style="width:100%; font-size:12px; padding:4px;" onchange="window.updateInlineDatalist()">
+                                <select id="i-tur" class="form-control" style="width:100%; font-size:13px; padding:4px;" onchange="window.updateInlineDatalist()">
                                     <option value="Hisse" selected>Hisse</option>
                                     <option value="Fon">Fon</option>
                                 </select>
                             </td>
-                            <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                            <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                            <td><input type="number" step="0.000001" id="i-fiyat" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Fiyat" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                            <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Adet" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                            <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" disabled></td>
+                            <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                            <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:13px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                            <td><input type="number" step="0.000001" id="i-fiyat" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="Fiyat" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                            <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="Adet" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
+                            <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="Tutar" disabled></td>
                             <td>
                                 <button class="btn" id="i-submit-btn" style="padding: 2px 4px; font-size: 14px; background: transparent; box-shadow: none; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineHisse()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
                                 <button class="btn" style="padding: 2px 4px; font-size: 14px; background: transparent; box-shadow: none; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('hisse')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
@@ -4815,23 +4815,23 @@ const renderNakitIslemleri = (container, append = false) => {
         if (n.id === window.currentNakitEditId) {
             return `<tr style="background: #eff6ff;">
                 <td>${i + 1}</td>
-                <td><input type="date" id="edit-n-tarih" class="form-control" style="width:100%; font-size:12px; padding:2px; text-align:right;" value="${n.tarih}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
-                <td><input type="number" step="0.01" id="edit-n-tutar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.tutar}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
-                <td><input type="number" step="0.01" id="edit-n-bist" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.bist100 || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
-                <td><input type="number" step="0.01" id="edit-n-dolar" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.dolar || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
-                <td><input type="number" step="0.01" id="edit-n-altin" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.gramAltin || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
-                <td><input type="text" inputmode="decimal" id="edit-n-pry" class="form-control" style="width:100%; font-size:12px; padding:2px;" value="${n.pry || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
+                <td><input type="date" id="edit-n-tarih" class="form-control" style="width:100%; font-size:13px; padding:3px; text-align:right;" value="${n.tarih}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
+                <td><input type="number" step="0.01" id="edit-n-tutar" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${n.tutar}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
+                <td><input type="number" step="0.01" id="edit-n-bist" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${n.bist100 || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
+                <td><input type="number" step="0.01" id="edit-n-dolar" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${n.dolar || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
+                <td><input type="number" step="0.01" id="edit-n-altin" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${n.gramAltin || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
+                <td><input type="text" inputmode="decimal" id="edit-n-pry" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${n.pry || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
                 <td>
-                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--accent-color);" onclick="window.saveEditNakit('${n.id}')">Kaydet</button>
-                    <button class="btn" style="padding: 0.1rem 0.3rem; font-size: 12px; background: var(--overlay-hover); color: var(--text-primary); border: 1px solid var(--surface-border); box-shadow: none;" onclick="window.cancelNakitEdit()">İptal</button>
+                    <button class="btn" style="padding: 0.2rem 0.45rem; font-size: 13px; background: var(--accent-color);" onclick="window.saveEditNakit('${n.id}')">Kaydet</button>
+                    <button class="btn" style="padding: 0.2rem 0.45rem; font-size: 13px; background: var(--overlay-hover); color: var(--text-primary); border: 1px solid var(--surface-border); box-shadow: none;" onclick="window.cancelNakitEdit()">İptal</button>
                 </td>
             </tr>`;
         }
         return `<tr>
             <td>${i + 1}</td><td style="text-align: right;">${formatDate(n.tarih)}</td><td class="${n.tutar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(n.tutar, 0)}</td><td>${formatNumber(n.bist100)}</td><td>${formatNumber(n.dolar)}</td><td>${formatNumber(n.gramAltin)}</td><td>${formatNumber(n.pry, 6)}</td>
             <td>
-                <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; box-shadow: none; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditNakit('${n.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
-                <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; color: var(--text-secondary); border: none;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                <button class="btn" style="padding: 2px 5px; font-size: 13.5px; background: transparent; box-shadow: none; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditNakit('${n.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
+                <button class="btn" style="padding: 2px 5px; font-size: 13.5px; background: transparent; color: var(--text-secondary); border: none;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
             </td>
         </tr>`;
     }).join('');
@@ -4849,12 +4849,12 @@ const renderNakitIslemleri = (container, append = false) => {
                     <tbody id="nakit-ekle-section" style="display: none;">
                         <tr style="background: #eff6ff;">
                             <td style="text-align: center;">-</td>
-                            <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:12px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Tutar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="XU100" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="Dolar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="GRAMALTIN" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="text" inputmode="decimal" id="n-pry" class="form-control" style="width:100%; font-size:12px; padding:4px;" placeholder="PRY" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:13px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="Tutar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="XU100" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="Dolar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="GRAMALTIN" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
+                            <td><input type="text" inputmode="decimal" id="n-pry" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="PRY" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
                             <td>
                                 <button class="btn" id="n-submit-btn" style="padding: 2px 4px; font-size: 14px; background: transparent; box-shadow: none; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineNakitEntry()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
                                 <button class="btn" style="padding: 2px 4px; font-size: 14px; background: transparent; box-shadow: none; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('nakit')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
@@ -4952,29 +4952,29 @@ const renderVeriler = (container) => {
             
 
             <!-- Enflasyon -->
-            <div class="table-container glass" style="margin-bottom: 0;">
+            <div class="table-container glass" style="margin-bottom: 0; padding: 0.75rem 1rem 1rem 1rem;">
                 <div class="table-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 13px; color: var(--text-primary);">Aylık Enflasyon Verileri</span>
-                    <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-secondary); border: none; box-shadow: none;" onclick="window.toggleEnfForm()" title="Ekle"><i class="fas fa-plus" style="font-size: 14px;"></i></button>
+                    <span style="font-size: 16px; font-weight: 700; color: #113A5D;">Aylık Enflasyon Verileri</span>
+                    <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-secondary); border: none; box-shadow: none;" onclick="window.toggleEnfForm()" title="Ekle"><i class="fas fa-plus" style="font-size: 15px;"></i></button>
                 </div>
                 
                 <div style="overflow-x: auto; overflow-y: visible; margin-bottom: 0;">
                     <table class="dash-table compact-table" style="width: 100%;">
                         <thead style="position: sticky; top: 0; background: var(--bg-card); z-index: 10;">
-                            <tr style="font-size: 12px; font-weight: normal;">
-                                <th style="text-align:center; font-size: 12px; font-weight: normal;">Dönem (Yıl-Ay)</th>
-                                <th style="text-align:right; font-size: 12px; font-weight: normal;">Aylık Enflasyon (%)</th>
-                                <th style="text-align:right; font-size: 12px; font-weight: normal;">Kümülatif Enflasyon (%)</th>
-                                <th style="text-align:center; width: 80px; font-size: 12px; font-weight: normal;">İşlem</th>
+                            <tr>
+                                <th style="text-align:center;">Dönem (Yıl-Ay)</th>
+                                <th style="text-align:right;">Aylık Enflasyon (%)</th>
+                                <th style="text-align:right;">Kümülatif Enflasyon (%)</th>
+                                <th style="text-align:center; width: 80px;">İşlem</th>
                             </tr>
                         </thead>
                         <tbody id="enf-form-tbody">
                             <tr id="enf-form-row" style="display:none; background: var(--overlay-bg);">
                                 <td style="text-align:center;">
-                                    <input type="month" id="i-enf-tarih" class="form-control" style="padding:2px 5px; font-size:12px; height:auto; width:100%;" required>
+                                    <input type="month" id="i-enf-tarih" class="form-control" style="padding:4px 6px; font-size:13px; height:auto; width:100%;" required>
                                 </td>
                                 <td style="text-align:right;">
-                                    <input type="number" id="i-enf-oran" class="form-control" step="0.01" style="padding:2px 5px; font-size:12px; height:auto; width:100%; text-align:right;" required>
+                                    <input type="number" id="i-enf-oran" class="form-control" step="0.01" style="padding:4px 6px; font-size:13px; height:auto; width:100%; text-align:right;" required>
                                 </td>
                                 <td style="text-align:right; color: var(--text-secondary);">-</td>
                                 <td style="text-align:center;">
@@ -5060,7 +5060,7 @@ window.renderEnflasyonData = () => {
                 <td style="text-align:right; color:${color}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(pct)}%</td>
                 <td style="text-align:right; color:${cumColor}; font-weight:bold;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(cumMap[item.tarih])}%</td>
                 <td style="text-align:center;">
-                    <button class="btn" style="padding: 2px 4px; font-size: 12px; background: transparent; color: var(--text-secondary); border: none;" onclick="window.deleteEnflasyon('${item.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                    <button class="btn" style="padding: 2px 5px; font-size: 13.5px; background: transparent; color: var(--text-secondary); border: none;" onclick="window.deleteEnflasyon('${item.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                 </td>
             </tr>`;
         });
@@ -5763,7 +5763,7 @@ const renderAnalizler = (container) => {
             <div class="table-container glass" style="flex: 1;">
                 <div class="table-header" style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.5rem; border-bottom: 1px solid var(--surface-border); margin-bottom: 0.5rem;">
                     <span>Takip Edilen Analizler</span>
-                    <button class="btn" style="font-size: 12px; padding: 0.3rem 0.8rem; background: var(--success-color);" onclick="window.toggleInlineAnaliz()">+</button>
+                    <button class="btn" style="font-size: 13.5px; padding: 0.35rem 0.85rem; background: var(--success-color);" onclick="window.toggleInlineAnaliz()">+</button>
                 </div>
                 <div style="overflow-x: auto;">
                     <table class="dash-table" style="table-layout: fixed; width: 100%;">
@@ -5779,15 +5779,15 @@ const renderAnalizler = (container) => {
                         </thead>
                         <tbody>
                             <tr id="inline-analiz-row" style="display: none; background: #eff6ff;">
-                                <td><input type="date" id="analiz-tarih" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px; text-align:right; color-scheme: light;" value="${today}"></td>
-                                <td><input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px; text-align:left;" placeholder="Analist"></td>
-                                <td><input type="text" id="analiz-hisse" list="bist-hisse-list" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px; text-transform:uppercase; text-align:left;" placeholder="Hisse"></td>
-                                <td><input type="text" id="analiz-baglanti" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px; text-align:left;" placeholder="Link"></td>
-                                <td><input type="text" id="analiz-not" class="form-control" style="width:100%; font-size:12px !important; font-weight:normal !important; padding:4px;" placeholder="Not..."></td>
+                                <td><input type="date" id="analiz-tarih" class="form-control" style="width:100%; font-size:13px !important; font-weight:normal !important; padding:4px; text-align:right; color-scheme: light;" value="${today}"></td>
+                                <td><input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%; font-size:13px !important; font-weight:normal !important; padding:4px; text-align:left;" placeholder="Analist"></td>
+                                <td><input type="text" id="analiz-hisse" list="bist-hisse-list" class="form-control" style="width:100%; font-size:13px !important; font-weight:normal !important; padding:4px; text-transform:uppercase; text-align:left;" placeholder="Hisse"></td>
+                                <td><input type="text" id="analiz-baglanti" class="form-control" style="width:100%; font-size:13px !important; font-weight:normal !important; padding:4px; text-align:left;" placeholder="Link"></td>
+                                <td><input type="text" id="analiz-not" class="form-control" style="width:100%; font-size:13px !important; font-weight:normal !important; padding:4px;" placeholder="Not..."></td>
                                 <td style="text-align: center;">
                                     <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                                        <button class="btn" style="background: var(--success-color); color: var(--btn-text); padding: 2px 6px !important; font-size: 12px !important; font-weight: normal !important; min-width: 0 !important; width: fit-content !important; border-radius: 4px; border: none; cursor: pointer; box-sizing: border-box !important;" onclick="window.addAnaliz()">Kaydet</button>
-                                        <button class="btn" style="background: var(--danger-color); color: #fff; padding: 2px 6px !important; font-size: 12px !important; font-weight: normal !important; min-width: 0 !important; width: fit-content !important; border-radius: 4px; border: none; cursor: pointer; box-sizing: border-box !important;" onclick="window.toggleInlineAnaliz()">İptal</button>
+                                        <button class="btn" style="background: var(--success-color); color: var(--btn-text); padding: 3px 8px !important; font-size: 13px !important; font-weight: 600 !important; min-width: 0 !important; width: fit-content !important; border-radius: 4px; border: none; cursor: pointer; box-sizing: border-box !important;" onclick="window.addAnaliz()">Kaydet</button>
+                                        <button class="btn" style="background: var(--danger-color); color: #fff; padding: 3px 8px !important; font-size: 13px !important; font-weight: 600 !important; min-width: 0 !important; width: fit-content !important; border-radius: 4px; border: none; cursor: pointer; box-sizing: border-box !important;" onclick="window.toggleInlineAnaliz()">İptal</button>
                                     </div>
                                 </td>
                             </tr>
@@ -6154,9 +6154,9 @@ window.renderTakipEditList = () => {
     }
 
     container.innerHTML = list.map(hisse => `
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.15rem 0.25rem; border-bottom: 1px solid var(--surface-border);">
-              <span style="color: var(--text-secondary); font-weight: 500; font-size: 12px;">${hisse}</span>
-                <i class="fas fa-trash-alt" style="cursor: pointer; color: var(--text-secondary); font-size: 12px; padding: 4px;" onclick="window.removeHisseFromTakipModal('${hisse}')"></i>
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.25rem 0.3rem; border-bottom: 1px solid var(--surface-border);">
+              <span style="color: var(--text-primary); font-weight: 600; font-size: 13.5px;">${hisse}</span>
+                <i class="fas fa-trash-alt" style="cursor: pointer; color: var(--text-secondary); font-size: 13px; padding: 4px;" onclick="window.removeHisseFromTakipModal('${hisse}')"></i>
           </div>
       `).join('');
 };
@@ -6458,11 +6458,11 @@ const renderAnasayfa = (container) => {
     container.innerHTML = `
         <style>
             .takip-table th {
-                font-size: 12px !important;
-                font-weight: 600 !important;
+                font-size: 12.5px !important;
+                font-weight: 700 !important;
             }
             .takip-table td {
-                font-size: 12px !important;
+                font-size: 13px !important;
             }
         </style>
         <div class="page-section active" style="display: flex; flex-direction: column; padding: 0px;">
@@ -6472,15 +6472,15 @@ const renderAnasayfa = (container) => {
 
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.65rem; justify-content: space-between; align-items: center;">
                     <div style="display: flex; gap: 0.5rem;">
-                        <span style="cursor: pointer; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 7px; color: ${window.takipTab === 'degerleme' ? 'var(--active-text-color)' : 'var(--text-secondary)'}; background: ${window.takipTab === 'degerleme' ? 'var(--overlay-bg)' : 'transparent'}" onclick="window.setTakipTab('degerleme')">Değerleme</span>
-                        <span style="cursor: pointer; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 7px; color: ${window.takipTab === 'oranlar' ? 'var(--active-text-color)' : 'var(--text-secondary)'}; background: ${window.takipTab === 'oranlar' ? 'var(--overlay-bg)' : 'transparent'}" onclick="window.setTakipTab('oranlar')">Oranlar</span>
+                        <span style="cursor: pointer; font-size: 13.5px; font-weight: 600; padding: 6px 13px; border-radius: 7px; color: ${window.takipTab === 'degerleme' ? 'var(--active-text-color)' : 'var(--text-secondary)'}; background: ${window.takipTab === 'degerleme' ? 'var(--overlay-bg)' : 'transparent'}" onclick="window.setTakipTab('degerleme')">Değerleme</span>
+                        <span style="cursor: pointer; font-size: 13.5px; font-weight: 600; padding: 6px 13px; border-radius: 7px; color: ${window.takipTab === 'oranlar' ? 'var(--active-text-color)' : 'var(--text-secondary)'}; background: ${window.takipTab === 'oranlar' ? 'var(--overlay-bg)' : 'transparent'}" onclick="window.setTakipTab('oranlar')">Oranlar</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.6rem;">
                         <div class="search-input-wrap">
                             <i class="fas fa-search"></i>
                             <input type="text" id="takip-search-input" class="inline-search-input" placeholder="Hisse ara..." value="${window.escapeHtml(window.takipSearchQuery || '')}" oninput="window.filterTakipTable(this.value)">
                         </div>
-                        <span id="takip-edit-btn" class="fas fa-pen" style="color: var(--text-secondary); cursor: pointer; font-size: 13px; padding: 6px; border-radius: 6px; background: var(--input-bg); border: 1px solid var(--surface-border);" title="Takip Listesini Düzenle" onclick="window.toggleTakipEditModal(event)"></span>
+                        <span id="takip-edit-btn" class="fas fa-pen" style="color: var(--text-secondary); cursor: pointer; font-size: 14px; padding: 7px; border-radius: 7px; background: var(--input-bg); border: 1px solid var(--surface-border);" title="Takip Listesini Düzenle" onclick="window.toggleTakipEditModal(event)"></span>
                     </div>
                 </div>
                 <div style="overflow-x: auto; overflow-y: visible; border-radius: 8px;">
@@ -6883,7 +6883,7 @@ const _renderPageActual = () => {
 window.renderNotlar = (container) => {
     container.innerHTML = `
         <div class="header-section" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0px;">
-            <h2 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--text-primary);">Notlarım</h2>
+            <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: var(--text-primary);">Notlarım</h2>
             <button class="btn" style="background: var(--accent-color); color: #fff;" onclick="window.openNoteModal()"><i class="fas fa-plus"></i> Yeni Not Ekle</button>
         </div>
         <div id="notes-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; align-items: start; margin-top: -10px;">
@@ -6914,12 +6914,12 @@ window.renderNotlar = (container) => {
             const formattedTitle = (note.title || 'Başlıksız').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
             card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                    <h3 style="margin: 0; font-size: 12px; font-weight: normal; color: var(--text-primary); word-break: break-word;">${formattedTitle}</h3>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.85rem;">
+                    <h3 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--text-primary); word-break: break-word;">${formattedTitle}</h3>
                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-top: -0.2rem; margin-right: -0.5rem;">
-                        <button class="btn" style="background: transparent; color: var(--danger-color); padding: 0.2rem 0.5rem; font-size: 12px;" onclick="window.deleteNote('${note.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                        <button class="btn" style="background: transparent; color: var(--danger-color); padding: 0.25rem 0.5rem; font-size: 13.5px;" onclick="window.deleteNote('${note.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
                         <div style="position: relative;">
-                            <button class="btn" style="background: transparent; color: var(--text-secondary); padding: 0.2rem 0.5rem; font-size: 12px;" onclick="window.toggleNoteColorMenu('${note.id}', event)" title="Renk Seçenekleri"><i class="fas fa-ellipsis-v"></i></button>
+                            <button class="btn" style="background: transparent; color: var(--text-secondary); padding: 0.25rem 0.5rem; font-size: 13.5px;" onclick="window.toggleNoteColorMenu('${note.id}', event)" title="Renk Seçenekleri"><i class="fas fa-ellipsis-v"></i></button>
                             <div id="note-color-menu-${note.id}" style="display: none; position: absolute; right: 0; top: 100%; background: var(--dropdown-bg); border: 1px solid var(--surface-border); border-radius: 8px; box-shadow: var(--shadow-lg); z-index: 10; padding: 0.5rem; min-width: 150px;">
                                 <div style="display: flex; gap: 0.4rem; justify-content: space-between;">
                                     <div class="color-swatch" style="width:18px; height:18px; border-radius:50%; background:#3498db; cursor:pointer;" onclick="window.changeNoteColor('${note.id}', '#3498db')"></div>
@@ -6932,9 +6932,9 @@ window.renderNotlar = (container) => {
                         </div>
                     </div>
                 </div>
-                <div id="note-content-display-${note.id}" style="color: var(--text-secondary); font-size: calc(0.95rem - 3px); line-height: 1.6; word-break: break-word; margin-bottom: 6px; cursor: text;" ondblclick="window.enterNoteEditMode('${note.id}')">${formattedContent}</div>
-                <textarea id="note-content-edit-${note.id}" class="form-control" style="display:none; width: 100%; font-size: calc(0.95rem - 3px); line-height: 1.6; font-family: inherit; resize: vertical; margin-bottom: 6px; min-height: 100px; box-sizing: border-box;" onblur="window.saveNoteInline('${note.id}')"></textarea>
-                <div style="font-size: 0.75rem; color: var(--text-secondary); text-align: right; border-top: 1px solid var(--table-border); padding-top: 6px; margin-bottom: -0.5rem;"><i class="far fa-clock"></i> ${dateStr}</div>
+                <div id="note-content-display-${note.id}" style="color: var(--text-secondary); font-size: 14px; line-height: 1.6; word-break: break-word; margin-bottom: 6px; cursor: text;" ondblclick="window.enterNoteEditMode('${note.id}')">${formattedContent}</div>
+                <textarea id="note-content-edit-${note.id}" class="form-control" style="display:none; width: 100%; font-size: 14px; line-height: 1.6; font-family: inherit; resize: vertical; margin-bottom: 6px; min-height: 100px; box-sizing: border-box;" onblur="window.saveNoteInline('${note.id}')"></textarea>
+                <div style="font-size: 12px; color: var(--text-secondary); text-align: right; border-top: 1px solid var(--table-border); padding-top: 6px; margin-bottom: -0.5rem;"><i class="far fa-clock"></i> ${dateStr}</div>
             `;
             grid.appendChild(card);
         });
@@ -6946,14 +6946,14 @@ window.renderNotlar = (container) => {
         modal.className = 'app-container';
         modal.style.cssText = 'display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(4px); z-index: 2000; opacity: 0; transition: opacity 0.3s;';
         modal.innerHTML = `
-            <div class="glass" style="width: 92%; max-width: 500px; height: min(680px, 86vh); display: flex; flex-direction: column; padding: 1rem; border-radius: 8px; position: relative; transform: scale(0.95); transition: transform 0.3s;">
-                <h3 id="note-modal-title" style="margin-top: 0; margin-bottom: 0.8rem; color: var(--text-primary); font-size: calc(1.2rem - 3px); flex-shrink: 0;">Yeni Not Ekle</h3>
+            <div class="glass" style="width: 92%; max-width: 500px; height: min(680px, 86vh); display: flex; flex-direction: column; padding: 1.25rem; border-radius: 12px; position: relative; transform: scale(0.95); transition: transform 0.3s;">
+                <h3 id="note-modal-title" style="margin-top: 0; margin-bottom: 0.85rem; color: var(--text-primary); font-size: 18px; flex-shrink: 0;">Yeni Not Ekle</h3>
                 <input type="hidden" id="note-id-input" value="">
-                <input type="text" id="note-title-input" placeholder="Not Başlığı (İsteğe bağlı)" style="width: 100%; padding: 0.5rem; margin-bottom: 0.5rem; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; color: var(--text-primary); outline: none; font-size: calc(1.2rem - 3px); flex-shrink: 0;">
-                <textarea id="note-content-input" placeholder="Notunuzu buraya yazın..." style="width: 100%; flex: 1; padding: 0.5rem; margin-bottom: 0.5rem; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 4px; color: var(--text-primary); outline: none; font-family: inherit; font-size: calc(0.95rem - 3px); resize: none; line-height: 1.4;"></textarea>
-                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.8rem; align-items: center; flex-shrink: 0;">
-                    <label style="color: var(--text-secondary); font-size: calc(0.95rem - 3px);">Etiket Rengi:</label>
-                    <div style="display: flex; gap: 0.3rem;" id="note-color-picker">
+                <input type="text" id="note-title-input" placeholder="Not Başlığı (İsteğe bağlı)" style="width: 100%; padding: 0.6rem 0.75rem; margin-bottom: 0.6rem; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text-primary); outline: none; font-size: 15px; flex-shrink: 0;">
+                <textarea id="note-content-input" placeholder="Notunuzu buraya yazın..." style="width: 100%; flex: 1; padding: 0.65rem 0.75rem; margin-bottom: 0.65rem; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 8px; color: var(--text-primary); outline: none; font-family: inherit; font-size: 14px; resize: none; line-height: 1.5;"></textarea>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.85rem; align-items: center; flex-shrink: 0;">
+                    <label style="color: var(--text-secondary); font-size: 13.5px; font-weight: 500;">Etiket Rengi:</label>
+                    <div style="display: flex; gap: 0.35rem;" id="note-color-picker">
                         <div class="color-swatch active" data-color="#3498db" style="width:18px; height:18px; border-radius:50%; background:#3498db; cursor:pointer; border: 2px solid #0f172a;"></div>
                         <div class="color-swatch" data-color="#2ecc71" style="width:18px; height:18px; border-radius:50%; background:#2ecc71; cursor:pointer; border: 2px solid transparent;"></div>
                         <div class="color-swatch" data-color="#e74c3c" style="width:18px; height:18px; border-radius:50%; background:#e74c3c; cursor:pointer; border: 2px solid transparent;"></div>
@@ -6962,9 +6962,9 @@ window.renderNotlar = (container) => {
                     </div>
                     <input type="hidden" id="note-color-input" value="#3498db">
                 </div>
-                <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
-                    <button class="btn" style="flex: 1; background: var(--success-color); padding: 0.4rem; font-size: calc(0.95rem - 3px);" onclick="window.saveNote()"><i class="fas fa-check"></i> Kaydet</button>
-                    <button class="btn" style="flex: 1; background: var(--overlay-hover); color: var(--text-primary); border: 1px solid var(--surface-border); box-shadow: none; padding: 0.4rem; font-size: calc(0.95rem - 3px);" onclick="window.closeNoteModal()">İptal</button>
+                <div style="display: flex; gap: 0.6rem; flex-shrink: 0;">
+                    <button class="btn" style="flex: 1; background: var(--success-color); padding: 0.55rem; font-size: 14px;" onclick="window.saveNote()"><i class="fas fa-check"></i> Kaydet</button>
+                    <button class="btn" style="flex: 1; background: var(--overlay-hover); color: var(--text-primary); border: 1px solid var(--surface-border); box-shadow: none; padding: 0.55rem; font-size: 14px;" onclick="window.closeNoteModal()">İptal</button>
                 </div>
             </div>
         `;
@@ -7286,10 +7286,10 @@ let isLoginMode = true;
 const toggleAuthMode = () => {
     isLoginMode = !isLoginMode;
     document.getElementById('auth-title').innerText = isLoginMode ? 'Giriş Yap' : 'Kayıt Ol';
-    document.getElementById('auth-submit-btn').innerText = isLoginMode ? 'Giriş Yap' : 'Kayıt Ol';
+    document.getElementById('auth-submit-btn').innerText = isLoginMode ? 'Sisteme Giriş Yap' : 'Kayıt Ol';
     document.getElementById('auth-toggle').innerHTML = isLoginMode ?
-        'Hesabınız yok mu? <span style="color: var(--accent-color);">Kayıt Olun</span>' :
-        'Zaten hesabınız var mı? <span style="color: var(--accent-color);">Giriş Yapın</span>';
+        'Hesabınız yok mu? <span>Kayıt Olun</span>' :
+        'Zaten hesabınız var mı? <span>Giriş Yapın</span>';
 
     document.getElementById('auth-name').style.display = isLoginMode ? 'none' : 'block';
     document.getElementById('auth-phone').style.display = isLoginMode ? 'none' : 'block';
@@ -7478,10 +7478,10 @@ window.showSidebarTakip = (btn) => {
 
     const takipList = (State.data.takipListesi || []).slice().sort((a, b) => a.localeCompare(b));
     if (takipList.length === 0) {
-        dropdown.innerHTML = '<div style="padding: 0.5rem; color: var(--text-secondary); font-size: 12px; white-space: nowrap; text-align: center;">Listeniz boş</div>';
+        dropdown.innerHTML = '<div style="padding: 0.5rem; color: var(--text-secondary); font-size: 13px; white-space: nowrap; text-align: center;">Listeniz boş</div>';
     } else {
         dropdown.innerHTML = takipList.map(hisse =>
-            `<button class="nav-btn" style="text-align: left; width: 100%; border-radius: 4px; font-size: 12px; padding: 0.5rem 1rem;" onclick="window.goToHisse('${hisse}'); if(window.hideSidebarTakip) window.hideSidebarTakip(true);">${hisse}</button>`
+            `<button class="nav-btn" style="text-align: left; width: 100%; border-radius: 6px; font-size: 13.5px; padding: 0.5rem 1rem;" onclick="window.goToHisse('${hisse}'); if(window.hideSidebarTakip) window.hideSidebarTakip(true);">${hisse}</button>`
         ).join('');
     }
 
