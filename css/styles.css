@@ -2250,6 +2250,470 @@ table th i.fa-sort-down {
 .enf-table tbody tr:not(:hover) td.enf-heat-4 { background: rgba(239, 68, 68, 0.16) !important; color: #b91c1c !important; }
 
 /* ==========================================================================
+   Hisse Detay & Değerleme Professional UI System
+   ========================================================================== */
+.hisse-hero-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    padding: 0.95rem 1.25rem;
+    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid var(--surface-border);
+    border-left: 5px solid #0284c7;
+    box-shadow: var(--shadow-sm);
+}
+
+.hisse-hero-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+}
+
+.hisse-nav-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f1f5f9;
+    padding: 3px;
+    border-radius: 9px;
+    border: 1px solid #e2e8f0;
+}
+
+.hisse-step-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: #475569;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12.5px;
+    transition: var(--transition);
+}
+
+.hisse-step-btn:hover {
+    background: #ffffff;
+    color: #0369a1;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.hisse-hero-ticker {
+    margin: 0;
+    font-size: 21px;
+    font-weight: 800;
+    color: #113A5D;
+    letter-spacing: 0.4px;
+}
+
+.hisse-metric-chips {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.hisse-metric-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    font-size: 12px;
+    color: #475569;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.hisse-metric-chip strong {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.hisse-hero-right {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.hisse-price-block {
+    display: flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    padding-right: 0.4rem;
+}
+
+.hisse-price-val {
+    font-size: 21px;
+    font-weight: 800;
+    color: #0f172a;
+    font-variant-numeric: tabular-nums;
+}
+
+.hisse-change-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.hisse-change-pill.pos {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+.hisse-change-pill.neg {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.hisse-tab-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    overflow-x: auto;
+    padding: 4px;
+    background: #ffffff;
+    border: 1px solid var(--surface-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+}
+
+.hisse-tab-strip .ekstre-tab-group {
+    border: none;
+    background: transparent;
+    padding: 2px;
+    width: 100%;
+    overflow-x: auto;
+}
+
+.hisse-tab-strip .ekstre-tab-pill.active {
+    background: #113A5D;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(17, 58, 93, 0.22);
+}
+
+.hisse-tab-strip .ekstre-tab-pill.active i {
+    color: #38bdf8;
+}
+
+.ozet-table-scroll {
+    overflow-x: auto;
+    width: 100%;
+}
+
+/* Değerleme Analytics & Matrix */
+.deg-analytics-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(300px, 1fr);
+    gap: 0.95rem;
+    align-items: stretch;
+}
+
+.deg-breakdown-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.deg-breakdown-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    font-size: 13px;
+    color: #475569;
+}
+
+.deg-breakdown-row strong {
+    color: #0f172a;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.deg-breakdown-row.highlight {
+    background: #f0f9ff;
+    border-color: #bae6fd;
+    color: #0369a1;
+    font-weight: 600;
+}
+
+.deg-breakdown-row.highlight strong {
+    color: #0c4a6e;
+    font-size: 14.5px;
+    font-weight: 800;
+}
+
+.deg-table-scroll {
+    overflow-x: auto;
+    overflow-y: visible;
+    border-radius: 10px;
+    border: 1px solid var(--table-border);
+}
+
+.deg-table {
+    width: 100%;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    margin-top: 0 !important;
+    table-layout: auto !important;
+}
+
+.deg-table th,
+.deg-table td {
+    padding: 8px 10px !important;
+    font-size: 13px !important;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.deg-table th.deg-sticky-label,
+.deg-table td.deg-sticky-label {
+    position: sticky;
+    left: 0;
+    min-width: 158px;
+    width: 158px;
+    box-sizing: border-box;
+    text-align: left !important;
+    z-index: 4;
+    box-shadow: 3px 0 6px -3px rgba(15, 23, 42, 0.10);
+}
+
+.deg-table thead th.deg-sticky-label {
+    z-index: 15;
+    background: var(--table-header-bg) !important;
+}
+
+.deg-table thead tr.deg-group-head th {
+    font-size: 11px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.45px;
+    padding: 6px 8px !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+}
+
+.deg-table thead th.deg-th-past {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+}
+
+.deg-table thead th.deg-th-next {
+    background: #dbeafe !important;
+    color: #1d4ed8 !important;
+}
+
+.deg-table thead th.deg-th-year {
+    background: #e0f2fe !important;
+    color: #0369a1 !important;
+}
+
+.deg-table thead th.deg-col-min {
+    min-width: 118px;
+}
+
+.deg-table tbody tr:nth-child(odd) td.deg-sticky-label {
+    background: var(--table-row-bg);
+}
+
+.deg-table tbody tr:nth-child(even) td.deg-sticky-label {
+    background: var(--table-row-alt);
+}
+
+.deg-table tbody tr:hover td.deg-sticky-label {
+    background: var(--table-row-hover-bg) !important;
+}
+
+.deg-table tbody tr.deg-ctrl-row td {
+    background: #f8fafc !important;
+    border-bottom: 1.5px solid #cbd5e1 !important;
+    padding: 6px 8px !important;
+}
+
+.deg-table tbody tr.deg-ctrl-row td.deg-sticky-label {
+    background: #f8fafc !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+    text-transform: uppercase;
+    letter-spacing: 0.35px;
+}
+
+.deg-col-controls {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.deg-curr-btn {
+    padding: 2px 7px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #113A5D;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.deg-curr-btn:hover {
+    border-color: #0284c7;
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.deg-edit-col-btn {
+    padding: 2px 7px;
+    border-radius: 6px;
+    border: 1px solid #bae6fd;
+    background: #f0f9ff;
+    color: #0369a1;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: var(--transition);
+    font-family: inherit;
+}
+
+.deg-edit-col-btn:hover {
+    background: #0284c7;
+    color: #ffffff;
+    border-color: #0284c7;
+}
+
+.deg-table tbody td.deg-cell-past {
+    color: #64748b !important;
+    background: rgba(241, 245, 249, 0.45);
+}
+
+.deg-table tbody td.deg-cell-editable {
+    cursor: pointer;
+    color: #0f172a !important;
+    font-weight: 500 !important;
+    position: relative;
+}
+
+.deg-table tbody td.deg-cell-editable:hover {
+    background: #eff6ff !important;
+    box-shadow: inset 0 0 0 1.5px #38bdf8;
+}
+
+.deg-table tbody td.deg-cell-next-col {
+    border-left: 1.5px solid #bfdbfe !important;
+    border-right: 1.5px solid #bfdbfe !important;
+}
+
+.deg-table tbody tr.deg-row-computed td {
+    background: #f8fafc !important;
+    font-weight: 600 !important;
+}
+
+.deg-table tbody tr.deg-row-computed td.deg-sticky-label {
+    background: #f8fafc !important;
+    color: #113A5D !important;
+    font-weight: 700 !important;
+}
+
+.deg-table tbody tr.deg-row-section-sep td {
+    border-top: 1.5px solid #cbd5e1 !important;
+}
+
+.deg-table tbody tr.deg-row-target td {
+    background: #f0f9ff !important;
+    border-top: 2px solid #7dd3fc !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    padding: 10px 10px !important;
+}
+
+.deg-table tbody tr.deg-row-target td.deg-sticky-label {
+    background: #f0f9ff !important;
+    color: #0c4a6e !important;
+}
+
+.deg-table tbody tr.deg-row-pot td {
+    background: #f8fafc !important;
+    font-weight: 800 !important;
+    padding: 9px 10px !important;
+}
+
+.deg-table tbody tr.deg-row-pot td.deg-sticky-label {
+    background: #f8fafc !important;
+    color: #113A5D !important;
+}
+
+.deg-inline-input {
+    width: 100%;
+    min-width: 96px;
+    box-sizing: border-box;
+    background: #ffffff;
+    color: #0f172a;
+    border: 1.5px solid #0284c7;
+    padding: 4px 6px;
+    text-align: right;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.14);
+}
+
+.deg-inline-input:focus {
+    outline: none;
+}
+
+.deg-notes-card {
+    background: #ffffff;
+    border: 1px solid var(--surface-border);
+    border-radius: 14px;
+    padding: 1rem 1.15rem;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.deg-save-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: #059669;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.deg-save-badge.visible {
+    opacity: 1;
+}
+
+/* ==========================================================================
    Ekstreler (Hisse & Fon / Nakit İşlemleri) Modern UI System
    ========================================================================== */
 .ekstre-card-shell {
@@ -2960,7 +3424,8 @@ tr.ekstre-group-row:hover td {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .dash-grid,
-    .enf-analytics-grid {
+    .enf-analytics-grid,
+    .deg-analytics-grid {
         grid-template-columns: 1fr;
     }
     .header-sub-tag,

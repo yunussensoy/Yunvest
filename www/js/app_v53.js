@@ -2191,6 +2191,178 @@ const renderPortfoy = (container) => {
     }
 };
 
+// --- UNIFIED VALUATION MATH ENGINE (Used by Değerleme UI, getGBHF & recalculateHedefFiyatlar) ---
+window.getDegerlemeFxRates = () => {
+    const getLive = (keys) => {
+        for (const k of keys) {
+            const v = State.getFiyat ? parseFloat(State.getFiyat(k)) : 0;
+            if (v && isFinite(v) && v > 1) return v;
+        }
+        return 0;
+    };
+    const usdKuru = getLive(['DOLAR', 'USDTRY']) || (window.latestMarketBenchmarks && window.latestMarketBenchmarks.dolar) || window.dolarKuru || 38.0;
+    const eurKuru = getLive(['EURO', 'EURTRY']) || window.euroKuru || (usdKuru * 1.08);
+    return { usdKuru, eurKuru };
+};
+
+window.getDegerlemeStockContext = (hisse) => {
+    const sym = String(hisse || '').trim().toUpperCase();
+    if (window.parseExcelData && (!window.stockData || !window.stockData[sym] || !window.stockData[sym].bilanco)) {
+        try { window.parseExcelData(sym); } catch (e) { }
+    }
+    const sData = (window.stockData && window.stockData[sym]) ? window.stockData[sym] : null;
+    const parseTR = (v) => {
+        if (typeof v === 'number') return isFinite(v) ? v : 0;
+        if (!v || v === '-') return 0;
+        const p = parseFloat(String(v).replace(/\./g, '').replace(/,/g, '.'));
+        return isNaN(p) ? 0 : p;
+    };
+
+    let odenmisSermaye = 0;
+    let netBorc = 0;
+    let anaOrtaklikOzkaynak = 0;
+    let ttmSatis = 0;
+    let ttmFavok = 0;
+    let ttmNetKar = 0;
+    let past3Favok = 0;
+    let past3NetKar = 0;
+
+    if (sData && sData.bilanco && sData.bilanco.rows) {
+        let finBorc = 0, nakit = 0, finYat = 0, inDuran = false;
+        const totalRows = sData.bilanco.rows.length;
+        sData.bilanco.rows.forEach((r, idx) => {
+            if (!r[0]) return;
+            const low = r[0].toString().toLocaleLowerCase('tr-TR');
+            if (low.trim() === 'duran varlıklar') inDuran = true;
+            if (low.includes('ödenmiş sermaye') && !low.includes('fark') && !low.includes('düzeltme') && odenmisSermaye === 0) {
+                odenmisSermaye = parseTR(r[1]);
+            }
+            if (low.includes('ana ortaklığa ait özkaynaklar') && anaOrtaklikOzkaynak === 0) {
+                anaOrtaklikOzkaynak = parseTR(r[1]);
+            }
+            if (low.includes('finansal borçlar') && !low.includes('kısımlar') && !low.includes('ksmlar') && idx < totalRows - 2) {
+                finBorc += parseTR(r[1]);
+            }
+            if (low.includes('nakit ve nakit benzerleri') || low.includes('nakit ve nakit değerler')) {
+                nakit += parseTR(r[1]);
+            }
+            if (low.includes('finansal yatırımlar') && !inDuran) {
+                finYat += parseTR(r[1]);
+            }
+        });
+        if (anaOrtaklikOzkaynak === 0) {
+            const ozR = sData.bilanco.rows.find(r => r[0] && r[0].toString().toLocaleLowerCase('tr-TR').trim() === 'özkaynaklar');
+            if (ozR) anaOrtaklikOzkaynak = parseTR(ozR[1]);
+        }
+        netBorc = finBorc - nakit - finYat;
+    }
+
+    if (sData && sData.gelirYillik && sData.gelirYillik.rows) {
+        const sR = sData.gelirYillik.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('satış gelirleri') || String(x[0]).toLocaleLowerCase('tr-TR').includes('hasılat')));
+        const fR = sData.gelirYillik.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
+        const nR = sData.gelirYillik.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+        if (sR) ttmSatis = parseTR(sR[1]);
+        if (fR) ttmFavok = parseTR(fR[1]);
+        if (nR) ttmNetKar = parseTR(nR[1]);
+    }
+
+    if (sData && sData.gelirCeyrek && sData.gelirCeyrek.rows && sData.gelirCeyrek.headers) {
+        const fR = sData.gelirCeyrek.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
+        const nR = sData.gelirCeyrek.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+        const maxQ = Math.min(3, sData.gelirCeyrek.headers.length - 1);
+        for (let i = 1; i <= maxQ; i++) {
+            if (fR && fR[i] !== undefined && fR[i] !== '') past3Favok += parseTR(fR[i]);
+            if (nR && nR[i] !== undefined && nR[i] !== '') past3NetKar += parseTR(nR[i]);
+        }
+    }
+
+    const td = window.tickerData && window.tickerData[sym];
+    const guncelFiyat = (td && td.c > 0) ? td.c : (parseFloat(State.getFiyat ? State.getFiyat(sym) : 0) || 0);
+    const { usdKuru, eurKuru } = window.getDegerlemeFxRates();
+
+    const piyasaDegeri = guncelFiyat * odenmisSermaye;
+    const firmaDegeri = piyasaDegeri + netBorc;
+    const guncelFdFavok = ttmFavok !== 0 ? (firmaDegeri / ttmFavok) : 0;
+    const guncelFk = ttmNetKar !== 0 ? (piyasaDegeri / ttmNetKar) : 0;
+    const guncelPdDd = anaOrtaklikOzkaynak !== 0 ? (piyasaDegeri / anaOrtaklikOzkaynak) : 0;
+
+    return {
+        hisse: sym, sData, guncelFiyat, usdKuru, eurKuru,
+        odenmisSermaye, netBorc, anaOrtaklikOzkaynak,
+        ttmSatis, ttmFavok, ttmNetKar, past3Favok, past3NetKar,
+        piyasaDegeri, firmaDegeri, guncelFdFavok, guncelFk, guncelPdDd
+    };
+};
+
+window.computeDegerlemePeriod = (period, dRaw, ctx) => {
+    const d = dRaw || {};
+    const isQuarterly = String(period || '').includes('/');
+    const curCurrency = d.currency || 'TRY';
+    const fxMult = curCurrency === 'USD' ? ctx.usdKuru : (curCurrency === 'EUR' ? ctx.eurKuru : 1);
+
+    const pNum = (v) => {
+        if (v === undefined || v === null || v === '') return null;
+        const n = parseFloat(String(v).replace(',', '.'));
+        return isNaN(n) || !isFinite(n) ? null : n;
+    };
+
+    const ciro = pNum(d.ciro);
+    const favokMarji = pNum(d.favok_marji);
+    const netKarMarji = pNum(d.net_kar_marji);
+    const ozkaynaklar = pNum(d.ozkaynaklar);
+    const yFdFavok = pNum(d.fd_favok);
+    const yFk = pNum(d.f_k !== undefined && d.f_k !== '' ? d.f_k : d.fk);
+    const yPdDd = pNum(d.pd_dd !== undefined && d.pd_dd !== '' ? d.pd_dd : d.pddd);
+    const customSermaye = pNum(d.sermaye);
+    const sermaye = (customSermaye !== null && customSermaye > 0) ? customSermaye : ctx.odenmisSermaye;
+
+    const hasFavok = ciro !== null && favokMarji !== null;
+    const hasNetKar = ciro !== null && netKarMarji !== null;
+    const favok = hasFavok ? ciro * (favokMarji / 100) : null;
+    const netKar = hasNetKar ? ciro * (netKarMarji / 100) : null;
+
+    const past3FavokConv = isQuarterly ? (ctx.past3Favok / fxMult) : 0;
+    const past3NetKarConv = isQuarterly ? (ctx.past3NetKar / fxMult) : 0;
+    const netBorcConv = ctx.netBorc / fxMult;
+
+    const ttmFavok = hasFavok ? (favok + past3FavokConv) : null;
+    const ttmNetKar = hasNetKar ? (netKar + past3NetKarConv) : null;
+
+    const pdByFdFavok = (hasFavok && yFdFavok !== null && yFdFavok > 0) ? ((ttmFavok * yFdFavok) - netBorcConv) : null;
+    const pdByFk = (hasNetKar && yFk !== null && yFk > 0) ? (ttmNetKar * yFk) : null;
+    const pdByPdDd = (ozkaynaklar !== null && yPdDd !== null && yPdDd > 0) ? (ozkaynaklar * yPdDd) : null;
+
+    const validPDs = [pdByFdFavok, pdByFk, pdByPdDd].filter(v => v !== null && isFinite(v));
+    const hfByFdFavok = (pdByFdFavok !== null && sermaye > 0) ? (pdByFdFavok / sermaye) * fxMult : null;
+    const hfByFk = (pdByFk !== null && sermaye > 0) ? (pdByFk / sermaye) * fxMult : null;
+    const hfByPdDd = (pdByPdDd !== null && sermaye > 0) ? (pdByPdDd / sermaye) * fxMult : null;
+
+    let hedefFiyatTL = null;
+    let potansiyelPct = null;
+    let potansiyelRatio = null;
+
+    if (validPDs.length > 0 && sermaye > 0) {
+        const avgPD = validPDs.reduce((s, v) => s + v, 0) / validPDs.length;
+        hedefFiyatTL = (avgPD / sermaye) * fxMult;
+        if (ctx.guncelFiyat > 0) {
+            potansiyelRatio = (hedefFiyatTL - ctx.guncelFiyat) / ctx.guncelFiyat;
+            potansiyelPct = potansiyelRatio * 100;
+        }
+    }
+
+    return {
+        period, isQuarterly, currency: curCurrency, fxMult,
+        ciro, favokMarji, netKarMarji, ozkaynaklar,
+        yFdFavok, yFk, yPdDd, sermaye,
+        hasFavok, hasNetKar, favok, netKar, ttmFavok, ttmNetKar,
+        pdByFdFavok, pdByFk, pdByPdDd,
+        hfByFdFavok, hfByFk, hfByPdDd,
+        methodCount: validPDs.length,
+        hasHedef: hedefFiyatTL !== null,
+        hedefFiyatTL, potansiyelPct, potansiyelRatio
+    };
+};
+
 const renderHisseler = (container) => {
 
     // Requires nodeIntegration
@@ -2295,14 +2467,7 @@ const renderHisseler = (container) => {
             'Akış': 'fas fa-stream'
         };
 
-        const makeBtn = (t) => `<button class="nav-btn ${activeTab === t ? 'active' : ''}" style="margin:0; font-size:13.5px; font-weight:600; padding:0.45rem 0.9rem; white-space:nowrap;" onclick="window.setHisseTab('${t}')"><i class="${tabIcons[t] || 'fas fa-file'}" style="margin-right:5px;"></i>${t}</button>`;
-        const makeDropdown = (title, items) => `
-            <div class="nav-dropdown">
-                <button class="nav-btn ${items.includes(activeTab) ? 'active' : ''}" style="margin:0; font-size:13.5px; font-weight:600; padding:0.45rem 0.9rem; white-space:nowrap;"><i class="fas fa-caret-down" style="margin-right:5px;"></i>${title}</button>
-                <div class="nav-dropdown-content">
-                    ${items.map(t => `<a onclick="window.setHisseTab('${t}')">${t}</a>`).join('')}
-                </div>
-            </div>`;
+        const makeBtn = (t) => `<button type="button" class="ekstre-tab-pill ${activeTab === t ? 'active' : ''}" onclick="window.setHisseTab('${t}')"><i class="${tabIcons[t] || 'fas fa-file'}"></i><span>${t}</span></button>`;
 
         let tabsHtml = makeBtn('Özet Rapor') + makeBtn('Değerleme') + makeBtn('Bilanço') + makeBtn('Gelir Tablosu') + makeBtn('Nakit Akım Tablosu') + makeBtn('Akış');
 
@@ -2805,138 +2970,125 @@ const renderHisseler = (container) => {
                 const hbk = (odenmisSermaye && odenmisSermaye > 0) ? (yilliklandirilmisNetKar / odenmisSermaye) : 0;
 
                 contentHtml = `
-                <style>
-                .compact-table { table-layout: auto !important; width: 100%; border-collapse: collapse; }
-                .compact-table th, .compact-table td { padding: 0.6rem 0.55rem !important; white-space: nowrap; }
-                .compact-table th { font-size: 13px !important; font-weight: 700 !important; color: var(--table-header-text) !important; height: 40px; }
-                .compact-table td:first-child { font-size: 13.5px !important; font-weight: 500 !important; color: var(--text-primary) !important; }
-                .compact-table tr { height: 40px !important; }
-                .compact-table td { font-size: 13.5px !important; font-weight: normal !important; color: var(--text-muted); height: 36px !important; line-height: 1.2 !important; }
-                /* nav-btn override removed to protect main sidebar */
-                .nav-dropdown-content a { font-size: 13.5px !important; font-weight: 500 !important; }
-                .dash-title { font-size: 15px !important; font-weight: 700 !important; color: #113A5D !important; }
-                .compact-card { padding: 1.2rem !important; }
-                .gauge-container { display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 80px; height: 50px; }
-                .gauge-bg { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid #e2e8f0; border-bottom: none; box-sizing: border-box; }
-                .gauge-fill { position: absolute; width: 100%; height: 100%; border-radius: 40px 40px 0 0; border: 8px solid #059669; border-bottom: none; box-sizing: border-box; transform-origin: bottom center; transform: rotate(0deg); transition: transform 1s; }
-                .gauge-text { position: absolute; bottom: 0; font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1; }
-                .gauge-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-top: 4px; text-align: center; }
-                </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
                         
                         <!-- Row 1: Özet Gelir & Bilanço -->
                         <div class="grid-2-col">
-                            <div class="dash-card compact-card" style="margin-bottom:0;">
-                                ${gelirHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadı</div>'}
+                            <div class="dash-card" style="margin-bottom:0; padding: 1.15rem;">
+                                <div class="ozet-table-scroll">
+                                    ${gelirHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadı</div>'}
+                                </div>
                             </div>
-                            <div class="dash-card compact-card" style="margin-bottom:0;">
-                                ${bilancoHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadı</div>'}
+                            <div class="dash-card" style="margin-bottom:0; padding: 1.15rem;">
+                                <div class="ozet-table-scroll">
+                                    ${bilancoHtml || '<div style="opacity:0.5; text-align:center;">Veri bulunamadı</div>'}
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Row 2: Çarpanlar, Karne, Şirket Detayları -->
+                        <!-- Row 2: Çarpanlar, Kaynak Dağılımı, Şirket Detayları -->
                         <div class="grid-3-col">
                             
                             <!-- Çarpanlar -->
-                            <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
-                                <div class="dash-title" style="font-size: 15px; font-weight: 700; margin-bottom: 1rem;">Çarpanlar</div>
+                            <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.15rem;">
+                                <div class="dash-title" style="font-size: 15px; font-weight: 700; margin-bottom: 0.75rem;">Çarpanlar</div>
                                 <table class="dash-table compact-table" style="flex: 1;">
                                     <tbody>
                                         <tr style="border-bottom: 1px solid var(--table-border);">
                                             <td style="text-align: left !important;">F/K</td>
-                                            <td style="text-align: right !important;">${fmtDec(fk)}</td>
+                                            <td style="text-align: right !important; font-weight:600 !important;">${fmtDec(fk)}</td>
                                         </tr>
                                         <tr style="border-bottom: 1px solid var(--table-border);">
                                             <td style="text-align: left !important;">FD/FAVÖK</td>
-                                            <td style="text-align: right !important;">${fmtDec(fdFavok)}</td>
+                                            <td style="text-align: right !important; font-weight:600 !important;">${fmtDec(fdFavok)}</td>
                                         </tr>
                                         <tr style="border-bottom: 1px solid var(--table-border);">
                                             <td style="text-align: left !important;">PD/DD</td>
-                                            <td style="text-align: right !important;">${fmtDec(pdDd)}</td>
+                                            <td style="text-align: right !important; font-weight:600 !important;">${fmtDec(pdDd)}</td>
                                         </tr>
-                                        
                                         <tr>
                                             <td style="text-align: left !important;">Net Borç / FAVÖK</td>
-                                            <td style="text-align: right !important;">${fmtDec(netBorcFavok)}</td>
+                                            <td style="text-align: right !important; font-weight:600 !important;">${fmtDec(netBorcFavok)}</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
 
                             <!-- Kaynak Dağılımı -->
-                            <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
+                            <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.15rem;">
                                 <div class="dash-title" style="font-size: 15px; font-weight: 700; margin-bottom: 0.8rem;">Kaynak Dağılımı</div>
                                 <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-                                    <div style="display:flex; height: 12px; border-radius: 6px; overflow:hidden; margin-bottom: 1.5rem;">
+                                    <div style="display:flex; height: 12px; border-radius: 6px; overflow:hidden; margin-bottom: 1.25rem;">
                                         <div style="width:${pctOz}%; background:#6c5ce7;" title="Özkaynaklar: %${pctOz}"></div>
                                         <div style="width:${pctKisa}%; background:#fd79a8;" title="Kısa Vade Yükümlülükler: %${pctKisa}"></div>
                                         <div style="width:${pctUzun}%; background:#636e72;" title="Uzun Vade Yükümlülükler: %${pctUzun}"></div>
                                     </div>
-                                    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 1rem; font-size: 13px; font-weight: 500; color:var(--text-secondary);">
-                                        <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#6c5ce7;"></div>Özkaynaklar: %${pctOz}</div>
-                                        <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#fd79a8;"></div>Kısa Vade Yük.: %${pctKisa}</div>
-                                        <div style="display:flex; align-items:center; gap:4px;"><div style="width:8px;height:8px;border-radius:50%;background:#636e72;"></div>Uzun Vade Yük.: %${pctUzun}</div>
+                                    <div style="display:flex; flex-wrap:wrap; justify-content:center; gap: 0.85rem; font-size: 13px; font-weight: 500; color:var(--text-secondary);">
+                                        <div style="display:flex; align-items:center; gap:5px;"><div style="width:9px;height:9px;border-radius:50%;background:#6c5ce7;"></div>Özkaynaklar: %${pctOz}</div>
+                                        <div style="display:flex; align-items:center; gap:5px;"><div style="width:9px;height:9px;border-radius:50%;background:#fd79a8;"></div>Kısa Vade Yük.: %${pctKisa}</div>
+                                        <div style="display:flex; align-items:center; gap:5px;"><div style="width:9px;height:9px;border-radius:50%;background:#636e72;"></div>Uzun Vade Yük.: %${pctUzun}</div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Şirket Detayları -->
-                            <div class="dash-card compact-card" style="margin-bottom:0; display:flex; flex-direction:column;">
-                                <div class="dash-title" style="font-size: 15px; font-weight: 700; margin-bottom: 1rem;">Şirket Detayları</div>
+                            <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.15rem;">
+                                <div class="dash-title" style="font-size: 15px; font-weight: 700; margin-bottom: 0.75rem;">Şirket Detayları</div>
                                 <table class="dash-table compact-table" style="flex: 1;">
                                     <tbody>
                                         <tr style="border-bottom: 1px solid var(--table-border);">
                                             <td style="text-align: left !important;">Hisse Başına Kar</td>
-                                            <td style="text-align: right !important;">${fmtDec(hbk)}</td>
+                                            <td style="text-align: right !important; font-weight:600 !important;">${fmtDec(hbk)}</td>
                                         </tr>
                                         <tr style="border-bottom: 1px solid var(--table-border);">
                                             <td style="text-align: left !important;">Ödenmiş Sermaye</td>
-                                            <td style="text-align: right !important;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(odenmisSermaye)}</td>
+                                            <td style="text-align: right !important; font-weight:600 !important;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(odenmisSermaye)}</td>
                                         </tr>
                                         <tr>
                                             <td style="text-align: left !important;">Piyasa Değeri</td>
-                                            <td style="text-align: right !important;">${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeri)}</td>
+                                            <td style="text-align: right !important; font-weight:600 !important;">₺${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeri)}</td>
                                         </tr>
                                         <tr>
                                             <td style="text-align: left !important;">Piyasa Değeri $</td>
-                                            <td style="text-align: right !important;">$${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeriUsd)}</td>
+                                            <td style="text-align: right !important; font-weight:600 !important;">$${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(piyasaDegeriUsd)}</td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
 
+                        <!-- Row 3: Marj ve Oran Grafikleri (3 Sütunlu Grid) -->
+                        <div class="grid-3-col">
+                            <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.15rem;">
+                                <div class="dash-title" style="font-size: 15px; font-weight: 700;">Brüt Kar Marjı</div>
+                                <div style="flex: 1; min-height: 235px; position: relative;"><canvas id="chart-bkm"></canvas></div>
+                            </div>
 
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 15px; font-weight: 700;">Brüt Kar Marjı</div>
-                            <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-bkm"></canvas></div>
-                        </div>
+                            <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.15rem;">
+                                <div class="dash-title" style="font-size: 15px; font-weight: 700;">FAVÖK Marjı</div>
+                                <div style="flex: 1; min-height: 235px; position: relative;"><canvas id="chart-fkm"></canvas></div>
+                            </div>
 
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 15px; font-weight: 700;">FAVÖK Marjı</div>
-                            <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-fkm"></canvas></div>
-                        </div>
+                            <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.15rem;">
+                                <div class="dash-title" style="font-size: 15px; font-weight: 700;">Net Kar Marjı</div>
+                                <div style="flex: 1; min-height: 235px; position: relative;"><canvas id="chart-nkm"></canvas></div>
+                            </div>
 
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 15px; font-weight: 700;">Net Kar Marjı</div>
-                            <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-nkm"></canvas></div>
-                        </div>
+                            <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.15rem;">
+                                <div class="dash-title" style="font-size: 15px; font-weight: 700;">Cari Oran</div>
+                                <div style="flex: 1; min-height: 235px; position: relative;"><canvas id="chart-cari"></canvas></div>
+                            </div>
 
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 15px; font-weight: 700;">Cari Oran</div>
-                            <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-cari"></canvas></div>
-                        </div>
+                            <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.15rem;">
+                                <div class="dash-title" style="font-size: 15px; font-weight: 700;">Kaldıraç Oranı</div>
+                                <div style="flex: 1; min-height: 235px; position: relative;"><canvas id="chart-kaldirac"></canvas></div>
+                            </div>
 
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 15px; font-weight: 700;">Kaldıraç Oranı</div>
-                            <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-kaldirac"></canvas></div>
+                            <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.15rem;">
+                                <div class="dash-title" style="font-size: 15px; font-weight: 700;">Özkaynak Karlılığı (ROE)</div>
+                                <div style="flex: 1; min-height: 235px; position: relative;"><canvas id="chart-roe"></canvas></div>
+                            </div>
                         </div>
-
-                        <div class="dash-card" style="margin-bottom:0; display:flex; flex-direction:column; padding: 1.2rem;">
-                            <div class="dash-title" style="font-size: 15px; font-weight: 700;">Özkaynak Karlılığı</div>
-                            <div style="flex: 1; min-height: 250px; position: relative;"><canvas id="chart-roe"></canvas></div>
-                        </div>
-                    </div>
                 </div>
                 `;
 
@@ -2965,11 +3117,6 @@ const renderHisseler = (container) => {
             }
             if (activeTab === 'Gelir Tablosu') {
                 contentHtml = `
-                <style>
-                .compact-table { table-layout: auto !important; width: 100%; }
-                .compact-table th, .compact-table td { padding: 0.45rem 0.4rem !important; white-space: nowrap; font-size: 13px !important; }
-                .compact-card { padding: 1rem 0.5rem !important; }
-                </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
                     
                     <div class="grid-3-col" style="margin-bottom: 1rem;">
@@ -3225,25 +3372,14 @@ const renderHisseler = (container) => {
             } else if (['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler'].includes(activeTab)) {
                 contentHtml = `<div style="display:flex; justify-content:center; align-items:center; height:200px; opacity:0.5; font-style:italic;">${activeTab} sayfası henüz yapım aşamasındadır.</div>`;
             } else if (activeTab === 'Değerleme') {
-                // Initialize default edit modes if not present
                 if (!window.degerlemeEditMode) window.degerlemeEditMode = {};
                 if (!window.araDegerlemeEditMode) window.araDegerlemeEditMode = {};
+                if (window.degShowPast === undefined) window.degShowPast = true;
 
-                window.enterDegerlemeEdit = (p, key) => {
-                    if (p.includes('/')) window.araDegerlemeEditMode[p] = true;
-                    else window.degerlemeEditMode[p] = true;
-                    window.degerlemeFocusPeriod = p;
-                    window.degerlemeFocusKey = key;
-                    if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
-                };
+                const degCtx = window.getDegerlemeStockContext(selectedHisse);
+                const sDataDeg = degCtx.sData;
+                const bilancoHeaders = (sDataDeg && sDataDeg.bilanco && sDataDeg.bilanco.headers) ? sDataDeg.bilanco.headers : [];
 
-                window.exitDegerlemeEdit = (p) => {
-                    if (p.includes('/')) window.araDegerlemeEditMode[p] = false;
-                    else window.degerlemeEditMode[p] = false;
-                    if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
-                };
-
-                // Read saved target price data for this hisse
                 if (!State.data.degerleme) State.data.degerleme = {};
                 if (!State.data.degerleme[selectedHisse]) State.data.degerleme[selectedHisse] = {};
                 if (!State.data.araDegerleme) State.data.araDegerleme = {};
@@ -3252,46 +3388,17 @@ const renderHisseler = (container) => {
                 const stateData = State.data.degerleme[selectedHisse];
                 const araStateData = State.data.araDegerleme[selectedHisse];
 
-                // Combine notes if both exist, else use one
+                // Combine notes cleanly
                 let savedNotYil = stateData.genelNotYil !== undefined ? stateData.genelNotYil : (stateData.genelNot || '');
                 let savedNotAra = stateData.genelNotAra || '';
                 let combinedNot = savedNotYil;
                 if (savedNotAra && savedNotAra !== savedNotYil) {
-                    combinedNot = combinedNot ? (combinedNot + "\n\n" + savedNotAra) : savedNotAra;
+                    combinedNot = combinedNot ? (combinedNot + '\n\n' + savedNotAra) : savedNotAra;
                 }
 
-                window.updateDegerlemeInputUnified = (hisse, p, field, value, shouldRender = true) => {
-                    if (p.includes('/')) {
-                        if (!State.data.araDegerleme[hisse]) State.data.araDegerleme[hisse] = {};
-                        if (!State.data.araDegerleme[hisse][p]) State.data.araDegerleme[hisse][p] = {};
-                        State.data.araDegerleme[hisse][p][field] = value;
-                    } else {
-                        if (!State.data.degerleme[hisse]) State.data.degerleme[hisse] = {};
-                        if (!State.data.degerleme[hisse][p]) State.data.degerleme[hisse][p] = {};
-                        State.data.degerleme[hisse][p][field] = value;
-                    }
-                    State.save();
-                    if (shouldRender) {
-                        if (typeof renderUI === 'function') renderUI(); else if (typeof renderPage === 'function') renderPage();
-                    }
-                };
-
-                window.saveDegerlemeNotUnified = (hisse) => {
-                    if (!State.data.degerleme[hisse]) State.data.degerleme[hisse] = {};
-                    const input = document.getElementById('degerleme-not-input');
-                    if (!input) return;
-                    State.data.degerleme[hisse].genelNotYil = input.value;
-                    // clear ara note to avoid duplication in future
-                    if (State.data.degerleme[hisse].genelNotAra) State.data.degerleme[hisse].genelNotAra = "";
-                    State.save();
-                };
-
-                const sDataDeg = window.stockData && window.stockData[selectedHisse] ? window.stockData[selectedHisse] : null;
-                const bilancoHeaders = (sDataDeg && sDataDeg.bilanco && sDataDeg.bilanco.headers) ? sDataDeg.bilanco.headers : [];
-
                 // Determine past quarters (up to 4)
-                let pastQuarters = [];
-                let pastIndices = [];
+                const pastQuarters = [];
+                const pastIndices = [];
                 for (let i = 1; i <= Math.min(4, bilancoHeaders.length - 1); i++) {
                     pastQuarters.push(bilancoHeaders[i]);
                     pastIndices.push(i);
@@ -3300,344 +3407,746 @@ const renderHisseler = (container) => {
                 pastIndices.reverse();
 
                 // Determine next quarter
-                let nextQuarter = "Gelecek Çeyrek";
+                let nextQuarter = 'Gelecek Çeyrek';
                 if (pastQuarters.length > 0) {
-                    const latest = pastQuarters[pastQuarters.length - 1];
-                    if (latest.includes('/')) {
-                        let parts = latest.split('/');
-                        let y = parseInt(parts[0]);
-                        let m = parseInt(parts[1]);
-                        m += 3;
-                        if (m > 12) {
-                            m = m % 12 || 12;
-                            y += 1;
-                        }
-                        nextQuarter = y + '/' + m;
+                    const latestQ = pastQuarters[pastQuarters.length - 1];
+                    if (latestQ.includes('/')) {
+                        const parts = latestQ.split('/');
+                        let y = parseInt(parts[0], 10);
+                        let m = parseInt(parts[1], 10) + 3;
+                        if (m > 12) { m = m % 12 || 12; y += 1; }
+                        nextQuarter = `${y}/${m}`;
                     }
                 }
 
-                // Determine next annual years (5 years)
+                // Determine next 5 annual years
                 let nextYearNum = new Date().getFullYear();
-                if (nextQuarter !== "Gelecek Çeyrek" && nextQuarter.includes('/')) {
-                    nextYearNum = parseInt(nextQuarter.split('/')[0]);
+                if (nextQuarter !== 'Gelecek Çeyrek' && nextQuarter.includes('/')) {
+                    nextYearNum = parseInt(nextQuarter.split('/')[0], 10);
                 }
-                let annualYears = [];
-                for (let i = 0; i < 5; i++) {
-                    annualYears.push((nextYearNum + i).toString());
-                }
+                const annualYears = [];
+                for (let i = 0; i < 5; i++) annualYears.push(String(nextYearNum + i));
 
-                const allPeriods = [...pastQuarters, nextQuarter, ...annualYears];
+                const forecastPeriods = [nextQuarter, ...annualYears];
+                const visiblePeriods = window.degShowPast ? [...pastQuarters, ...forecastPeriods] : [...forecastPeriods];
 
-                let headerHtml = `<tr><th style="width: 140px;">Kalem</th>`;
-                const colWidthStyle = `width: calc((100% - 140px) / ${allPeriods.length});`;
-                allPeriods.forEach(p => {
-                    const isPast = pastQuarters.includes(p);
-                    let dotsHtml = '';
-                    if (!isPast) {
-                        const d = (p.includes('/') ? araStateData[p] : stateData[p]) || {};
-                        const curCurrency = d.currency || 'TRY';
-                        dotsHtml = `
-                        <div style="position:absolute; right:0; top:0; bottom:0; padding:0 8px; display:flex; align-items:center; cursor:pointer;" onmouseenter="document.querySelectorAll('.currency-dropdown').forEach(el => el.style.display='none'); this.querySelector('.currency-dropdown').style.display='block';" onmouseleave="this.querySelector('.currency-dropdown').style.display='none';">
-                            <i class="fas fa-ellipsis-v" style="color:var(--text-secondary);"></i>
-                            <div class="currency-dropdown" style="display:none; position:absolute; right:0; top:100%; background:var(--dropdown-bg); border:1px solid var(--surface-border); border-radius:6px; z-index:999; padding:5px; box-shadow: var(--shadow-md); text-align:left;">
-                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'TRY' ? 'var(--accent-color)' : 'var(--text-secondary)'}; font-size:13px; font-weight:${curCurrency === 'TRY' ? '600' : 'normal'}; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'TRY'); this.parentElement.style.display='none';">₺ TRY</div>
-                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'USD' ? 'var(--accent-color)' : 'var(--text-secondary)'}; font-size:13px; font-weight:${curCurrency === 'USD' ? '600' : 'normal'}; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'USD'); this.parentElement.style.display='none';">$ USD</div>
-                                <div style="padding:4px 10px; cursor:pointer; color:${curCurrency === 'EUR' ? 'var(--accent-color)' : 'var(--text-secondary)'}; font-size:13px; font-weight:${curCurrency === 'EUR' ? '600' : 'normal'}; white-space:nowrap;" onclick="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', 'currency', 'EUR'); this.parentElement.style.display='none';">€ EUR</div>
-                            </div>
-                        </div>`;
+                const getPeriodRaw = (p) => (p.includes('/') ? (araStateData[p] || {}) : (stateData[p] || {}));
+
+                const setPeriodField = (hisse, p, field, value) => {
+                    const store = p.includes('/') ? State.data.araDegerleme : State.data.degerleme;
+                    if (!store[hisse]) store[hisse] = {};
+                    if (!store[hisse][p]) store[hisse][p] = {};
+                    if (value === '' || value === null || value === undefined) {
+                        delete store[hisse][p][field];
+                    } else {
+                        store[hisse][p][field] = value;
                     }
-                    headerHtml += `<th style="font-size: 13px; text-align:center; position:relative; ${colWidthStyle}">
-                        <div>${p}</div>
-                        ${dotsHtml}
-                    </th>`;
-                });
-                headerHtml += `</tr>`;
-
-                let html = `<div class="dash-card" style="display:flex; flex-direction:column; margin-top: 0;">
-                    <style>.degerleme-table td, .degerleme-table th, .degerleme-table input { color: var(--text-primary) !important; }</style>
-                    <div style="overflow-x:auto;">
-                    <table class="dash-table compact-table degerleme-table" style="width: 100%; min-width: 1200px; table-layout: fixed !important;" onclick="document.querySelectorAll('.currency-dropdown').forEach(el => el.style.display='none');">
-                            <thead>${headerHtml}</thead>
-                            <tbody>`;
-
-                // Common calculations
-                let odenmisSermayeDeg = 0;
-                if (sDataDeg && sDataDeg.bilanco && sDataDeg.bilanco.rows) {
-                    const osRow_deg = sDataDeg.bilanco.rows.find(r => r[0] && r[0].toString().toLowerCase().includes('ödenmiş sermaye') && !r[0].toString().toLowerCase().includes('fark') && !r[0].toString().toLowerCase().includes('düzeltme'));
-                    if (osRow_deg && osRow_deg.length > 1) {
-                        odenmisSermayeDeg = parseFloat(String(osRow_deg[1]).replace(/\./g, '').replace(/,/g, '.')) || 0;
-                    }
-                }
-                let netBorc_deg = 0;
-                if (sDataDeg && sDataDeg.bilanco && sDataDeg.bilanco.rows) {
-                    let finansalBorclarTotal_deg = 0;
-                    let nakitTotal_deg = 0;
-                    let finYatTotal_deg = 0;
-                    let inDuran = false;
-                    sDataDeg.bilanco.rows.forEach(r => {
-                        if (!r[0]) return;
-                        const rName = r[0].toString().toLocaleLowerCase('tr-TR');
-                        if (rName.trim() === 'duran varlıklar') inDuran = true;
-                        if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sDataDeg.bilanco.rows.length || sDataDeg.bilanco.rows.indexOf(r) < sDataDeg.bilanco.rows.length - 2)) {
-                            const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                            finansalBorclarTotal_deg += val;
-                        }
-                        if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
-                            const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                            nakitTotal_deg += val;
-                        }
-                        if (rName.includes('finansal yatırımlar') && !inDuran) {
-                            const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                            finYatTotal_deg += val;
-                        }
-                    });
-                    netBorc_deg = finansalBorclarTotal_deg - nakitTotal_deg - finYatTotal_deg;
-                }
-
-                const guncelFiyat = parseFloat(State.getFiyat ? State.getFiyat(selectedHisse) : (window.fiyatlar ? window.fiyatlar[selectedHisse] : 0)) || 0;
-                const usdKuru = (State.getFiyat ? parseFloat(State.getFiyat('USDTRY')) : null) || window.dolarKuru || 46.99;
-                const eurKuru = (State.getFiyat ? parseFloat(State.getFiyat('EURTRY')) : null) || window.euroKuru || 50;
-
-                const parseTRNumberForAra = (str) => {
-                    if (str === undefined || str === null || str === '') return 0;
-                    if (typeof str === 'number') return str;
-                    return parseFloat(str.replace(/\./g, '').replace(/,/g, '.')) || 0;
+                    // Keep legacy fk/pddd keys synchronized/cleaned so all readers agree
+                    if (field === 'f_k') delete store[hisse][p].fk;
+                    if (field === 'pd_dd') delete store[hisse][p].pddd;
                 };
 
+                window.enterDegerlemeEdit = (p, key) => {
+                    window.degerlemeEditMode = {};
+                    window.araDegerlemeEditMode = {};
+                    if (p.includes('/')) window.araDegerlemeEditMode[p] = true;
+                    else window.degerlemeEditMode[p] = true;
+                    window.degerlemeFocusPeriod = p;
+                    window.degerlemeFocusKey = key;
+                    renderUI();
+                };
+
+                window.exitDegerlemeEdit = (p) => {
+                    if (p.includes('/')) window.araDegerlemeEditMode[p] = false;
+                    else window.degerlemeEditMode[p] = false;
+                    if (typeof window.recalculateHedefFiyatlar === 'function') window.recalculateHedefFiyatlar();
+                    renderUI();
+                };
+
+                window.updateDegerlemeInputUnified = (hisse, p, field, value, shouldRender = true) => {
+                    setPeriodField(hisse, p, field, value);
+                    if (typeof window.recalculateHedefFiyatlar === 'function') window.recalculateHedefFiyatlar();
+                    State.save();
+                    if (shouldRender) renderUI();
+                };
+
+                window.cycleDegerlemeCurrency = (hisse, p) => {
+                    const cur = (getPeriodRaw(p).currency || 'TRY');
+                    const next = cur === 'TRY' ? 'USD' : (cur === 'USD' ? 'EUR' : 'TRY');
+                    window.updateDegerlemeInputUnified(hisse, p, 'currency', next, true);
+                };
+
+                window.setDegShowPast = (show) => {
+                    window.degShowPast = !!show;
+                    renderUI();
+                };
+
+                window.setDegBreakdownPeriod = (p) => {
+                    window.degBreakdownPeriod = p;
+                    renderUI();
+                };
+
+                window.saveDegerlemeNotUnified = (hisse) => {
+                    if (!State.data.degerleme[hisse]) State.data.degerleme[hisse] = {};
+                    const input = document.getElementById('degerleme-not-input');
+                    if (!input) return;
+                    State.data.degerleme[hisse].genelNotYil = input.value;
+                    if (State.data.degerleme[hisse].genelNotAra) State.data.degerleme[hisse].genelNotAra = '';
+                    State.save();
+                    const badge = document.getElementById('deg-note-save-badge');
+                    if (badge) {
+                        badge.classList.add('visible');
+                        setTimeout(() => badge.classList.remove('visible'), 1800);
+                    }
+                };
+
+                // Helper to fetch historical quarterly data
+                const parseTRLocal = (str) => {
+                    if (str === undefined || str === null || str === '' || str === '-') return '';
+                    if (typeof str === 'number') return str;
+                    const p = parseFloat(String(str).replace(/\./g, '').replace(/,/g, '.'));
+                    return isNaN(p) ? '' : p;
+                };
                 const fetchHistVal = (key, idx) => {
                     if (!sDataDeg) return '';
                     let r = null;
-                    let val = '';
-                    if (key === 'ciro') {
-                        if (sDataDeg.gelirCeyrek && sDataDeg.gelirCeyrek.rows) {
-                            r = sDataDeg.gelirCeyrek.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('satış gelirleri'));
-                        }
-                    } else if (key === 'favok') {
-                        if (sDataDeg.gelirCeyrek && sDataDeg.gelirCeyrek.rows) {
-                            r = sDataDeg.gelirCeyrek.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
-                        }
-                    } else if (key === 'net_kar') {
-                        if (sDataDeg.gelirCeyrek && sDataDeg.gelirCeyrek.rows) {
-                            r = sDataDeg.gelirCeyrek.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
-                        }
-                    } else if (key === 'ozkaynaklar') {
-                        if (sDataDeg.bilanco && sDataDeg.bilanco.rows) {
-                            r = sDataDeg.bilanco.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
-                        }
+                    if (key === 'ciro' && sDataDeg.gelirCeyrek && sDataDeg.gelirCeyrek.rows) {
+                        r = sDataDeg.gelirCeyrek.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('satış gelirleri') || String(x[0]).toLocaleLowerCase('tr-TR').includes('hasılat')));
+                    } else if (key === 'favok' && sDataDeg.gelirCeyrek && sDataDeg.gelirCeyrek.rows) {
+                        r = sDataDeg.gelirCeyrek.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
+                    } else if (key === 'net_kar' && sDataDeg.gelirCeyrek && sDataDeg.gelirCeyrek.rows) {
+                        r = sDataDeg.gelirCeyrek.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                    } else if (key === 'ozkaynaklar' && sDataDeg.bilanco && sDataDeg.bilanco.rows) {
+                        r = sDataDeg.bilanco.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
+                        if (!r) r = sDataDeg.bilanco.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').trim() === 'özkaynaklar');
                     }
-                    if (r && r[idx] !== undefined && r[idx] !== '') val = parseTRNumberForAra(r[idx]);
-                    return val;
+                    return (r && r[idx] !== undefined && r[idx] !== '') ? parseTRLocal(r[idx]) : '';
                 };
 
-                const rows = [
+                // Precompute all forecast periods with unified engine
+                const forecastComputed = {};
+                forecastPeriods.forEach(p => {
+                    forecastComputed[p] = window.computeDegerlemePeriod(p, getPeriodRaw(p), degCtx);
+                });
+
+                // Period Modal Editor (full input form + 1-click baseline / growth fill + live preview)
+                window.openDegerlemePeriodModal = (hisse, period) => {
+                    const existingOverlay = document.getElementById('deg-period-modal-overlay');
+                    if (existingOverlay) existingOverlay.remove();
+
+                    const ctxModal = window.getDegerlemeStockContext(hisse);
+                    const isQ = String(period).includes('/');
+                    const raw = isQ ? ((State.data.araDegerleme[hisse] && State.data.araDegerleme[hisse][period]) || {}) : ((State.data.degerleme[hisse] && State.data.degerleme[hisse][period]) || {});
+                    let modalCurr = raw.currency || 'TRY';
+
+                    const fmtDecM = (v) => new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+                    const fmtIntM = (v) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v));
+                    const initFk = raw.f_k !== undefined && raw.f_k !== '' ? raw.f_k : (raw.fk !== undefined ? raw.fk : '');
+                    const initPdDd = raw.pd_dd !== undefined && raw.pd_dd !== '' ? raw.pd_dd : (raw.pddd !== undefined ? raw.pddd : '');
+
+                    // Previous year key for +%20 growth shortcut
+                    const prevYearKey = !isQ ? String(parseInt(period, 10) - 1) : null;
+                    const hasPrevYear = prevYearKey && State.data.degerleme[hisse] && State.data.degerleme[hisse][prevYearKey] && Object.keys(State.data.degerleme[hisse][prevYearKey]).length > 0;
+
+                    const overlay = document.createElement('div');
+                    overlay.id = 'deg-period-modal-overlay';
+                    overlay.className = 'ekstre-modal-overlay';
+                    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+                    overlay.innerHTML = `
+                        <div class="ekstre-modal-card" role="dialog" aria-modal="true" style="width: min(560px, 100%);">
+                            <div class="ekstre-modal-header">
+                                <h3>
+                                    <i class="fas fa-gem" style="color: #0284c7;"></i>
+                                    <span>${window.escapeHtml(hisse)} · ${window.escapeHtml(period)} Tahmin Modeli</span>
+                                </h3>
+                                <button type="button" class="ekstre-modal-close" aria-label="Kapat" onclick="document.getElementById('deg-period-modal-overlay')?.remove()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <form id="deg-period-modal-form" class="ekstre-modal-body">
+                                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+                                    <div class="ekstre-segmented" id="dpm-curr-group">
+                                        <button type="button" class="ekstre-seg-btn ${modalCurr === 'TRY' ? 'active' : ''}" data-curr="TRY">₺ TRY</button>
+                                        <button type="button" class="ekstre-seg-btn ${modalCurr === 'USD' ? 'active' : ''}" data-curr="USD">$ USD</button>
+                                        <button type="button" class="ekstre-seg-btn ${modalCurr === 'EUR' ? 'active' : ''}" data-curr="EUR">€ EUR</button>
+                                    </div>
+                                    <div style="display:flex; flex-wrap:wrap; gap:0.4rem;">
+                                        <button type="button" class="ekstre-shortcut-pill" id="dpm-fill-base" title="Mevcut gerçekleşen veriyi baz şablon olarak doldur">
+                                            <i class="fas fa-magic"></i> ${isQ ? 'Son Çeyreği Baz Al' : 'Son TTM Baz Al'}
+                                        </button>
+                                        ${hasPrevYear ? `<button type="button" class="ekstre-shortcut-pill" id="dpm-fill-grow" title="${prevYearKey} tahminini %20 büyüterek aktar"><i class="fas fa-arrow-trend-up"></i> ${prevYearKey} +%20</button>` : ''}
+                                        <button type="button" class="ekstre-shortcut-pill danger" id="dpm-clear-btn">Temizle</button>
+                                    </div>
+                                </div>
+
+                                <div class="ekstre-form-grid-2">
+                                    <div class="ekstre-field">
+                                        <label for="dpm-ciro">Satış Gelirleri (<span class="dpm-curr-sym">${modalCurr}</span>)</label>
+                                        <input type="number" id="dpm-ciro" class="form-control" step="any" placeholder="Örn: 35000000000" value="${raw.ciro !== undefined ? raw.ciro : ''}">
+                                    </div>
+                                    <div class="ekstre-field">
+                                        <label for="dpm-ozkaynak">Özkaynaklar (<span class="dpm-curr-sym">${modalCurr}</span>)</label>
+                                        <input type="number" id="dpm-ozkaynak" class="form-control" step="any" placeholder="Örn: 28000000000" value="${raw.ozkaynaklar !== undefined ? raw.ozkaynaklar : ''}">
+                                    </div>
+                                </div>
+
+                                <div class="ekstre-form-grid-2">
+                                    <div class="ekstre-field">
+                                        <label for="dpm-favok-m">FAVÖK Marjı (%)</label>
+                                        <input type="number" id="dpm-favok-m" class="form-control" step="any" placeholder="Örn: 22.5" value="${raw.favok_marji !== undefined ? raw.favok_marji : ''}">
+                                    </div>
+                                    <div class="ekstre-field">
+                                        <label for="dpm-netkar-m">Net Kâr Marjı (%)</label>
+                                        <input type="number" id="dpm-netkar-m" class="form-control" step="any" placeholder="Örn: 14.0" value="${raw.net_kar_marji !== undefined ? raw.net_kar_marji : ''}">
+                                    </div>
+                                </div>
+
+                                <div class="ekstre-form-grid-3">
+                                    <div class="ekstre-field">
+                                        <label for="dpm-fdfavok">Hedef FD/FAVÖK</label>
+                                        <input type="number" id="dpm-fdfavok" class="form-control" step="any" min="0" placeholder="${ctxModal.guncelFdFavok > 0 ? ctxModal.guncelFdFavok.toFixed(1) : '7.0'}" value="${raw.fd_favok !== undefined ? raw.fd_favok : ''}">
+                                    </div>
+                                    <div class="ekstre-field">
+                                        <label for="dpm-fk">Hedef F/K</label>
+                                        <input type="number" id="dpm-fk" class="form-control" step="any" min="0" placeholder="${ctxModal.guncelFk > 0 ? ctxModal.guncelFk.toFixed(1) : '10.0'}" value="${initFk}">
+                                    </div>
+                                    <div class="ekstre-field">
+                                        <label for="dpm-pddd">Hedef PD/DD</label>
+                                        <input type="number" id="dpm-pddd" class="form-control" step="any" min="0" placeholder="${ctxModal.guncelPdDd > 0 ? ctxModal.guncelPdDd.toFixed(1) : '2.0'}" value="${initPdDd}">
+                                    </div>
+                                </div>
+
+                                <div id="dpm-live-preview" class="ekstre-total-preview"></div>
+
+                                <div class="ekstre-modal-footer" style="margin: 0.25rem -1.35rem -1.25rem -1.35rem;">
+                                    <button type="button" class="ekstre-ghost-btn" onclick="document.getElementById('deg-period-modal-overlay')?.remove()">İptal</button>
+                                    <button type="submit" class="btn" style="padding: 9px 22px;">
+                                        <i class="fas fa-check" style="margin-right: 6px; color: #ffffff !important;"></i>Tahmini Kaydet
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    `;
+
+                    document.body.appendChild(overlay);
+
+                    const fCiro = document.getElementById('dpm-ciro');
+                    const fOz = document.getElementById('dpm-ozkaynak');
+                    const fFm = document.getElementById('dpm-favok-m');
+                    const fNm = document.getElementById('dpm-netkar-m');
+                    const fFd = document.getElementById('dpm-fdfavok');
+                    const fFk = document.getElementById('dpm-fk');
+                    const fPd = document.getElementById('dpm-pddd');
+                    const previewBox = document.getElementById('dpm-live-preview');
+
+                    const getFormDraft = () => ({
+                        currency: modalCurr,
+                        ciro: fCiro.value,
+                        ozkaynaklar: fOz.value,
+                        favok_marji: fFm.value,
+                        net_kar_marji: fNm.value,
+                        fd_favok: fFd.value,
+                        f_k: fFk.value,
+                        pd_dd: fPd.value
+                    });
+
+                    const updatePreview = () => {
+                        const res = window.computeDegerlemePeriod(period, getFormDraft(), ctxModal);
+                        overlay.querySelectorAll('.dpm-curr-sym').forEach(el => { el.textContent = modalCurr; });
+                        if (res.hasHedef) {
+                            const isUp = res.potansiyelPct === null || res.potansiyelPct >= 0;
+                            previewBox.className = 'ekstre-total-preview ' + (isUp ? 'alis' : 'satis');
+                            const parts = [];
+                            if (res.hfByFdFavok !== null) parts.push(`FD/FAVÖK: ₺${fmtDecM(res.hfByFdFavok)}`);
+                            if (res.hfByFk !== null) parts.push(`F/K: ₺${fmtDecM(res.hfByFk)}`);
+                            if (res.hfByPdDd !== null) parts.push(`PD/DD: ₺${fmtDecM(res.hfByPdDd)}`);
+                            const potTxt = res.potansiyelPct !== null ? `${res.potansiyelPct >= 0 ? '%+' : '%-'}${fmtDecM(Math.abs(res.potansiyelPct))}` : '-';
+                            previewBox.innerHTML = `
+                                <div>
+                                    <div class="ekstre-total-preview-label">Hesaplanan Hedef Fiyat (${res.methodCount} yöntem ort.)</div>
+                                    <div style="font-size:12px; color:#475569; margin-top:3px;">${parts.join(' · ')}</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div class="ekstre-total-preview-value" style="color:${isUp ? '#047857' : '#b91c1c'};">₺${fmtDecM(res.hedefFiyatTL)}</div>
+                                    <div style="font-size:12.5px; font-weight:700; color:${isUp ? '#059669' : '#dc2626'};">Potansiyel: ${potTxt}</div>
+                                </div>
+                            `;
+                        } else {
+                            previewBox.className = 'ekstre-total-preview';
+                            const fkSub = res.hasFavok ? `FAVÖK: ${fmtIntM(res.favok)}` : 'Satış + Marj ve en az bir çarpan girin';
+                            previewBox.innerHTML = `
+                                <div>
+                                    <div class="ekstre-total-preview-label">Canlı Değerleme Önizlemesi</div>
+                                    <div style="font-size:12px; color:#64748b; margin-top:2px;">${fkSub}</div>
+                                </div>
+                                <div class="ekstre-total-preview-value" style="color:#64748b;">---</div>
+                            `;
+                        }
+                    };
+
+                    overlay.querySelectorAll('#dpm-curr-group button').forEach(b => {
+                        b.addEventListener('click', () => {
+                            modalCurr = b.getAttribute('data-curr') || 'TRY';
+                            overlay.querySelectorAll('#dpm-curr-group button').forEach(x => x.classList.toggle('active', x === b));
+                            updatePreview();
+                        });
+                    });
+
+                    document.getElementById('dpm-fill-base')?.addEventListener('click', () => {
+                        const fxDiv = modalCurr === 'USD' ? ctxModal.usdKuru : (modalCurr === 'EUR' ? ctxModal.eurKuru : 1);
+                        let baseCiro = 0, baseFavok = 0, baseNetKar = 0;
+                        if (isQ && pastIndices.length > 0) {
+                            const lastIdx = pastIndices[pastIndices.length - 1];
+                            baseCiro = parseFloat(fetchHistVal('ciro', lastIdx)) || 0;
+                            baseFavok = parseFloat(fetchHistVal('favok', lastIdx)) || 0;
+                            baseNetKar = parseFloat(fetchHistVal('net_kar', lastIdx)) || 0;
+                        } else {
+                            baseCiro = ctxModal.ttmSatis || 0;
+                            baseFavok = ctxModal.ttmFavok || 0;
+                            baseNetKar = ctxModal.ttmNetKar || 0;
+                        }
+                        if (baseCiro > 0) {
+                            fCiro.value = Math.round(baseCiro / fxDiv);
+                            if (baseFavok) fFm.value = ((baseFavok / baseCiro) * 100).toFixed(2);
+                            if (baseNetKar) fNm.value = ((baseNetKar / baseCiro) * 100).toFixed(2);
+                        }
+                        if (ctxModal.anaOrtaklikOzkaynak > 0) fOz.value = Math.round(ctxModal.anaOrtaklikOzkaynak / fxDiv);
+                        if (ctxModal.guncelFdFavok > 0 && ctxModal.guncelFdFavok < 40) fFd.value = ctxModal.guncelFdFavok.toFixed(2);
+                        if (ctxModal.guncelFk > 0 && ctxModal.guncelFk < 60) fFk.value = ctxModal.guncelFk.toFixed(2);
+                        if (ctxModal.guncelPdDd > 0 && ctxModal.guncelPdDd < 20) fPd.value = ctxModal.guncelPdDd.toFixed(2);
+                        updatePreview();
+                    });
+
+                    document.getElementById('dpm-fill-grow')?.addEventListener('click', () => {
+                        const prev = State.data.degerleme[hisse] && State.data.degerleme[hisse][prevYearKey];
+                        if (!prev) return;
+                        if (prev.currency) {
+                            modalCurr = prev.currency;
+                            overlay.querySelectorAll('#dpm-curr-group button').forEach(x => x.classList.toggle('active', x.getAttribute('data-curr') === modalCurr));
+                        }
+                        if (prev.ciro) fCiro.value = Math.round(parseFloat(prev.ciro) * 1.2);
+                        if (prev.ozkaynaklar) fOz.value = Math.round(parseFloat(prev.ozkaynaklar) * 1.2);
+                        if (prev.favok_marji !== undefined) fFm.value = prev.favok_marji;
+                        if (prev.net_kar_marji !== undefined) fNm.value = prev.net_kar_marji;
+                        if (prev.fd_favok !== undefined) fFd.value = prev.fd_favok;
+                        const prevFk = prev.f_k !== undefined ? prev.f_k : prev.fk;
+                        const prevPd = prev.pd_dd !== undefined ? prev.pd_dd : prev.pddd;
+                        if (prevFk !== undefined) fFk.value = prevFk;
+                        if (prevPd !== undefined) fPd.value = prevPd;
+                        updatePreview();
+                    });
+
+                    document.getElementById('dpm-clear-btn')?.addEventListener('click', () => {
+                        [fCiro, fOz, fFm, fNm, fFd, fFk, fPd].forEach(el => { el.value = ''; });
+                        updatePreview();
+                    });
+
+                    [fCiro, fOz, fFm, fNm, fFd, fFk, fPd].forEach(el => el.addEventListener('input', updatePreview));
+                    updatePreview();
+
+                    const onKeyDown = (ke) => {
+                        if (ke.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', onKeyDown); }
+                    };
+                    document.addEventListener('keydown', onKeyDown);
+
+                    document.getElementById('deg-period-modal-form').addEventListener('submit', (ev) => {
+                        ev.preventDefault();
+                        const draft = getFormDraft();
+                        Object.entries(draft).forEach(([k, v]) => setPeriodField(hisse, period, k, v));
+                        if (typeof window.recalculateHedefFiyatlar === 'function') window.recalculateHedefFiyatlar();
+                        State.save();
+                        document.removeEventListener('keydown', onKeyDown);
+                        overlay.remove();
+                        window.showToast(`${hisse} · ${period} tahmini kaydedildi.`, 'success');
+                        renderUI();
+                    });
+
+                    setTimeout(() => fCiro.focus(), 30);
+                };
+
+                // --- Formatters ---
+                const fmtDecD = (v) => new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+                const fmtIntD = (v) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(v));
+                const fmtCompactM = (v, sym = '₺') => {
+                    if (!v || isNaN(v) || !isFinite(v)) return '-';
+                    const abs = Math.abs(v);
+                    const sign = v < 0 ? '-' : '';
+                    if (abs >= 1e9) return `${sign}${sym}${fmtDecD(abs / 1e9)} Mlr`;
+                    if (abs >= 1e6) return `${sign}${sym}${fmtDecD(abs / 1e6)} Mn`;
+                    return `${sign}${sym}${fmtIntD(abs)}`;
+                };
+                const fmtPotStr = (pct) => {
+                    if (pct === null || pct === undefined || isNaN(pct)) return '-';
+                    const formatted = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(Math.abs(pct));
+                    return pct < 0 ? `%-${formatted}` : `%+${formatted}`;
+                };
+
+                // --- 4 Executive KPI Cards ---
+                const gbRes = forecastComputed[nextQuarter];
+                const y1Key = annualYears[0];
+                const y1Res = forecastComputed[y1Key];
+                // Find furthest annual year with target price for Long-Term CAGR KPI
+                let longKey = annualYears[annualYears.length - 1];
+                let longRes = null;
+                for (let i = annualYears.length - 1; i >= 0; i--) {
+                    if (forecastComputed[annualYears[i]] && forecastComputed[annualYears[i]].hasHedef) {
+                        longKey = annualYears[i];
+                        longRes = forecastComputed[annualYears[i]];
+                        break;
+                    }
+                }
+                let longCagr = null;
+                if (longRes && longRes.hasHedef && degCtx.guncelFiyat > 0) {
+                    const yrsAhead = Math.max(1, parseInt(longKey, 10) - new Date().getFullYear() + 0.5);
+                    if (longRes.hedefFiyatTL > 0) {
+                        longCagr = (Math.pow(longRes.hedefFiyatTL / degCtx.guncelFiyat, 1 / yrsAhead) - 1) * 100;
+                    }
+                }
+
+                const kpiDegHtml = `
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-icon-box slate"><i class="fas fa-tag"></i></div>
+                            <div class="kpi-info">
+                                <div class="kpi-label">Güncel Fiyat & Çarpanlar</div>
+                                <div class="kpi-value">${degCtx.guncelFiyat > 0 ? '₺' + fmtDecD(degCtx.guncelFiyat) : '-'}</div>
+                                <div class="kpi-sub">F/K: ${degCtx.guncelFk > 0 ? fmtDecD(degCtx.guncelFk) : '-'} · FD/FAVÖK: ${degCtx.guncelFdFavok > 0 ? fmtDecD(degCtx.guncelFdFavok) : '-'} · PD/DD: ${degCtx.guncelPdDd > 0 ? fmtDecD(degCtx.guncelPdDd) : '-'}</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card takip-kpi-clickable" onclick="window.openDegerlemePeriodModal('${window.escapeHtml(selectedHisse)}', '${window.escapeHtml(nextQuarter)}')" title="${window.escapeHtml(nextQuarter)} tahminini düzenle">
+                            <div class="kpi-icon-box ${gbRes && gbRes.hasHedef ? (gbRes.potansiyelPct >= 0 ? 'green' : 'red') : 'navy'}"><i class="fas fa-bolt"></i></div>
+                            <div class="kpi-info">
+                                <div class="kpi-label">Gelecek Bilanço (${window.escapeHtml(nextQuarter)})</div>
+                                <div class="kpi-value" style="color:${gbRes && gbRes.hasHedef ? (gbRes.potansiyelPct >= 0 ? 'var(--success-color)' : 'var(--danger-color)') : 'var(--text-primary)'};">${gbRes && gbRes.hasHedef ? '₺' + fmtDecD(gbRes.hedefFiyatTL) : 'Tahmin Gir'}</div>
+                                <div class="kpi-sub">${gbRes && gbRes.hasHedef ? `Potansiyel: <strong>${fmtPotStr(gbRes.potansiyelPct)}</strong> · ${gbRes.methodCount} çarpan` : 'Düzenlemek için tıklayın'}</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card takip-kpi-clickable" onclick="window.openDegerlemePeriodModal('${window.escapeHtml(selectedHisse)}', '${window.escapeHtml(y1Key)}')" title="${window.escapeHtml(y1Key)} tahminini düzenle">
+                            <div class="kpi-icon-box ${y1Res && y1Res.hasHedef ? (y1Res.potansiyelPct >= 0 ? 'green' : 'red') : 'navy'}"><i class="fas fa-bullseye"></i></div>
+                            <div class="kpi-info">
+                                <div class="kpi-label">${y1Key} Yıl Sonu Hedef</div>
+                                <div class="kpi-value" style="color:${y1Res && y1Res.hasHedef ? (y1Res.potansiyelPct >= 0 ? 'var(--success-color)' : 'var(--danger-color)') : 'var(--text-primary)'};">${y1Res && y1Res.hasHedef ? '₺' + fmtDecD(y1Res.hedefFiyatTL) : 'Tahmin Gir'}</div>
+                                <div class="kpi-sub">${y1Res && y1Res.hasHedef ? `Potansiyel: <strong>${fmtPotStr(y1Res.potansiyelPct)}</strong> · ${y1Res.methodCount} çarpan` : 'Düzenlemek için tıklayın'}</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon-box ${longRes && longRes.hasHedef ? (longRes.potansiyelPct >= 0 ? 'green' : 'red') : 'slate'}"><i class="fas fa-arrow-trend-up"></i></div>
+                            <div class="kpi-info">
+                                <div class="kpi-label">Uzun Vade (${longKey}) & CAGR</div>
+                                <div class="kpi-value" style="color:${longRes && longRes.hasHedef ? (longRes.potansiyelPct >= 0 ? 'var(--success-color)' : 'var(--danger-color)') : 'var(--text-primary)'};">${longRes && longRes.hasHedef ? '₺' + fmtDecD(longRes.hedefFiyatTL) : '-'}</div>
+                                <div class="kpi-sub">${longRes && longRes.hasHedef ? `Pot: ${fmtPotStr(longRes.potansiyelPct)}${longCagr !== null ? ` · Yıllık CAGR: ${fmtPotStr(longCagr)}` : ''}` : `Net Borç: ${fmtCompactM(degCtx.netBorc)}`}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // --- Analytics Row: Target Trajectory Chart + Method Breakdown ---
+                const periodsWithTarget = forecastPeriods.filter(p => forecastComputed[p] && forecastComputed[p].hasHedef);
+                if (!window.degBreakdownPeriod || !forecastPeriods.includes(window.degBreakdownPeriod)) {
+                    window.degBreakdownPeriod = periodsWithTarget[0] || nextQuarter;
+                }
+                const activeBrkPeriod = window.degBreakdownPeriod;
+                const brkRes = forecastComputed[activeBrkPeriod];
+
+                window.degerlemeChartPayload = periodsWithTarget.length > 0 ? {
+                    labels: periodsWithTarget,
+                    targets: periodsWithTarget.map(p => Number(forecastComputed[p].hedefFiyatTL.toFixed(2))),
+                    potentials: periodsWithTarget.map(p => forecastComputed[p].potansiyelPct !== null ? Number(forecastComputed[p].potansiyelPct.toFixed(1)) : 0),
+                    currentPrice: degCtx.guncelFiyat
+                } : null;
+
+                const netBorcLabel = degCtx.netBorc < 0 ? 'Net Nakit Pozisyonu' : 'Net Borç';
+                const netBorcColor = degCtx.netBorc < 0 ? '#059669' : '#0f172a';
+
+                const analyticsHtml = `
+                    <div class="deg-analytics-grid">
+                        <div class="enf-panel-card">
+                            <div class="enf-panel-header">
+                                <span class="enf-panel-title">
+                                    <i class="fas fa-chart-bar" style="color:#0284c7;"></i>
+                                    <span>Hedef Fiyat Yörüngesi (₺)</span>
+                                </span>
+                                ${degCtx.guncelFiyat > 0 ? `<span class="hisse-metric-chip">Güncel Fiyat: <strong>₺${fmtDecD(degCtx.guncelFiyat)}</strong></span>` : ''}
+                            </div>
+                            <div class="enf-chart-canvas-wrap" style="height: 235px;">
+                                ${periodsWithTarget.length > 0
+                                    ? `<canvas id="chart-degerleme-trajectory"></canvas>`
+                                    : `<div class="ekstre-empty-state" style="padding: 2rem;"><i class="fas fa-chart-line"></i><strong>Henüz hedef fiyat oluşmadı</strong><span>Aşağıdaki tablodan bir dönem seçip satış, marj ve çarpan girdiğinizde grafik otomatik çizilir.</span></div>`
+                                }
+                            </div>
+                        </div>
+
+                        <div class="enf-panel-card">
+                            <div class="enf-panel-header">
+                                <span class="enf-panel-title">
+                                    <i class="fas fa-layer-group" style="color:#059669;"></i>
+                                    <span>Çarpan Kırılımı</span>
+                                </span>
+                                <select class="ekstre-select" style="height:30px; font-size:12px; padding:0 24px 0 8px !important;" onchange="window.setDegBreakdownPeriod(this.value)">
+                                    ${forecastPeriods.map(p => `<option value="${window.escapeHtml(p)}" ${p === activeBrkPeriod ? 'selected' : ''}>${window.escapeHtml(p)}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="deg-breakdown-list">
+                                <div class="deg-breakdown-row">
+                                    <span>FD/FAVÖK Bazlı Hedef</span>
+                                    <strong>${brkRes && brkRes.hfByFdFavok !== null ? '₺' + fmtDecD(brkRes.hfByFdFavok) : '-'}</strong>
+                                </div>
+                                <div class="deg-breakdown-row">
+                                    <span>F/K Bazlı Hedef</span>
+                                    <strong>${brkRes && brkRes.hfByFk !== null ? '₺' + fmtDecD(brkRes.hfByFk) : '-'}</strong>
+                                </div>
+                                <div class="deg-breakdown-row">
+                                    <span>PD/DD Bazlı Hedef</span>
+                                    <strong>${brkRes && brkRes.hfByPdDd !== null ? '₺' + fmtDecD(brkRes.hfByPdDd) : '-'}</strong>
+                                </div>
+                                <div class="deg-breakdown-row highlight">
+                                    <span>Ortalama Hedef (${window.escapeHtml(activeBrkPeriod)})</span>
+                                    <strong>${brkRes && brkRes.hasHedef ? '₺' + fmtDecD(brkRes.hedefFiyatTL) : '-'}</strong>
+                                </div>
+                                <div style="height:1px; background:#e2e8f0; margin:2px 0;"></div>
+                                <div style="display:flex; justify-content:space-between; font-size:12px; color:#64748b;">
+                                    <span>Ödenmiş Sermaye: <strong style="color:#0f172a;">${degCtx.odenmisSermaye > 0 ? fmtIntD(degCtx.odenmisSermaye) : '-'}</strong></span>
+                                    <span>${netBorcLabel}: <strong style="color:${netBorcColor};">${fmtCompactM(Math.abs(degCtx.netBorc))}</strong></span>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; font-size:11.5px; color:#64748b;">
+                                    <span>USD Kur: <strong>₺${fmtDecD(degCtx.usdKuru)}</strong></span>
+                                    <span>EUR Kur: <strong>₺${fmtDecD(degCtx.eurKuru)}</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // --- 2-Tier Grouped Valuation Matrix Table (ZERO icons inside <th>!) ---
+                const pastColCount = window.degShowPast ? pastQuarters.length : 0;
+                const groupHeaderHtml = `
+                    <tr class="deg-group-head">
+                        <th class="deg-sticky-label" rowspan="2" style="vertical-align: middle;">Kalem</th>
+                        ${pastColCount > 0 ? `<th colspan="${pastColCount}" class="deg-th-past">Gerçekleşen Son ${pastColCount} Çeyrek</th>` : ''}
+                        <th colspan="1" class="deg-th-next">Gelecek Bilanço</th>
+                        <th colspan="${annualYears.length}" class="deg-th-year">Yıllık Projeksiyonlar (${annualYears[0]}–${annualYears[annualYears.length - 1]})</th>
+                    </tr>
+                    <tr>
+                        ${visiblePeriods.map(p => {
+                            const cls = pastQuarters.includes(p) ? 'deg-th-past' : (p === nextQuarter ? 'deg-th-next' : 'deg-th-year');
+                            return `<th class="${cls} deg-col-min">${window.escapeHtml(p)}</th>`;
+                        }).join('')}
+                    </tr>
+                `;
+
+                // Control row inside tbody (Currency toggle + Modal Edit button per forecast period)
+                const ctrlRowHtml = `
+                    <tr class="deg-ctrl-row">
+                        <td class="deg-sticky-label">Dönem Kontrolü</td>
+                        ${visiblePeriods.map(p => {
+                            if (pastQuarters.includes(p)) {
+                                return `<td style="text-align:center !important; font-size:11.5px !important; color:#94a3b8 !important;">Gerçekleşen</td>`;
+                            }
+                            const curr = getPeriodRaw(p).currency || 'TRY';
+                            const currSym = curr === 'USD' ? '$' : (curr === 'EUR' ? '€' : '₺');
+                            const safeP = window.escapeHtml(p);
+                            const safeH = window.escapeHtml(selectedHisse);
+                            return `
+                                <td class="${p === nextQuarter ? 'deg-cell-next-col' : ''}" style="text-align:center !important;">
+                                    <div class="deg-col-controls">
+                                        <button type="button" class="deg-curr-btn" onclick="window.cycleDegerlemeCurrency('${safeH}', '${safeP}')" title="Para birimini değiştir (TRY / USD / EUR)">${currSym} ${curr}</button>
+                                        <button type="button" class="deg-edit-col-btn" onclick="window.openDegerlemePeriodModal('${safeH}', '${safeP}')" title="${safeP} tahminlerini formdan düzenle"><i class="fas fa-pen"></i> Düzenle</button>
+                                    </div>
+                                </td>
+                            `;
+                        }).join('')}
+                    </tr>
+                `;
+
+                const matrixRows = [
                     { key: 'ciro', label: 'Satış Gelirleri', type: 'currency_int' },
-                    { key: 'favok_marji', label: 'FAVÖK Marjı', type: 'percent' },
-                    { key: 'net_kar_marji', label: 'Net Kar Marjı', type: 'percent' },
-                    { key: 'favok', label: 'FAVÖK', readonly: true, type: 'currency_int' },
-                    { key: 'net_kar', label: 'Net Kar', readonly: true, type: 'currency_int' },
+                    { key: 'favok_marji', label: 'FAVÖK Marjı (%)', type: 'percent' },
+                    { key: 'net_kar_marji', label: 'Net Kâr Marjı (%)', type: 'percent' },
+                    { key: 'favok', label: 'FAVÖK', readonly: true, computed: true, type: 'currency_int' },
+                    { key: 'net_kar', label: 'Net Kâr', readonly: true, computed: true, type: 'currency_int' },
                     { key: 'ozkaynaklar', label: 'Özkaynaklar', type: 'currency_int' },
-                    { key: 'fd_favok', label: 'FD/FAVÖK', type: 'decimal' },
+                    { key: 'fd_favok', label: 'FD/FAVÖK', type: 'decimal', sectionSep: true },
                     { key: 'f_k', label: 'F/K', type: 'decimal' },
                     { key: 'pd_dd', label: 'PD/DD', type: 'decimal' },
-                    { key: 'hedef_fiyat', label: 'Hedef Fiyat', readonly: true, isTarget: true, type: 'target' },
-                    { key: 'potansiyel', label: 'Potansiyel', readonly: true, type: 'percent_target' }
+                    { key: 'hedef_fiyat', label: 'Hedef Fiyat (₺)', readonly: true, isTarget: true, type: 'target' },
+                    { key: 'potansiyel', label: 'Potansiyel (%)', readonly: true, isPot: true, type: 'percent_target' }
                 ];
 
-                rows.forEach(r => {
-                    html += `<tr><td style="text-align:left !important; font-weight:normal;">${r.label}</td>`;
-                    allPeriods.forEach(p => {
+                let matrixBodyHtml = ctrlRowHtml;
+                matrixRows.forEach(r => {
+                    const trClasses = [];
+                    if (r.computed) trClasses.push('deg-row-computed');
+                    if (r.sectionSep) trClasses.push('deg-row-section-sep');
+                    if (r.isTarget) trClasses.push('deg-row-target');
+                    if (r.isPot) trClasses.push('deg-row-pot');
+
+                    matrixBodyHtml += `<tr class="${trClasses.join(' ')}"><td class="deg-sticky-label">${r.label}</td>`;
+
+                    visiblePeriods.forEach(p => {
                         const isPast = pastQuarters.includes(p);
-                        let d = {};
+                        const isNext = p === nextQuarter;
+                        const pSafe = p.replace(/[^a-zA-Z0-9_-]/g, '-');
+                        const safeH = window.escapeHtml(selectedHisse);
+                        const safeP = window.escapeHtml(p);
+
+                        let rawVal = '';
+                        let displayStr = '---';
+                        let currencySymbol = '₺';
+                        let cellTitle = '';
+                        let extraStyle = '';
+                        let heatCls = '';
+
                         if (isPast) {
                             const pIdx = pastIndices[pastQuarters.indexOf(p)];
                             const ciro = fetchHistVal('ciro', pIdx);
                             const favok = fetchHistVal('favok', pIdx);
-                            const net_kar = fetchHistVal('net_kar', pIdx);
-                            const ozkaynaklar = fetchHistVal('ozkaynaklar', pIdx);
-
-                            d.ciro = ciro;
-                            d.favok = favok;
-                            d.net_kar = net_kar;
-                            d.ozkaynaklar = ozkaynaklar;
-                            d.favok_marji = (ciro !== '' && ciro !== 0 && favok !== '') ? (favok / ciro) * 100 : '';
-                            d.net_kar_marji = (ciro !== '' && ciro !== 0 && net_kar !== '') ? (net_kar / ciro) * 100 : '';
-                            d.fd_favok = '';
-                            d.f_k = '';
-                            d.pd_dd = '';
-                            d.hedef_fiyat = '';
-                            d.potansiyel = '';
-                        } else if (p.includes('/')) {
-                            d = araStateData[p] || {};
+                            const netKar = fetchHistVal('net_kar', pIdx);
+                            const oz = fetchHistVal('ozkaynaklar', pIdx);
+                            const histMap = {
+                                ciro,
+                                favok,
+                                net_kar: netKar,
+                                ozkaynaklar: oz,
+                                favok_marji: (ciro !== '' && ciro !== 0 && favok !== '') ? (favok / ciro) * 100 : '',
+                                net_kar_marji: (ciro !== '' && ciro !== 0 && netKar !== '') ? (netKar / ciro) * 100 : ''
+                            };
+                            rawVal = histMap[r.key] !== undefined ? histMap[r.key] : '';
                         } else {
-                            d = stateData[p] || {};
+                            const d = getPeriodRaw(p);
+                            const comp = forecastComputed[p];
+                            currencySymbol = comp.currency === 'USD' ? '$' : (comp.currency === 'EUR' ? '€' : '₺');
+
+                            if (r.key === 'favok') rawVal = comp.hasFavok ? comp.favok : '';
+                            else if (r.key === 'net_kar') rawVal = comp.hasNetKar ? comp.netKar : '';
+                            else if (r.key === 'hedef_fiyat') {
+                                rawVal = comp.hasHedef ? comp.hedefFiyatTL : '';
+                                if (comp.hasHedef) {
+                                    const parts = [];
+                                    if (comp.hfByFdFavok !== null) parts.push(`FD/FAVÖK: ₺${fmtDecD(comp.hfByFdFavok)}`);
+                                    if (comp.hfByFk !== null) parts.push(`F/K: ₺${fmtDecD(comp.hfByFk)}`);
+                                    if (comp.hfByPdDd !== null) parts.push(`PD/DD: ₺${fmtDecD(comp.hfByPdDd)}`);
+                                    cellTitle = parts.join(' · ');
+                                    const isPos = comp.potansiyelPct === null || comp.potansiyelPct >= 0;
+                                    extraStyle = `color:${isPos ? '#047857' : '#b91c1c'} !important;`;
+                                }
+                            } else if (r.key === 'potansiyel') {
+                                rawVal = (comp.hasHedef && comp.potansiyelPct !== null) ? comp.potansiyelPct : '';
+                                if (rawVal !== '') {
+                                    extraStyle = `color:${rawVal >= 0 ? '#059669' : '#dc2626'} !important;`;
+                                    if (rawVal >= 100) heatCls = 'takip-heat-high';
+                                    else if (rawVal >= 50) heatCls = 'takip-heat-mid';
+                                    else if (rawVal <= -15) heatCls = 'takip-heat-neg';
+                                }
+                            } else if (r.key === 'f_k') {
+                                rawVal = d.f_k !== undefined && d.f_k !== '' ? d.f_k : (d.fk !== undefined ? d.fk : '');
+                            } else if (r.key === 'pd_dd') {
+                                rawVal = d.pd_dd !== undefined && d.pd_dd !== '' ? d.pd_dd : (d.pddd !== undefined ? d.pddd : '');
+                            } else {
+                                rawVal = d[r.key] !== undefined ? d[r.key] : '';
+                            }
+                        }
+
+                        if (rawVal !== '' && rawVal !== null && rawVal !== undefined) {
+                            const numVal = parseFloat(String(rawVal).replace(',', '.'));
+                            if (!isNaN(numVal) && isFinite(numVal)) {
+                                if (r.type === 'target') displayStr = '₺' + fmtDecD(numVal);
+                                else if (r.type === 'currency_int') displayStr = currencySymbol === '€' ? (fmtIntD(numVal) + '€') : (currencySymbol + fmtIntD(numVal));
+                                else if (r.type === 'percent') {
+                                    const f = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(Math.abs(numVal));
+                                    displayStr = numVal < 0 ? '%-' + f : '%' + f;
+                                } else if (r.type === 'percent_target') {
+                                    const f = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(Math.abs(numVal));
+                                    displayStr = numVal < 0 ? '%-' + f : '%+' + f;
+                                } else if (r.type === 'decimal') {
+                                    displayStr = fmtDecD(numVal);
+                                }
+                            }
                         }
 
                         const editMode = !isPast && (p.includes('/') ? window.araDegerlemeEditMode[p] : window.degerlemeEditMode[p]);
-                        const curCurrency = d.currency || 'TRY';
-                        let currencySymbol = '₺';
-                        if (curCurrency === 'USD') currencySymbol = '$';
-                        if (curCurrency === 'EUR') currencySymbol = '€';
+                        const colExtraCls = isNext ? 'deg-cell-next-col' : '';
 
-                        let val = d[r.key] !== undefined ? d[r.key] : '';
-                        let displayVal = val;
-
-                        if (isPast && ['fd_favok', 'f_k', 'pd_dd', 'hedef_fiyat', 'potansiyel'].includes(r.key)) {
-                            displayVal = val = '---';
-                        } else if (!isPast) {
-                            const ciro = parseFloat(d.ciro) || 0;
-                            const favokMarji = parseFloat(d.favok_marji) || 0;
-                            const netKarMarji = parseFloat(d.net_kar_marji) || 0;
-
-                            let favok = 0;
-                            let net_kar = 0;
-                            let hasFavok = false;
-                            let hasNetKar = false;
-
-                            let past3Favok = 0;
-                            let past3NetKar = 0;
-
-                            if (p.includes('/') && sDataDeg && sDataDeg.gelirCeyrek && sDataDeg.gelirCeyrek.rows) {
-                                const favokRow = sDataDeg.gelirCeyrek.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
-                                const netKarRow = sDataDeg.gelirCeyrek.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
-                                
-                                for (let i = 1; i <= Math.min(3, sDataDeg.gelirCeyrek.headers.length - 1); i++) {
-                                    if (favokRow && favokRow[i] !== undefined && favokRow[i] !== '') {
-                                        past3Favok += (typeof favokRow[i] === 'number' ? favokRow[i] : parseFloat(String(favokRow[i]).replace(/\./g, '').replace(/,/g, '.')) || 0);
-                                    }
-                                    if (netKarRow && netKarRow[i] !== undefined && netKarRow[i] !== '') {
-                                        past3NetKar += (typeof netKarRow[i] === 'number' ? netKarRow[i] : parseFloat(String(netKarRow[i]).replace(/\./g, '').replace(/,/g, '.')) || 0);
-                                    }
-                                }
-                            }
-
-                            if (d.ciro !== undefined && d.ciro !== '' && d.favok_marji !== undefined && d.favok_marji !== '') {
-                                favok = (ciro * (favokMarji / 100));
-                                hasFavok = true;
-                            }
-                            if (d.ciro !== undefined && d.ciro !== '' && d.net_kar_marji !== undefined && d.net_kar_marji !== '') {
-                                net_kar = (ciro * (netKarMarji / 100));
-                                hasNetKar = true;
-                            }
-
-                            if (r.key === 'favok') displayVal = val = hasFavok ? favok : '---';
-                            if (r.key === 'net_kar') displayVal = val = hasNetKar ? net_kar : '---';
-
-                            let validPDs = [];
-                            let currentNetBorc = netBorc_deg;
-                            if (curCurrency === 'USD') currentNetBorc = netBorc_deg / usdKuru;
-                            else if (curCurrency === 'EUR') currentNetBorc = netBorc_deg / eurKuru;
-
-                            let yFdFavok = parseFloat(d.fd_favok) || 0;
-                            let yFk = parseFloat(d.f_k) || 0;
-                            let yPdDd = parseFloat(d.pd_dd) || 0;
-
-                            let ttmFavok = favok + (p.includes('/') ? past3Favok : 0);
-                            let ttmNetKar = net_kar + (p.includes('/') ? past3NetKar : 0);
-
-                            if (hasFavok && yFdFavok > 0) {
-                                validPDs.push((ttmFavok * yFdFavok) - currentNetBorc);
-                            }
-                            if (hasNetKar && yFk > 0) {
-                                validPDs.push(ttmNetKar * yFk);
-                            }
-                            if (d.ozkaynaklar !== undefined && d.ozkaynaklar !== '' && yPdDd > 0) {
-                                validPDs.push((parseFloat(d.ozkaynaklar) || 0) * yPdDd);
-                            }
-
-                            let avgPD = 0;
-                            if (validPDs.length > 0) avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
-
-                            let hedefFiyatTL = 0;
-                            let hasHedef = false;
-
-                            let currentOdenmisSermaye = odenmisSermayeDeg;
-                            if (d.sermaye !== undefined && d.sermaye !== '') currentOdenmisSermaye = parseFloat(d.sermaye) || currentOdenmisSermaye;
-
-                            if (validPDs.length > 0 && currentOdenmisSermaye > 0) {
-                                let hedefFiyatForeign = avgPD / currentOdenmisSermaye;
-                                if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
-                                else if (curCurrency === 'EUR') hedefFiyatTL = hedefFiyatForeign * eurKuru;
-                                else hedefFiyatTL = hedefFiyatForeign;
-                                hasHedef = true;
-                            }
-
-                            if (r.key === 'hedef_fiyat') displayVal = val = hasHedef ? hedefFiyatTL : '---';
-
-                            let potansiyelNum = 0;
-                            if (hasHedef && guncelFiyat > 0) potansiyelNum = ((hedefFiyatTL - guncelFiyat) / guncelFiyat) * 100;
-
-                            if (r.key === 'potansiyel') {
-                                if (hasHedef && guncelFiyat > 0) displayVal = val = potansiyelNum;
-                                else displayVal = val = '---';
-                            }
-                            if (r.key === 'sermaye' && !editMode && (d.sermaye === undefined || d.sermaye === '')) {
-                                displayVal = odenmisSermayeDeg;
-                            }
-                        }
-
-                        if (displayVal !== '---' && displayVal !== '') {
-                            let numVal = parseFloat(displayVal);
-                            if (!isNaN(numVal)) {
-                                if (r.type === 'target') displayVal = '₺' + new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numVal);
-                                else if (r.type === 'currency') displayVal = currencySymbol === '€' ? new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(numVal) + '€' : currencySymbol + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(numVal);
-                                else if (r.type === 'currency_int') displayVal = currencySymbol === '€' ? new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(numVal) + '€' : currencySymbol + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(numVal);
-                                else if (r.type === 'percent') {
-                                    let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2 }).format(Math.abs(numVal));
-                                    displayVal = numVal < 0 ? '%-' + formatted : '%' + formatted;
-                                } else if (r.type === 'percent_target') {
-                                    let formatted = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(numVal));
-                                    displayVal = numVal < 0 ? '%-' + formatted : '%' + formatted;
-                                } else if (r.type === 'decimal') {
-                                    displayVal = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(numVal);
-                                }
-                            }
-                        }
-
-                        let extraStyle = '';
-                        if (!isPast && r.isTarget && displayVal !== '---') {
-                            const numPot = ((parseFloat(String(displayVal).replace('₺', '').replace(/\./g, '').replace(',', '.')) - guncelFiyat) / guncelFiyat) * 100;
-                            extraStyle = numPot > 0 ? 'color: #059669 !important; font-weight: 600; font-size:1.1rem;' : 'color: #dc2626 !important; font-weight: 600; font-size:1.1rem;';
-                        }
-                        if (!isPast && r.key === 'potansiyel' && val !== '---') {
-                            extraStyle = val > 0 ? 'color: #059669 !important; font-weight: 500;' : 'color: #dc2626 !important; font-weight: 500;';
-                        }
-
-                        const pSafe = p.replace('/', '-');
                         if (editMode && !r.readonly) {
-                            html += `<td class="editing-column-${pSafe}" style="text-align: right !important; padding: 2px !important; ${colWidthStyle}">
-                                <input id="edit-input-${pSafe}-${r.key}" type="number" step="any" style="width:100%; min-width:0; box-sizing: border-box; background:var(--input-bg); color:var(--text-primary); border:1px solid var(--accent-color); padding:4px; text-align:right; border-radius:4px;" 
-                                value="${val !== '---' ? val : ''}" 
-                                oninput="window.updateDegerlemeInputUnified('${selectedHisse}', '${p}', '${r.key}', this.value, false)" 
-                                onkeydown="if(event.key === 'Enter') { event.preventDefault(); window.exitDegerlemeEdit('${p}'); }"
-                                onblur="setTimeout(() => { if (!document.activeElement.closest('.editing-column-${pSafe}')) { window.exitDegerlemeEdit('${p}'); } }, 100)">
-                            </td>`;
+                            matrixBodyHtml += `
+                                <td class="editing-column-${pSafe} ${colExtraCls}" style="text-align:right !important; padding:4px 6px !important;">
+                                    <input id="edit-input-${pSafe}-${r.key}" class="deg-inline-input" type="number" step="any"
+                                        value="${rawVal !== '' ? window.escapeHtml(rawVal) : ''}"
+                                        oninput="window.updateDegerlemeInputUnified('${safeH}', '${safeP}', '${r.key}', this.value, false)"
+                                        onkeydown="if(event.key === 'Enter' || event.key === 'Escape') { event.preventDefault(); window.exitDegerlemeEdit('${safeP}'); }"
+                                        onblur="setTimeout(() => { if (!document.activeElement || !document.activeElement.closest('.editing-column-${pSafe}')) { window.exitDegerlemeEdit('${safeP}'); } }, 120)">
+                                </td>`;
+                        } else if (!isPast && !r.readonly) {
+                            matrixBodyHtml += `<td class="editing-column-${pSafe} deg-cell-editable ${colExtraCls}" style="text-align:right !important; ${extraStyle}" onclick="window.enterDegerlemeEdit('${safeP}', '${r.key}')" title="Düzenlemek için tıklayın">${displayStr}</td>`;
                         } else {
-                            const dblClick = (!isPast && !r.readonly) ? `ondblclick="window.enterDegerlemeEdit('${p}', '${r.key}')" style="cursor:text; text-align: right !important; ${extraStyle}" title="Düzenlemek için çift tıklayın"` : `style="text-align: right !important; ${extraStyle}"`;
-                            html += `<td class="editing-column-${pSafe}" ${dblClick}>${displayVal === '' ? '---' : displayVal}</td>`;
+                            const pastCls = isPast ? 'deg-cell-past' : '';
+                            matrixBodyHtml += `<td class="${pastCls} ${colExtraCls} ${heatCls}" style="text-align:right !important; ${extraStyle}" ${cellTitle ? `title="${window.escapeHtml(cellTitle)}"` : ''}>${displayStr}</td>`;
                         }
                     });
-                    html += `</tr>`;
+                    matrixBodyHtml += `</tr>`;
                 });
 
                 if (window.degerlemeFocusPeriod && window.degerlemeFocusKey) {
+                    const fpSafe = window.degerlemeFocusPeriod.replace(/[^a-zA-Z0-9_-]/g, '-');
+                    const fkKey = window.degerlemeFocusKey;
                     setTimeout(() => {
-                        const el = document.getElementById(`edit-input-${window.degerlemeFocusPeriod.replace('/', '-')}-${window.degerlemeFocusKey}`);
-                        if (el) {
-                            el.focus();
-                            el.select();
-                        }
+                        const el = document.getElementById(`edit-input-${fpSafe}-${fkKey}`);
+                        if (el) { el.focus(); el.select(); }
                         window.degerlemeFocusPeriod = null;
                         window.degerlemeFocusKey = null;
-                    }, 50);
+                    }, 40);
                 }
 
-                html += `</tbody></table></div>`; // End of table wrapper
-                html += `
-                    <div style="margin-top: 1rem; border-top: 1px solid var(--surface-border); padding-top: 1rem;">
-                        <textarea id="degerleme-not-input" class="form-control" style="width: 100%; height: 64px; resize: vertical; font-size: 13.5px; font-family: inherit; margin-bottom: 0.5rem; color: var(--text-primary);" placeholder="Bu hisse için değerleme notlarınızı buraya yazabilirsiniz..." onblur="window.saveDegerlemeNotUnified('${selectedHisse}')">${combinedNot}</textarea>
+                contentHtml = `
+                    <div style="display:flex; flex-direction:column; gap:0.95rem;">
+                        ${kpiDegHtml}
+                        ${analyticsHtml}
+
+                        <!-- Valuation Matrix Card -->
+                        <div class="glass ekstre-card-shell">
+                            <div class="ekstre-toolbar-top">
+                                <div>
+                                    <span class="enf-panel-title">
+                                        <i class="fas fa-table" style="color:#0284c7;"></i>
+                                        <span>${window.escapeHtml(selectedHisse)} Değerleme Modeli</span>
+                                    </span>
+                                    <div style="font-size:12px; color:#64748b; margin-top:2px;">Hücreye tek tıklayarak hızlı düzenleyin veya sütundaki <strong>Düzenle</strong> butonuyla tüm varsayımları girin.</div>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:0.55rem; flex-wrap:wrap;">
+                                    ${pastQuarters.length > 0 ? `
+                                    <div class="ekstre-segmented">
+                                        <button type="button" class="ekstre-seg-btn ${window.degShowPast ? 'active' : ''}" onclick="window.setDegShowPast(true)">Geçmiş + Tahmin</button>
+                                        <button type="button" class="ekstre-seg-btn ${!window.degShowPast ? 'active' : ''}" onclick="window.setDegShowPast(false)">Sadece Tahminler</button>
+                                    </div>` : ''}
+                                    <button type="button" class="btn ekstre-primary-cta" onclick="window.openDegerlemePeriodModal('${window.escapeHtml(selectedHisse)}', '${window.escapeHtml(nextQuarter)}')">
+                                        <i class="fas fa-sliders" style="color:#ffffff !important;"></i>
+                                        <span>Tahmin Düzenle</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="deg-table-scroll">
+                                <table class="dash-table compact-table deg-table">
+                                    <thead>${groupHeaderHtml}</thead>
+                                    <tbody>${matrixBodyHtml}</tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Valuation Notes Card -->
+                        <div class="deg-notes-card">
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:0.5rem;">
+                                <span class="enf-panel-title">
+                                    <i class="fas fa-note-sticky" style="color:#d97706;"></i>
+                                    <span>Değerleme Varsayımları & Notlar</span>
+                                </span>
+                                <span id="deg-note-save-badge" class="deg-save-badge"><i class="fas fa-check-circle"></i> Kaydedildi</span>
+                            </div>
+                            <textarea id="degerleme-not-input" class="takip-note-textarea" style="min-height: 92px;" placeholder="Bu hisse için büyüme beklentisi, marj varsayımları, hedef çarpan gerekçesi veya risk notlarınız..." onblur="window.saveDegerlemeNotUnified('${window.escapeHtml(selectedHisse)}')">${window.escapeHtml(combinedNot)}</textarea>
+                        </div>
                     </div>
-                </div>`; // End of dash-card
-                contentHtml += html;
+                `;
+                window.shouldRenderDashboardCharts = true;
             } else if (activeTab === 'Akış') {
                 let analizler = State.data.analizler || [];
                 analizler = analizler.filter(a => (a.hisse || '').toUpperCase() === selectedHisse.toUpperCase());
@@ -3961,9 +4470,13 @@ const renderHisseler = (container) => {
             let stockHeaderHtml = '';
             if (selectedHisse) {
                 window.stockChanges = window.stockChanges || {};
-                const hFiyat = parseFloat(State.getFiyat(selectedHisse)) || 0;
+                const hCtx = window.getDegerlemeStockContext(selectedHisse);
+                const hFiyat = hCtx.guncelFiyat || 0;
+                const tdH = window.tickerData && window.tickerData[selectedHisse];
                 let hDegisim = 0;
-                if (window.stockChanges[selectedHisse] !== undefined) {
+                if (tdH && tdH.chp !== undefined && tdH.chp !== null && !isNaN(tdH.chp)) {
+                    hDegisim = tdH.chp;
+                } else if (window.stockChanges[selectedHisse] !== undefined) {
                     hDegisim = window.stockChanges[selectedHisse];
                 } else {
                     const hKayit = State.data.hisseFiyatlari && State.data.hisseFiyatlari.find(h => h.hisse === selectedHisse);
@@ -3973,7 +4486,6 @@ const renderHisseler = (container) => {
 
                 const isPos = hDegisim >= 0;
                 const hColor = isPos ? 'var(--success-color)' : 'var(--danger-color)';
-
                 let initChangeStr = Math.abs(hDegisim).toFixed(2).replace('.', ',');
                 if (isPos && hDegisim > 0) initChangeStr = '+' + initChangeStr;
                 else if (!isPos) initChangeStr = '-' + initChangeStr;
@@ -3983,20 +4495,55 @@ const renderHisseler = (container) => {
                     ...((State.data && State.data.takipListesi) ? State.data.takipListesi : []),
                     ...Object.keys((State.data && State.data.degerleme) ? State.data.degerleme : {})
                 ])).filter(Boolean).sort((a, b) => a.localeCompare(b));
+                const curIdx = switcherSymbols.indexOf(selectedHisse);
+                const prevSym = switcherSymbols.length > 1 ? switcherSymbols[(curIdx - 1 + switcherSymbols.length) % switcherSymbols.length] : null;
+                const nextSym = switcherSymbols.length > 1 ? switcherSymbols[(curIdx + 1) % switcherSymbols.length] : null;
+
+                const isStarredH = Array.isArray(State.data.takipYildizlar) && State.data.takipYildizlar.includes(selectedHisse);
+                const safeSel = window.escapeHtml(selectedHisse);
+                const fmtHdrDec = (v) => new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+                const fmtHdrPd = (v) => {
+                    if (!v || v <= 0) return null;
+                    if (v >= 1e9) return `₺${fmtHdrDec(v / 1e9)} Mlr`;
+                    if (v >= 1e6) return `₺${fmtHdrDec(v / 1e6)} Mn`;
+                    return `₺${Math.round(v).toLocaleString('tr-TR')}`;
+                };
+
+                const chips = [];
+                const pdStr = fmtHdrPd(hCtx.piyasaDegeri);
+                if (pdStr) chips.push(`<span class="hisse-metric-chip">PD: <strong>${pdStr}</strong></span>`);
+                if (hCtx.guncelFk > 0) chips.push(`<span class="hisse-metric-chip">F/K: <strong>${fmtHdrDec(hCtx.guncelFk)}</strong></span>`);
+                if (hCtx.guncelFdFavok > 0) chips.push(`<span class="hisse-metric-chip">FD/FAVÖK: <strong>${fmtHdrDec(hCtx.guncelFdFavok)}</strong></span>`);
+                if (hCtx.guncelPdDd > 0) chips.push(`<span class="hisse-metric-chip">PD/DD: <strong>${fmtHdrDec(hCtx.guncelPdDd)}</strong></span>`);
 
                 stockHeaderHtml = `
-            <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 1.25rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 0; flex-shrink: 0; flex-wrap: wrap; gap: 0.75rem;">
-                <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
-                    <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 0.5px; color: var(--text-primary);">${window.escapeHtml(selectedHisse)}</h1>
-                    <select id="hisse-switcher-select" class="ekstre-select" style="height: 34px; font-weight: 700; min-width: 120px;" title="Başka hisseye geç" onchange="window.switchSelectedHisse && window.switchSelectedHisse(this.value)">
-                        ${switcherSymbols.map(s => `<option value="${window.escapeHtml(s)}" ${s === selectedHisse ? 'selected' : ''}>${window.escapeHtml(s)}</option>`).join('')}
-                    </select>
-                </div>
-                <div style="display: flex; align-items: baseline; gap: 0.8rem;">
-                    <div style="font-size: 18px; font-weight: 700; color: var(--text-primary);">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)} ₺</div>
-                    <div id="hisse-header-change" style="font-size: 14px; font-weight: 600; color: ${hColor}; display: block;">
-                        <i class="fas fa-caret-${isPos ? 'up' : 'down'}"></i> %${initChangeStr}
+            <div id="hisse-header-border" class="hisse-hero-card" style="border-left-color: ${hColor};">
+                <div class="hisse-hero-left">
+                    <div class="hisse-nav-stepper">
+                        ${prevSym ? `<button type="button" class="hisse-step-btn" onclick="window.switchSelectedHisse('${window.escapeHtml(prevSym)}')" title="Önceki hisse (${window.escapeHtml(prevSym)})"><i class="fas fa-chevron-left"></i></button>` : ''}
+                        <select id="hisse-switcher-select" class="ekstre-select" style="height: 30px; font-weight: 800; color: #113A5D; border: none; background-color: transparent; min-width: 100px;" title="Başka hisseye geç" onchange="window.switchSelectedHisse && window.switchSelectedHisse(this.value)">
+                            ${switcherSymbols.map(s => `<option value="${window.escapeHtml(s)}" ${s === selectedHisse ? 'selected' : ''}>${window.escapeHtml(s)}</option>`).join('')}
+                        </select>
+                        ${nextSym ? `<button type="button" class="hisse-step-btn" onclick="window.switchSelectedHisse('${window.escapeHtml(nextSym)}')" title="Sonraki hisse (${window.escapeHtml(nextSym)})"><i class="fas fa-chevron-right"></i></button>` : ''}
                     </div>
+                    <h1 class="hisse-hero-ticker">${safeSel}</h1>
+                    ${chips.length > 0 ? `<div class="hisse-metric-chips">${chips.join('')}</div>` : ''}
+                </div>
+
+                <div class="hisse-hero-right">
+                    <div class="hisse-price-block">
+                        <span class="hisse-price-val">₺${fmtHdrDec(hFiyat)}</span>
+                        <span id="hisse-header-change" class="hisse-change-pill ${isPos ? 'pos' : 'neg'}">
+                            <i class="fas fa-caret-${isPos ? 'up' : 'down'}"></i> %${initChangeStr}
+                        </span>
+                    </div>
+                    <button type="button" class="takip-star-filter-btn ${isStarredH ? 'active' : ''}" style="height:34px; padding:0 10px;" onclick="if(window.toggleTakipStar) window.toggleTakipStar('${safeSel}', event); renderPage();" title="${isStarredH ? 'Yıldızı kaldır' : 'Öncelikli olarak yıldızla'}">
+                        <i class="${isStarredH ? 'fas' : 'far'} fa-star" style="color:#f59e0b;"></i>
+                    </button>
+                    <button type="button" class="ekstre-ghost-btn" style="height:34px; color:#059669; border-color:#a7f3d0; background:#ecfdf5;" onclick="window.openEkstreModal && window.openEkstreModal(null, '${safeSel}')" title="${safeSel} için alım/satım işlemi ekle">
+                        <i class="fas fa-plus"></i>
+                        <span>İşlem</span>
+                    </button>
                 </div>
             </div>
             `;
@@ -4011,10 +4558,12 @@ const renderHisseler = (container) => {
             }
 
             container.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="display: flex; flex-direction: column; gap: 0.9rem;">
                 ${stockHeaderHtml}
-                <div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; border: 1px solid var(--surface-border); border-radius: 12px; flex-wrap: wrap; align-items: center; background: var(--surface-color); box-shadow: var(--shadow-sm); flex-shrink: 0;">
-                    ${tabsHtml}
+                <div class="hisse-tab-strip">
+                    <div class="ekstre-tab-group">
+                        ${tabsHtml}
+                    </div>
                 </div>
                 <div class="page-section active" style="display: flex; flex-direction: column; gap: 1rem; padding: 0;">
                     ${contentHtml}
@@ -4033,12 +4582,11 @@ const renderHisseler = (container) => {
                             const change = data.data[0].d[1];
                             const changeEl = document.getElementById('hisse-header-change');
                             const borderEl = document.getElementById('hisse-header-border');
-                            if (changeEl) {
+                            if (changeEl && change !== null && change !== undefined && !isNaN(change)) {
                                 window.stockChanges[selectedHisse] = change;
                                 const isPos = change >= 0;
                                 const color = isPos ? 'var(--success-color)' : 'var(--danger-color)';
-                                changeEl.style.color = color;
-                                changeEl.style.display = 'block';
+                                changeEl.className = 'hisse-change-pill ' + (isPos ? 'pos' : 'neg');
                                 let changeStr = Math.abs(change).toFixed(2).replace('.', ',');
                                 if (isPos && change > 0) changeStr = '+' + changeStr;
                                 else if (!isPos) changeStr = '-' + changeStr;
@@ -4046,10 +4594,7 @@ const renderHisseler = (container) => {
                                 if (borderEl) borderEl.style.borderLeftColor = color;
                             }
                         }
-                    }).catch(e => {
-                        const changeEl = document.getElementById('hisse-header-change');
-                        if (changeEl) changeEl.innerHTML = '-';
-                    });
+                    }).catch(() => { });
                 }, 100);
             }
 
@@ -4057,6 +4602,74 @@ const renderHisseler = (container) => {
             if (window.shouldRenderDashboardCharts) {
                 window.shouldRenderDashboardCharts = false;
                 setTimeout(() => {
+                    // --- Değerleme Hedef Fiyat Yörüngesi Grafiği ---
+                    if (window.degerlemeChartPayload && typeof Chart !== 'undefined') {
+                        const dp = window.degerlemeChartPayload;
+                        const cvDeg = document.getElementById('chart-degerleme-trajectory');
+                        if (cvDeg && dp.labels && dp.labels.length > 0) {
+                            let ex = Chart.getChart ? Chart.getChart(cvDeg) : null;
+                            if (ex) ex.destroy();
+                            const barColors = dp.targets.map(v => (!dp.currentPrice || v >= dp.currentPrice) ? 'rgba(16, 185, 129, 0.82)' : 'rgba(239, 68, 68, 0.78)');
+                            const datasets = [
+                                {
+                                    type: 'bar',
+                                    label: 'Hedef Fiyat (₺)',
+                                    data: dp.targets,
+                                    backgroundColor: barColors,
+                                    borderRadius: 7,
+                                    maxBarThickness: 46
+                                }
+                            ];
+                            if (dp.currentPrice > 0) {
+                                datasets.push({
+                                    type: 'line',
+                                    label: 'Güncel Fiyat (₺)',
+                                    data: dp.labels.map(() => dp.currentPrice),
+                                    borderColor: '#113A5D',
+                                    borderWidth: 2,
+                                    borderDash: [6, 4],
+                                    pointRadius: 0,
+                                    fill: false
+                                });
+                            }
+                            new Chart(cvDeg.getContext('2d'), {
+                                type: 'bar',
+                                data: { labels: dp.labels, datasets },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    interaction: { mode: 'index', intersect: false },
+                                    plugins: {
+                                        datalabels: { display: false },
+                                        legend: { position: 'top', align: 'end', labels: { boxWidth: 12, usePointStyle: true, font: { size: 11.5, weight: '600' } } },
+                                        tooltip: {
+                                            callbacks: {
+                                                label: (c) => {
+                                                    const val = c.parsed.y;
+                                                    if (c.datasetIndex === 0) {
+                                                        const pot = dp.potentials[c.dataIndex];
+                                                        const potS = dp.currentPrice > 0 ? ` (${pot >= 0 ? '%+' : '%-'}${Math.abs(pot).toFixed(1).replace('.', ',')})` : '';
+                                                        return `Hedef: ₺${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val)}${potS}`;
+                                                    }
+                                                    return `Güncel Fiyat: ₺${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val)}`;
+                                                }
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        x: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' }, color: '#334155' } },
+                                        y: {
+                                            beginAtZero: true,
+                                            ticks: { callback: (v) => '₺' + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(v), font: { size: 11 }, color: '#64748b' },
+                                            grid: { color: 'rgba(148, 163, 184, 0.16)' }
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                        window.degerlemeChartPayload = null;
+                    }
+
                     // --- Nakit Akım Grafikleri (Çeyreklik & Yıllıklandırılmış) ---
                     if (window.nakitChartPayload && typeof Chart !== 'undefined') {
                         const renderNakitChart = (canvasId, series) => {
@@ -7583,111 +8196,29 @@ const renderAyarlar = (container) => {
 };
 window.getGBHF = (hisse) => {
     if (!State.data.araDegerleme || !State.data.araDegerleme[hisse]) return null;
-    let qKeys = Object.keys(State.data.araDegerleme[hisse]).sort((a, b) => {
-        let [yA, mA] = a.split('/').map(Number);
-        let [yB, mB] = b.split('/').map(Number);
+    const qKeys = Object.keys(State.data.araDegerleme[hisse]).sort((a, b) => {
+        const [yA, mA] = a.split('/').map(Number);
+        const [yB, mB] = b.split('/').map(Number);
         if (yA !== yB) return yB - yA;
         return mB - mA;
     });
-    
-    // Find the latest quarter that actually has data and generates a target price
-    for (let period of qKeys) {
+
+    const ctx = window.getDegerlemeStockContext(hisse);
+    if (!ctx.sData) return null;
+
+    for (const period of qKeys) {
         const d = State.data.araDegerleme[hisse][period];
         if (!d || Object.keys(d).length === 0) continue;
-        
-        const sData = (window.stockData && window.stockData[hisse]) ? window.stockData[hisse] : null;
-        if (!sData) continue;
-        
-        if (sData.gelirCeyrek && sData.gelirCeyrek.headers && sData.gelirCeyrek.headers.includes(period)) {
+        if (ctx.sData.gelirCeyrek && ctx.sData.gelirCeyrek.headers && ctx.sData.gelirCeyrek.headers.includes(period)) {
             continue;
         }
-        
-        let past3Favok = 0; let past3NetKar = 0;
-        if (sData.gelirCeyrek && sData.gelirCeyrek.rows) {
-            const fRow = sData.gelirCeyrek.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
-            const nRow = sData.gelirCeyrek.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
-            for (let i = 1; i <= Math.min(3, sData.gelirCeyrek.headers.length - 1); i++) {
-                if (fRow && fRow[i] !== undefined && fRow[i] !== '') past3Favok += (typeof fRow[i] === 'number' ? fRow[i] : parseFloat(String(fRow[i]).replace(/\./g, '').replace(/,/g, '.')) || 0);
-                if (nRow && nRow[i] !== undefined && nRow[i] !== '') past3NetKar += (typeof nRow[i] === 'number' ? nRow[i] : parseFloat(String(nRow[i]).replace(/\./g, '').replace(/,/g, '.')) || 0);
-            }
-        }
-        
-        let finansalBorclarTotal = 0; let nakitTotal = 0; let finYatTotal = 0; let inDuran = false;
-        if (sData.bilanco && sData.bilanco.rows) {
-            sData.bilanco.rows.forEach(r => {
-                if (!r[0]) return;
-                const rName = r[0].toString().toLocaleLowerCase('tr-TR');
-                if (rName.trim() === 'duran varlıklar') inDuran = true;
-                if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
-                    finansalBorclarTotal += typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                }
-                if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
-                    nakitTotal += typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                }
-                if (rName.includes('finansal yatırımlar') && !inDuran) {
-                    finYatTotal += typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                }
-            });
-        }
-        const netBorc = finansalBorclarTotal - nakitTotal - finYatTotal;
-        
-        let odenmisSermayeDeg = 0;
-        if (sData.bilanco && sData.bilanco.rows) {
-            const osRow = sData.bilanco.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('ödenmiş sermaye') && !String(x[0]).toLocaleLowerCase('tr-TR').includes('fark') && !String(x[0]).toLocaleLowerCase('tr-TR').includes('düzeltme'));
-            if (osRow && osRow[1]) odenmisSermayeDeg = typeof osRow[1] === 'number' ? osRow[1] : parseFloat(String(osRow[1]).replace(/\./g, '').replace(/,/g, '.')) || 0;
-        }
-        
-        const curCurrency = d.currency || 'TRY';
-        const usdKuru = (State.getFiyat ? parseFloat(State.getFiyat('USDTRY')) : null) || window.dolarKuru || 46.99;
-        const eurKuru = (State.getFiyat ? parseFloat(State.getFiyat('EURTRY')) : null) || window.euroKuru || 50.00;
-        const guncelFiyat = parseFloat(State.getFiyat(hisse)) || 0;
-        
-        let ciro = parseFloat(d.ciro) || 0;
-        let favokMarji = parseFloat(d.favok_marji) || 0;
-        let netKarMarji = parseFloat(d.net_kar_marji) || 0;
-        
-        let favok = 0; let hasFavok = false;
-        if (d.ciro !== undefined && d.ciro !== '' && d.favok_marji !== undefined && d.favok_marji !== '') {
-            favok = (ciro * (favokMarji / 100));
-            hasFavok = true;
-        }
-        
-        let net_kar = 0; let hasNetKar = false;
-        if (d.ciro !== undefined && d.ciro !== '' && d.net_kar_marji !== undefined && d.net_kar_marji !== '') {
-            net_kar = (ciro * (netKarMarji / 100));
-        }
-        
-        let validPDs = [];
-        let currentNetBorc = netBorc;
-        if (curCurrency === 'USD') currentNetBorc = netBorc / usdKuru;
-        else if (curCurrency === 'EUR') currentNetBorc = netBorc / eurKuru;
-        
-        let yFdFavok = parseFloat(d.fd_favok) || 0;
-        let yFk = parseFloat(d.f_k) || 0;
-        let yPdDd = parseFloat(d.pd_dd) || 0;
-        
-        let ttmFavok = favok + (period.includes('/') ? past3Favok : 0);
-        let ttmNetKar = net_kar + (period.includes('/') ? past3NetKar : 0);
-        
-        if (hasFavok && yFdFavok > 0) validPDs.push((ttmFavok * yFdFavok) - currentNetBorc);
-        if (hasNetKar && yFk > 0) validPDs.push(ttmNetKar * yFk);
-        if (d.ozkaynaklar !== undefined && d.ozkaynaklar !== '' && yPdDd > 0) validPDs.push((parseFloat(d.ozkaynaklar) || 0) * yPdDd);
-        
-        let currentOdenmisSermaye = odenmisSermayeDeg;
-        if (d.sermaye !== undefined && d.sermaye !== '') currentOdenmisSermaye = parseFloat(d.sermaye) || currentOdenmisSermaye;
-        
-        if (validPDs.length > 0 && currentOdenmisSermaye > 0) {
-            let avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
-            let hedefFiyatForeign = avgPD / currentOdenmisSermaye;
-            let hedefFiyatTL = 0;
-            if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
-            else if (curCurrency === 'EUR') hedefFiyatTL = hedefFiyatForeign * eurKuru;
-            else hedefFiyatTL = hedefFiyatForeign;
-            
-            let potansiyelNum = 0;
-            if (guncelFiyat > 0) potansiyelNum = ((hedefFiyatTL - guncelFiyat) / guncelFiyat) * 100;
-            
-            return { hedefFiyat: hedefFiyatTL, potansiyel: potansiyelNum, period: period };
+        const res = window.computeDegerlemePeriod(period, d, ctx);
+        if (res.hasHedef) {
+            return {
+                hedefFiyat: res.hedefFiyatTL,
+                potansiyel: res.potansiyelPct !== null ? res.potansiyelPct : 0,
+                period
+            };
         }
     }
     return null;
@@ -9984,74 +10515,15 @@ window.recalculateHedefFiyatlar = () => {
     if (!State.data.degerleme && !State.data.araDegerleme) return;
     if (!State.data.hedefFiyatlar) State.data.hedefFiyatlar = {};
 
-    const getVal = (sheet, rowName) => {
-        if (!sheet || !sheet.rows) return 0;
-        const searchStr = rowName.toLowerCase().replace(/[öçşğıü]/g, '');
-        let exactRow = sheet.rows.find(r => r[0] && r[0].toString().toLowerCase().replace(/[öçşğıü]/g, '').trim() === searchStr.trim());
-        const row = exactRow || sheet.rows.find(r => {
-            if (!r[0]) return false;
-            const t = r[0].toString().toLowerCase().replace(/[öçşğıü]/g, '');
-            if (searchStr.includes('sermaye') && (t.includes('fark') || t.includes('duzeltme'))) return false;
-            return t.includes(searchStr);
-        });
-        if (!row) return 0;
-        const v = row[1];
-        if (typeof v === 'number') return v;
-        if (typeof v === 'string') {
-            const p = parseFloat(v.replace(/\./g, '').replace(/,/g, '.'));
-            return isNaN(p) ? 0 : p;
-        }
-        return 0;
-    };
-
     const allHisseler = new Set([
         ...Object.keys(State.data.degerleme || {}),
         ...Object.keys(State.data.araDegerleme || {})
     ]);
 
     for (const hisse of allHisseler) {
-        if (window.parseExcelData && (!window.stockData || !window.stockData[hisse] || !window.stockData[hisse].bilanco)) {
-            try { window.parseExcelData(hisse); } catch (e) { }
-        }
-        const sData = (window.stockData && window.stockData[hisse]) ? window.stockData[hisse] : null;
-        if (!sData) continue;
+        const ctx = window.getDegerlemeStockContext(hisse);
+        if (!ctx.sData) continue;
 
-        let finansalBorclarTotal = 0;
-        let nakitTotal = 0;
-        if (sData.bilanco && sData.bilanco.rows) {
-            sData.bilanco.rows.forEach(r => {
-                if (!r[0]) return;
-                const rName = r[0].toString().toLocaleLowerCase('tr-TR');
-                if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
-                    const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                    finansalBorclarTotal += val;
-                }
-                if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
-                    const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                    nakitTotal += val;
-                }
-            });
-        }
-        let finYatTotal = 0;
-        let inDuran = false;
-        if (sData.bilanco && sData.bilanco.rows) {
-            sData.bilanco.rows.forEach(r => {
-                if (!r[0]) return;
-                const rName = r[0].toString().toLocaleLowerCase('tr-TR');
-                if (rName.trim() === 'duran varlıklar') inDuran = true;
-                if (rName.includes('finansal yatırımlar') && !inDuran) {
-                    finYatTotal += typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                }
-            });
-        }
-        const netBorc = finansalBorclarTotal - nakitTotal - finYatTotal;
-        const odenmisSermaye = getVal(sData.bilanco, 'Ödenmiş Sermaye');
-        const guncelFiyat = parseFloat(State.getFiyat(hisse)) || 0;
-        const usdtry = parseFloat(State.getFiyat('USDTRY')) || 32.50;
-        const eurKuru = (State.getFiyat ? parseFloat(State.getFiyat('EURTRY')) : null) || window.euroKuru || 50.00;
-        const usdKuru = (State.getFiyat ? parseFloat(State.getFiyat('USDTRY')) : null) || window.dolarKuru || 46.99;
-
-        // CLEAR ALL STALE TARGET PRICES FOR THIS STOCK BEFORE RECALCULATING
         State.data.hedefFiyatlar[hisse] = {};
 
         const years = ['2026', '2027', '2028', '2029', '2030'];
@@ -10059,46 +10531,12 @@ window.recalculateHedefFiyatlar = () => {
             years.forEach(y => {
                 const d = State.data.degerleme[hisse][y];
                 if (!d) return;
-                const pNum = (val) => (val === undefined || val === null || val === '') ? null : parseFloat(val);
-                const curCurrency = d.currency || 'TRY';
-
-                let ySatis = pNum(d['ciro']);
-                let yFavokMarji = pNum(d['favok_marji']);
-                let yNetKarMarji = pNum(d['net_kar_marji']);
-                let yFdFavok = pNum(d['fd_favok']);
-                let yFk = pNum(d['fk']);
-                let yPdDd = pNum(d['pddd']);
-                let yOzkaynak = pNum(d['ozkaynaklar']);
-
-                let favok = (ySatis !== null && yFavokMarji !== null) ? ySatis * (yFavokMarji / 100) : null;
-                let netKar = (ySatis !== null && yNetKarMarji !== null) ? ySatis * (yNetKarMarji / 100) : null;
-
-                let currentNetBorc = netBorc;
-                if (curCurrency === 'USD') currentNetBorc = netBorc / usdKuru;
-                else if (curCurrency === 'EUR') currentNetBorc = netBorc / eurKuru;
-
-                let pd1 = (favok !== null && yFdFavok !== null && yFdFavok > 0) ? (favok * yFdFavok) - currentNetBorc : null;
-                let pd2 = (netKar !== null && yFk !== null && yFk > 0) ? (netKar * yFk) : null;
-                let pd3 = (yOzkaynak !== null && yPdDd !== null && yPdDd > 0) ? (yOzkaynak * yPdDd) : null;
-
-                let validPDs = [];
-                if (pd1 !== null) validPDs.push(pd1);
-                if (pd2 !== null) validPDs.push(pd2);
-                if (pd3 !== null) validPDs.push(pd3);
-
-                if (validPDs.length > 0 && odenmisSermaye > 0) {
-                    let avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
-                    let hedefFiyatForeign = avgPD / odenmisSermaye;
-                    let hedefFiyatTL = 0;
-                    if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
-                    else if (curCurrency === 'EUR') hedefFiyatTL = hedefFiyatForeign * eurKuru;
-                    else hedefFiyatTL = hedefFiyatForeign;
-
-                    let potansiyel = 0;
-                    if (guncelFiyat > 0) {
-                        potansiyel = (hedefFiyatTL - guncelFiyat) / guncelFiyat;
-                    }
-                    State.data.hedefFiyatlar[hisse][y] = { hedefFiyat: hedefFiyatTL, potansiyel: potansiyel };
+                const res = window.computeDegerlemePeriod(y, d, ctx);
+                if (res.hasHedef) {
+                    State.data.hedefFiyatlar[hisse][y] = {
+                        hedefFiyat: res.hedefFiyatTL,
+                        potansiyel: res.potansiyelRatio !== null ? res.potansiyelRatio : 0
+                    };
                 } else {
                     delete State.data.hedefFiyatlar[hisse][y];
                 }
@@ -10109,73 +10547,12 @@ window.recalculateHedefFiyatlar = () => {
             Object.keys(State.data.araDegerleme[hisse]).forEach(y => {
                 const d = State.data.araDegerleme[hisse][y];
                 if (!d) return;
-                const pNum = (val) => (val === undefined || val === null || val === '') ? null : parseFloat(val);
-                const curCurrency = d.currency || 'TRY';
-
-                let ySatis = pNum(d['ciro']);
-                let yFavokMarji = pNum(d['favok_marji']);
-                let yNetKarMarji = pNum(d['net_kar_marji']);
-                let yFdFavok = pNum(d['fd_favok']);
-                let yFk = pNum(d['f_k']);
-                let yPdDd = pNum(d['pd_dd']);
-                let yOzkaynak = pNum(d['ozkaynaklar']);
-
-                let past3Favok = 0;
-                let past3NetKar = 0;
-
-                if (y.includes('/') && sData && sData.gelirCeyrek && sData.gelirCeyrek.rows) {
-                    const favokRow = sData.gelirCeyrek.rows.find(x => x[0] && String(x[0]).toLocaleLowerCase('tr-TR').includes('favök'));
-                    const netKarRow = sData.gelirCeyrek.rows.find(x => x[0] && (String(x[0]).toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || String(x[0]).toLocaleLowerCase('tr-TR').includes('dönem net kar')));
-                    
-                    for (let i = 1; i <= Math.min(3, sData.gelirCeyrek.headers.length - 1); i++) {
-                        if (favokRow && favokRow[i] !== undefined && favokRow[i] !== '') {
-                            past3Favok += (typeof favokRow[i] === 'number' ? favokRow[i] : parseFloat(String(favokRow[i]).replace(/\./g, '').replace(/,/g, '.')) || 0);
-                        }
-                        if (netKarRow && netKarRow[i] !== undefined && netKarRow[i] !== '') {
-                            past3NetKar += (typeof netKarRow[i] === 'number' ? netKarRow[i] : parseFloat(String(netKarRow[i]).replace(/\./g, '').replace(/,/g, '.')) || 0);
-                        }
-                    }
-                }
-
-                let favok = past3Favok;
-                if (ySatis !== null && yFavokMarji !== null) {
-                    favok = (ySatis * (yFavokMarji / 100));
-                }
-                
-                let netKar = past3NetKar;
-                if (ySatis !== null && yNetKarMarji !== null) {
-                    netKar = (ySatis * (yNetKarMarji / 100));
-                }
-
-                let currentNetBorc = netBorc;
-                if (curCurrency === 'USD') currentNetBorc = netBorc / usdKuru;
-                else if (curCurrency === 'EUR') currentNetBorc = netBorc / eurKuru;
-
-                let pd1 = (favok !== null && yFdFavok !== null && yFdFavok > 0) ? (favok * yFdFavok) - currentNetBorc : null;
-                let pd2 = (netKar !== null && yFk !== null && yFk > 0) ? (netKar * yFk) : null;
-                let pd3 = (yOzkaynak !== null && yPdDd !== null && yPdDd > 0) ? (yOzkaynak * yPdDd) : null;
-
-                let validPDs = [];
-                if (pd1 !== null) validPDs.push(pd1);
-                if (pd2 !== null) validPDs.push(pd2);
-                if (pd3 !== null) validPDs.push(pd3);
-
-                let inputSermaye = pNum(d['sermaye']);
-                let finalSermaye = (inputSermaye !== null && inputSermaye !== 0) ? inputSermaye : odenmisSermaye;
-
-                if (validPDs.length > 0 && finalSermaye > 0) {
-                    let avgPD = validPDs.reduce((a, b) => a + b, 0) / validPDs.length;
-                    let hedefFiyatForeign = avgPD / finalSermaye;
-                    let hedefFiyatTL = 0;
-                    if (curCurrency === 'USD') hedefFiyatTL = hedefFiyatForeign * usdKuru;
-                    else if (curCurrency === 'EUR') hedefFiyatTL = hedefFiyatForeign * eurKuru;
-                    else hedefFiyatTL = hedefFiyatForeign;
-
-                    let potansiyel = 0;
-                    if (guncelFiyat > 0) {
-                        potansiyel = (hedefFiyatTL - guncelFiyat) / guncelFiyat;
-                    }
-                    State.data.hedefFiyatlar[hisse][y] = { hedefFiyat: hedefFiyatTL, potansiyel: potansiyel };
+                const res = window.computeDegerlemePeriod(y, d, ctx);
+                if (res.hasHedef) {
+                    State.data.hedefFiyatlar[hisse][y] = {
+                        hedefFiyat: res.hedefFiyatTL,
+                        potansiyel: res.potansiyelRatio !== null ? res.potansiyelRatio : 0
+                    };
                 } else {
                     delete State.data.hedefFiyatlar[hisse][y];
                 }
