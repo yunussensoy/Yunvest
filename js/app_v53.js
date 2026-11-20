@@ -5333,12 +5333,12 @@ const renderHisseIslemleri = (container) => {
                     <thead>
                         <tr>
                             <th style="width: 52px;">S.N.</th>
-                            <th style="cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tarih')">Tarih${getHisseSortIcon('tarih')}</th>
-                            <th style="text-align: left !important; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('menkul')">Menkul${getHisseSortIcon('menkul')}</th>
+                            <th style="cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tarih')">Tarih</th>
+                            <th style="text-align: left !important; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('menkul')">Menkul</th>
                             <th>Yön</th>
-                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('fiyat')">Birim Fiyat${getHisseSortIcon('fiyat')}</th>
-                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('adet')">Adet${getHisseSortIcon('adet')}</th>
-                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tutar')">Tutar${getHisseSortIcon('tutar')}</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('fiyat')">Birim Fiyat</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('adet')">Adet</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tutar')">Tutar</th>
                             <th style="width: 92px;">İşlem</th>
                         </tr>
                     </thead>
@@ -5456,13 +5456,13 @@ const renderHisseIslemleri = (container) => {
                     <thead>
                         <tr>
                             <th style="width: 52px;">S.N.</th>
-                            <th style="cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tarih')">Tarih${getNakitSortIcon('tarih')}</th>
+                            <th style="cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tarih')">Tarih</th>
                             <th>Yön</th>
-                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tutar')">Tutar${getNakitSortIcon('tutar')}</th>
-                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('bist100')">XU100${getNakitSortIcon('bist100')}</th>
-                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('dolar')">USDTRY${getNakitSortIcon('dolar')}</th>
-                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('gramAltin')">GRAMALTIN${getNakitSortIcon('gramAltin')}</th>
-                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('pry')">PRY${getNakitSortIcon('pry')}</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tutar')">Tutar</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('bist100')">XU100</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('dolar')">USDTRY</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('gramAltin')">GRAMALTIN</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('pry')">PRY</th>
                             <th style="width: 92px;">İşlem</th>
                         </tr>
                     </thead>
