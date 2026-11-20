@@ -94,13 +94,12 @@ window.manualRefreshPrices = async () => {
 };
 
 window.filterTakipTable = (query) => {
-    const q = (query || '').trim().toUpperCase();
     window.takipSearchQuery = query || '';
-    const rows = document.querySelectorAll('.takip-table tbody tr[data-hisse]');
-    rows.forEach((tr) => {
-        const sym = (tr.getAttribute('data-hisse') || '').toUpperCase();
-        tr.style.display = (!q || sym.includes(q)) ? '' : 'none';
-    });
+    if (typeof window.updateTakipViewOnly === 'function') {
+        window.updateTakipViewOnly();
+    } else if (typeof renderPage === 'function') {
+        renderPage();
+    }
 };
 
 window.filterEkstreTable = (query) => {
@@ -610,6 +609,8 @@ const DEFAULT_STATE = {
         { menkul: 'GRAM ALTIN', fiyat: 2450 }
     ],
     hedefFiyatlar: {},
+    takipYildizlar: [],
+    takipAlimHedefleri: {},
     analizler: [],
     uploadedReports: [],
     portfoyGecmisi: []
@@ -626,6 +627,8 @@ const State = {
 
         const processLoadedData = () => {
             if (!this.data.takipListesi) this.data.takipListesi = [];
+            if (!Array.isArray(this.data.takipYildizlar)) this.data.takipYildizlar = [];
+            if (!this.data.takipAlimHedefleri || Array.isArray(this.data.takipAlimHedefleri)) this.data.takipAlimHedefleri = {};
             if (!this.data.analizler) this.data.analizler = [];
             if (!this.data.uploadedReports) this.data.uploadedReports = [];
             if (!this.data.portfoyGecmisi) this.data.portfoyGecmisi = [];
@@ -863,18 +866,56 @@ const State = {
 
     // TAKİP LİSTESİ
     addTakip(menkul) {
+        const sym = String(menkul || '').trim().toUpperCase();
+        if (!sym) return false;
         if (!this.data.takipListesi) this.data.takipListesi = [];
-        if (!this.data.takipListesi.includes(menkul)) {
-            this.data.takipListesi.push(menkul);
+        if (!this.data.takipListesi.includes(sym)) {
+            this.data.takipListesi.push(sym);
             this.save();
             this.syncHisseFolders();
+            return true;
         }
+        return false;
     },
     removeTakip(menkul) {
+        const sym = String(menkul || '').trim().toUpperCase();
         if (!this.data.takipListesi) this.data.takipListesi = [];
-        this.data.takipListesi = this.data.takipListesi.filter(m => m !== menkul);
+        this.data.takipListesi = this.data.takipListesi.filter(m => m !== sym);
+        if (Array.isArray(this.data.takipYildizlar)) {
+            this.data.takipYildizlar = this.data.takipYildizlar.filter(m => m !== sym);
+        }
         this.save();
         this.syncHisseFolders();
+    },
+    toggleTakipYildiz(menkul) {
+        const sym = String(menkul || '').trim().toUpperCase();
+        if (!sym) return false;
+        if (!Array.isArray(this.data.takipYildizlar)) this.data.takipYildizlar = [];
+        const idx = this.data.takipYildizlar.indexOf(sym);
+        let starred = false;
+        if (idx >= 0) {
+            this.data.takipYildizlar.splice(idx, 1);
+            starred = false;
+        } else {
+            this.data.takipYildizlar.push(sym);
+            starred = true;
+        }
+        this.save();
+        return starred;
+    },
+    setTakipAlimHedefi(menkul, fiyat) {
+        const sym = String(menkul || '').trim().toUpperCase();
+        if (!sym) return;
+        if (!this.data.takipAlimHedefleri || Array.isArray(this.data.takipAlimHedefleri)) {
+            this.data.takipAlimHedefleri = {};
+        }
+        const num = parseFloat(String(fiyat || '').replace(',', '.'));
+        if (!isNaN(num) && num > 0) {
+            this.data.takipAlimHedefleri[sym] = num;
+        } else {
+            delete this.data.takipAlimHedefleri[sym];
+        }
+        this.save();
     },
 
     syncHisseFolders() {
@@ -6878,330 +6919,1071 @@ window.removeHisseFromTakipModal = (hisse) => {
 
 window.toggleTakipSort = (col) => {
     if (!window.takipSort) window.takipSort = { col: null, asc: true };
+    const ascDefaultCols = new Set(['hisse', 'fk', 'fdFavok', 'pdDd', 'netBorcFavok']);
     if (window.takipSort.col === col) {
         window.takipSort.asc = !window.takipSort.asc;
     } else {
-        window.takipSort = { col: col, asc: true };
+        window.takipSort = { col: col, asc: ascDefaultCols.has(col) };
     }
-    if (typeof renderPage === 'function') renderPage();
+    if (typeof window.updateTakipViewOnly === 'function') window.updateTakipViewOnly();
+    else if (typeof renderPage === 'function') renderPage();
 };
 
 const getTakipSortIcon = () => '';
 
+window.setTakipFilter = (key, val) => {
+    if (key === 'sahiplik') window.takipFilterSahiplik = val;
+    else if (key === 'quick') window.takipFilterQuick = val;
+    else if (key === 'yildiz') window.takipFilterYildiz = !!val;
+    else if (key === 'yearMode') window.takipYearMode = val;
+    else if (key === 'pinStars') window.takipPinStars = !!val;
+    if (typeof renderPage === 'function') renderPage();
+};
+
+window.resetTakipFilters = () => {
+    window.takipSearchQuery = '';
+    window.takipFilterSahiplik = 'all';
+    window.takipFilterQuick = 'all';
+    window.takipFilterYildiz = false;
+    window.takipSort = { col: null, asc: true };
+    if (typeof renderPage === 'function') renderPage();
+};
+
+window.toggleTakipStar = (hisse, ev) => {
+    if (ev) ev.stopPropagation();
+    const starred = State.toggleTakipYildiz(hisse);
+    if (typeof window.updateTakipViewOnly === 'function') {
+        window.updateTakipViewOnly();
+    } else if (typeof renderPage === 'function') {
+        renderPage();
+    }
+    window.showToast(starred ? `${hisse} yıldızlılara eklendi.` : `${hisse} yıldızlılardan çıkarıldı.`, 'info', 1800);
+};
+
+window.quickAddTakipHisse = (ev) => {
+    if (ev) ev.preventDefault();
+    const input = document.getElementById('takip-quick-add-input');
+    if (!input) return;
+    const val = (input.value || '').trim().toUpperCase();
+    if (!val) return;
+
+    const hasBistList = State.bistStocks && State.bistStocks.length > 0;
+    const validStocks = hasBistList ? State.bistStocks : (window.defaultStocksArray || []);
+    if (hasBistList && !validStocks.includes(val)) {
+        window.showToast('Geçerli bir BİST hisse kodu seçiniz: ' + val, 'warning');
+        return;
+    }
+    if (!hasBistList && !/^[A-Z0-9]{3,6}$/.test(val)) {
+        window.showToast('Geçersiz hisse kodu: ' + val, 'warning');
+        return;
+    }
+
+    if (!State.data.takipListesi) State.data.takipListesi = [];
+    if (State.data.takipListesi.includes(val)) {
+        window.showToast(val + ' zaten takip listenizde.', 'info');
+        input.value = '';
+        return;
+    }
+
+    State.addTakip(val);
+    input.value = '';
+    if (typeof window.updateGlobalHisseDropdown === 'function') window.updateGlobalHisseDropdown();
+    if (typeof window.fetchGuncelFiyatlar === 'function' && (!window.livePrices || !window.livePrices[val])) {
+        try { window.fetchGuncelFiyatlar(); } catch (e) { }
+    }
+    window.showToast(val + ' takip listesine eklendi.', 'success');
+    if (typeof renderPage === 'function') renderPage();
+};
+
+window.removeTakipFromTable = async (hisse, ev) => {
+    if (ev) ev.stopPropagation();
+    if (!hisse) return;
+    if (await window.showConfirm(`${hisse} hissesini takip listesinden çıkarmak istediğinize emin misiniz?`, 'Evet, Çıkar')) {
+        State.removeTakip(hisse);
+        if (window.currentSelectedHisse === hisse) window.currentSelectedHisse = null;
+        if (typeof window.updateGlobalHisseDropdown === 'function') window.updateGlobalHisseDropdown();
+        window.showToast(`${hisse} takip listesinden çıkarıldı.`, 'info');
+        if (typeof renderPage === 'function') renderPage();
+    }
+};
+
+window.openTakipDetailModal = (hisse, ev) => {
+    if (ev) ev.stopPropagation();
+    const sym = String(hisse || '').trim().toUpperCase();
+    if (!sym) return;
+
+    const existingOverlay = document.getElementById('takip-detail-modal-overlay');
+    if (existingOverlay) existingOverlay.remove();
+
+    const td = window.tickerData && window.tickerData[sym];
+    const fiyat = td && td.c ? td.c : (State.getFiyat(sym) || 0);
+    const gunluk = td && td.chp !== undefined && td.chp !== null ? td.chp : null;
+    const gbhf = typeof window.getGBHF === 'function' ? window.getGBHF(sym) : null;
+    const currentTarget = (State.data.takipAlimHedefleri && State.data.takipAlimHedefleri[sym]) ? State.data.takipAlimHedefleri[sym] : '';
+    const currentNote = (State.data.hisseNotlari && State.data.hisseNotlari[sym]) ? State.data.hisseNotlari[sym] : '';
+    const fmtDecLocal = (v) => new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+
+    const overlay = document.createElement('div');
+    overlay.id = 'takip-detail-modal-overlay';
+    overlay.className = 'ekstre-modal-overlay';
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.remove();
+    });
+
+    const safeSym = window.escapeHtml(sym);
+    const safeNote = window.escapeHtml(currentNote);
+    const gunlukTxt = gunluk !== null && !isNaN(gunluk)
+        ? `<span style="font-weight:700; color:${gunluk > 0 ? '#059669' : (gunluk < 0 ? '#dc2626' : '#64748b')};">(${gunluk > 0 ? '%+' : (gunluk < 0 ? '%-' : '%')}${fmtDecLocal(Math.abs(gunluk))})</span>`
+        : '';
+
+    overlay.innerHTML = `
+        <div class="ekstre-modal-card" role="dialog" aria-modal="true">
+            <div class="ekstre-modal-header">
+                <h3>
+                    <i class="fas fa-crosshairs" style="color: #0284c7;"></i>
+                    <span>${safeSym} — Alım Hedefi & Not</span>
+                </h3>
+                <button type="button" class="ekstre-modal-close" aria-label="Kapat" onclick="document.getElementById('takip-detail-modal-overlay')?.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="takip-detail-modal-form" class="ekstre-modal-body">
+                <div class="ekstre-hint-bar" style="justify-content: space-between;">
+                    <span>Güncel Fiyat: <strong style="color:#0f172a;">₺${fmtDecLocal(fiyat)}</strong> ${gunlukTxt}</span>
+                    ${gbhf && gbhf.hedefFiyat ? `<span>G. B. Hedef (${window.escapeHtml(gbhf.period || '')}): <strong style="color:#059669;">₺${fmtDecLocal(gbhf.hedefFiyat)}</strong></span>` : ''}
+                </div>
+
+                <div class="ekstre-field">
+                    <label for="tdm-alim-hedef">Kişisel Alım Hedef Fiyatı (₺)</label>
+                    <input type="number" id="tdm-alim-hedef" class="form-control" step="any" min="0" placeholder="Örn: ${fiyat > 0 ? (fiyat * 0.9).toFixed(2) : '100.00'}" value="${currentTarget !== '' ? currentTarget : ''}">
+                    <div style="display:flex; flex-wrap:wrap; gap:0.4rem; margin-top:4px;">
+                        ${fiyat > 0 ? `
+                        <button type="button" class="ekstre-shortcut-pill" data-pct="0.95">-%5 (₺${fmtDecLocal(fiyat * 0.95)})</button>
+                        <button type="button" class="ekstre-shortcut-pill" data-pct="0.90">-%10 (₺${fmtDecLocal(fiyat * 0.90)})</button>
+                        <button type="button" class="ekstre-shortcut-pill" data-pct="0.85">-%15 (₺${fmtDecLocal(fiyat * 0.85)})</button>
+                        ` : ''}
+                        <button type="button" class="ekstre-shortcut-pill danger" id="tdm-clear-target">Hedefi Temizle</button>
+                    </div>
+                </div>
+
+                <div id="tdm-target-status" class="takip-target-status-bar">
+                    <span>Hedef fiyat girildiğinde alım bölgesine olan mesafe burada görünür.</span>
+                </div>
+
+                <div class="ekstre-field">
+                    <label for="tdm-not">Kişisel Hisse Notu</label>
+                    <textarea id="tdm-not" class="takip-note-textarea" placeholder="Bilanço beklentisi, alım stratejisi, destek/direnç veya takip notlarınız...">${safeNote}</textarea>
+                </div>
+
+                <div class="ekstre-modal-footer" style="margin: 0.25rem -1.35rem -1.25rem -1.35rem;">
+                    <button type="button" class="ekstre-ghost-btn" onclick="document.getElementById('takip-detail-modal-overlay')?.remove()">İptal</button>
+                    <button type="submit" class="btn" style="padding: 9px 22px;">
+                        <i class="fas fa-check" style="margin-right: 6px; color: #ffffff !important;"></i>Kaydet
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const inpTarget = document.getElementById('tdm-alim-hedef');
+    const inpNote = document.getElementById('tdm-not');
+    const statusBox = document.getElementById('tdm-target-status');
+
+    const updateTargetStatus = () => {
+        const tVal = parseFloat(String(inpTarget.value || '').replace(',', '.'));
+        if (!tVal || isNaN(tVal) || tVal <= 0) {
+            statusBox.className = 'takip-target-status-bar';
+            statusBox.innerHTML = '<span><i class="fas fa-info-circle" style="margin-right:6px;"></i>Alım hedef fiyatı tanımlı değil.</span>';
+            return;
+        }
+        if (fiyat <= 0) {
+            statusBox.className = 'takip-target-status-bar above-zone';
+            statusBox.innerHTML = `<span>Alım Hedefi: <strong>₺${fmtDecLocal(tVal)}</strong></span><span>Canlı fiyat bekleniyor</span>`;
+            return;
+        }
+        const diffPct = ((fiyat - tVal) / tVal) * 100;
+        if (fiyat <= tVal) {
+            statusBox.className = 'takip-target-status-bar in-zone';
+            statusBox.innerHTML = `<span><i class="fas fa-check-circle" style="margin-right:6px;"></i><strong>Alım Bölgesinde!</strong> Güncel fiyat hedefin altında.</span><strong>%${fmtDecLocal(Math.abs(diffPct))} iskonto</strong>`;
+        } else {
+            statusBox.className = 'takip-target-status-bar above-zone';
+            statusBox.innerHTML = `<span><i class="fas fa-hourglass-half" style="margin-right:6px;"></i>Alım hedefine ulaşmak için geri çekilme gerekiyor.</span><strong>Hedefin +%${fmtDecLocal(diffPct)} üstünde</strong>`;
+        }
+    };
+
+    overlay.querySelectorAll('[data-pct]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const mult = parseFloat(btn.getAttribute('data-pct'));
+            if (fiyat > 0 && mult > 0) {
+                inpTarget.value = (fiyat * mult).toFixed(2);
+                updateTargetStatus();
+            }
+        });
+    });
+
+    document.getElementById('tdm-clear-target')?.addEventListener('click', () => {
+        inpTarget.value = '';
+        updateTargetStatus();
+    });
+
+    inpTarget.addEventListener('input', updateTargetStatus);
+    updateTargetStatus();
+
+    const onKeyDown = (ke) => {
+        if (ke.key === 'Escape') {
+            overlay.remove();
+            document.removeEventListener('keydown', onKeyDown);
+        }
+    };
+    document.addEventListener('keydown', onKeyDown);
+
+    document.getElementById('takip-detail-modal-form').addEventListener('submit', (se) => {
+        se.preventDefault();
+        if (!State.data.takipAlimHedefleri || Array.isArray(State.data.takipAlimHedefleri)) {
+            State.data.takipAlimHedefleri = {};
+        }
+        const tVal = parseFloat(String(inpTarget.value || '').replace(',', '.'));
+        if (!isNaN(tVal) && tVal > 0) {
+            State.data.takipAlimHedefleri[sym] = tVal;
+        } else {
+            delete State.data.takipAlimHedefleri[sym];
+        }
+
+        if (!State.data.hisseNotlari) State.data.hisseNotlari = {};
+        const trimmedNote = (inpNote.value || '').trim();
+        if (trimmedNote) {
+            State.data.hisseNotlari[sym] = inpNote.value;
+        } else {
+            delete State.data.hisseNotlari[sym];
+        }
+
+        State.save();
+        document.removeEventListener('keydown', onKeyDown);
+        overlay.remove();
+        window.showToast(`${sym} hedef ve not bilgileri kaydedildi.`, 'success');
+        if (typeof window.updateTakipViewOnly === 'function') window.updateTakipViewOnly();
+        else if (typeof renderPage === 'function') renderPage();
+    });
+
+    setTimeout(() => inpTarget.focus(), 30);
+};
+
 const renderAnasayfa = (container) => {
     try {
         window.takipTab = window.takipTab || 'degerleme';
-    window.setTakipTab = window.setTakipTab || ((tab) => {
-        window.takipTab = tab;
-        if (typeof renderPage === 'function') renderPage();
-    });
+        window.takipFilterSahiplik = window.takipFilterSahiplik || 'all';
+        window.takipFilterQuick = window.takipFilterQuick || 'all';
+        window.takipFilterYildiz = !!window.takipFilterYildiz;
+        window.takipYearMode = window.takipYearMode || 'all';
+        if (window.takipPinStars === undefined) window.takipPinStars = true;
+        window.takipSearchQuery = window.takipSearchQuery || '';
+        window.takipSort = window.takipSort || { col: null, asc: true };
 
-    if (window.recalculateHedefFiyatlar) window.recalculateHedefFiyatlar();
-    let takipList = State.data.takipListesi ? [...State.data.takipListesi] : [];
+        window.setTakipTab = (tab) => {
+            window.takipTab = tab;
+            if (typeof renderPage === 'function') renderPage();
+        };
 
-    const fmtDec = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(val);
-    const fmtPct = (val) => { let num = val * 100; let formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(Math.abs(num))); return num < 0 ? '%-' + formatted : '%' + formatted; };
-    const fmtNum = (val) => {
-        if (val === 0 || isNaN(val) || !val) return '-';
-        if (val >= 1000000000) return (val / 1000000000).toFixed(2) + ' Mlr';
-        if (val >= 1000000) return (val / 1000000).toFixed(2) + ' M';
-        return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(val));
-    };
-    const fmtFullNum = (val) => {
-        if (val === 0 || isNaN(val) || !val) return '-';
-        return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(val));
-    };
-    const fmtCurrency = (val, symbol) => {
-        if (val === 0 || isNaN(val) || !val) return '-';
-        return symbol + ' ' + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(val));
-    };
-    const fmtMet = (val) => {
-        if (val === 0 || isNaN(val) || !val || !isFinite(val)) return '-';
-        return fmtDec(val);
-    };
+        if (window.recalculateHedefFiyatlar) window.recalculateHedefFiyatlar();
 
-    const dolarKuru = State.getFiyat('DOLAR') || 1;
+        const fmtDec = (val) => new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 2, minimumFractionDigits: 2 }).format(val);
+        const fmtPct = (val) => {
+            const num = val * 100;
+            const formatted = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(Math.abs(num)));
+            return num < 0 ? '%-' + formatted : '%' + formatted;
+        };
+        const fmtPctDec = (val, showPlus = false) => {
+            if (val === null || val === undefined || isNaN(val) || !isFinite(val)) return '-';
+            const formatted = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(Math.abs(val));
+            if (val < 0) return '%-' + formatted;
+            return (showPlus && val > 0 ? '%+' : '%') + formatted;
+        };
+        const fmtCurrency = (val, symbol) => {
+            if (val === 0 || isNaN(val) || !val || !isFinite(val)) return '-';
+            return symbol + ' ' + new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(Math.round(val));
+        };
+        const fmtMet = (val) => {
+            if (val === 0 || isNaN(val) || !val || !isFinite(val)) return '-';
+            return fmtDec(val);
+        };
+        const fmtNullableDec = (val) => {
+            if (val === null || val === undefined || isNaN(val) || !isFinite(val)) return '-';
+            return fmtDec(val);
+        };
+        const calcMedian = (arr) => {
+            const clean = arr.filter(v => v !== null && v !== undefined && !isNaN(v) && isFinite(v)).sort((a, b) => a - b);
+            if (clean.length === 0) return null;
+            const mid = Math.floor(clean.length / 2);
+            return clean.length % 2 !== 0 ? clean[mid] : (clean[mid - 1] + clean[mid]) / 2;
+        };
+        const calcAvg = (arr) => {
+            const clean = arr.filter(v => v !== null && v !== undefined && !isNaN(v) && isFinite(v));
+            if (clean.length === 0) return null;
+            return clean.reduce((s, v) => s + v, 0) / clean.length;
+        };
 
-    let takipDataList = takipList.map(hisse => {
-        let fiyat = 0;
-        let gunlukYuzde = null;
-        const td = window.tickerData && window.tickerData[hisse];
-        if (td) {
-            fiyat = td.c || 0;
-            gunlukYuzde = td.chp;
-        } else {
-            fiyat = State.getFiyat(hisse);
-        }
+        const computeAllTakipData = () => {
+            const takipList = State.data.takipListesi ? [...State.data.takipListesi] : [];
+            const dolarKuru = State.getFiyat('DOLAR') || 1;
+            const starredSet = new Set((State.data.takipYildizlar || []).map(s => String(s).trim().toUpperCase()));
+            const alimHedefleri = State.data.takipAlimHedefleri || {};
+            const hisseNotlari = State.data.hisseNotlari || {};
 
-        if (window.parseExcelData && (!window.stockData || !window.stockData[hisse] || !window.stockData[hisse].bilanco)) {
-            try { window.parseExcelData(hisse); } catch (e) { }
-        }
-
-        let piyasaDegeri = 0, fdFavok = 0, fk = 0, pdDd = 0, firmaDegeri = 0;
-        let araHedefFiyat = -Infinity, araPotansiyel = -Infinity, araPeriod = null;
-        const sData = (window.stockData && window.stockData[hisse]) ? window.stockData[hisse] : null;
-
-        if (sData) {
-            const getVal = (sheet, rowName) => {
-                if (!sheet || !sheet.rows) return 0;
-                const searchStr = rowName.toLowerCase().replace(/[öçşğıü]/g, '');
-                let exactRow = sheet.rows.find(r => r[0] && r[0].toString().toLowerCase().replace(/[öçşğıü]/g, '').trim() === searchStr.trim());
-                const row = exactRow || sheet.rows.find(r => {
-                    if (!r[0]) return false;
-                    const t = r[0].toString().toLowerCase().replace(/[öçşğıü]/g, '');
-                    if (searchStr.includes('sermaye') && (t.includes('fark') || t.includes('duzeltme'))) return false;
-                    return t.includes(searchStr);
+            // Map active portfolio holdings so watchlist knows what's already held
+            const portfoyMap = {};
+            try {
+                const { portfoyList } = calculatePortfoy(State.data.ekstre || [], (m) => State.getFiyat(m), State.data.nakitHareketleri || []);
+                (portfoyList || []).forEach(p => {
+                    if (!p || p.isNakit || !p.menkul) return;
+                    const sym = String(p.menkul).trim().toUpperCase();
+                    if ((p.adet || 0) > 0.0001) {
+                        portfoyMap[sym] = {
+                            inPortfoy: true,
+                            portfoyOrani: (p.portfoyOrani || 0) * 100,
+                            karYuzde: (p.karYuzde || 0) * 100,
+                            guncelTutar: p.guncelTutar || 0,
+                            adet: p.adet || 0
+                        };
+                    }
                 });
-                if (!row) return 0;
-                const v = row[1];
-                if (typeof v === 'number') return v;
-                if (typeof v === 'string') {
-                    const p = parseFloat(v.replace(/\./g, '').replace(/,/g, '.'));
-                    return isNaN(p) ? 0 : p;
+            } catch (e) { }
+
+            return takipList.map(rawHisse => {
+                const hisse = String(rawHisse).trim().toUpperCase();
+                let fiyat = 0;
+                let gunlukYuzde = null;
+                const td = window.tickerData && window.tickerData[hisse];
+                if (td) {
+                    fiyat = td.c || 0;
+                    gunlukYuzde = td.chp;
+                } else {
+                    fiyat = State.getFiyat(hisse);
                 }
-                return 0;
+
+                if (window.parseExcelData && (!window.stockData || !window.stockData[hisse] || !window.stockData[hisse].bilanco)) {
+                    try { window.parseExcelData(hisse); } catch (e) { }
+                }
+
+                let piyasaDegeri = 0, fdFavok = 0, fk = 0, pdDd = 0, firmaDegeri = 0;
+                let netBorcFavok = null, favokMarji = null, netKarMarji = null, roe = null;
+                let araHedefFiyat = -Infinity, araPotansiyel = -Infinity, araPeriod = null;
+                const sData = (window.stockData && window.stockData[hisse]) ? window.stockData[hisse] : null;
+
+                if (sData) {
+                    const getVal = (sheet, rowName) => {
+                        if (!sheet || !sheet.rows) return 0;
+                        const searchStr = rowName.toLowerCase().replace(/[öçşğıü]/g, '');
+                        const exactRow = sheet.rows.find(r => r[0] && r[0].toString().toLowerCase().replace(/[öçşğıü]/g, '').trim() === searchStr.trim());
+                        const row = exactRow || sheet.rows.find(r => {
+                            if (!r[0]) return false;
+                            const t = r[0].toString().toLowerCase().replace(/[öçşğıü]/g, '');
+                            if (searchStr.includes('sermaye') && (t.includes('fark') || t.includes('duzeltme'))) return false;
+                            return t.includes(searchStr);
+                        });
+                        if (!row) return 0;
+                        const v = row[1];
+                        if (typeof v === 'number') return v;
+                        if (typeof v === 'string') {
+                            const p = parseFloat(v.replace(/\./g, '').replace(/,/g, '.'));
+                            return isNaN(p) ? 0 : p;
+                        }
+                        return 0;
+                    };
+
+                    const odenmisSermaye = getVal(sData.bilanco, 'Ödenmiş Sermaye');
+                    piyasaDegeri = fiyat * odenmisSermaye;
+
+                    let finansalBorclarTotal = 0;
+                    let nakitTotal = 0;
+                    if (sData.bilanco && sData.bilanco.rows) {
+                        sData.bilanco.rows.forEach((r, idx) => {
+                            if (!r[0]) return;
+                            const rName = r[0].toString().toLocaleLowerCase('tr-TR');
+                            if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && idx < sData.bilanco.rows.length - 2) {
+                                const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                                finansalBorclarTotal += val;
+                            }
+                            if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
+                                const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                                nakitTotal += val;
+                            }
+                        });
+                    }
+                    const netBorc = finansalBorclarTotal - nakitTotal;
+                    firmaDegeri = piyasaDegeri + netBorc;
+
+                    let favok = 0;
+                    if (sData.gelirYillik && sData.gelirYillik.rows) {
+                        const fR = sData.gelirYillik.rows.find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('favök'));
+                        if (fR) {
+                            favok = typeof fR[1] === 'number' ? fR[1] : parseFloat((fR[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                        }
+                    }
+                    if (favok === 0) favok = getVal(sData.gelirYillik, 'FAVÖK');
+                    fdFavok = favok !== 0 ? (firmaDegeri / favok) : 0;
+                    netBorcFavok = favok !== 0 ? (netBorc / favok) : null;
+
+                    let yilliklandirilmisNetKar = 0;
+                    if (sData.gelirYillik && sData.gelirYillik.rows) {
+                        const nR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toString().toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toString().toLocaleLowerCase('tr-TR').includes('dönem net kar')));
+                        if (nR) {
+                            yilliklandirilmisNetKar = typeof nR[1] === 'number' ? nR[1] : parseFloat((nR[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                        }
+                    }
+                    if (yilliklandirilmisNetKar === 0) yilliklandirilmisNetKar = getVal(sData.gelirYillik, 'Net Dönem Karı');
+                    fk = yilliklandirilmisNetKar !== 0 ? (piyasaDegeri / yilliklandirilmisNetKar) : 0;
+
+                    let anaOrtaklikOzkaynaklar = 0;
+                    if (sData.bilanco && sData.bilanco.rows) {
+                        const aoRow = sData.bilanco.rows.find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
+                        if (aoRow) {
+                            anaOrtaklikOzkaynaklar = typeof aoRow[1] === 'number' ? aoRow[1] : parseFloat((aoRow[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
+                        }
+                    }
+                    if (anaOrtaklikOzkaynaklar === 0) anaOrtaklikOzkaynaklar = getVal(sData.bilanco, 'Özkaynaklar');
+                    pdDd = anaOrtaklikOzkaynaklar !== 0 ? (piyasaDegeri / anaOrtaklikOzkaynaklar) : 0;
+
+                    let satislar = getVal(sData.gelirYillik, 'Satış Gelirleri');
+                    if (satislar === 0) satislar = getVal(sData.gelirYillik, 'Hasılat');
+                    if (satislar > 0 && favok !== 0) favokMarji = (favok / satislar) * 100;
+                    if (satislar > 0 && yilliklandirilmisNetKar !== 0) netKarMarji = (yilliklandirilmisNetKar / satislar) * 100;
+                    if (anaOrtaklikOzkaynaklar > 0 && yilliklandirilmisNetKar !== 0) roe = (yilliklandirilmisNetKar / anaOrtaklikOzkaynaklar) * 100;
+
+                    const gbhfData = typeof window.getGBHF === 'function' ? window.getGBHF(hisse) : null;
+                    if (gbhfData) {
+                        araHedefFiyat = gbhfData.hedefFiyat;
+                        araPotansiyel = gbhfData.potansiyel / 100;
+                        araPeriod = gbhfData.period;
+                    }
+                }
+
+                const hData = (State.data.hedefFiyatlar && State.data.hedefFiyatlar[hisse]) ? State.data.hedefFiyatlar[hisse] : null;
+                const getPot = (y) => (hData && hData[y] && hData[y].potansiyel !== undefined) ? hData[y].potansiyel : -Infinity;
+                const getHf = (y) => (hData && hData[y] && hData[y].hedefFiyat !== undefined) ? hData[y].hedefFiyat : -Infinity;
+
+                const pot2026 = getPot('2026'), pot2027 = getPot('2027'), pot2028 = getPot('2028'), pot2029 = getPot('2029'), pot2030 = getPot('2030');
+                const hf2026 = getHf('2026'), hf2027 = getHf('2027'), hf2028 = getHf('2028'), hf2029 = getHf('2029'), hf2030 = getHf('2030');
+
+                const hasDegerleme = araPotansiyel !== -Infinity || pot2026 !== -Infinity || pot2027 !== -Infinity || pot2028 !== -Infinity || pot2029 !== -Infinity || pot2030 !== -Infinity;
+                const hasOran = piyasaDegeri > 0 || fk !== 0 || fdFavok !== 0 || pdDd !== 0;
+
+                const pInfo = portfoyMap[hisse] || null;
+                const isStarred = starredSet.has(hisse);
+                const rawTarget = parseFloat(alimHedefleri[hisse]);
+                const alimHedefi = (!isNaN(rawTarget) && rawTarget > 0) ? rawTarget : null;
+                const alimBolgesinde = alimHedefi !== null && fiyat > 0 && fiyat <= alimHedefi;
+                const alimMesafePct = (alimHedefi !== null && fiyat > 0) ? ((fiyat - alimHedefi) / alimHedefi) * 100 : null;
+                const notText = String(hisseNotlari[hisse] || '').trim();
+
+                return {
+                    hisse, fiyat, gunlukYuzde,
+                    piyasaDegeri, piyasaDegeriUsd: piyasaDegeri / dolarKuru, firmaDegeri,
+                    fdFavok, fk, pdDd, netBorcFavok, favokMarji, netKarMarji, roe,
+                    araHedefFiyat, araPotansiyel, araPeriod,
+                    hf2026, pot2026, hf2027, pot2027, hf2028, pot2028, hf2029, pot2029, hf2030, pot2030,
+                    hasDegerleme, hasOran,
+                    inPortfoy: !!pInfo,
+                    portfoyOrani: pInfo ? pInfo.portfoyOrani : 0,
+                    portfoyKarYuzde: pInfo ? pInfo.karYuzde : 0,
+                    isStarred, alimHedefi, alimBolgesinde, alimMesafePct, notText
+                };
+            });
+        };
+
+        const filterAndSort = (allItems) => {
+            const q = (window.takipSearchQuery || '').trim().toUpperCase();
+            const sahF = window.takipFilterSahiplik || 'all';
+            const quickF = window.takipFilterQuick || 'all';
+            const yildizF = !!window.takipFilterYildiz;
+
+            const filtered = allItems.filter(it => {
+                if (sahF === 'portfoy' && !it.inPortfoy) return false;
+                if (sahF === 'izleme' && it.inPortfoy) return false;
+                if (yildizF && !it.isStarred) return false;
+
+                const primaryPot = it.araPotansiyel !== -Infinity ? it.araPotansiyel : it.pot2026;
+                if (quickF === 'alim_bolgesi' && !it.alimBolgesinde) return false;
+                if (quickF === 'alim_tanimli' && it.alimHedefi === null) return false;
+                if (quickF === 'pozitif_pot' && !(primaryPot !== -Infinity && primaryPot > 0)) return false;
+                if (quickF === 'yuksek_pot' && !(primaryPot !== -Infinity && primaryPot >= 0.5)) return false;
+                if (quickF === 'yukselen' && !(it.gunlukYuzde !== null && it.gunlukYuzde > 0)) return false;
+                if (quickF === 'dusen' && !(it.gunlukYuzde !== null && it.gunlukYuzde < 0)) return false;
+                if (quickF === 'degerlemeli' && !it.hasDegerleme) return false;
+                if (quickF === 'notlu' && !it.notText) return false;
+
+                if (q) {
+                    const hay = `${it.hisse} ${it.notText}`.toUpperCase();
+                    if (!hay.includes(q)) return false;
+                }
+                return true;
+            });
+
+            const zeroIsMissingCols = new Set(['piyasaDegeri', 'piyasaDegeriUsd', 'firmaDegeri', 'fdFavok', 'fk', 'pdDd', 'fiyat']);
+            const isMissingVal = (col, v) => {
+                if (v === null || v === undefined || v === -Infinity || isNaN(v) || !isFinite(v)) return true;
+                if (zeroIsMissingCols.has(col) && v === 0) return true;
+                return false;
             };
 
-            const odenmisSermaye = getVal(sData.bilanco, 'Ödenmiş Sermaye');
-            piyasaDegeri = fiyat * odenmisSermaye;
+            const multiLevelSort = (a, b) => {
+                if (b.araPotansiyel !== a.araPotansiyel) return b.araPotansiyel - a.araPotansiyel;
+                if (b.pot2026 !== a.pot2026) return b.pot2026 - a.pot2026;
+                if (b.pot2027 !== a.pot2027) return b.pot2027 - a.pot2027;
+                if (b.pot2028 !== a.pot2028) return b.pot2028 - a.pot2028;
+                if (b.pot2029 !== a.pot2029) return b.pot2029 - a.pot2029;
+                if (b.pot2030 !== a.pot2030) return b.pot2030 - a.pot2030;
+                return a.hisse.localeCompare(b.hisse);
+            };
 
-            let finansalBorclarTotal = 0;
-            let nakitTotal = 0;
-            if (sData.bilanco && sData.bilanco.rows) {
-                sData.bilanco.rows.forEach(r => {
-                    if (!r[0]) return;
-                    const rName = r[0].toString().toLocaleLowerCase('tr-TR');
-                    if (rName.includes('finansal borçlar') && !rName.includes('kısımlar') && !rName.includes('ksmlar') && (!sData.bilanco.rows.length || sData.bilanco.rows.indexOf(r) < sData.bilanco.rows.length - 2)) {
-                        const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                        finansalBorclarTotal += val;
-                    }
-                    if (rName.includes('nakit ve nakit benzerleri') || rName.includes('nakit ve nakit değerler')) {
-                        const val = typeof r[1] === 'number' ? r[1] : parseFloat((r[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                        nakitTotal += val;
+            const col = window.takipSort && window.takipSort.col ? window.takipSort.col : null;
+            const asc = !!(window.takipSort && window.takipSort.asc);
+            const pinStars = !!window.takipPinStars;
+
+            filtered.sort((a, b) => {
+                if (pinStars && a.isStarred !== b.isStarred) {
+                    return a.isStarred ? -1 : 1;
+                }
+                if (!col) return multiLevelSort(a, b);
+                if (col === 'hisse') {
+                    const diff = asc ? a.hisse.localeCompare(b.hisse) : b.hisse.localeCompare(a.hisse);
+                    return diff !== 0 ? diff : multiLevelSort(a, b);
+                }
+                const aMiss = isMissingVal(col, a[col]);
+                const bMiss = isMissingVal(col, b[col]);
+                if (aMiss && bMiss) return multiLevelSort(a, b);
+                if (aMiss) return 1;
+                if (bMiss) return -1;
+                const diff = asc ? (a[col] - b[col]) : (b[col] - a[col]);
+                return (diff !== 0 && !isNaN(diff)) ? diff : multiLevelSort(a, b);
+            });
+
+            return filtered;
+        };
+
+        const buildKpiHtml = (allItems, visibleItems) => {
+            const isFiltered = visibleItems.length !== allItems.length;
+            const src = visibleItems.length > 0 ? visibleItems : allItems;
+
+            const portfoyCount = allItems.filter(x => x.inPortfoy).length;
+            const izlemeCount = allItems.length - portfoyCount;
+            const starCount = allItems.filter(x => x.isStarred).length;
+            const alimZoneCount = allItems.filter(x => x.alimBolgesinde).length;
+
+            const gunlukVals = src.map(x => x.gunlukYuzde).filter(v => v !== null && v !== undefined && !isNaN(v));
+            const avgGunluk = calcAvg(gunlukVals);
+            const upCount = gunlukVals.filter(v => v > 0).length;
+            const downCount = gunlukVals.filter(v => v < 0).length;
+
+            // Find highest potential leader (prefer G.B., fallback 2026)
+            let leader = null;
+            let leaderPot = -Infinity;
+            let leaderHf = 0;
+            let leaderLabel = 'G. B.';
+            src.forEach(it => {
+                if (it.araPotansiyel !== -Infinity && it.araPotansiyel > leaderPot) {
+                    leader = it;
+                    leaderPot = it.araPotansiyel;
+                    leaderHf = it.araHedefFiyat;
+                    leaderLabel = it.araPeriod ? `G. B. ${it.araPeriod}` : 'G. B.';
+                }
+            });
+            if (!leader) {
+                src.forEach(it => {
+                    if (it.pot2026 !== -Infinity && it.pot2026 > leaderPot) {
+                        leader = it;
+                        leaderPot = it.pot2026;
+                        leaderHf = it.hf2026;
+                        leaderLabel = '2026';
                     }
                 });
             }
-            const netBorc = finansalBorclarTotal - nakitTotal;
-            firmaDegeri = piyasaDegeri + netBorc;
 
-            let favok = 0;
-            if (sData.gelirYillik && sData.gelirYillik.rows) {
-                const fR = sData.gelirYillik.rows.find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('favök'));
-                if (fR) {
-                    favok = typeof fR[1] === 'number' ? fR[1] : parseFloat((fR[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                }
-            }
-            if (favok === 0) favok = getVal(sData.gelirYillik, 'FAVÖK');
-            fdFavok = favok !== 0 ? (firmaDegeri / favok) : 0;
-
-            let yilliklandirilmisNetKar = 0;
-            if (sData.gelirYillik && sData.gelirYillik.rows) {
-                const nR = sData.gelirYillik.rows.find(x => x[0] && (x[0].toString().toLocaleLowerCase('tr-TR').includes('ana ortaklık payları') || x[0].toString().toLocaleLowerCase('tr-TR').includes('dönem net kar')));
-                if (nR) {
-                    yilliklandirilmisNetKar = typeof nR[1] === 'number' ? nR[1] : parseFloat((nR[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                }
-            }
-            if (yilliklandirilmisNetKar === 0) yilliklandirilmisNetKar = getVal(sData.gelirYillik, 'Net Dönem Karı');
-            fk = yilliklandirilmisNetKar !== 0 ? (piyasaDegeri / yilliklandirilmisNetKar) : 0;
-
-            let anaOrtaklikOzkaynaklar = 0;
-            if (sData.bilanco && sData.bilanco.rows) {
-                const aoRow = sData.bilanco.rows.find(x => x[0] && x[0].toString().toLocaleLowerCase('tr-TR').includes('ana ortaklığa ait özkaynaklar'));
-                if (aoRow) {
-                    anaOrtaklikOzkaynaklar = typeof aoRow[1] === 'number' ? aoRow[1] : parseFloat((aoRow[1] || '').replace(/\./g, '').replace(/,/g, '.')) || 0;
-                }
-            }
-            if (anaOrtaklikOzkaynaklar === 0) anaOrtaklikOzkaynaklar = getVal(sData.bilanco, 'Özkaynaklar');
-            pdDd = anaOrtaklikOzkaynaklar !== 0 ? (piyasaDegeri / anaOrtaklikOzkaynaklar) : 0;
-
-            araPeriod = null;
-            const gbhfData = window.getGBHF(hisse);
-            if (gbhfData) {
-                araHedefFiyat = gbhfData.hedefFiyat;
-                araPotansiyel = gbhfData.potansiyel / 100;
-                araPeriod = gbhfData.period;
-            }
-        }
-
-        const getPot = (year) => {
-            if (State.data.hedefFiyatlar && State.data.hedefFiyatlar[hisse] && State.data.hedefFiyatlar[hisse][year]) {
-                return State.data.hedefFiyatlar[hisse][year].potansiyel !== undefined ? State.data.hedefFiyatlar[hisse][year].potansiyel : -Infinity;
-            }
-            return -Infinity;
-        };
-
-        return {
-            hisse, fiyat, gunlukYuzde, piyasaDegeri, piyasaDegeriUsd: piyasaDegeri / dolarKuru, firmaDegeri, fdFavok, fk, pdDd,
-            araHedefFiyat, araPotansiyel, araPeriod,
-            pot2026: getPot('2026'), pot2027: getPot('2027'),
-            pot2028: getPot('2028'), pot2029: getPot('2029'), pot2030: getPot('2030')
-        };
-    });
-
-    window.takipSort = window.takipSort || { col: null, asc: true };
-    takipDataList.sort((a, b) => {
-        const multiLevelSort = () => {
-            if (b.araPotansiyel !== a.araPotansiyel) return b.araPotansiyel - a.araPotansiyel;
-            if (b.pot2026 !== a.pot2026) return b.pot2026 - a.pot2026;
-            if (b.pot2027 !== a.pot2027) return b.pot2027 - a.pot2027;
-            if (b.pot2028 !== a.pot2028) return b.pot2028 - a.pot2028;
-            if (b.pot2029 !== a.pot2029) return b.pot2029 - a.pot2029;
-            if (b.pot2030 !== a.pot2030) return b.pot2030 - a.pot2030;
-            return a.hisse.localeCompare(b.hisse);
-        };
-
-        if (!window.takipSort.col) {
-            return multiLevelSort();
-        }
-
-        if (window.takipSort.col === 'hisse') {
-            let diff = window.takipSort.asc ? a.hisse.localeCompare(b.hisse) : b.hisse.localeCompare(a.hisse);
-            if (diff !== 0) return diff;
-            return multiLevelSort();
-        }
-
-        let valA = a[window.takipSort.col];
-        let valB = b[window.takipSort.col];
-        if (valA === -Infinity) valA = -999999999;
-        if (valB === -Infinity) valB = -999999999;
-        
-        let diff = window.takipSort.asc ? valA - valB : valB - valA;
-        if (diff !== 0 && !isNaN(diff)) return diff;
-        
-        return multiLevelSort();
-    });
-
-    let rowsHtml = '';
-    takipDataList.forEach((item, i) => {
-        const { hisse, fiyat, gunlukYuzde, piyasaDegeri, piyasaDegeriUsd, firmaDegeri, fdFavok, fk, pdDd, araHedefFiyat, araPotansiyel, araPeriod, pot2026, pot2027, pot2028, pot2029, pot2030 } = item;
-
-        const formatGunluk = (val) => {
-            if (val === null || val === undefined || isNaN(val)) return `<td style="text-align: right !important;">-</td>`;
-            const color = val > 0 ? '#059669' : (val < 0 ? '#dc2626' : 'var(--text-primary)');
-            const formatted = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(val));
-            const prefix = val > 0 ? '%+' : (val < 0 ? '%-' : '%');
-            return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${prefix}${formatted}</td>`;
-        };
-
-        const hData = State.data.hedefFiyatlar && State.data.hedefFiyatlar[hisse] ? State.data.hedefFiyatlar[hisse] : null;
-        const renderCell = (year) => {
-            if (!hData || !hData[year]) return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
-            const color = hData[year].potansiyel > 0 ? '#059669' : '#dc2626';
-            return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtDec(hData[year].hedefFiyat)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(hData[year].potansiyel)}</td>`;
-        };
-
-        const renderAraCell = (hf, pot, period) => {
-            if (hf === -Infinity || pot === -Infinity) return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
-            const color = pot > 0 ? '#059669' : '#dc2626';
-            return `<td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtDec(hf)}</td><td style="text-align: right !important; color:${color} !important; font-weight:bold;">${fmtPct(pot)}</td>`;
-        };
-
-        const oranlarHtml = `
-                <td style="text-align: right !important;">${fmtCurrency(piyasaDegeri, '₺')}</td>
-                <td style="text-align: right !important;">${fmtCurrency(piyasaDegeriUsd, '$')}</td>
-                <td style="text-align: right !important;">${fmtCurrency(firmaDegeri, '₺')}</td>
-                <td style="text-align: right !important;">${fmtMet(fdFavok)}</td>
-                <td style="text-align: right !important;">${fmtMet(fk)}</td>
-                <td style="text-align: right !important;">${fmtMet(pdDd)}</td>
-        `;
-
-        const degerlemeHtml = `
-                ${renderAraCell(araHedefFiyat, araPotansiyel, araPeriod)}
-                ${renderCell('2026')}
-                ${renderCell('2027')}
-                ${renderCell('2028')}
-                ${renderCell('2029')}
-                ${renderCell('2030')}
-        `;
-
-        const restHtml = window.takipTab === 'degerleme' ? degerlemeHtml : oranlarHtml;
-
-        const safeHisse = window.escapeHtml(hisse);
-        rowsHtml += `
-            <tr data-hisse="${safeHisse}">
-                <td style="text-align: center !important;">${i + 1}</td>
-                <td class="takip-hisse-link" style="text-align: left !important;" onclick="window.goToHisse('${safeHisse}')">${safeHisse}</td>
-                <td style="text-align: right !important;">${fmtDec(fiyat)}</td>
-                ${formatGunluk(gunlukYuzde)}
-                ${restHtml}
-            </tr>
-        `;
-    });
-
-    if (takipList.length === 0) {
-        const colspan = window.takipTab === 'degerleme' ? 14 : 10;
-        rowsHtml = `<tr><td colspan="${colspan}" style="text-align: center; padding: 2rem;">Takip listeniz boş. Kalem simgesine tıklayarak hisse ekleyebilirsiniz.</td></tr>`;
-    }
-
-    container.innerHTML = `
-        <style>
-            .takip-table th {
-                font-size: 12.5px !important;
-                font-weight: 700 !important;
-            }
-            .takip-table td {
-                font-size: 13px !important;
-            }
-        </style>
-        <div class="page-section active" style="display: flex; flex-direction: column; padding: 0px;">
-
-            <!-- Takip Listesi Tablosu -->
-            <div class="glass" style="display: flex; flex-direction: column; padding: 0.75rem 1rem 1rem 1rem;">
-
-                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.65rem; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; gap: 0.5rem;">
-                        <span style="cursor: pointer; font-size: 13.5px; font-weight: 600; padding: 6px 13px; border-radius: 7px; color: ${window.takipTab === 'degerleme' ? 'var(--active-text-color)' : 'var(--text-secondary)'}; background: ${window.takipTab === 'degerleme' ? 'var(--overlay-bg)' : 'transparent'}" onclick="window.setTakipTab('degerleme')">Değerleme</span>
-                        <span style="cursor: pointer; font-size: 13.5px; font-weight: 600; padding: 6px 13px; border-radius: 7px; color: ${window.takipTab === 'oranlar' ? 'var(--active-text-color)' : 'var(--text-secondary)'}; background: ${window.takipTab === 'oranlar' ? 'var(--overlay-bg)' : 'transparent'}" onclick="window.setTakipTab('oranlar')">Oranlar</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 0.6rem;">
-                        <div class="search-input-wrap">
-                            <i class="fas fa-search"></i>
-                            <input type="text" id="takip-search-input" class="inline-search-input" placeholder="Hisse ara..." value="${window.escapeHtml(window.takipSearchQuery || '')}" oninput="window.filterTakipTable(this.value)">
+            // Tab-contextual 4th card
+            let card4Html = '';
+            if (window.takipTab === 'degerleme') {
+                const medAra = calcMedian(src.map(x => x.araPotansiyel !== -Infinity ? x.araPotansiyel : null));
+                const med2026 = calcMedian(src.map(x => x.pot2026 !== -Infinity ? x.pot2026 : null));
+                const primaryMed = medAra !== null ? medAra : med2026;
+                const primaryMedLabel = medAra !== null ? 'G. B. Medyan Potansiyel' : '2026 Medyan Potansiyel';
+                const degCount = src.filter(x => x.hasDegerleme).length;
+                card4Html = `
+                    <div class="kpi-card">
+                        <div class="kpi-icon-box slate"><i class="fas fa-scale-balanced"></i></div>
+                        <div class="kpi-info">
+                            <div class="kpi-label">${primaryMedLabel}</div>
+                            <div class="kpi-value" style="color:${primaryMed !== null ? (primaryMed >= 0 ? 'var(--success-color)' : 'var(--danger-color)') : 'var(--text-primary)'};">${primaryMed !== null ? fmtPct(primaryMed) : '-'}</div>
+                            <div class="kpi-sub">${med2026 !== null ? `2026 Medyan: ${fmtPct(med2026)} · ` : ''}${degCount} Analizli${alimZoneCount > 0 ? ` · ${alimZoneCount} Alım Böl.` : ''}</div>
                         </div>
-                        <span id="takip-edit-btn" class="fas fa-pen" style="color: var(--text-secondary); cursor: pointer; font-size: 14px; padding: 7px; border-radius: 7px; background: var(--input-bg); border: 1px solid var(--surface-border);" title="Takip Listesini Düzenle" onclick="window.toggleTakipEditModal(event)"></span>
                     </div>
+                `;
+            } else {
+                const medFk = calcMedian(src.map(x => x.fk > 0 ? x.fk : null));
+                const medFd = calcMedian(src.map(x => x.fdFavok > 0 ? x.fdFavok : null));
+                const medPd = calcMedian(src.map(x => x.pdDd > 0 ? x.pdDd : null));
+                const medRoe = calcMedian(src.map(x => x.roe));
+                card4Html = `
+                    <div class="kpi-card">
+                        <div class="kpi-icon-box slate"><i class="fas fa-scale-balanced"></i></div>
+                        <div class="kpi-info">
+                            <div class="kpi-label">Liste Medyan F/K</div>
+                            <div class="kpi-value">${medFk !== null ? fmtDec(medFk) : '-'}</div>
+                            <div class="kpi-sub">FD/FAVÖK: ${medFd !== null ? fmtDec(medFd) : '-'} · PD/DD: ${medPd !== null ? fmtDec(medPd) : '-'}${medRoe !== null ? ` · ROE: ${fmtPctDec(medRoe)}` : ''}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const gunlukColor = avgGunluk === null ? 'var(--text-primary)' : (avgGunluk > 0 ? 'var(--success-color)' : (avgGunluk < 0 ? 'var(--danger-color)' : 'var(--text-primary)'));
+            const gunlukBoxClass = (avgGunluk !== null && avgGunluk < 0) ? 'red' : 'green';
+            const leaderSafe = leader ? window.escapeHtml(leader.hisse) : '';
+
+            return `
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon-box navy"><i class="fas fa-binoculars"></i></div>
+                        <div class="kpi-info">
+                            <div class="kpi-label">Takip & Portföy</div>
+                            <div class="kpi-value">${isFiltered ? `${visibleItems.length} / ${allItems.length}` : `${allItems.length} Hisse`}</div>
+                            <div class="kpi-sub">${portfoyCount} Portföyde · ${izlemeCount} İzlemede${starCount > 0 ? ` · ${starCount} ★` : ''}</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon-box ${gunlukBoxClass}"><i class="fas fa-chart-line"></i></div>
+                        <div class="kpi-info">
+                            <div class="kpi-label">Günlük Nabız</div>
+                            <div class="kpi-value" style="color: ${gunlukColor};">${avgGunluk !== null ? fmtPctDec(avgGunluk, true) : '-'}</div>
+                            <div class="kpi-sub">${upCount} Yükselen · ${downCount} Düşen${alimZoneCount > 0 ? ` · <strong style="color:#059669;">${alimZoneCount} Alım Böl.</strong>` : ''}</div>
+                        </div>
+                    </div>
+                    <div class="kpi-card ${leader ? 'takip-kpi-clickable' : ''}" ${leader ? `onclick="window.goToHisse('${leaderSafe}')" title="${leaderSafe} detay sayfasına git"` : ''}>
+                        <div class="kpi-icon-box green"><i class="fas fa-bullseye"></i></div>
+                        <div class="kpi-info">
+                            <div class="kpi-label">En Yüksek Potansiyel (${window.escapeHtml(leaderLabel)})</div>
+                            <div class="kpi-value" style="color: ${leader ? (leaderPot >= 0 ? 'var(--success-color)' : 'var(--danger-color)') : 'var(--text-primary)'};">${leader ? `${leaderSafe} · ${fmtPct(leaderPot)}` : '-'}</div>
+                            <div class="kpi-sub">${leader ? `₺${fmtDec(leader.fiyat)} → ₺${fmtDec(leaderHf)}` : 'Değerleme verisi bulunamadı'}</div>
+                        </div>
+                    </div>
+                    ${card4Html}
                 </div>
-                <div style="overflow-x: auto; overflow-y: visible; border-radius: 8px;">
-                    <table class="dash-table compact-table takip-table" style="text-align: center; border-collapse: separate; border-spacing: 0;">
+            `;
+        };
+
+        const buildTableHtml = (allItems, visibleItems) => {
+            const isDeg = window.takipTab === 'degerleme';
+            const isCompactYears = isDeg && window.takipYearMode === 'compact';
+            const activeYears = isCompactYears ? ['2026', '2027'] : ['2026', '2027', '2028', '2029', '2030'];
+
+            // Detect predominant G.B. period for header sub-tag
+            const periodCounts = {};
+            visibleItems.forEach(it => { if (it.araPeriod) periodCounts[it.araPeriod] = (periodCounts[it.araPeriod] || 0) + 1; });
+            const topPeriod = Object.entries(periodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || '';
+
+            const sortCol = window.takipSort?.col || null;
+            const sortAsc = !!window.takipSort?.asc;
+            const thSortAttr = (col, labelTitle) => {
+                const isSorted = sortCol === col;
+                const dirTxt = isSorted ? (sortAsc ? ' (Artan)' : ' (Azalan)') : '';
+                return {
+                    cls: `takip-th-sortable${isSorted ? ' takip-th-sorted' : ''}`,
+                    title: `${labelTitle || col}${dirTxt}`
+                };
+            };
+
+            const getHeatClass = (pot) => {
+                if (pot === -Infinity || pot === null || isNaN(pot)) return '';
+                if (pot >= 1.0) return 'takip-heat-high';
+                if (pot >= 0.5) return 'takip-heat-mid';
+                if (pot <= -0.15) return 'takip-heat-neg';
+                return '';
+            };
+
+            const formatGunluk = (val) => {
+                if (val === null || val === undefined || isNaN(val)) return `<td style="text-align: right !important;">-</td>`;
+                const color = val > 0 ? '#059669' : (val < 0 ? '#dc2626' : 'var(--text-primary)');
+                const formatted = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.abs(val));
+                const prefix = val > 0 ? '%+' : (val < 0 ? '%-' : '%');
+                return `<td style="text-align: right !important; color:${color} !important; font-weight:700;">${prefix}${formatted}</td>`;
+            };
+
+            const renderPotPair = (hf, pot, tooltipStr = '') => {
+                if (hf === -Infinity || pot === -Infinity) {
+                    return `<td style="text-align: right !important;">-</td><td style="text-align: right !important;">-</td>`;
+                }
+                const color = pot > 0 ? '#059669' : '#dc2626';
+                const heatCls = getHeatClass(pot);
+                const tt = tooltipStr ? ` title="${window.escapeHtml(tooltipStr)}"` : '';
+                return `<td style="text-align: right !important; color:${color} !important; font-weight:700;"${tt}>${fmtDec(hf)}</td><td class="${heatCls}" style="text-align: right !important; color:${color} !important; font-weight:700;"${tt}>${fmtPct(pot)}</td>`;
+            };
+
+            const formatNetBorcFavok = (val) => {
+                if (val === null || val === undefined || isNaN(val) || !isFinite(val)) return `<td style="text-align: right !important;">-</td>`;
+                let color = 'var(--text-muted)';
+                let fw = '500';
+                if (val <= 0) { color = '#059669'; fw = '700'; }
+                else if (val > 5) { color = '#dc2626'; fw = '700'; }
+                else if (val > 3) { color = '#d97706'; fw = '600'; }
+                const tt = val <= 0 ? 'Net Nakit Pozisyonu' : 'Net Borç / FAVÖK';
+                return `<td style="text-align: right !important; color:${color} !important; font-weight:${fw};" title="${tt}">${fmtDec(val)}</td>`;
+            };
+
+            const formatMarginCell = (val, highThreshold = 25) => {
+                if (val === null || val === undefined || isNaN(val) || !isFinite(val)) return `<td style="text-align: right !important;">-</td>`;
+                let color = 'var(--text-muted)';
+                let fw = '500';
+                if (val >= highThreshold) { color = '#059669'; fw = '700'; }
+                else if (val < 0) { color = '#dc2626'; fw = '700'; }
+                return `<td style="text-align: right !important; color:${color} !important; font-weight:${fw};">${fmtPctDec(val)}</td>`;
+            };
+
+            const colspan = isDeg ? (5 + 2 + activeYears.length * 2) : 15;
+            let rowsHtml = '';
+
+            if (allItems.length === 0) {
+                rowsHtml = `<tr><td colspan="${colspan}" style="padding: 2.5rem;"><div class="ekstre-empty-state"><i class="fas fa-binoculars"></i><strong>Takip listeniz henüz boş</strong><span>Yukarıdaki kutudan hisse kodu girerek hemen takip etmeye başlayabilirsiniz.</span></div></td></tr>`;
+            } else if (visibleItems.length === 0) {
+                rowsHtml = `<tr><td colspan="${colspan}" style="padding: 2.5rem;"><div class="ekstre-empty-state"><i class="fas fa-filter"></i><strong>Seçili filtrelere uygun hisse bulunamadı</strong><button type="button" class="ekstre-ghost-btn reset" style="margin-top:6px;" onclick="window.resetTakipFilters()"><i class="fas fa-rotate-left"></i> Filtreleri Sıfırla</button></div></td></tr>`;
+            } else {
+                visibleItems.forEach((item, i) => {
+                    const safeHisse = window.escapeHtml(item.hisse);
+                    const safeNotePreview = item.notText ? window.escapeHtml(item.notText.slice(0, 140) + (item.notText.length > 140 ? '…' : '')) : '';
+
+                    const badges = [];
+                    if (item.inPortfoy) {
+                        const karTxt = `${item.portfoyKarYuzde >= 0 ? '%+' : '%-'}${fmtDec(Math.abs(item.portfoyKarYuzde))}`;
+                        badges.push(`<span class="takip-mini-pill takip-pill-portfoy" title="Portföyde · Ağırlık: %${fmtDec(item.portfoyOrani)} · Getiri: ${karTxt}">P %${Math.round(item.portfoyOrani)}</span>`);
+                    }
+                    if (item.alimBolgesinde) {
+                        badges.push(`<span class="takip-mini-pill takip-pill-alim-hit" onclick="window.openTakipDetailModal('${safeHisse}', event)" title="Alım Bölgesinde! Hedef: ₺${fmtDec(item.alimHedefi)}">ALIM</span>`);
+                    } else if (item.alimHedefi !== null) {
+                        const distTxt = item.alimMesafePct !== null ? ` (+%${fmtDec(item.alimMesafePct)})` : '';
+                        badges.push(`<span class="takip-mini-pill takip-pill-alim" onclick="window.openTakipDetailModal('${safeHisse}', event)" title="Alım Hedefi: ₺${fmtDec(item.alimHedefi)}${distTxt}">₺${fmtDec(item.alimHedefi)}</span>`);
+                    }
+                    if (item.notText) {
+                        badges.push(`<span class="takip-mini-pill takip-pill-not" onclick="window.openTakipDetailModal('${safeHisse}', event)" title="Not: ${safeNotePreview}"><i class="fas fa-sticky-note"></i></span>`);
+                    }
+
+                    const restHtml = isDeg ? `
+                        ${renderPotPair(item.araHedefFiyat, item.araPotansiyel, item.araPeriod ? `Gelecek Bilanço Dönemi: ${item.araPeriod}` : '')}
+                        ${activeYears.map(y => renderPotPair(item['hf' + y], item['pot' + y])).join('')}
+                    ` : `
+                        <td style="text-align: right !important;">${fmtCurrency(item.piyasaDegeri, '₺')}</td>
+                        <td style="text-align: right !important;">${fmtCurrency(item.piyasaDegeriUsd, '$')}</td>
+                        <td style="text-align: right !important;">${fmtCurrency(item.firmaDegeri, '₺')}</td>
+                        <td style="text-align: right !important;">${fmtMet(item.fdFavok)}</td>
+                        <td style="text-align: right !important;">${fmtMet(item.fk)}</td>
+                        <td style="text-align: right !important;">${fmtMet(item.pdDd)}</td>
+                        ${formatNetBorcFavok(item.netBorcFavok)}
+                        ${formatMarginCell(item.favokMarji, 25)}
+                        ${formatMarginCell(item.netKarMarji, 15)}
+                        ${formatMarginCell(item.roe, 30)}
+                    `;
+
+                    const targetBtnClass = item.alimBolgesinde ? 'in-zone' : ((item.alimHedefi !== null || item.notText) ? 'has-data' : '');
+                    const targetBtnTitle = item.alimBolgesinde
+                        ? `Alım Bölgesinde (Hedef: ₺${fmtDec(item.alimHedefi)}) — Düzenle`
+                        : ((item.alimHedefi !== null || item.notText) ? 'Alım Hedefi & Notu Düzenle' : 'Alım Hedefi veya Not Ekle');
+
+                    rowsHtml += `
+                        <tr data-hisse="${safeHisse}">
+                            <td class="takip-sticky-1" style="text-align: center !important;">${i + 1}</td>
+                            <td class="takip-sticky-2" style="text-align: left !important;">
+                                <div class="takip-symbol-cell">
+                                    <div class="takip-symbol-main">
+                                        <button type="button" class="takip-star-btn ${item.isStarred ? 'starred' : ''}" onclick="window.toggleTakipStar('${safeHisse}', event)" title="${item.isStarred ? 'Yıldızı kaldır' : 'Öncelikli olarak yıldızla'}">
+                                            <i class="${item.isStarred ? 'fas' : 'far'} fa-star"></i>
+                                        </button>
+                                        <span class="takip-ticker-name" onclick="window.goToHisse('${safeHisse}')">${safeHisse}</span>
+                                    </div>
+                                    ${badges.length > 0 ? `<div class="takip-symbol-badges">${badges.join('')}</div>` : ''}
+                                </div>
+                            </td>
+                            <td class="takip-sticky-3" style="text-align: right !important; font-weight: 600; color: var(--text-primary) !important;">${item.fiyat > 0 ? fmtDec(item.fiyat) : '-'}</td>
+                            ${formatGunluk(item.gunlukYuzde)}
+                            ${restHtml}
+                            <td style="text-align: center !important;">
+                                <div class="ekstre-row-actions">
+                                    <button type="button" class="takip-action-btn target ${targetBtnClass}" onclick="window.openTakipDetailModal('${safeHisse}', event)" title="${window.escapeHtml(targetBtnTitle)}">
+                                        <i class="fas fa-crosshairs"></i>
+                                    </button>
+                                    <button type="button" class="takip-action-btn buy" onclick="window.openEkstreModal(null, '${safeHisse}')" title="${safeHisse} için hızlı alım işlemi ekle">
+                                        <i class="fas fa-plus-circle"></i>
+                                    </button>
+                                    <button type="button" class="takip-action-btn remove" onclick="window.removeTakipFromTable('${safeHisse}', event)" title="${safeHisse} takip listesinden çıkar">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Build Median/Average Footer Row
+            let tfootHtml = '';
+            if (visibleItems.length > 0) {
+                const medGunluk = calcMedian(visibleItems.map(x => x.gunlukYuzde));
+                const avgGunluk = calcAvg(visibleItems.map(x => x.gunlukYuzde));
+                const gunlukFootColor = medGunluk === null ? '' : (medGunluk > 0 ? 'text-success' : (medGunluk < 0 ? 'text-danger' : ''));
+
+                if (isDeg) {
+                    const renderPotFoot = (arr) => {
+                        const med = calcMedian(arr);
+                        const avg = calcAvg(arr);
+                        const cls = med === null ? '' : (med >= 0 ? 'text-success' : 'text-danger');
+                        const tt = avg !== null ? `Ortalama: ${fmtPct(avg)}` : '';
+                        return `<td style="text-align: right !important;">-</td><td class="${cls}" style="text-align: right !important;" title="${tt}">${med !== null ? fmtPct(med) : '-'}</td>`;
+                    };
+                    tfootHtml = `
+                        <tfoot>
+                            <tr class="total-row">
+                                <td class="takip-sticky-1"></td>
+                                <td class="takip-sticky-2" style="text-align: left !important;">MEDYAN (${visibleItems.length})</td>
+                                <td class="takip-sticky-3"></td>
+                                <td class="${gunlukFootColor}" style="text-align: right !important;" title="${avgGunluk !== null ? 'Ortalama: ' + fmtPctDec(avgGunluk, true) : ''}">${medGunluk !== null ? fmtPctDec(medGunluk, true) : '-'}</td>
+                                ${renderPotFoot(visibleItems.map(x => x.araPotansiyel !== -Infinity ? x.araPotansiyel : null))}
+                                ${activeYears.map(y => renderPotFoot(visibleItems.map(x => x['pot' + y] !== -Infinity ? x['pot' + y] : null))).join('')}
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    `;
+                } else {
+                    const renderMetFoot = (arr, formatter, suffix = '') => {
+                        const med = calcMedian(arr);
+                        const avg = calcAvg(arr);
+                        const tt = avg !== null ? `Ortalama: ${formatter(avg)}${suffix}` : '';
+                        return `<td style="text-align: right !important;" title="${tt}">${med !== null ? formatter(med) + suffix : '-'}</td>`;
+                    };
+                    tfootHtml = `
+                        <tfoot>
+                            <tr class="total-row">
+                                <td class="takip-sticky-1"></td>
+                                <td class="takip-sticky-2" style="text-align: left !important;">MEDYAN (${visibleItems.length})</td>
+                                <td class="takip-sticky-3"></td>
+                                <td class="${gunlukFootColor}" style="text-align: right !important;" title="${avgGunluk !== null ? 'Ortalama: ' + fmtPctDec(avgGunluk, true) : ''}">${medGunluk !== null ? fmtPctDec(medGunluk, true) : '-'}</td>
+                                ${renderMetFoot(visibleItems.map(x => x.piyasaDegeri > 0 ? x.piyasaDegeri : null), v => fmtCurrency(v, '₺'))}
+                                ${renderMetFoot(visibleItems.map(x => x.piyasaDegeriUsd > 0 ? x.piyasaDegeriUsd : null), v => fmtCurrency(v, '$'))}
+                                ${renderMetFoot(visibleItems.map(x => x.firmaDegeri > 0 ? x.firmaDegeri : null), v => fmtCurrency(v, '₺'))}
+                                ${renderMetFoot(visibleItems.map(x => x.fdFavok > 0 ? x.fdFavok : null), fmtDec)}
+                                ${renderMetFoot(visibleItems.map(x => x.fk > 0 ? x.fk : null), fmtDec)}
+                                ${renderMetFoot(visibleItems.map(x => x.pdDd > 0 ? x.pdDd : null), fmtDec)}
+                                ${renderMetFoot(visibleItems.map(x => x.netBorcFavok), fmtDec)}
+                                ${renderMetFoot(visibleItems.map(x => x.favokMarji), fmtPctDec)}
+                                ${renderMetFoot(visibleItems.map(x => x.netKarMarji), fmtPctDec)}
+                                ${renderMetFoot(visibleItems.map(x => x.roe), fmtPctDec)}
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    `;
+                }
+            }
+
+            const thHisse = thSortAttr('hisse', 'Hisse Koduna Göre Sırala');
+            const thFiyat = thSortAttr('fiyat', 'Güncel Fiyata Göre Sırala');
+            const thGunluk = thSortAttr('gunlukYuzde', 'Günlük Değişime Göre Sırala');
+            const thAraHf = thSortAttr('araHedefFiyat', topPeriod ? `Gelecek Bilanço (${topPeriod}) Hedef Fiyat` : 'Gelecek Bilanço Hedef Fiyat');
+            const thAraPot = thSortAttr('araPotansiyel', topPeriod ? `Gelecek Bilanço (${topPeriod}) Potansiyel` : 'Gelecek Bilanço Potansiyel');
+
+            const degHeadersHtml = `
+                <th class="${thAraHf.cls}" onclick="window.toggleTakipSort('araHedefFiyat')" title="${window.escapeHtml(thAraHf.title)}">G. B. H. F.${topPeriod ? `<span class="takip-period-tag">${window.escapeHtml(topPeriod)}</span>` : ''}</th>
+                <th class="${thAraPot.cls}" onclick="window.toggleTakipSort('araPotansiyel')" title="${window.escapeHtml(thAraPot.title)}">G. B. Pot.${topPeriod ? `<span class="takip-period-tag">${window.escapeHtml(topPeriod)}</span>` : ''}</th>
+                ${activeYears.map(y => {
+                    const thHf = thSortAttr('hf' + y, `${y} Hedef Fiyat`);
+                    const thPot = thSortAttr('pot' + y, `${y} Potansiyel`);
+                    return `
+                        <th class="${thHf.cls}" onclick="window.toggleTakipSort('hf${y}')" title="${window.escapeHtml(thHf.title)}">${y} H. F.</th>
+                        <th class="${thPot.cls}" onclick="window.toggleTakipSort('pot${y}')" title="${window.escapeHtml(thPot.title)}">${y} Pot.</th>
+                    `;
+                }).join('')}
+            `;
+
+            const oranCols = [
+                { col: 'piyasaDegeri', label: 'Piyasa Değeri', title: 'Piyasa Değeri (TL)' },
+                { col: 'piyasaDegeriUsd', label: 'Piyasa Değeri $', title: 'Piyasa Değeri (USD)' },
+                { col: 'firmaDegeri', label: 'Firma Değeri', title: 'Firma Değeri (TL)' },
+                { col: 'fdFavok', label: 'FD/FAVÖK', title: 'Firma Değeri / Yıllıklandırılmış FAVÖK' },
+                { col: 'fk', label: 'F/K', title: 'Fiyat / Kazanç' },
+                { col: 'pdDd', label: 'PD/DD', title: 'Piyasa Değeri / Defter Değeri' },
+                { col: 'netBorcFavok', label: 'Net Borç/FAVÖK', title: 'Net Borç / FAVÖK (Negatif = Net Nakit)' },
+                { col: 'favokMarji', label: 'FAVÖK Marjı', title: 'Yıllıklandırılmış FAVÖK / Satışlar (%)' },
+                { col: 'netKarMarji', label: 'Net Kâr Marjı', title: 'Yıllıklandırılmış Net Kâr / Satışlar (%)' },
+                { col: 'roe', label: 'ROE', title: 'Özsermaye Kârlılığı (%)' }
+            ];
+            const oranHeadersHtml = oranCols.map(c => {
+                const st = thSortAttr(c.col, c.title);
+                return `<th class="${st.cls}" onclick="window.toggleTakipSort('${c.col}')" title="${window.escapeHtml(st.title)}">${c.label}</th>`;
+            }).join('');
+
+            return `
+                <div class="takip-table-scroll">
+                    <table class="dash-table compact-table takip-table" style="text-align: center;">
                         <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
                             <tr>
-                                <th style="text-align: center;">S.N</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('hisse')">Hisse</th>
-                                <th style="text-align: center;">Fiyat</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('gunlukYuzde')">Gün %</th>
-                                ${window.takipTab === 'degerleme' ? `
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('araHedefFiyat')" title="Gelecek Bilanço Hedef Fiyat">G. B. H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('araPotansiyel')" title="Gelecek Bilanço Potansiyel">G. B. Pot.</th>
-                                <th style="text-align: center;" title="2026 Hedef Fiyat">2026 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2026')" title="2026 Potansiyel">2026 Pot.</th>
-                                <th style="text-align: center;" title="2027 Hedef Fiyat">2027 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2027')" title="2027 Potansiyel">2027 Pot.</th>
-                                <th style="text-align: center;" title="2028 Hedef Fiyat">2028 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2028')" title="2028 Potansiyel">2028 Pot.</th>
-                                <th style="text-align: center;" title="2029 Hedef Fiyat">2029 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2029')" title="2029 Potansiyel">2029 Pot.</th>
-                                <th style="text-align: center;" title="2030 Hedef Fiyat">2030 H. F.</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pot2030')" title="2030 Potansiyel">2030 Pot.</th>
-                                ` : `
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('piyasaDegeri')">Piyasa Değeri</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('piyasaDegeriUsd')">Piyasa Değeri $</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('firmaDegeri')">Firma Değeri</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('fdFavok')">FD/FAVÖK</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('fk')">F/K</th>
-                                <th style="text-align: center; cursor: pointer; user-select: none;" onclick="window.toggleTakipSort('pdDd')">PD/DD</th>
-                                `}
+                                <th class="takip-sticky-1">S.N</th>
+                                <th class="takip-sticky-2 ${thHisse.cls}" style="text-align: left !important;" onclick="window.toggleTakipSort('hisse')" title="${window.escapeHtml(thHisse.title)}">Hisse</th>
+                                <th class="takip-sticky-3 ${thFiyat.cls}" onclick="window.toggleTakipSort('fiyat')" title="${window.escapeHtml(thFiyat.title)}">Fiyat</th>
+                                <th class="${thGunluk.cls}" onclick="window.toggleTakipSort('gunlukYuzde')" title="${window.escapeHtml(thGunluk.title)}">Gün %</th>
+                                ${isDeg ? degHeadersHtml : oranHeadersHtml}
+                                <th style="width: 96px;">İşlem</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${rowsHtml}
                         </tbody>
+                        ${tfootHtml}
                     </table>
                 </div>
+            `;
+        };
+
+        const allItems = computeAllTakipData();
+        const visibleItems = filterAndSort(allItems);
+
+        const degCount = allItems.filter(x => x.hasDegerleme).length;
+        const oranCount = allItems.filter(x => x.hasOran).length;
+        const starCount = allItems.filter(x => x.isStarred).length;
+        const hasActiveFilters = !!(
+            (window.takipSearchQuery && window.takipSearchQuery.trim()) ||
+            window.takipFilterSahiplik !== 'all' ||
+            window.takipFilterQuick !== 'all' ||
+            window.takipFilterYildiz ||
+            (window.takipSort && window.takipSort.col)
+        );
+
+        container.innerHTML = `
+            <div class="page-section active" style="display: flex; flex-direction: column; gap: 0.9rem; padding: 0;">
+                <div id="takip-kpi-wrap">
+                    ${buildKpiHtml(allItems, visibleItems)}
+                </div>
+
+                <div class="glass ekstre-card-shell">
+                    <!-- Top Toolbar -->
+                    <div class="ekstre-toolbar-top">
+                        <div class="ekstre-tab-group">
+                            <button type="button" class="ekstre-tab-pill ${window.takipTab === 'degerleme' ? 'active' : ''}" onclick="window.setTakipTab('degerleme')">
+                                <i class="fas fa-bullseye"></i>
+                                <span>Değerleme</span>
+                                <span class="ekstre-tab-count">${degCount}</span>
+                            </button>
+                            <button type="button" class="ekstre-tab-pill ${window.takipTab === 'oranlar' ? 'active' : ''}" onclick="window.setTakipTab('oranlar')">
+                                <i class="fas fa-chart-pie"></i>
+                                <span>Oranlar</span>
+                                <span class="ekstre-tab-count">${oranCount}</span>
+                            </button>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;">
+                            <form class="takip-quick-add-form" onsubmit="window.quickAddTakipHisse(event)">
+                                <input type="text" id="takip-quick-add-input" class="takip-quick-add-input" list="bist-hisse-list" placeholder="Hisse ekle (Örn: AKSA)" autocomplete="off">
+                                <button type="submit" class="btn ekstre-primary-cta" style="height: 36px; padding: 0 0.85rem;">
+                                    <i class="fas fa-plus" style="color: #ffffff !important;"></i>
+                                    <span>Ekle</span>
+                                </button>
+                            </form>
+                            <span id="takip-edit-btn" class="fas fa-pen" style="color: var(--text-secondary); cursor: pointer; font-size: 13px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; background: #ffffff; border: 1px solid #cbd5e1;" title="Takip Listesini Toplu Düzenle" onclick="window.toggleTakipEditModal(event)"></span>
+                        </div>
+                    </div>
+
+                    <!-- Filter Bar -->
+                    <div class="ekstre-filter-bar">
+                        <div class="ekstre-filter-left">
+                            <div class="ekstre-search-wrap">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="takip-search-input" class="ekstre-search-input" placeholder="Hisse veya not ara..." value="${window.escapeHtml(window.takipSearchQuery || '')}" oninput="window.filterTakipTable(this.value)">
+                                <button type="button" id="takip-search-clear-btn" class="ekstre-search-clear" style="display: ${window.takipSearchQuery ? 'inline-flex' : 'none'};" onclick="const inp=document.getElementById('takip-search-input'); if(inp){inp.value=''; inp.focus();} window.filterTakipTable('');" title="Aramayı temizle">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+
+                            <div class="ekstre-segmented" role="group" aria-label="Portföy filtresi">
+                                <button type="button" class="ekstre-seg-btn ${window.takipFilterSahiplik === 'all' ? 'active' : ''}" onclick="window.setTakipFilter('sahiplik', 'all')">Tümü</button>
+                                <button type="button" class="ekstre-seg-btn ${window.takipFilterSahiplik === 'portfoy' ? 'active' : ''}" onclick="window.setTakipFilter('sahiplik', 'portfoy')">Portföyde</button>
+                                <button type="button" class="ekstre-seg-btn ${window.takipFilterSahiplik === 'izleme' ? 'active' : ''}" onclick="window.setTakipFilter('sahiplik', 'izleme')">İzlemede</button>
+                            </div>
+
+                            <button type="button" class="takip-star-filter-btn ${window.takipFilterYildiz ? 'active' : ''}" onclick="window.setTakipFilter('yildiz', ${!window.takipFilterYildiz})" title="Sadece yıldızlı hisseleri göster">
+                                <i class="${window.takipFilterYildiz ? 'fas' : 'far'} fa-star" style="color: #f59e0b;"></i>
+                                <span>Yıldızlı${starCount > 0 ? ` (${starCount})` : ''}</span>
+                            </button>
+
+                            <select class="ekstre-select" aria-label="Hızlı filtre" onchange="window.setTakipFilter('quick', this.value)">
+                                <option value="all" ${window.takipFilterQuick === 'all' ? 'selected' : ''}>Tüm Fırsatlar</option>
+                                <option value="alim_bolgesi" ${window.takipFilterQuick === 'alim_bolgesi' ? 'selected' : ''}>Alım Bölgesindekiler</option>
+                                <option value="alim_tanimli" ${window.takipFilterQuick === 'alim_tanimli' ? 'selected' : ''}>Alım Hedefi Tanımlılar</option>
+                                <option value="pozitif_pot" ${window.takipFilterQuick === 'pozitif_pot' ? 'selected' : ''}>Pozitif Potansiyelli</option>
+                                <option value="yuksek_pot" ${window.takipFilterQuick === 'yuksek_pot' ? 'selected' : ''}>%50+ Yüksek Potansiyel</option>
+                                <option value="yukselen" ${window.takipFilterQuick === 'yukselen' ? 'selected' : ''}>Bugün Yükselenler</option>
+                                <option value="dusen" ${window.takipFilterQuick === 'dusen' ? 'selected' : ''}>Bugün Düşenler (Fırsat)</option>
+                                <option value="degerlemeli" ${window.takipFilterQuick === 'degerlemeli' ? 'selected' : ''}>Değerlemesi Olanlar</option>
+                                <option value="notlu" ${window.takipFilterQuick === 'notlu' ? 'selected' : ''}>Notu Olanlar</option>
+                            </select>
+                        </div>
+
+                        <div class="ekstre-filter-right">
+                            ${window.takipTab === 'degerleme' ? `
+                            <div class="ekstre-segmented" role="group" aria-label="Yıl görünümü">
+                                <button type="button" class="ekstre-seg-btn ${window.takipYearMode === 'compact' ? 'active' : ''}" onclick="window.setTakipFilter('yearMode', 'compact')" title="Gelecek Bilanço + 2026 ve 2027">Özet</button>
+                                <button type="button" class="ekstre-seg-btn ${window.takipYearMode !== 'compact' ? 'active' : ''}" onclick="window.setTakipFilter('yearMode', 'all')" title="2026–2030 tüm yıllar">Tüm Yıllar</button>
+                            </div>
+                            ` : ''}
+
+                            <button type="button" class="takip-pin-toggle-btn ${window.takipPinStars ? 'active' : ''}" onclick="window.setTakipFilter('pinStars', ${!window.takipPinStars})" title="Yıldızlı hisseleri tablonun en üstünde sabitle">
+                                <i class="fas fa-thumbtack"></i>
+                                <span>★ Üstte</span>
+                            </button>
+
+                            <span id="takip-reset-wrap" style="display: ${hasActiveFilters ? 'inline-flex' : 'none'};">
+                                <button type="button" class="ekstre-ghost-btn reset" onclick="window.resetTakipFilters()" title="Tüm filtre ve sıralamayı sıfırla">
+                                    <i class="fas fa-rotate-left"></i>
+                                    <span>Sıfırla</span>
+                                </button>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div id="takip-table-wrap">
+                        ${buildTableHtml(allItems, visibleItems)}
+                    </div>
+                </div>
             </div>
-        </div>
-    `;
-    if (window.takipSearchQuery) window.filterTakipTable(window.takipSearchQuery);
-    } catch(err) {
+        `;
+
+        window.updateTakipViewOnly = () => {
+            const kpiWrap = document.getElementById('takip-kpi-wrap');
+            const tableWrap = document.getElementById('takip-table-wrap');
+            if (!kpiWrap || !tableWrap) {
+                if (typeof renderPage === 'function') renderPage();
+                return;
+            }
+            const freshAll = computeAllTakipData();
+            const freshVisible = filterAndSort(freshAll);
+            kpiWrap.innerHTML = buildKpiHtml(freshAll, freshVisible);
+            tableWrap.innerHTML = buildTableHtml(freshAll, freshVisible);
+
+            const clearBtn = document.getElementById('takip-search-clear-btn');
+            if (clearBtn) clearBtn.style.display = window.takipSearchQuery ? 'inline-flex' : 'none';
+
+            const resetWrap = document.getElementById('takip-reset-wrap');
+            if (resetWrap) {
+                const anyActive = !!(
+                    (window.takipSearchQuery && window.takipSearchQuery.trim()) ||
+                    window.takipFilterSahiplik !== 'all' ||
+                    window.takipFilterQuick !== 'all' ||
+                    window.takipFilterYildiz ||
+                    (window.takipSort && window.takipSort.col)
+                );
+                resetWrap.style.display = anyActive ? 'inline-flex' : 'none';
+            }
+
+            // Update star count badge on the star filter button if present
+            const starBtnSpan = document.querySelector('.takip-star-filter-btn span');
+            if (starBtnSpan) {
+                const sc = freshAll.filter(x => x.isStarred).length;
+                starBtnSpan.textContent = sc > 0 ? `Yıldızlı (${sc})` : 'Yıldızlı';
+            }
+        };
+    } catch (err) {
         container.innerHTML = `<div style="padding: 20px; color: var(--danger-color); font-family: monospace; font-size: 14px;">
             <h3>Takip Listesi Yüklenirken Hata Oluştu!</h3>
             <p>${err.message}</p>
