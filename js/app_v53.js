@@ -104,13 +104,12 @@ window.filterTakipTable = (query) => {
 };
 
 window.filterEkstreTable = (query) => {
-    const q = (query || '').trim().toUpperCase();
     window.ekstreSearchQuery = query || '';
-    const rows = document.querySelectorAll('#hisse-tbody tr');
-    rows.forEach((tr) => {
-        const text = (tr.textContent || '').toUpperCase();
-        tr.style.display = (!q || text.includes(q)) ? '' : 'none';
-    });
+    if (typeof window.updateEkstreViewOnly === 'function') {
+        window.updateEkstreViewOnly();
+    } else if (typeof renderPage === 'function') {
+        renderPage();
+    }
 };
 
 
@@ -929,10 +928,12 @@ const State = {
     },
 
     addEkstre(islem) {
-        let islemAdet = parseFloat(islem.adet);
-        if (islem.islemTip === 'SATIŞ') islemAdet = -Math.abs(islemAdet);
+        const parsedFiyat = parseFloat(String(islem.fiyat).replace(',', '.'));
+        const parsedAdet = parseFloat(String(islem.adet).replace(',', '.'));
+        let islemAdet = Math.abs(parsedAdet);
+        if (islem.islemTip === 'SATIŞ') islemAdet = -islemAdet;
 
-        const tutar = Math.abs(islemAdet) * parseFloat(islem.fiyat);
+        const tutar = Math.abs(islemAdet) * parsedFiyat;
 
         this.data.ekstre.push({
             id: Date.now().toString(),
@@ -940,7 +941,7 @@ const State = {
             islemTip: islem.islemTip,
             menkul: islem.menkul.trim().toUpperCase(),
             adet: islemAdet,
-            fiyat: parseFloat(islem.fiyat),
+            fiyat: parsedFiyat,
             tutar: tutar
         });
 
@@ -955,16 +956,18 @@ const State = {
     updateEkstre(id, islem) {
         const index = this.data.ekstre.findIndex(e => e.id === id);
         if (index > -1) {
-            let islemAdet = parseFloat(islem.adet);
-            if (islem.islemTip === 'SATIŞ') islemAdet = -Math.abs(islemAdet);
-            const tutar = Math.abs(islemAdet) * parseFloat(islem.fiyat);
+            const parsedFiyat = parseFloat(String(islem.fiyat).replace(',', '.'));
+            const parsedAdet = parseFloat(String(islem.adet).replace(',', '.'));
+            let islemAdet = Math.abs(parsedAdet);
+            if (islem.islemTip === 'SATIŞ') islemAdet = -islemAdet;
+            const tutar = Math.abs(islemAdet) * parsedFiyat;
             this.data.ekstre[index] = {
                 ...this.data.ekstre[index],
                 tarih: islem.tarih,
                 islemTip: islem.islemTip,
                 menkul: islem.menkul.trim().toUpperCase(),
                 adet: islemAdet,
-                fiyat: parseFloat(islem.fiyat),
+                fiyat: parsedFiyat,
                 tutar: tutar
             };
             this.save(false, true);
@@ -4483,257 +4486,575 @@ window.toggleNakitTableCollapse = () => {
 
 window.toggleHisseGroup = (menkul) => {
     window.hisseGroupCollapsed = window.hisseGroupCollapsed || {};
-    if (window.hisseGroupCollapsed[menkul] === undefined) {
-        window.hisseGroupCollapsed[menkul] = false;
-    } else {
-        window.hisseGroupCollapsed[menkul] = !window.hisseGroupCollapsed[menkul];
-    }
-    if (typeof renderPage === 'function') renderPage();
+    const currentlyCollapsed = window.hisseGroupCollapsed[menkul] === true;
+    window.hisseGroupCollapsed[menkul] = !currentlyCollapsed;
+    if (typeof window.updateEkstreViewOnly === 'function') window.updateEkstreViewOnly();
+    else if (typeof renderPage === 'function') renderPage();
 };
 
-const renderHisseIslemleri = (container) => {
-    window.currentEditId = window.currentEditId || null;
-    window.hisseSort = window.hisseSort || { col: null, asc: true };
-    if (window.hisseTableCollapsed === undefined) window.hisseTableCollapsed = true;
-
-    const hisseFonEkstre = [...State.data.ekstre].filter(e => e.menkul !== 'NAKİT');
-
-    hisseFonEkstre.sort((a, b) => {
-        if (window.hisseSort.col === 'tarih') {
-            const dateA = new Date(a.tarih);
-            const dateB = new Date(b.tarih);
-            return window.hisseSort.asc ? dateA - dateB : dateB - dateA;
-        } else if (window.hisseSort.col === 'tutar') {
-            const tutarA = a.fiyat * Math.abs(a.adet);
-            const tutarB = b.fiyat * Math.abs(b.adet);
-            return window.hisseSort.asc ? tutarA - tutarB : tutarB - tutarA;
-        } else if (window.hisseSort.col === 'tur') {
-            const turA = a.menkul.length === 3 ? 'Fon' : 'Hisse';
-            const turB = b.menkul.length === 3 ? 'Fon' : 'Hisse';
-            if (turA !== turB) return window.hisseSort.asc ? turA.localeCompare(turB) : turB.localeCompare(turA);
-            return new Date(b.tarih) - new Date(a.tarih);
-        } else if (window.hisseSort.col === 'menkul') {
-            if (a.menkul !== b.menkul) return window.hisseSort.asc ? a.menkul.localeCompare(b.menkul) : b.menkul.localeCompare(a.menkul);
-            return new Date(b.tarih) - new Date(a.tarih);
+const getEkstreSymbolStats = (allRows) => {
+    const stats = {};
+    (allRows || []).forEach(e => {
+        if (!e || !e.menkul) return;
+        const sym = String(e.menkul).trim().toUpperCase();
+        if (sym === 'NAKIT' || sym === 'NAKİT') return;
+        if (!stats[sym]) {
+            stats[sym] = {
+                menkul: sym,
+                isFon: sym.length === 3,
+                netAdet: 0,
+                alisAdet: 0,
+                alisTutar: 0,
+                satisAdet: 0,
+                satisTutar: 0,
+                count: 0,
+                isAcik: false
+            };
+        }
+        const s = stats[sym];
+        const adet = parseFloat(e.adet) || 0;
+        const fiyat = parseFloat(e.fiyat) || 0;
+        const tutar = Math.abs(adet) * fiyat;
+        s.netAdet += adet;
+        s.count += 1;
+        if (adet >= 0) {
+            s.alisAdet += adet;
+            s.alisTutar += tutar;
         } else {
-            if (a.menkul !== b.menkul) return a.menkul.localeCompare(b.menkul);
-            return new Date(b.tarih) - new Date(a.tarih);
+            s.satisAdet += Math.abs(adet);
+            s.satisTutar += tutar;
         }
     });
-
-    window.hisseGroupCollapsed = window.hisseGroupCollapsed || {};
-
-    const groupedItems = [];
-    const groupMap = {};
-
-    hisseFonEkstre.forEach(e => {
-        if (!groupMap[e.menkul]) {
-            groupMap[e.menkul] = [];
-            groupedItems.push({ menkul: e.menkul, rows: groupMap[e.menkul] });
-        }
-        groupMap[e.menkul].push(e);
+    Object.values(stats).forEach(s => {
+        if (Math.abs(s.netAdet) < 0.0001) s.netAdet = 0;
+        s.isAcik = s.netAdet > 0;
+        s.ortAlis = s.alisAdet > 0 ? (s.alisTutar / s.alisAdet) : 0;
     });
+    return stats;
+};
 
-    let rowIndex = 1;
-    let ekstreRowsHtml = '';
+const formatEkstrePrice = (fiyat, isFon) => {
+    const num = parseFloat(fiyat) || 0;
+    if (isFon && num > 0 && num < 50) {
+        return '₺' + num.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+    }
+    return formatCurrency(num, 2);
+};
 
-    groupedItems.forEach(g => {
-        const isCollapsed = window.hisseGroupCollapsed[g.menkul] !== false;
-        const iconClass = isCollapsed ? 'fa-chevron-right' : 'fa-chevron-down';
+const formatEkstreQty = (adet) => {
+    const num = parseFloat(adet) || 0;
+    const absStr = Math.abs(num).toLocaleString('tr-TR', { maximumFractionDigits: 4 });
+    return num > 0 ? `+${absStr}` : (num < 0 ? `-${absStr}` : '0');
+};
 
-        ekstreRowsHtml += `<tr class="group-header-row" style="background: #eff6ff; font-weight: 600; cursor: pointer;" onclick="window.toggleHisseGroup('${g.menkul}')">
-            <td colspan="8" style="text-align: left !important; color: var(--accent-color); padding-left: 1rem !important;">
-                <i class="fas ${iconClass}" style="margin-right: 8px; width: 12px; display: inline-block; text-align: center;"></i>${g.menkul}
-            </td>
-        </tr>`;
+const closeAllEkstreModals = () => {
+    const m1 = document.getElementById('ekstre-modal-overlay');
+    if (m1) m1.remove();
+    const m2 = document.getElementById('nakit-modal-overlay');
+    if (m2) m2.remove();
+};
 
-        if (!isCollapsed) {
-            g.rows.forEach(e => {
-                const isFon = e.menkul.length === 3;
-                const tur = isFon ? 'Fon' : 'Hisse';
-
-                if (e.id === window.currentEditId) {
-                    ekstreRowsHtml += `<tr style="background: #eff6ff;">
-                        <td>${rowIndex++}</td>
-                        <td>
-                            <select id="edit-tur" class="form-control" style="width:100%; font-size:13px; padding:3px;" onchange="window.updateEditDatalist()">
-                                <option value="Hisse" ${!isFon ? 'selected' : ''}>Hisse</option>
-                                <option value="Fon" ${isFon ? 'selected' : ''}>Fon</option>
-                            </select>
-                        </td>
-                        <td><input type="text" id="edit-menkul" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${e.menkul}" list="${isFon ? 'fon-list' : 'bist-hisse-list'}"></td>
-                        <td><input type="date" id="edit-tarih" class="form-control" style="width:100%; font-size:13px; padding:3px; text-align:right;" value="${e.tarih}"></td>
-                        <td><input type="number" step="0.000001" id="edit-fiyat" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${e.fiyat}"></td>
-                        <td><input type="number" step="0.0001" id="edit-adet" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${e.adet}"></td>
-                        <td><input type="text" id="edit-tutar" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}" disabled></td>
-                        <td>
-                            <button class="btn" style="padding: 0.2rem 0.45rem; font-size: 13px; background: var(--accent-color);" onclick="window.saveEditEkstre('${e.id}')">Kaydet</button>
-                            <button class="btn" style="padding: 0.2rem 0.45rem; font-size: 13px; background: var(--overlay-hover); color: var(--text-primary); border: 1px solid var(--surface-border); box-shadow: none;" onclick="window.cancelEdit()">İptal</button>
-                        </td>
-                    </tr>`;
-                } else {
-                    ekstreRowsHtml += `<tr>
-                        <td>${rowIndex++}</td>
-                        <td style="font-weight:600; color: var(--text-primary); text-align:left;">${tur}</td>
-                        <td style="font-weight:600; color: var(--text-primary); text-align:left;">${e.menkul}</td>
-                        <td style="text-align: right;">${formatDate(e.tarih)}</td>
-                        <td>${formatCurrency(e.fiyat)}</td>
-                        <td class="${e.adet >= 0 ? 'text-success' : 'text-danger'}">${e.adet.toLocaleString('tr-TR')}</td>
-                        <td>${formatCurrency(e.fiyat * Math.abs(e.adet), 0)}</td>
-                        <td>
-                            <button class="btn" style="padding: 2px 5px; font-size: 13.5px; background: transparent; box-shadow: none; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditEkstre('${e.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
-                            <button class="btn" style="padding: 2px 5px; font-size: 13.5px; background: transparent; color: var(--text-secondary); border: none;" onclick="window.deleteEkstre('${e.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
-                        </td>
-                    </tr>`;
-                }
-            });
+if (!window._ekstreEscBound) {
+    window._ekstreEscBound = true;
+    document.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') {
+            if (document.getElementById('ekstre-modal-overlay') || document.getElementById('nakit-modal-overlay')) {
+                closeAllEkstreModals();
+            }
         }
     });
+}
 
-    const ekstreRows = ekstreRowsHtml;
+window.openEkstreModal = (editId = null, prefillMenkul = '') => {
+    closeAllEkstreModals();
+    const allEkstre = (State.data.ekstre || []).filter(e => e && e.menkul && e.menkul !== 'NAKİT' && e.menkul !== 'NAKIT');
+    const symbolStats = getEkstreSymbolStats(allEkstre);
 
+    const existing = editId ? allEkstre.find(x => String(x.id) === String(editId)) : null;
     const todayStr = new Date().toISOString().split('T')[0];
 
+    const initMenkul = existing ? String(existing.menkul).trim().toUpperCase() : String(prefillMenkul || '').trim().toUpperCase();
+    const initIsFon = initMenkul ? (initMenkul.length === 3) : false;
+    const initSide = existing ? ((parseFloat(existing.adet) || 0) < 0 ? 'SATIŞ' : 'ALIŞ') : 'ALIŞ';
+    const initTarih = existing ? (existing.tarih || todayStr) : todayStr;
+    const initFiyat = existing ? (parseFloat(existing.fiyat) || '') : (initMenkul && State.getFiyat(initMenkul) > 0 ? State.getFiyat(initMenkul) : '');
+    const initAdet = existing ? Math.abs(parseFloat(existing.adet) || 0) : '';
+
+    // Ensure fon datalist exists
     const fonSet = new Set();
-    State.data.ekstre.forEach(e => {
-        if (e.menkul !== 'NAKIT' && e.menkul.length === 3) fonSet.add(e.menkul);
-    });
-    let fonDatalistOptions = '';
-    fonSet.forEach(fon => {
-        fonDatalistOptions += `<option value="${fon}">`;
+    allEkstre.forEach(e => { if (e.menkul && e.menkul.length === 3) fonSet.add(e.menkul.toUpperCase()); });
+    let fonDl = document.getElementById('fon-list');
+    if (!fonDl) {
+        fonDl = document.createElement('datalist');
+        fonDl.id = 'fon-list';
+        document.body.appendChild(fonDl);
+    }
+    fonDl.innerHTML = [...fonSet].sort().map(f => `<option value="${window.escapeHtml(f)}">`).join('');
+
+    let currentSide = initSide;
+    let currentTur = initIsFon ? 'Fon' : 'Hisse';
+
+    const overlay = document.createElement('div');
+    overlay.id = 'ekstre-modal-overlay';
+    overlay.className = 'ekstre-modal-overlay';
+    overlay.addEventListener('click', (ev) => {
+        if (ev.target === overlay) closeAllEkstreModals();
     });
 
-    window.ekstreTab = window.ekstreTab || 'hisse';
-    window.setEkstreTab = window.setEkstreTab || ((tab) => {
-        window.ekstreTab = tab;
-        if (typeof renderPage === 'function') renderPage();
-    });
-    const getTabBg = (tab) => window.ekstreTab === tab ? 'var(--overlay-bg)' : 'transparent';
-    const getTabColor = (tab) => window.ekstreTab === tab ? 'var(--active-text-color)' : 'var(--text-secondary)';
+    overlay.innerHTML = `
+        <div class="ekstre-modal-card" role="dialog" aria-modal="true">
+            <div class="ekstre-modal-header">
+                <h3>
+                    <i class="fas ${existing ? 'fa-pen-to-square' : 'fa-plus-circle'}" style="color: #2563eb;"></i>
+                    <span>${existing ? 'İşlemi Düzenle' : 'Yeni Hisse / Fon İşlemi'}</span>
+                </h3>
+                <button type="button" class="ekstre-modal-close" aria-label="Kapat" onclick="document.getElementById('ekstre-modal-overlay')?.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="ekstre-modal-form" class="ekstre-modal-body">
+                <div>
+                    <div class="ekstre-side-toggle">
+                        <button type="button" id="em-btn-alis" class="ekstre-side-btn ${currentSide === 'ALIŞ' ? 'active-alis' : ''}">
+                            <i class="fas fa-arrow-down"></i> ALIŞ
+                        </button>
+                        <button type="button" id="em-btn-satis" class="ekstre-side-btn ${currentSide === 'SATIŞ' ? 'active-satis' : ''}">
+                            <i class="fas fa-arrow-up"></i> SATIŞ
+                        </button>
+                    </div>
+                </div>
 
-    container.innerHTML = `
-        <style>
-            .ekstre-table th {
-                font-size: 13px !important;
-                font-weight: 700 !important;
-            }
-            .ekstre-table td {
-                font-size: 13.5px !important;
-            }
-            .ekstre-table thead, .ekstre-table thead tr, .ekstre-table thead th {
-                position: sticky;
-                top: 0;
-                z-index: 10;
-                background: var(--table-header-bg) !important;
-            }
-        </style>
-        <datalist id="fon-list">${fonDatalistOptions}</datalist>
-        <div class="page-section active" style="display: flex; flex-direction: column; padding: 0px; gap: 0;">
-            <div class="glass" style="display: flex; flex-direction: column; padding: 0.65rem 1rem; width: 100%;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--surface-border); padding-bottom: 6px; margin-bottom: 8px;">
-                    <div style="display: flex; gap: 0.5rem; align-items: center; overflow-x: auto; white-space: nowrap;">
-                        <span style="cursor: pointer; font-size: 13.5px !important; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: ${getTabBg('hisse')}; color: ${getTabColor('hisse')};" onclick="window.setEkstreTab('hisse')">Hisse ve Fon İşlemleri</span>
-                        <span style="cursor: pointer; font-size: 13.5px !important; font-weight: 600; padding: 6px 12px; border-radius: 6px; background: ${getTabBg('nakit')}; color: ${getTabColor('nakit')};" onclick="window.setEkstreTab('nakit')">Nakit İşlemleri</span>
+                <div class="ekstre-form-grid-2">
+                    <div class="ekstre-field">
+                        <label>Menkul Türü</label>
+                        <div class="ekstre-segmented" style="height: 40px; width: 100%; display: grid; grid-template-columns: 1fr 1fr;">
+                            <button type="button" id="em-tur-hisse" class="ekstre-seg-btn ${currentTur === 'Hisse' ? 'active' : ''}" style="justify-content: center;">Hisse</button>
+                            <button type="button" id="em-tur-fon" class="ekstre-seg-btn ${currentTur === 'Fon' ? 'active' : ''}" style="justify-content: center;">Fon (3 Harf)</button>
+                        </div>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        ${window.ekstreTab === 'hisse' ? `<div class="search-input-wrap"><i class="fas fa-search"></i><input type="text" class="inline-search-input" placeholder="Menkul ara..." value="${window.escapeHtml(window.ekstreSearchQuery || '')}" oninput="window.filterEkstreTable(this.value)"></div>` : ''}
-                        <button class="btn" style="padding: 6px 10px; display: flex; align-items: center; justify-content: center; background: var(--overlay-bg); color: var(--accent-color); border: 1px solid #bfdbfe; box-shadow: none;" onclick="window.toggleInlineForm(window.ekstreTab)" title="Yeni İşlem Ekle"><i class="fas fa-plus" style="font-size: 14px;"></i></button>
+                    <div class="ekstre-field">
+                        <label for="em-menkul">Menkul Kodu</label>
+                        <input type="text" id="em-menkul" class="form-control" style="text-transform: uppercase; font-weight: 600;"
+                               placeholder="${currentTur === 'Fon' ? 'Örn: PRY, MAC' : 'Örn: THYAO, AKSA'}"
+                               value="${window.escapeHtml(initMenkul)}"
+                               ${currentTur === 'Fon' ? 'list="fon-list" maxlength="3"' : 'list="bist-hisse-list"'}
+                               autocomplete="off" required>
                     </div>
                 </div>
-                <div id="ekstreler-tables-wrapper" style="display: flex; flex-direction: column; width: 100%;">
-                    <div class="page-section ${window.ekstreTab === 'hisse' ? 'active' : ''}" style="${window.ekstreTab === 'hisse' ? '' : 'display: none !important;'} margin-top: 0;">
-                        <div class="table-container" style="overflow-x: auto; padding: 0;">
-                
-                <table class="dash-table compact-table ekstre-table" style="table-layout: fixed; width: 100%;">
-                    <thead>
-                        <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleHisseTableCollapse()"><i class="fas ${window.hisseTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 8%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tur')">Tür${getHisseSortIcon('tur')}</th><th style="width: 12%; text-align: left; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('menkul')">Menkul${getHisseSortIcon('menkul')}</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tarih')">Tarih${getHisseSortIcon('tarih')}</th><th style="width: 14%;">Fiyat</th><th style="width: 15%;">Adet</th><th style="width: 13%; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tutar')">Tutar${getHisseSortIcon('tutar')}</th><th style="width: 18%;">İşlem</th></tr>
-                    </thead>
-                    <tbody id="hisse-ekle-section" style="display: none;">
-                        <tr style="background: #eff6ff;">
-                            <td style="text-align: center;">-</td>
-                            <td>
-                                <select id="i-tur" class="form-control" style="width:100%; font-size:13px; padding:4px;" onchange="window.updateInlineDatalist()">
-                                    <option value="Hisse" selected>Hisse</option>
-                                    <option value="Fon">Fon</option>
-                                </select>
-                            </td>
-                            <td><input type="text" id="i-menkul" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="Hisse Adı" list="bist-hisse-list" autocomplete="off" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                            <td><input type="date" id="i-tarih" class="form-control" style="width:100%; font-size:13px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                            <td><input type="number" step="0.000001" id="i-fiyat" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="Fiyat" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                            <td><input type="number" step="0.0001" id="i-adet" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="Adet" onkeydown="if(event.key==='Enter') window.saveInlineHisse()"></td>
-                            <td><input type="text" id="i-tutar" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="Tutar" disabled></td>
-                            <td>
-                                <button class="btn" id="i-submit-btn" style="padding: 2px 4px; font-size: 14px; background: transparent; box-shadow: none; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineHisse()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
-                                <button class="btn" style="padding: 2px 4px; font-size: 14px; background: transparent; box-shadow: none; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('hisse')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                    <tbody id="hisse-tbody" style="${window.hisseTableCollapsed ? 'display: none;' : ''}">
-                        ${ekstreRows}
-                    </tbody>
-                </table>
+
+                <div id="em-hint-bar" class="ekstre-hint-bar" style="display: none;"></div>
+
+                <div class="ekstre-form-grid-3">
+                    <div class="ekstre-field">
+                        <label for="em-tarih">İşlem Tarihi</label>
+                        <input type="date" id="em-tarih" class="form-control" value="${window.escapeHtml(initTarih)}" required>
+                    </div>
+                    <div class="ekstre-field">
+                        <label for="em-fiyat">Birim Fiyat (₺)</label>
+                        <input type="number" id="em-fiyat" class="form-control" step="any" min="0" placeholder="0,00" value="${initFiyat !== '' ? initFiyat : ''}" required>
+                    </div>
+                    <div class="ekstre-field">
+                        <label for="em-adet">Adet</label>
+                        <input type="number" id="em-adet" class="form-control" step="any" min="0" placeholder="0" value="${initAdet !== '' ? initAdet : ''}" required>
+                    </div>
                 </div>
-            </div>
-            </div>
-            </div>
+
+                <div id="em-total-preview" class="ekstre-total-preview ${currentSide === 'SATIŞ' ? 'satis' : 'alis'}">
+                    <div>
+                        <div class="ekstre-total-preview-label" id="em-total-label">${currentSide === 'SATIŞ' ? 'Tahmini Satış Tutarı' : 'Toplam Alış Tutarı'}</div>
+                        <div id="em-total-sub" style="font-size: 12px; color: #64748b; margin-top: 2px;">Adet ve birim fiyat girdikçe otomatik hesaplanır</div>
+                    </div>
+                    <div id="em-total-value" class="ekstre-total-preview-value">₺0,00</div>
+                </div>
+
+                <div class="ekstre-modal-footer" style="margin: 0.25rem -1.35rem -1.25rem -1.35rem;">
+                    <button type="button" class="ekstre-ghost-btn" onclick="document.getElementById('ekstre-modal-overlay')?.remove()">İptal</button>
+                    <button type="submit" class="btn" id="em-submit-btn" style="padding: 9px 22px;">
+                        <i class="fas fa-check" style="margin-right: 6px; color: #ffffff !important;"></i>${existing ? 'Değişiklikleri Kaydet' : 'İşlemi Kaydet'}
+                    </button>
+                </div>
+            </form>
         </div>
     `;
 
-    // listeners
-    window.updateInlineDatalist = () => {
-        const tur = document.getElementById('i-tur').value;
-        const menkulInput = document.getElementById('i-menkul');
-        menkulInput.value = ''; // clear when switching
-        if (tur === 'Fon') {
-            menkulInput.setAttribute('list', 'fon-list');
-            menkulInput.placeholder = 'Fon (3 Harf)';
-            menkulInput.setAttribute('maxlength', '3');
+    document.body.appendChild(overlay);
+
+    const btnAlis = document.getElementById('em-btn-alis');
+    const btnSatis = document.getElementById('em-btn-satis');
+    const btnTurHisse = document.getElementById('em-tur-hisse');
+    const btnTurFon = document.getElementById('em-tur-fon');
+    const inpMenkul = document.getElementById('em-menkul');
+    const inpTarih = document.getElementById('em-tarih');
+    const inpFiyat = document.getElementById('em-fiyat');
+    const inpAdet = document.getElementById('em-adet');
+    const hintBar = document.getElementById('em-hint-bar');
+    const totalBox = document.getElementById('em-total-preview');
+    const totalLabel = document.getElementById('em-total-label');
+    const totalSub = document.getElementById('em-total-sub');
+    const totalVal = document.getElementById('em-total-value');
+
+    const refreshHintsAndTotal = () => {
+        const sym = (inpMenkul.value || '').trim().toUpperCase();
+        const fiyat = parseFloat(String(inpFiyat.value || '').replace(',', '.')) || 0;
+        const adet = Math.abs(parseFloat(String(inpAdet.value || '').replace(',', '.')) || 0);
+        const tutar = fiyat * adet;
+
+        totalBox.className = 'ekstre-total-preview ' + (currentSide === 'SATIŞ' ? 'satis' : 'alis');
+        totalLabel.textContent = currentSide === 'SATIŞ' ? 'Toplam Satış Tutarı' : 'Toplam Alış Tutarı';
+        totalVal.textContent = formatCurrency(tutar, 2);
+        totalVal.style.color = currentSide === 'SATIŞ' ? '#b91c1c' : '#047857';
+        if (fiyat > 0 && adet > 0) {
+            totalSub.textContent = `${adet.toLocaleString('tr-TR', { maximumFractionDigits: 4 })} adet × ${formatEkstrePrice(fiyat, currentTur === 'Fon')}`;
         } else {
-            menkulInput.setAttribute('list', 'bist-hisse-list');
-            menkulInput.placeholder = 'Hisse Adı';
-            menkulInput.removeAttribute('maxlength');
+            totalSub.textContent = 'Adet ve birim fiyat girdikçe otomatik hesaplanır';
         }
-    };
 
-    window.updateEditDatalist = () => {
-        const tur = document.getElementById('edit-tur').value;
-        const menkulInput = document.getElementById('edit-menkul');
-        if (tur === 'Fon') {
-            menkulInput.setAttribute('list', 'fon-list');
-            menkulInput.setAttribute('maxlength', '3');
+        if (!sym) {
+            hintBar.style.display = 'none';
+            return;
+        }
+
+        const livePrice = State.getFiyat(sym) || 0;
+        const st = symbolStats[sym];
+        const netHolding = st ? st.netAdet : 0;
+        const chips = [];
+
+        if (livePrice > 0) {
+            chips.push(`<button type="button" class="ekstre-shortcut-pill" id="em-use-price"><i class="fas fa-bolt"></i> Güncel Fiyatı Kullan (${formatEkstrePrice(livePrice, currentTur === 'Fon')})</button>`);
+        }
+        if (netHolding > 0) {
+            chips.push(`<span style="font-weight: 600; color: #334155;">Portföyde: <strong>${netHolding.toLocaleString('tr-TR', { maximumFractionDigits: 4 })}</strong> adet</span>`);
+            if (currentSide === 'SATIŞ') {
+                chips.push(`<button type="button" class="ekstre-shortcut-pill danger" id="em-sell-all"><i class="fas fa-layer-group"></i> Tümünü Sat</button>`);
+            }
+        }
+        if (st && st.ortAlis > 0) {
+            chips.push(`<span style="color: #64748b;">Ort. Alış: ${formatEkstrePrice(st.ortAlis, st.isFon)}</span>`);
+        }
+
+        if (chips.length > 0) {
+            hintBar.innerHTML = chips.join('');
+            hintBar.style.display = 'flex';
+            const usePriceBtn = document.getElementById('em-use-price');
+            if (usePriceBtn) {
+                usePriceBtn.addEventListener('click', () => {
+                    inpFiyat.value = livePrice;
+                    refreshHintsAndTotal();
+                    inpAdet.focus();
+                });
+            }
+            const sellAllBtn = document.getElementById('em-sell-all');
+            if (sellAllBtn) {
+                sellAllBtn.addEventListener('click', () => {
+                    inpAdet.value = netHolding;
+                    refreshHintsAndTotal();
+                });
+            }
         } else {
-            menkulInput.setAttribute('list', 'bist-hisse-list');
-            menkulInput.removeAttribute('maxlength');
+            hintBar.style.display = 'none';
         }
     };
 
-    const calcTutar = (fiyatId, adetId, tutarId) => {
-        const f = parseFloat(document.getElementById(fiyatId)?.value) || 0;
-        const a = parseFloat(document.getElementById(adetId)?.value) || 0;
-        const target = document.getElementById(tutarId);
-        if (target) target.value = formatCurrency(f * Math.abs(a), 0);
+    const setSide = (side) => {
+        currentSide = side;
+        btnAlis.className = 'ekstre-side-btn' + (side === 'ALIŞ' ? ' active-alis' : '');
+        btnSatis.className = 'ekstre-side-btn' + (side === 'SATIŞ' ? ' active-satis' : '');
+        refreshHintsAndTotal();
     };
 
-    document.getElementById('i-fiyat')?.addEventListener('input', () => calcTutar('i-fiyat', 'i-adet', 'i-tutar'));
-    document.getElementById('i-adet')?.addEventListener('input', () => calcTutar('i-fiyat', 'i-adet', 'i-tutar'));
-
-    if (document.getElementById('edit-fiyat')) {
-        document.getElementById('edit-fiyat').addEventListener('input', () => calcTutar('edit-fiyat', 'edit-adet', 'edit-tutar'));
-        document.getElementById('edit-adet').addEventListener('input', () => calcTutar('edit-fiyat', 'edit-adet', 'edit-tutar'));
-    }
-
-    window.toggleInlineForm = (type) => {
-        const section = document.getElementById(`${type}-ekle-section`);
-        if (section) section.style.display = section.style.display === 'none' ? '' : 'none';
-
-        if (type === 'nakit' && typeof window.cancelNakitEdit === 'function') window.cancelNakitEdit();
-        else if (typeof window.cancelEdit === 'function') window.cancelEdit();
-
-        // focus the first input if opening
-        if (section && section.style.display === '') {
-            const firstInput = section.querySelector('input, select');
-            if (firstInput) firstInput.focus();
+    const setTur = (tur, clearInput = false) => {
+        currentTur = tur;
+        btnTurHisse.className = 'ekstre-seg-btn' + (tur === 'Hisse' ? ' active' : '');
+        btnTurFon.className = 'ekstre-seg-btn' + (tur === 'Fon' ? ' active' : '');
+        if (clearInput) inpMenkul.value = '';
+        if (tur === 'Fon') {
+            inpMenkul.removeAttribute('data-custom-list');
+            inpMenkul.setAttribute('list', 'fon-list');
+            inpMenkul.setAttribute('maxlength', '3');
+            inpMenkul.placeholder = 'Örn: PRY, MAC';
+        } else {
+            inpMenkul.removeAttribute('maxlength');
+            inpMenkul.setAttribute('list', 'bist-hisse-list');
+            inpMenkul.setAttribute('data-custom-list', 'bist-hisse-list');
+            inpMenkul.placeholder = 'Örn: THYAO, AKSA';
         }
+        refreshHintsAndTotal();
+    };
+
+    btnAlis.addEventListener('click', () => setSide('ALIŞ'));
+    btnSatis.addEventListener('click', () => setSide('SATIŞ'));
+    btnTurHisse.addEventListener('click', () => setTur('Hisse', true));
+    btnTurFon.addEventListener('click', () => setTur('Fon', true));
+
+    inpMenkul.addEventListener('input', () => {
+        const val = (inpMenkul.value || '').trim().toUpperCase();
+        if (val.length === 3 && fonSet.has(val) && currentTur !== 'Fon') {
+            setTur('Fon', false);
+        } else if (val.length >= 4 && currentTur !== 'Hisse') {
+            setTur('Hisse', false);
+        }
+        refreshHintsAndTotal();
+    });
+    inpMenkul.addEventListener('change', refreshHintsAndTotal);
+    inpFiyat.addEventListener('input', refreshHintsAndTotal);
+    inpAdet.addEventListener('input', refreshHintsAndTotal);
+
+    document.getElementById('ekstre-modal-form').addEventListener('submit', (ev) => {
+        ev.preventDefault();
+        const menkul = (inpMenkul.value || '').trim().toUpperCase();
+        const tarih = inpTarih.value;
+        const fiyat = parseFloat(String(inpFiyat.value || '').replace(',', '.'));
+        const adet = Math.abs(parseFloat(String(inpAdet.value || '').replace(',', '.')));
+
+        if (!menkul) {
+            window.showToast('Lütfen geçerli bir hisse veya fon kodu girin.', 'warning');
+            inpMenkul.focus();
+            return;
+        }
+        if (currentTur === 'Fon' && menkul.length !== 3) {
+            window.showToast('Fon kodları 3 harfli olmalıdır (Örn: PRY).', 'warning');
+            inpMenkul.focus();
+            return;
+        }
+        if (!tarih) {
+            window.showToast('Lütfen işlem tarihini seçin.', 'warning');
+            inpTarih.focus();
+            return;
+        }
+        if (isNaN(fiyat) || fiyat <= 0) {
+            window.showToast('Lütfen 0\'dan büyük bir birim fiyat girin.', 'warning');
+            inpFiyat.focus();
+            return;
+        }
+        if (isNaN(adet) || adet <= 0) {
+            window.showToast('Lütfen 0\'dan büyük bir adet girin.', 'warning');
+            inpAdet.focus();
+            return;
+        }
+
+        const payload = {
+            tarih,
+            islemTip: currentSide,
+            menkul,
+            fiyat,
+            adet
+        };
+
+        if (existing) {
+            State.updateEkstre(existing.id, payload);
+            window.showToast(`${menkul} işlemi güncellendi.`, 'success');
+        } else {
+            State.addEkstre(payload);
+            window.showToast(`${menkul} ${currentSide === 'ALIŞ' ? 'alış' : 'satış'} işlemi eklendi.`, 'success');
+        }
+        closeAllEkstreModals();
+        if (typeof renderPage === 'function') renderPage();
+    });
+
+    refreshHintsAndTotal();
+    setTimeout(() => {
+        if (!initMenkul) inpMenkul.focus();
+        else if (!initFiyat) inpFiyat.focus();
+        else inpAdet.focus();
+    }, 30);
+};
+
+window.openNakitModal = (editId = null) => {
+    closeAllEkstreModals();
+    const list = State.data.nakitHareketleri || [];
+    const existing = editId ? list.find(x => String(x.id) === String(editId)) : null;
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    let currentDir = existing ? ((parseFloat(existing.tutar) || 0) < 0 ? 'CIKIS' : 'GIRIS') : 'GIRIS';
+    const initTutar = existing ? Math.abs(parseFloat(existing.tutar) || 0) : '';
+    const initTarih = existing ? (existing.tarih || todayStr) : todayStr;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'nakit-modal-overlay';
+    overlay.className = 'ekstre-modal-overlay';
+    overlay.addEventListener('click', (ev) => {
+        if (ev.target === overlay) closeAllEkstreModals();
+    });
+
+    overlay.innerHTML = `
+        <div class="ekstre-modal-card" role="dialog" aria-modal="true">
+            <div class="ekstre-modal-header">
+                <h3>
+                    <i class="fas ${existing ? 'fa-pen-to-square' : 'fa-money-bill-transfer'}" style="color: #059669;"></i>
+                    <span>${existing ? 'Nakit Hareketini Düzenle' : 'Yeni Nakit Hareketi'}</span>
+                </h3>
+                <button type="button" class="ekstre-modal-close" aria-label="Kapat" onclick="document.getElementById('nakit-modal-overlay')?.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="nakit-modal-form" class="ekstre-modal-body">
+                <div class="ekstre-side-toggle">
+                    <button type="button" id="nm-btn-giris" class="ekstre-side-btn ${currentDir === 'GIRIS' ? 'active-alis' : ''}">
+                        <i class="fas fa-arrow-down"></i> Nakit Girişi (+)
+                    </button>
+                    <button type="button" id="nm-btn-cikis" class="ekstre-side-btn ${currentDir === 'CIKIS' ? 'active-satis' : ''}">
+                        <i class="fas fa-arrow-up"></i> Nakit Çıkışı (-)
+                    </button>
+                </div>
+
+                <div class="ekstre-form-grid-2">
+                    <div class="ekstre-field">
+                        <label for="nm-tarih">Tarih</label>
+                        <input type="date" id="nm-tarih" class="form-control" value="${window.escapeHtml(initTarih)}" required>
+                    </div>
+                    <div class="ekstre-field">
+                        <label for="nm-tutar">Tutar (₺)</label>
+                        <input type="number" id="nm-tutar" class="form-control" step="any" min="0" placeholder="0,00" value="${initTutar !== '' ? initTutar : ''}" required>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
+                    <span style="font-size: 12.5px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.4px;">Karşılaştırma Kurları (Opsiyonel)</span>
+                    <button type="button" id="nm-fill-rates" class="ekstre-shortcut-pill">
+                        <i class="fas fa-sync-alt"></i> Güncel Kurları Doldur
+                    </button>
+                </div>
+
+                <div class="ekstre-form-grid-2">
+                    <div class="ekstre-field">
+                        <label for="nm-bist">XU100</label>
+                        <input type="number" id="nm-bist" class="form-control" step="any" placeholder="Örn: 9850,00" value="${existing && existing.bist100 ? existing.bist100 : ''}">
+                    </div>
+                    <div class="ekstre-field">
+                        <label for="nm-dolar">USDTRY</label>
+                        <input type="number" id="nm-dolar" class="form-control" step="any" placeholder="Örn: 38,50" value="${existing && existing.dolar ? existing.dolar : ''}">
+                    </div>
+                    <div class="ekstre-field">
+                        <label for="nm-altin">GRAMALTIN</label>
+                        <input type="number" id="nm-altin" class="form-control" step="any" placeholder="Örn: 3650,00" value="${existing && existing.gramAltin ? existing.gramAltin : ''}">
+                    </div>
+                    <div class="ekstre-field">
+                        <label for="nm-pry">PRY</label>
+                        <input type="text" inputmode="decimal" id="nm-pry" class="form-control" placeholder="Örn: 1,452300" value="${existing && existing.pry ? existing.pry : ''}">
+                    </div>
+                </div>
+
+                <div class="ekstre-modal-footer" style="margin: 0.25rem -1.35rem -1.25rem -1.35rem;">
+                    <button type="button" class="ekstre-ghost-btn" onclick="document.getElementById('nakit-modal-overlay')?.remove()">İptal</button>
+                    <button type="submit" class="btn" style="padding: 9px 22px;">
+                        <i class="fas fa-check" style="margin-right: 6px; color: #ffffff !important;"></i>${existing ? 'Değişiklikleri Kaydet' : 'Kaydet'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const btnGiris = document.getElementById('nm-btn-giris');
+    const btnCikis = document.getElementById('nm-btn-cikis');
+    btnGiris.addEventListener('click', () => {
+        currentDir = 'GIRIS';
+        btnGiris.className = 'ekstre-side-btn active-alis';
+        btnCikis.className = 'ekstre-side-btn';
+    });
+    btnCikis.addEventListener('click', () => {
+        currentDir = 'CIKIS';
+        btnCikis.className = 'ekstre-side-btn active-satis';
+        btnGiris.className = 'ekstre-side-btn';
+    });
+
+    document.getElementById('nm-fill-rates').addEventListener('click', () => {
+        const bm = window.latestMarketBenchmarks || {};
+        const bistVal = bm.bist100 || State.getFiyat('BIST') || State.getFiyat('XU100') || '';
+        const usdVal = bm.dolar || State.getFiyat('DOLAR') || State.getFiyat('USDTRY') || '';
+        const altinVal = bm.gramAltin || State.getFiyat('GRAM ALTIN') || '';
+        const pryVal = State.getFiyat('PRY') || '';
+
+        if (bistVal) document.getElementById('nm-bist').value = bistVal;
+        if (usdVal) document.getElementById('nm-dolar').value = usdVal;
+        if (altinVal) document.getElementById('nm-altin').value = altinVal;
+        if (pryVal) document.getElementById('nm-pry').value = pryVal;
+
+        if (bistVal || usdVal || altinVal || pryVal) {
+            window.showToast('Güncel piyasa kurları dolduruldu.', 'info');
+        } else {
+            window.showToast('Canlı kur verisi henüz yüklenmedi.', 'warning');
+        }
+    });
+
+    document.getElementById('nakit-modal-form').addEventListener('submit', (ev) => {
+        ev.preventDefault();
+        const tarih = document.getElementById('nm-tarih').value;
+        const rawTutar = Math.abs(parseFloat(String(document.getElementById('nm-tutar').value || '').replace(',', '.')) || 0);
+        if (!tarih || rawTutar <= 0) {
+            window.showToast('Lütfen geçerli tarih ve tutar girin.', 'warning');
+            return;
+        }
+        const payload = {
+            tarih,
+            tutar: currentDir === 'CIKIS' ? -rawTutar : rawTutar,
+            bist100: parseFloat(String(document.getElementById('nm-bist').value || '').replace(',', '.')) || 0,
+            dolar: parseFloat(String(document.getElementById('nm-dolar').value || '').replace(',', '.')) || 0,
+            gramAltin: parseFloat(String(document.getElementById('nm-altin').value || '').replace(',', '.')) || 0,
+            pry: parseFloat(String(document.getElementById('nm-pry').value || '').replace(',', '.')) || 0
+        };
+        if (existing) {
+            State.updateNakitHareket(existing.id, payload);
+            window.showToast('Nakit hareketi güncellendi.', 'success');
+        } else {
+            State.addNakitHareket(payload);
+            window.showToast('Nakit hareketi eklendi.', 'success');
+        }
+        closeAllEkstreModals();
+        if (typeof renderPage === 'function') renderPage();
+    });
+
+    setTimeout(() => document.getElementById('nm-tutar')?.focus(), 30);
+};
+
+window.setEkstreViewMode = (mode) => {
+    window.ekstreViewMode = mode;
+    if (typeof renderPage === 'function') renderPage();
+};
+
+window.setEkstreFilter = (key, val) => {
+    if (key === 'tur') window.ekstreFilterTur = val;
+    else if (key === 'yon') window.ekstreFilterYon = val;
+    else if (key === 'durum') window.ekstreFilterDurum = val;
+    else if (key === 'yil') window.ekstreFilterYil = val;
+    if (typeof renderPage === 'function') renderPage();
+};
+
+window.resetEkstreFilters = () => {
+    window.ekstreSearchQuery = '';
+    window.ekstreFilterTur = 'all';
+    window.ekstreFilterYon = 'all';
+    window.ekstreFilterDurum = 'all';
+    window.ekstreFilterYil = 'all';
+    if (typeof renderPage === 'function') renderPage();
+};
+
+window.toggleAllEkstreGroups = (expand) => {
+    window.hisseGroupCollapsed = window.hisseGroupCollapsed || {};
+    const allRows = (State.data.ekstre || []).filter(e => e && e.menkul && e.menkul !== 'NAKİT' && e.menkul !== 'NAKIT');
+    allRows.forEach(e => {
+        const sym = String(e.menkul).trim().toUpperCase();
+        window.hisseGroupCollapsed[sym] = !expand;
+    });
+    if (typeof window.updateEkstreViewOnly === 'function') window.updateEkstreViewOnly();
+    else if (typeof renderPage === 'function') renderPage();
+};
+
+const renderHisseIslemleri = (container) => {
+    window.ekstreTab = window.ekstreTab || 'hisse';
+    window.ekstreViewMode = window.ekstreViewMode || 'chrono';
+    window.ekstreFilterTur = window.ekstreFilterTur || 'all';
+    window.ekstreFilterYon = window.ekstreFilterYon || 'all';
+    window.ekstreFilterDurum = window.ekstreFilterDurum || 'all';
+    window.ekstreFilterYil = window.ekstreFilterYil || 'all';
+    window.ekstreSearchQuery = window.ekstreSearchQuery || '';
+    window.hisseSort = window.hisseSort || { col: 'tarih', asc: false };
+    window.hisseGroupCollapsed = window.hisseGroupCollapsed || {};
+
+    window.setEkstreTab = (tab) => {
+        window.ekstreTab = tab;
+        if (typeof renderPage === 'function') renderPage();
     };
 
     window.deleteEkstre = async (id) => {
@@ -4744,141 +5065,6 @@ const renderHisseIslemleri = (container) => {
         }
     };
 
-    window.setEditEkstre = (id) => {
-        window.currentEditId = id;
-        if (typeof renderPage === 'function') renderPage();
-    };
-    window.cancelEdit = () => {
-        if (window.currentEditId) {
-            window.currentEditId = null;
-            if (typeof renderPage === 'function') renderPage();
-        }
-    };
-
-    window.saveEditEkstre = (id) => {
-        const menkul = document.getElementById('edit-menkul').value.trim().toUpperCase();
-        if (!menkul) return;
-        const islem = {
-            tarih: document.getElementById('edit-tarih').value,
-            islemTip: parseFloat(document.getElementById('edit-adet').value) < 0 ? 'SATIŞ' : 'ALIŞ',
-            menkul: menkul,
-            fiyat: document.getElementById('edit-fiyat').value,
-            adet: document.getElementById('edit-adet').value
-        };
-        State.updateEkstre(id, islem);
-        window.currentEditId = null;
-        if (typeof renderPage === 'function') renderPage();
-    };
-
-    window.saveInlineHisse = () => {
-        const menkul = document.getElementById('i-menkul').value.trim().toUpperCase();
-        if (!menkul) return;
-        const islem = {
-            tarih: document.getElementById('i-tarih').value,
-            islemTip: parseFloat(document.getElementById('i-adet').value) < 0 ? 'SATIŞ' : 'ALIŞ',
-            menkul: menkul,
-            fiyat: document.getElementById('i-fiyat').value,
-            adet: document.getElementById('i-adet').value
-        };
-        State.addEkstre(islem);
-        if (typeof renderPage === 'function') renderPage();
-    };
-
-    renderNakitIslemleri(container, true);
-};
-
-const renderNakitIslemleri = (container, append = false) => {
-    window.currentNakitEditId = window.currentNakitEditId || null;
-    window.nakitSort = window.nakitSort || { col: null, asc: true };
-    if (window.nakitTableCollapsed === undefined) window.nakitTableCollapsed = true;
-    const nakitHareketleriList = [...(State.data.nakitHareketleri || [])].sort((a, b) => {
-        if (!window.nakitSort.col) return new Date(b.tarih) - new Date(a.tarih);
-
-        let valA, valB;
-        if (window.nakitSort.col === 'tarih') {
-            valA = new Date(a.tarih).getTime(); valB = new Date(b.tarih).getTime();
-        } else if (window.nakitSort.col === 'tutar') {
-            valA = a.tutar; valB = b.tutar;
-        } else if (window.nakitSort.col === 'bist100') {
-            valA = a.bist100 || 0; valB = b.bist100 || 0;
-        } else if (window.nakitSort.col === 'dolar') {
-            valA = a.dolar || 0; valB = b.dolar || 0;
-        } else if (window.nakitSort.col === 'gramAltin') {
-            valA = a.gramAltin || 0; valB = b.gramAltin || 0;
-        } else if (window.nakitSort.col === 'pry') {
-            valA = a.pry || 0; valB = b.pry || 0;
-        }
-        return window.nakitSort.asc ? valA - valB : valB - valA;
-    });
-
-    const nakitRows = nakitHareketleriList.map((n, i) => {
-        if (n.id === window.currentNakitEditId) {
-            return `<tr style="background: #eff6ff;">
-                <td>${i + 1}</td>
-                <td><input type="date" id="edit-n-tarih" class="form-control" style="width:100%; font-size:13px; padding:3px; text-align:right;" value="${n.tarih}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
-                <td><input type="number" step="0.01" id="edit-n-tutar" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${n.tutar}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
-                <td><input type="number" step="0.01" id="edit-n-bist" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${n.bist100 || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
-                <td><input type="number" step="0.01" id="edit-n-dolar" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${n.dolar || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
-                <td><input type="number" step="0.01" id="edit-n-altin" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${n.gramAltin || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
-                <td><input type="text" inputmode="decimal" id="edit-n-pry" class="form-control" style="width:100%; font-size:13px; padding:3px;" value="${n.pry || ''}" onkeydown="if(event.key==='Enter') window.saveEditNakit('${n.id}')"></td>
-                <td>
-                    <button class="btn" style="padding: 0.2rem 0.45rem; font-size: 13px; background: var(--accent-color);" onclick="window.saveEditNakit('${n.id}')">Kaydet</button>
-                    <button class="btn" style="padding: 0.2rem 0.45rem; font-size: 13px; background: var(--overlay-hover); color: var(--text-primary); border: 1px solid var(--surface-border); box-shadow: none;" onclick="window.cancelNakitEdit()">İptal</button>
-                </td>
-            </tr>`;
-        }
-        return `<tr>
-            <td>${i + 1}</td><td style="text-align: right;">${formatDate(n.tarih)}</td><td class="${n.tutar >= 0 ? 'text-success' : 'text-danger'}">${formatCurrency(n.tutar, 0)}</td><td>${formatNumber(n.bist100)}</td><td>${formatNumber(n.dolar)}</td><td>${formatNumber(n.gramAltin)}</td><td>${formatNumber(n.pry, 6)}</td>
-            <td>
-                <button class="btn" style="padding: 2px 5px; font-size: 13.5px; background: transparent; box-shadow: none; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.setEditNakit('${n.id}')" title="Düzenle"><i class="fas fa-edit" style="color: var(--accent-color) !important;"></i></button>
-                <button class="btn" style="padding: 2px 5px; font-size: 13.5px; background: transparent; color: var(--text-secondary); border: none;" onclick="window.deleteNakit('${n.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
-            </td>
-        </tr>`;
-    }).join('');
-
-    const todayStr = new Date().toISOString().split('T')[0];
-
-    const htmlContent = `
-        <div class="page-section ${window.ekstreTab === 'nakit' ? 'active' : ''}" style="${window.ekstreTab === 'nakit' ? '' : 'display: none !important;'} margin-top: 0;">
-            <div class="table-container" style="overflow-x: auto; padding: 0;">
-                
-                <table class="dash-table compact-table ekstre-table" style="table-layout: fixed; width: 100%;">
-                    <thead>
-                        <tr><th style="width: 5%; cursor: pointer; user-select: none;" onclick="window.toggleNakitTableCollapse()"><i class="fas ${window.nakitTableCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'}" style="margin-right: 4px;"></i>S.N.</th><th style="width: 15%; text-align: right; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tarih')">Tarih${getNakitSortIcon('tarih')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tutar')">Tutar${getNakitSortIcon('tutar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('bist100')">XU100${getNakitSortIcon('bist100')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('dolar')">USDTRY${getNakitSortIcon('dolar')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('gramAltin')">GRAMALTIN${getNakitSortIcon('gramAltin')}</th><th style="width: 15%; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('pry')">PRY${getNakitSortIcon('pry')}</th><th style="width: 20%;">İşlem</th></tr>
-                    </thead>
-                    <tbody id="nakit-ekle-section" style="display: none;">
-                        <tr style="background: #eff6ff;">
-                            <td style="text-align: center;">-</td>
-                            <td><input type="date" id="n-tarih" class="form-control" style="width:100%; font-size:13px; padding:4px; text-align:right;" value="${todayStr}" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-tutar" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="Tutar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-bist" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="XU100" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-dolar" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="Dolar" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="number" step="0.01" id="n-altin" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="GRAMALTIN" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td><input type="text" inputmode="decimal" id="n-pry" class="form-control" style="width:100%; font-size:13px; padding:4px;" placeholder="PRY" onkeydown="if(event.key==='Enter') window.saveInlineNakitEntry()"></td>
-                            <td>
-                                <button class="btn" id="n-submit-btn" style="padding: 2px 4px; font-size: 14px; background: transparent; box-shadow: none; color: var(--accent-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.saveInlineNakitEntry()" title="Ekle"><i class="fas fa-check" style="color: var(--accent-color) !important; font-size: 14px;"></i></button>
-                                <button class="btn" style="padding: 2px 4px; font-size: 14px; background: transparent; box-shadow: none; color: var(--danger-color); border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; border: none;" onclick="window.toggleInlineForm('nakit')" title="İptal"><i class="fas fa-times" style="color: var(--danger-color) !important; font-size: 14px;"></i></button>
-                            </td>
-                        </tr>
-                    </tbody>
-                    <tbody id="nakit-tbody" style="${window.nakitTableCollapsed ? 'display: none;' : ''}">
-                        ${nakitRows}
-                    </tbody>
-                </table>
-                </div>
-            </div>
-        </div>
-    `;
-    if (append) {
-        const wrapper = container.querySelector('#ekstreler-tables-wrapper');
-        if (wrapper) wrapper.insertAdjacentHTML('beforeend', htmlContent);
-        else container.insertAdjacentHTML('beforeend', htmlContent);
-    } else {
-        container.innerHTML = htmlContent;
-    }
-
-    // (window.toggleInlineForm defined in renderHisseIslemleri)
-
     window.deleteNakit = async (id) => {
         if (await window.showConfirm('Bu nakit hareketini silmek istediğinize emin misiniz?')) {
             State.deleteNakitHareket(id);
@@ -4886,41 +5072,558 @@ const renderNakitIslemleri = (container, append = false) => {
             window.showToast('Nakit hareketi silindi.', 'info');
         }
     };
-    window.setEditNakit = (id) => {
-        window.currentNakitEditId = id;
-        if (typeof renderPage === 'function') renderPage();
+
+    const allHisseFon = [...(State.data.ekstre || [])].filter(e => e && e.menkul && e.menkul !== 'NAKİT' && e.menkul !== 'NAKIT');
+    const allNakit = [...(State.data.nakitHareketleri || [])];
+    const symbolStats = getEkstreSymbolStats(allHisseFon);
+
+    const yearsSet = new Set();
+    allHisseFon.forEach(e => {
+        if (e.tarih && String(e.tarih).length >= 4) yearsSet.add(String(e.tarih).slice(0, 4));
+    });
+    const allYears = [...yearsSet].sort((a, b) => b.localeCompare(a));
+
+    const computeFilteredHisse = () => {
+        const q = (window.ekstreSearchQuery || '').trim().toUpperCase();
+        const turF = window.ekstreFilterTur || 'all';
+        const yonF = window.ekstreFilterYon || 'all';
+        const durumF = window.ekstreFilterDurum || 'all';
+        const yilF = window.ekstreFilterYil || 'all';
+
+        const filtered = allHisseFon.filter(e => {
+            const sym = String(e.menkul).trim().toUpperCase();
+            const isFon = sym.length === 3;
+            const adet = parseFloat(e.adet) || 0;
+            const isAlis = adet >= 0;
+            const st = symbolStats[sym];
+
+            if (turF === 'hisse' && isFon) return false;
+            if (turF === 'fon' && !isFon) return false;
+            if (yonF === 'alis' && !isAlis) return false;
+            if (yonF === 'satis' && isAlis) return false;
+            if (durumF === 'acik' && (!st || !st.isAcik)) return false;
+            if (durumF === 'kapali' && st && st.isAcik) return false;
+            if (yilF !== 'all' && !(e.tarih && String(e.tarih).startsWith(yilF))) return false;
+            if (q) {
+                const haystack = `${sym} ${isFon ? 'FON' : 'HISSE'} ${isAlis ? 'ALIS ALIŞ' : 'SATIS SATIŞ'} ${e.tarih || ''} ${formatDate(e.tarih)}`.toUpperCase();
+                if (!haystack.includes(q)) return false;
+            }
+            return true;
+        });
+
+        filtered.sort((a, b) => {
+            const col = window.hisseSort?.col || 'tarih';
+            const asc = !!window.hisseSort?.asc;
+            if (col === 'tarih') {
+                const diff = new Date(a.tarih) - new Date(b.tarih);
+                if (diff !== 0) return asc ? diff : -diff;
+                return String(b.id || '').localeCompare(String(a.id || ''));
+            }
+            if (col === 'tutar') {
+                const tA = (parseFloat(a.fiyat) || 0) * Math.abs(parseFloat(a.adet) || 0);
+                const tB = (parseFloat(b.fiyat) || 0) * Math.abs(parseFloat(b.adet) || 0);
+                return asc ? tA - tB : tB - tA;
+            }
+            if (col === 'fiyat') {
+                return asc ? ((parseFloat(a.fiyat) || 0) - (parseFloat(b.fiyat) || 0)) : ((parseFloat(b.fiyat) || 0) - (parseFloat(a.fiyat) || 0));
+            }
+            if (col === 'adet') {
+                return asc ? ((parseFloat(a.adet) || 0) - (parseFloat(b.adet) || 0)) : ((parseFloat(b.adet) || 0) - (parseFloat(a.adet) || 0));
+            }
+            if (col === 'tur') {
+                const turA = a.menkul.length === 3 ? 'Fon' : 'Hisse';
+                const turB = b.menkul.length === 3 ? 'Fon' : 'Hisse';
+                if (turA !== turB) return asc ? turA.localeCompare(turB) : turB.localeCompare(turA);
+                return new Date(b.tarih) - new Date(a.tarih);
+            }
+            if (col === 'menkul') {
+                const cmp = String(a.menkul).localeCompare(String(b.menkul));
+                if (cmp !== 0) return asc ? cmp : -cmp;
+                return new Date(b.tarih) - new Date(a.tarih);
+            }
+            return new Date(b.tarih) - new Date(a.tarih);
+        });
+
+        return filtered;
     };
-    window.cancelNakitEdit = () => {
-        if (window.currentNakitEditId) {
-            window.currentNakitEditId = null;
-            if (typeof renderPage === 'function') renderPage();
+
+    const buildHisseKpiHtml = (rows) => {
+        let alisCount = 0, satisCount = 0, alisTutar = 0, satisTutar = 0;
+        let hisseAlisTutar = 0, fonAlisTutar = 0;
+        const uniqueSyms = new Set();
+        rows.forEach(e => {
+            const sym = String(e.menkul).trim().toUpperCase();
+            uniqueSyms.add(sym);
+            const adet = parseFloat(e.adet) || 0;
+            const fiyat = parseFloat(e.fiyat) || 0;
+            const tutar = Math.abs(adet) * fiyat;
+            if (adet >= 0) {
+                alisCount++;
+                alisTutar += tutar;
+                if (sym.length === 3) fonAlisTutar += tutar;
+                else hisseAlisTutar += tutar;
+            } else {
+                satisCount++;
+                satisTutar += tutar;
+            }
+        });
+        const netAkis = alisTutar - satisTutar;
+        const acikCount = [...uniqueSyms].filter(sym => symbolStats[sym] && symbolStats[sym].isAcik).length;
+
+        return `
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon-box navy"><i class="fas fa-receipt"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Toplam İşlem</div>
+                        <div class="kpi-value">${rows.length.toLocaleString('tr-TR')}</div>
+                        <div class="kpi-sub">${alisCount} Alış · ${satisCount} Satış · ${uniqueSyms.size} Menkul</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon-box green"><i class="fas fa-arrow-down"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Toplam Alış</div>
+                        <div class="kpi-value" style="color: var(--success-color);">${formatCurrency(alisTutar, 0)}</div>
+                        <div class="kpi-sub">Hisse: ${formatCurrency(hisseAlisTutar, 0)} · Fon: ${formatCurrency(fonAlisTutar, 0)}</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon-box red"><i class="fas fa-arrow-up"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Toplam Satış</div>
+                        <div class="kpi-value" style="color: var(--danger-color);">${formatCurrency(satisTutar, 0)}</div>
+                        <div class="kpi-sub">${satisCount > 0 ? `Ort. Satış: ${formatCurrency(satisTutar / satisCount, 0)}` : 'Satış kaydı yok'}</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon-box slate"><i class="fas fa-scale-balanced"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Net Yatırım Akışı</div>
+                        <div class="kpi-value">${formatCurrency(netAkis, 0)}</div>
+                        <div class="kpi-sub">Açık Pozisyon: ${acikCount} menkul</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    };
+
+    const buildTradeRowHtml = (e, sn) => {
+        const sym = String(e.menkul).trim().toUpperCase();
+        const safeSym = window.escapeHtml(sym);
+        const safeId = window.escapeHtml(String(e.id));
+        const isFon = sym.length === 3;
+        const adet = parseFloat(e.adet) || 0;
+        const fiyat = parseFloat(e.fiyat) || 0;
+        const tutar = Math.abs(adet) * fiyat;
+        const isAlis = adet >= 0;
+
+        return `<tr>
+            <td style="text-align: center !important; color: #64748b !important;">${sn}</td>
+            <td style="text-align: center !important;">${formatDate(e.tarih)}</td>
+            <td style="text-align: left !important;">
+                <span class="ekstre-symbol-link" onclick="window.goToHisse('${safeSym}')" title="${safeSym} detayına git">
+                    ${safeSym}
+                    <span class="ekstre-badge ${isFon ? 'ekstre-badge-fon' : 'ekstre-badge-hisse'}">${isFon ? 'Fon' : 'Hisse'}</span>
+                </span>
+            </td>
+            <td style="text-align: center !important;">
+                <span class="ekstre-badge ${isAlis ? 'ekstre-badge-alis' : 'ekstre-badge-satis'}">
+                    <i class="fas ${isAlis ? 'fa-arrow-down' : 'fa-arrow-up'}" style="font-size: 10px;"></i>
+                    ${isAlis ? 'ALIŞ' : 'SATIŞ'}
+                </span>
+            </td>
+            <td style="text-align: right !important;">${formatEkstrePrice(fiyat, isFon)}</td>
+            <td style="text-align: right !important; font-weight: 600 !important;" class="${isAlis ? 'text-success' : 'text-danger'}">${formatEkstreQty(adet)}</td>
+            <td style="text-align: right !important; font-weight: 700 !important; color: #0f172a !important;">${formatCurrency(tutar, 0)}</td>
+            <td style="text-align: center !important;">
+                <div class="ekstre-row-actions">
+                    <button type="button" class="ekstre-action-btn edit" onclick="window.openEkstreModal('${safeId}')" title="Düzenle"><i class="fas fa-edit"></i></button>
+                    <button type="button" class="ekstre-action-btn delete" onclick="window.deleteEkstre('${safeId}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            </td>
+        </tr>`;
+    };
+
+    const buildHisseTableHtml = (rows) => {
+        if (rows.length === 0) {
+            return `
+                <div class="ekstre-empty-state">
+                    <i class="fas fa-receipt"></i>
+                    <div style="font-size: 15px; font-weight: 700; color: #1e293b;">Eşleşen işlem bulunamadı</div>
+                    <div style="font-size: 13.5px; color: #64748b;">Filtreleri temizleyebilir veya sağ üstten yeni bir hisse/fon işlemi ekleyebilirsiniz.</div>
+                </div>
+            `;
+        }
+
+        const isGrouped = window.ekstreViewMode === 'grouped';
+        const hasSearch = (window.ekstreSearchQuery || '').trim().length > 0;
+        let tbodyHtml = '';
+        let totalTutarSum = 0;
+        let netFlowSum = 0;
+
+        rows.forEach(e => {
+            const adet = parseFloat(e.adet) || 0;
+            const fiyat = parseFloat(e.fiyat) || 0;
+            const t = Math.abs(adet) * fiyat;
+            totalTutarSum += t;
+            netFlowSum += adet >= 0 ? t : -t;
+        });
+
+        if (!isGrouped) {
+            rows.forEach((e, idx) => {
+                tbodyHtml += buildTradeRowHtml(e, idx + 1);
+            });
+        } else {
+            const groupMap = {};
+            const groups = [];
+            rows.forEach(e => {
+                const sym = String(e.menkul).trim().toUpperCase();
+                if (!groupMap[sym]) {
+                    groupMap[sym] = { menkul: sym, rows: [] };
+                    groups.push(groupMap[sym]);
+                }
+                groupMap[sym].rows.push(e);
+            });
+            groups.sort((a, b) => a.menkul.localeCompare(b.menkul));
+
+            let snCounter = 1;
+            groups.forEach(g => {
+                const st = symbolStats[g.menkul] || { isFon: g.menkul.length === 3, netAdet: 0, ortAlis: 0, alisTutar: 0, satisTutar: 0, isAcik: false };
+                const safeSym = window.escapeHtml(g.menkul);
+                const isCollapsed = hasSearch ? false : (window.hisseGroupCollapsed[g.menkul] === true);
+                const chevron = isCollapsed ? 'fa-chevron-right' : 'fa-chevron-down';
+
+                tbodyHtml += `
+                    <tr class="ekstre-group-row" onclick="window.toggleHisseGroup('${safeSym}')">
+                        <td colspan="8" style="text-align: left !important;">
+                            <div class="ekstre-group-flex">
+                                <div class="ekstre-group-left">
+                                    <i class="fas ${chevron} ekstre-group-chevron"></i>
+                                    <span class="ekstre-symbol-link" onclick="event.stopPropagation(); window.goToHisse('${safeSym}')" title="${safeSym} detayına git">${safeSym}</span>
+                                    <span class="ekstre-badge ${st.isFon ? 'ekstre-badge-fon' : 'ekstre-badge-hisse'}">${st.isFon ? 'Fon' : 'Hisse'}</span>
+                                    <span class="ekstre-badge ${st.isAcik ? 'ekstre-badge-acik' : 'ekstre-badge-kapali'}">${st.isAcik ? 'Açık' : 'Kapatıldı'}</span>
+                                </div>
+                                <div class="ekstre-group-meta">
+                                    <span class="ekstre-group-chip"><strong>${g.rows.length}</strong> işlem</span>
+                                    <span class="ekstre-group-chip">Net: <strong>${st.netAdet.toLocaleString('tr-TR', { maximumFractionDigits: 4 })}</strong> adet</span>
+                                    ${st.ortAlis > 0 ? `<span class="ekstre-group-chip">Ort. Alış: <strong>${formatEkstrePrice(st.ortAlis, st.isFon)}</strong></span>` : ''}
+                                    <span class="ekstre-group-chip">Alış: <strong style="color: #059669;">${formatCurrency(st.alisTutar, 0)}</strong></span>
+                                    ${st.satisTutar > 0 ? `<span class="ekstre-group-chip">Satış: <strong style="color: #dc2626;">${formatCurrency(st.satisTutar, 0)}</strong></span>` : ''}
+                                    <button type="button" class="ekstre-group-add-btn" onclick="event.stopPropagation(); window.openEkstreModal(null, '${safeSym}')" title="${safeSym} için yeni işlem ekle">
+                                        <i class="fas fa-plus"></i> İşlem
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+
+                if (!isCollapsed) {
+                    g.rows.forEach(e => {
+                        tbodyHtml += buildTradeRowHtml(e, snCounter++);
+                    });
+                }
+            });
+        }
+
+        return `
+            <div class="table-container" style="margin-bottom: 0; padding-top: 0;">
+                <table class="dash-table ekstre-table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="width: 52px;">S.N.</th>
+                            <th style="cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tarih')">Tarih${getHisseSortIcon('tarih')}</th>
+                            <th style="text-align: left !important; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('menkul')">Menkul${getHisseSortIcon('menkul')}</th>
+                            <th>Yön</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('fiyat')">Birim Fiyat${getHisseSortIcon('fiyat')}</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('adet')">Adet${getHisseSortIcon('adet')}</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleHisseSort('tutar')">Tutar${getHisseSortIcon('tutar')}</th>
+                            <th style="width: 92px;">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="hisse-tbody">
+                        ${tbodyHtml}
+                        <tr class="total-row">
+                            <td colspan="3" style="text-align: left !important; padding-left: 12px !important;">FİLTRELENEN TOPLAM (${rows.length} işlem)</td>
+                            <td colspan="3" style="text-align: right !important;">Net Akış: ${formatCurrency(netFlowSum, 0)}</td>
+                            <td style="text-align: right !important;">${formatCurrency(totalTutarSum, 0)}</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+    };
+
+    const buildNakitSectionHtml = () => {
+        window.nakitSort = window.nakitSort || { col: 'tarih', asc: false };
+        const sortedNakit = [...allNakit].sort((a, b) => {
+            const col = window.nakitSort.col || 'tarih';
+            const asc = !!window.nakitSort.asc;
+            let vA, vB;
+            if (col === 'tarih') { vA = new Date(a.tarih).getTime() || 0; vB = new Date(b.tarih).getTime() || 0; }
+            else if (col === 'tutar') { vA = a.tutar || 0; vB = b.tutar || 0; }
+            else if (col === 'bist100') { vA = a.bist100 || 0; vB = b.bist100 || 0; }
+            else if (col === 'dolar') { vA = a.dolar || 0; vB = b.dolar || 0; }
+            else if (col === 'gramAltin') { vA = a.gramAltin || 0; vB = b.gramAltin || 0; }
+            else if (col === 'pry') { vA = a.pry || 0; vB = b.pry || 0; }
+            else { vA = new Date(a.tarih).getTime() || 0; vB = new Date(b.tarih).getTime() || 0; }
+            return asc ? vA - vB : vB - vA;
+        });
+
+        let girisCount = 0, cikisCount = 0, girisTutar = 0, cikisTutar = 0;
+        sortedNakit.forEach(n => {
+            const t = parseFloat(n.tutar) || 0;
+            if (t >= 0) { girisCount++; girisTutar += t; }
+            else { cikisCount++; cikisTutar += Math.abs(t); }
+        });
+        const netNakit = girisTutar - cikisTutar;
+
+        const kpiHtml = `
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon-box navy"><i class="fas fa-money-bill-transfer"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Nakit Hareketleri</div>
+                        <div class="kpi-value">${sortedNakit.length}</div>
+                        <div class="kpi-sub">${girisCount} Giriş · ${cikisCount} Çıkış</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon-box green"><i class="fas fa-arrow-down"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Toplam Giriş</div>
+                        <div class="kpi-value" style="color: var(--success-color);">+${formatCurrency(girisTutar, 0)}</div>
+                        <div class="kpi-sub">Portföye eklenen anapara</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon-box red"><i class="fas fa-arrow-up"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Toplam Çıkış</div>
+                        <div class="kpi-value" style="color: var(--danger-color);">-${formatCurrency(cikisTutar, 0)}</div>
+                        <div class="kpi-sub">Portföyden çekilen tutar</div>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon-box slate"><i class="fas fa-wallet"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Net Nakit Girişi</div>
+                        <div class="kpi-value">${formatCurrency(netNakit, 0)}</div>
+                        <div class="kpi-sub">Kümülatif anapara akışı</div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const rowsHtml = sortedNakit.length === 0 ? '' : sortedNakit.map((n, i) => {
+            const t = parseFloat(n.tutar) || 0;
+            const isGiris = t >= 0;
+            const safeId = window.escapeHtml(String(n.id));
+            return `<tr>
+                <td style="text-align: center !important; color: #64748b !important;">${i + 1}</td>
+                <td style="text-align: center !important;">${formatDate(n.tarih)}</td>
+                <td style="text-align: center !important;">
+                    <span class="ekstre-badge ${isGiris ? 'ekstre-badge-alis' : 'ekstre-badge-satis'}">
+                        <i class="fas ${isGiris ? 'fa-arrow-down' : 'fa-arrow-up'}" style="font-size: 10px;"></i>
+                        ${isGiris ? 'GİRİŞ' : 'ÇIKIŞ'}
+                    </span>
+                </td>
+                <td style="text-align: right !important; font-weight: 700 !important;" class="${isGiris ? 'text-success' : 'text-danger'}">${isGiris ? '+' : '-'}${formatCurrency(Math.abs(t), 0)}</td>
+                <td style="text-align: right !important;">${formatNumber(n.bist100)}</td>
+                <td style="text-align: right !important;">${formatNumber(n.dolar)}</td>
+                <td style="text-align: right !important;">${formatNumber(n.gramAltin)}</td>
+                <td style="text-align: right !important;">${formatNumber(n.pry, 6)}</td>
+                <td style="text-align: center !important;">
+                    <div class="ekstre-row-actions">
+                        <button type="button" class="ekstre-action-btn edit" onclick="window.openNakitModal('${safeId}')" title="Düzenle"><i class="fas fa-edit"></i></button>
+                        <button type="button" class="ekstre-action-btn delete" onclick="window.deleteNakit('${safeId}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+
+        const tableHtml = sortedNakit.length === 0 ? `
+            <div class="ekstre-empty-state">
+                <i class="fas fa-money-bill-transfer"></i>
+                <div style="font-size: 15px; font-weight: 700; color: #1e293b;">Henüz nakit hareketi eklenmemiş</div>
+                <div style="font-size: 13.5px; color: #64748b;">Sağ üstteki butondan portföye nakit girişi veya çıkışı ekleyebilirsiniz.</div>
+            </div>
+        ` : `
+            <div class="table-container" style="margin-bottom: 0; padding-top: 0;">
+                <table class="dash-table ekstre-table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="width: 52px;">S.N.</th>
+                            <th style="cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tarih')">Tarih${getNakitSortIcon('tarih')}</th>
+                            <th>Yön</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('tutar')">Tutar${getNakitSortIcon('tutar')}</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('bist100')">XU100${getNakitSortIcon('bist100')}</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('dolar')">USDTRY${getNakitSortIcon('dolar')}</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('gramAltin')">GRAMALTIN${getNakitSortIcon('gramAltin')}</th>
+                            <th style="text-align: right !important; cursor: pointer; user-select: none;" onclick="window.toggleNakitSort('pry')">PRY${getNakitSortIcon('pry')}</th>
+                            <th style="width: 92px;">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody id="nakit-tbody">
+                        ${rowsHtml}
+                        <tr class="total-row">
+                            <td colspan="3" style="text-align: left !important; padding-left: 12px !important;">TOPLAM NET NAKİT</td>
+                            <td style="text-align: right !important;" class="${netNakit >= 0 ? 'text-success' : 'text-danger'}">${netNakit >= 0 ? '+' : '-'}${formatCurrency(Math.abs(netNakit), 0)}</td>
+                            <td colspan="5"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        return { kpiHtml, tableHtml };
+    };
+
+    const isHisseTab = window.ekstreTab !== 'nakit';
+    const filteredHisse = isHisseTab ? computeFilteredHisse() : [];
+    const nakitRendered = !isHisseTab ? buildNakitSectionHtml() : null;
+
+    const hasActiveFilter = (window.ekstreSearchQuery || '').trim() !== '' ||
+        window.ekstreFilterTur !== 'all' ||
+        window.ekstreFilterYon !== 'all' ||
+        window.ekstreFilterDurum !== 'all' ||
+        window.ekstreFilterYil !== 'all';
+
+    const anyGroupExpanded = isHisseTab && window.ekstreViewMode === 'grouped' &&
+        Object.keys(symbolStats).some(sym => window.hisseGroupCollapsed[sym] !== true);
+
+    const filterBarHtml = isHisseTab ? `
+        <div class="ekstre-filter-bar">
+            <div class="ekstre-filter-left">
+                <div class="ekstre-search-wrap">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="ekstre-search-input" class="ekstre-search-input" placeholder="Menkul veya tarih ara..."
+                           value="${window.escapeHtml(window.ekstreSearchQuery || '')}"
+                           oninput="window.filterEkstreTable(this.value)">
+                    <button type="button" id="ekstre-search-clear-btn" class="ekstre-search-clear"
+                            style="display: ${(window.ekstreSearchQuery || '').trim() ? 'inline-flex' : 'none'};"
+                            onclick="window.filterEkstreTable(''); const el=document.getElementById('ekstre-search-input'); if(el){el.value=''; el.focus();}" title="Aramayı Temizle">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="ekstre-segmented" title="Menkul Türü">
+                    <button type="button" class="ekstre-seg-btn ${window.ekstreFilterTur === 'all' ? 'active' : ''}" onclick="window.setEkstreFilter('tur', 'all')">Tümü</button>
+                    <button type="button" class="ekstre-seg-btn ${window.ekstreFilterTur === 'hisse' ? 'active' : ''}" onclick="window.setEkstreFilter('tur', 'hisse')">Hisse</button>
+                    <button type="button" class="ekstre-seg-btn ${window.ekstreFilterTur === 'fon' ? 'active' : ''}" onclick="window.setEkstreFilter('tur', 'fon')">Fon</button>
+                </div>
+
+                <div class="ekstre-segmented" title="İşlem Yönü">
+                    <button type="button" class="ekstre-seg-btn ${window.ekstreFilterYon === 'all' ? 'active' : ''}" onclick="window.setEkstreFilter('yon', 'all')">Tümü</button>
+                    <button type="button" class="ekstre-seg-btn alis ${window.ekstreFilterYon === 'alis' ? 'active' : ''}" onclick="window.setEkstreFilter('yon', 'alis')">Alış</button>
+                    <button type="button" class="ekstre-seg-btn satis ${window.ekstreFilterYon === 'satis' ? 'active' : ''}" onclick="window.setEkstreFilter('yon', 'satis')">Satış</button>
+                </div>
+
+                <select class="ekstre-select" aria-label="Pozisyon Durumu" onchange="window.setEkstreFilter('durum', this.value)">
+                    <option value="all" ${window.ekstreFilterDurum === 'all' ? 'selected' : ''}>Durum: Tümü</option>
+                    <option value="acik" ${window.ekstreFilterDurum === 'acik' ? 'selected' : ''}>Portföyde Açık</option>
+                    <option value="kapali" ${window.ekstreFilterDurum === 'kapali' ? 'selected' : ''}>Kapatılmış</option>
+                </select>
+
+                ${allYears.length > 0 ? `
+                <select class="ekstre-select" aria-label="Yıl Filtresi" onchange="window.setEkstreFilter('yil', this.value)">
+                    <option value="all" ${window.ekstreFilterYil === 'all' ? 'selected' : ''}>Yıl: Tümü</option>
+                    ${allYears.map(y => `<option value="${y}" ${window.ekstreFilterYil === y ? 'selected' : ''}>${y}</option>`).join('')}
+                </select>
+                ` : ''}
+
+                <span id="ekstre-filter-reset-slot">
+                    ${hasActiveFilter ? `<button type="button" class="ekstre-ghost-btn reset" onclick="window.resetEkstreFilters()"><i class="fas fa-rotate-left"></i> Temizle</button>` : ''}
+                </span>
+            </div>
+
+            <div class="ekstre-filter-right">
+                <div class="ekstre-segmented" title="Görünüm Modu">
+                    <button type="button" class="ekstre-seg-btn ${window.ekstreViewMode === 'chrono' ? 'active' : ''}" onclick="window.setEkstreViewMode('chrono')">
+                        <i class="fas fa-clock"></i> Son İşlemler
+                    </button>
+                    <button type="button" class="ekstre-seg-btn ${window.ekstreViewMode === 'grouped' ? 'active' : ''}" onclick="window.setEkstreViewMode('grouped')">
+                        <i class="fas fa-layer-group"></i> Gruplu
+                    </button>
+                </div>
+                ${window.ekstreViewMode === 'grouped' ? `
+                    <button type="button" id="ekstre-toggle-all-btn" class="ekstre-ghost-btn" onclick="window.toggleAllEkstreGroups(${anyGroupExpanded ? 'false' : 'true'})">
+                        <i class="fas ${anyGroupExpanded ? 'fa-compress-alt' : 'fa-expand-alt'}"></i>
+                        ${anyGroupExpanded ? 'Tümünü Daralt' : 'Tümünü Aç'}
+                    </button>
+                ` : ''}
+            </div>
+        </div>
+    ` : '';
+
+    container.innerHTML = `
+        <div class="page-section active" style="display: flex; flex-direction: column; padding: 0; gap: 1rem;">
+            <div id="ekstre-kpi-slot">
+                ${isHisseTab ? buildHisseKpiHtml(filteredHisse) : nakitRendered.kpiHtml}
+            </div>
+
+            <div class="glass ekstre-card-shell">
+                <div class="ekstre-toolbar-top">
+                    <div class="ekstre-tab-group">
+                        <button type="button" class="ekstre-tab-pill ${isHisseTab ? 'active' : ''}" onclick="window.setEkstreTab('hisse')">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Hisse ve Fon İşlemleri</span>
+                            <span class="ekstre-tab-count">${allHisseFon.length}</span>
+                        </button>
+                        <button type="button" class="ekstre-tab-pill ${!isHisseTab ? 'active' : ''}" onclick="window.setEkstreTab('nakit')">
+                            <i class="fas fa-money-bill-transfer"></i>
+                            <span>Nakit İşlemleri</span>
+                            <span class="ekstre-tab-count">${allNakit.length}</span>
+                        </button>
+                    </div>
+
+                    <button type="button" class="btn ekstre-primary-cta" onclick="${isHisseTab ? 'window.openEkstreModal()' : 'window.openNakitModal()'}">
+                        <i class="fas fa-plus"></i>
+                        <span>${isHisseTab ? 'Yeni İşlem Ekle' : 'Yeni Nakit Hareketi'}</span>
+                    </button>
+                </div>
+
+                ${filterBarHtml}
+
+                <div id="ekstre-table-slot">
+                    ${isHisseTab ? buildHisseTableHtml(filteredHisse) : nakitRendered.tableHtml}
+                </div>
+            </div>
+        </div>
+    `;
+
+    window.updateEkstreViewOnly = () => {
+        if (window.ekstreTab !== 'hisse') return;
+        const rows = computeFilteredHisse();
+        const kpiSlot = document.getElementById('ekstre-kpi-slot');
+        const tableSlot = document.getElementById('ekstre-table-slot');
+        const clearBtn = document.getElementById('ekstre-search-clear-btn');
+        const resetSlot = document.getElementById('ekstre-filter-reset-slot');
+        const toggleAllBtn = document.getElementById('ekstre-toggle-all-btn');
+        if (kpiSlot) kpiSlot.innerHTML = buildHisseKpiHtml(rows);
+        if (tableSlot) tableSlot.innerHTML = buildHisseTableHtml(rows);
+        if (clearBtn) clearBtn.style.display = (window.ekstreSearchQuery || '').trim() ? 'inline-flex' : 'none';
+        if (toggleAllBtn) {
+            const anyOpen = Object.keys(symbolStats).some(sym => window.hisseGroupCollapsed[sym] !== true);
+            toggleAllBtn.setAttribute('onclick', `window.toggleAllEkstreGroups(${anyOpen ? 'false' : 'true'})`);
+            toggleAllBtn.innerHTML = `<i class="fas ${anyOpen ? 'fa-compress-alt' : 'fa-expand-alt'}"></i> ${anyOpen ? 'Tümünü Daralt' : 'Tümünü Aç'}`;
+        }
+        if (resetSlot) {
+            const active = (window.ekstreSearchQuery || '').trim() !== '' ||
+                window.ekstreFilterTur !== 'all' ||
+                window.ekstreFilterYon !== 'all' ||
+                window.ekstreFilterDurum !== 'all' ||
+                window.ekstreFilterYil !== 'all';
+            resetSlot.innerHTML = active ? `<button type="button" class="ekstre-ghost-btn reset" onclick="window.resetEkstreFilters()"><i class="fas fa-rotate-left"></i> Temizle</button>` : '';
         }
     };
-    window.saveEditNakit = (id) => {
-        const islem = {
-            tarih: document.getElementById('edit-n-tarih').value,
-            tutar: parseFloat(document.getElementById('edit-n-tutar').value) || 0,
-            bist100: parseFloat(document.getElementById('edit-n-bist').value) || 0,
-            dolar: parseFloat(document.getElementById('edit-n-dolar').value) || 0,
-            gramAltin: parseFloat(document.getElementById('edit-n-altin').value) || 0,
-            pry: parseFloat((document.getElementById('edit-n-pry').value || '').toString().replace(',', '.')) || 0
-        };
-        State.updateNakitHareket(id, islem);
-        window.currentNakitEditId = null;
-        if (typeof renderPage === 'function') renderPage();
-    };
-    window.saveInlineNakitEntry = () => {
-        const islem = {
-            tarih: document.getElementById('n-tarih').value,
-            tutar: parseFloat(document.getElementById('n-tutar').value) || 0,
-            bist100: parseFloat(document.getElementById('n-bist').value) || 0,
-            dolar: parseFloat(document.getElementById('n-dolar').value) || 0,
-            gramAltin: parseFloat(document.getElementById('n-altin').value) || 0,
-            pry: parseFloat((document.getElementById('n-pry').value || '').toString().replace(',', '.')) || 0
-        };
-        State.addNakitHareket(islem);
-        if (typeof renderPage === 'function') renderPage();
-    };
+};
+
+const renderNakitIslemleri = (container) => {
+    window.ekstreTab = 'nakit';
+    renderHisseIslemleri(container);
 };
 
 const renderVeriler = (container) => {
@@ -7150,7 +7853,11 @@ window.fetchTickerData = async () => {
                 const eur = trJson.data.find(x => x.s === 'FX_IDC:EURTRY');
                 const ons = trJson.data.find(x => x.s === 'OANDA:XAUUSD');
 
-                if (usd) tData['USD'] = { Selling: usd.d[0].toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), Change: usd.d[1] };
+                window.latestMarketBenchmarks = window.latestMarketBenchmarks || {};
+                if (usd) {
+                    tData['USD'] = { Selling: usd.d[0].toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), Change: usd.d[1] };
+                    window.latestMarketBenchmarks.dolar = Number(usd.d[0].toFixed(2));
+                }
                 if (eur) tData['EUR'] = { Selling: eur.d[0].toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), Change: eur.d[1] };
                 if (ons) tData['ons'] = { Selling: ons.d[0].toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), Change: ons.d[1] };
 
@@ -7158,6 +7865,7 @@ window.fetchTickerData = async () => {
                     const graPrice = (ons.d[0] * usd.d[0]) / 31.1035;
                     const graChange = ((1 + ons.d[1] / 100) * (1 + usd.d[1] / 100) - 1) * 100;
                     tData['gram-altin'] = { Selling: graPrice.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }), Change: graChange };
+                    window.latestMarketBenchmarks.gramAltin = Number(graPrice.toFixed(2));
                 }
             }
         } catch (e) { console.error(e); }
@@ -7227,7 +7935,12 @@ window.fetchTickerData = async () => {
 
         // XU100 ve BRENT'i arka planda çekip tekrar renderla
         Promise.all([fetchTV('turkey', 'BIST:XU100'), fetchTV('global', 'FX:UKOIL')]).then(([x, b]) => {
-            if (x) xu100 = x;
+            if (x) {
+                xu100 = x;
+                window.latestMarketBenchmarks = window.latestMarketBenchmarks || {};
+                const parsedXu = parseFloat(String(x.Selling).replace(/\./g, '').replace(',', '.'));
+                if (!isNaN(parsedXu)) window.latestMarketBenchmarks.bist100 = Number(parsedXu.toFixed(2));
+            }
             if (b) brent = b;
             renderTicker();
         });
