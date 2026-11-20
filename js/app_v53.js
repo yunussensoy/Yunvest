@@ -4148,324 +4148,506 @@ const renderHisseler = (container) => {
                 `;
                 window.shouldRenderDashboardCharts = true;
             } else if (activeTab === 'Akış') {
-                let analizler = State.data.analizler || [];
-                analizler = analizler.filter(a => (a.hisse || '').toUpperCase() === selectedHisse.toUpperCase());
+                window.akisViewMode = window.akisViewMode || 'feed';
+                window.akisFilterType = window.akisFilterType || 'all';
+                window.akisFilterAuthor = window.akisFilterAuthor || 'all';
+                window.akisSearchQuery = window.akisSearchQuery || '';
 
-                // Get Reports
-                let foundReports = [];
-                const availablePdfs = (window.stockReports && window.stockReports[selectedHisse]) ? window.stockReports[selectedHisse] : [];
-                availablePdfs.forEach(file => {
-                    let baseName = file.toLowerCase();
-                    if (baseName.endsWith('.pdf')) baseName = baseName.substring(0, baseName.length - 4);
-
-                    const trMap = {
-                        'arastirma': 'Araştırma', 'raporu': 'Raporu', 'faaliyet': 'Faaliyet',
-                        'finansal': 'Finansal', 'toplanti': 'Toplantı', 'notlari': 'Notları',
-                        'yatirimci': 'Yatırımcı', 'sunumu': 'Sunumu', 'fiyat': 'Fiyat',
-                        'tespit': 'Tespit', 'degerleme': 'Değerleme', 'sirket': 'Şirket',
-                        'yatirim': 'Yatırım', 'degerler': 'Değerler', 'is': 'İş',
-                        'unlu': 'Ünlü', 'yapi': 'Yapı', 'vakif': 'Vakıf', 'araci': 'Aracı',
-                        'info': 'İnfo', 'teb': 'TEB', 'qnb': 'QNB', 'a1': 'A1',
-                        'capital': 'Capital', 'tacirler': 'Tacirler', 'ak': 'Ak',
-                        'tera': 'Tera', 'bulls': 'Bulls', 'ziyaretci': 'Ziyaretçi',
-                        'ziyareti': 'Ziyareti', 'notu': 'Notu', 'rapor': 'Rapor',
-                        'degerlendirme': 'Değerlendirme', 'degerlendirmesi': 'Değerlendirmesi',
-                        'ceyrek': 'Çeyrek', 'yillik': 'Yıllık', 'bilanco': 'Bilanço',
-                        'gelir': 'Gelir', 'tablosu': 'Tablosu', 'nakit': 'Nakit', 'akisi': 'Akışı',
-                        'gelecege': 'Geleceğe', 'donuk': 'Dönük', 'beklentiler': 'Beklentiler',
-                        'aciklama': 'Açıklama'
-                    };
-
-                    const cols = baseName.split('-');
-                    let sirket = '-';
-                    let tarih = '-';
-                    let ad = '-';
-                    let sn = '-';
-
-                    const formatWords = (str) => {
-                        if (!str) return '-';
-                        return str.split('_').map(w => trMap[w] || w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-                    };
-
-                    if (/^\d+$/.test(cols[0])) {
-                        sn = cols[0];
-                        if (cols.length >= 4) { ad = formatWords(cols[1]); tarih = formatWords(cols[2]); sirket = formatWords(cols[3]); }
-                        else if (cols.length === 3) { ad = formatWords(cols[1]); tarih = formatWords(cols[2]); }
-                        else if (cols.length === 2) { ad = formatWords(cols[1]); }
-                    } else {
-                        if (cols.length >= 3) { ad = formatWords(cols[0]); tarih = formatWords(cols[1]); sirket = formatWords(cols[2]); }
-                        else if (cols.length === 2) { ad = formatWords(cols[0]); tarih = formatWords(cols[1]); }
-                        else if (cols.length === 1) { ad = formatWords(cols[0]); }
-                    }
-
-                    foundReports.push({ type: 'report', file: file, sn: sn, name: ad, tarih: tarih, company: sirket });
-                });
+                window.setAkisViewMode = (mode) => {
+                    window.akisViewMode = mode;
+                    renderUI();
+                };
+                window.setAkisFilter = (key, val) => {
+                    if (key === 'type') window.akisFilterType = val;
+                    else if (key === 'author') window.akisFilterAuthor = val;
+                    renderUI();
+                };
+                window.filterAkisFeed = (q) => {
+                    window.akisSearchQuery = q || '';
+                    if (typeof window.updateAkisViewOnly === 'function') window.updateAkisViewOnly();
+                    else renderUI();
+                };
+                window.resetAkisFilters = () => {
+                    window.akisSearchQuery = '';
+                    window.akisFilterType = 'all';
+                    window.akisFilterAuthor = 'all';
+                    renderUI();
+                };
+                window.toggleAkisNoteExpand = (btn) => {
+                    const noteEl = btn && btn.previousElementSibling;
+                    if (!noteEl) return;
+                    const expanded = !noteEl.classList.toggle('clamped');
+                    btn.textContent = expanded ? 'Daha az göster' : 'Devamını gör';
+                };
 
                 const parseDateStr = (dStr) => {
                     if (!dStr || dStr === '-') return 0;
-                    let s = dStr.replace(/[\s\._]/g, '-');
-                    let p = s.split('-');
+                    const s = String(dStr).replace(/[\s\._]/g, '-');
+                    const p = s.split('-');
                     if (p.length >= 3) {
-                        if (p[0].length === 4) {
-                            return parseInt(p[0] + p[1].padStart(2, '0') + p[2].padStart(2, '0'));
-                        } else if (p[2].length === 4) {
-                            return parseInt(p[2] + p[1].padStart(2, '0') + p[0].padStart(2, '0'));
-                        }
+                        if (p[0].length === 4) return parseInt(p[0] + p[1].padStart(2, '0') + p[2].padStart(2, '0'), 10);
+                        if (p[2].length === 4) return parseInt(p[2] + p[1].padStart(2, '0') + p[0].padStart(2, '0'), 10);
                     }
-                    let clean = dStr.replace(/\D/g, '');
+                    const clean = String(dStr).replace(/\D/g, '');
                     if (clean.length === 8) {
-                        if (clean.startsWith('20')) return parseInt(clean);
-                        return parseInt(clean.substring(4, 8) + clean.substring(2, 4) + clean.substring(0, 2));
+                        if (clean.startsWith('20')) return parseInt(clean, 10);
+                        return parseInt(clean.substring(4, 8) + clean.substring(2, 4) + clean.substring(0, 2), 10);
                     }
-                    return parseInt(clean) || 0;
+                    return parseInt(clean, 10) || 0;
                 };
 
-                const today = new Date().toISOString().split('T')[0];
-                let unifiedList = [];
-
-                analizler.forEach(a => {
-                    let d = 0;
-                    if (a.tarih) {
-                        d = parseDateStr(a.tarih);
+                const detectLinkPlatform = (safeHref) => {
+                    if (!safeHref) return { key: 'note', label: 'Analiz Notu', icon: 'fas fa-sticky-note', badgeCls: 'akis-badge-note', cardCls: '' };
+                    const low = safeHref.toLowerCase();
+                    if (low.includes('youtube.com') || low.includes('youtu.be')) {
+                        return { key: 'youtube', label: 'YouTube', icon: 'fab fa-youtube', badgeCls: 'akis-badge-youtube', cardCls: 'type-youtube' };
                     }
-                    unifiedList.push({
-                        type: 'analiz',
-                        data: a,
-                        sortTarih: d,
-                        gosterimTarih: a.tarih ? a.tarih.split('-').reverse().join('.') : '-'
-                    });
-                });
-
-                foundReports.forEach(r => {
-                    let d = parseDateStr(r.tarih);
-                    unifiedList.push({
-                        type: 'report',
-                        data: r,
-                        sortTarih: d,
-                        gosterimTarih: r.tarih !== '-' ? r.tarih : '-'
-                    });
-                });
-
-                // Firebase'e yüklenmiş PDF raporları
-                const uploadedPdfs = (State.data.uploadedReports || []).filter(r => (r.hisse || '').toUpperCase() === selectedHisse.toUpperCase());
-                uploadedPdfs.forEach(r => {
-                    let d = parseDateStr(r.tarih);
-                    let displayDate = '-';
-                    if (r.tarih && r.tarih !== '-') {
-                        displayDate = r.tarih.includes('-') && r.tarih.split('-')[0].length === 4
-                            ? r.tarih.split('-').reverse().join('.')
-                            : r.tarih;
+                    if (low.includes('twitter.com') || low.includes('x.com')) {
+                        return { key: 'x', label: 'X / Twitter', icon: 'fa-brands fa-x-twitter', badgeCls: 'akis-badge-x', cardCls: 'type-x' };
                     }
-                    unifiedList.push({
-                        type: 'firebase_pdf',
-                        data: r,
-                        sortTarih: d,
-                        gosterimTarih: displayDate
+                    if (low.includes('kap.org.tr')) {
+                        return { key: 'kap', label: 'KAP', icon: 'fas fa-landmark', badgeCls: 'akis-badge-kap', cardCls: 'type-kap' };
+                    }
+                    return { key: 'link', label: 'Web / Analiz', icon: 'fas fa-globe', badgeCls: 'akis-badge-link', cardCls: 'type-link' };
+                };
+
+                const trMap = {
+                    'arastirma': 'Araştırma', 'raporu': 'Raporu', 'faaliyet': 'Faaliyet',
+                    'finansal': 'Finansal', 'toplanti': 'Toplantı', 'notlari': 'Notları',
+                    'yatirimci': 'Yatırımcı', 'sunumu': 'Sunumu', 'fiyat': 'Fiyat',
+                    'tespit': 'Tespit', 'degerleme': 'Değerleme', 'sirket': 'Şirket',
+                    'yatirim': 'Yatırım', 'degerler': 'Değerler', 'is': 'İş',
+                    'unlu': 'Ünlü', 'yapi': 'Yapı', 'vakif': 'Vakıf', 'araci': 'Aracı',
+                    'info': 'İnfo', 'teb': 'TEB', 'qnb': 'QNB', 'a1': 'A1',
+                    'capital': 'Capital', 'tacirler': 'Tacirler', 'ak': 'Ak',
+                    'tera': 'Tera', 'bulls': 'Bulls', 'ziyaretci': 'Ziyaretçi',
+                    'ziyareti': 'Ziyareti', 'notu': 'Notu', 'rapor': 'Rapor',
+                    'degerlendirme': 'Değerlendirme', 'degerlendirmesi': 'Değerlendirmesi',
+                    'ceyrek': 'Çeyrek', 'yillik': 'Yıllık', 'bilanco': 'Bilanço',
+                    'gelir': 'Gelir', 'tablosu': 'Tablosu', 'nakit': 'Nakit', 'akisi': 'Akışı',
+                    'gelecege': 'Geleceğe', 'donuk': 'Dönük', 'beklentiler': 'Beklentiler',
+                    'aciklama': 'Açıklama'
+                };
+                const formatWords = (str) => {
+                    if (!str) return '-';
+                    return str.split('_').map(w => trMap[w] || w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                };
+
+                const buildUnifiedAkis = () => {
+                    const list = [];
+                    const upperSel = selectedHisse.toUpperCase();
+
+                    // 1. Analizler & Kişisel Notlar
+                    const analizler = (State.data.analizler || []).filter(a => (a.hisse || '').toUpperCase() === upperSel);
+                    analizler.forEach(a => {
+                        const isPers = !!(a.isKisiselNot || a.kurum === 'Yunus Şensoy' || (window.currentUser && (a.kurum === window.currentUser.displayName || a.borsaci === window.currentUser.displayName)));
+                        const safeHref = window.sanitizeUrl ? window.sanitizeUrl(a.baglanti) : (a.baglanti || '');
+                        const plat = isPers
+                            ? { key: 'personal', label: 'Kişisel Not', icon: 'fas fa-thumbtack', badgeCls: 'akis-badge-personal', cardCls: 'type-personal' }
+                            : detectLinkPlatform(safeHref);
+
+                        const rawTitle = (a.baslik && a.baslik !== '-') ? a.baslik : (isPers ? 'Kişisel Yatırım Notu' : (safeHref ? safeHref.replace(/^https?:\/\/(www\.)?/, '').slice(0, 64) : 'Analiz Kaydı'));
+                        list.push({
+                            uid: 'an_' + a.id,
+                            id: String(a.id),
+                            type: 'analiz',
+                            category: isPers ? 'personal' : 'link',
+                            isPersonal: isPers,
+                            plat,
+                            title: rawTitle,
+                            href: safeHref || '',
+                            author: (a.borsaci && a.borsaci !== '-') ? a.borsaci : '',
+                            note: (a.notText || '').trim(),
+                            sortTarih: parseDateStr(a.tarih),
+                            displayDate: a.tarih ? a.tarih.split('-').reverse().join('.') : '-',
+                            editable: true,
+                            deletable: true,
+                            data: a
+                        });
                     });
-                });
 
-                // Kişisel analiz her zaman en üstte, sonra yeniden eskiye sıralama
-                const isPersonal = (item) => item.type === 'analiz' && item.data && (item.data.isKisiselNot || item.data.kurum === 'Yunus Şensoy' || (window.currentUser && (item.data.kurum === window.currentUser.displayName || item.data.borsaci === window.currentUser.displayName)));
-                unifiedList.sort((a, b) => {
-                    const aPers = isPersonal(a);
-                    const bPers = isPersonal(b);
-                    if (aPers && !bPers) return -1;
-                    if (!aPers && bPers) return 1;
-                    return b.sortTarih - a.sortTarih;
-                });
+                    // 2. Local PDF Reports (Hisseler/<HISSE>/*.pdf)
+                    const availablePdfs = (window.stockReports && window.stockReports[selectedHisse]) ? window.stockReports[selectedHisse] : [];
+                    availablePdfs.forEach((file, idx) => {
+                        let baseName = file.toLowerCase();
+                        if (baseName.endsWith('.pdf')) baseName = baseName.substring(0, baseName.length - 4);
+                        const cols = baseName.split('-');
+                        let sirket = '-', tarih = '-', ad = '-';
+                        if (/^\d+$/.test(cols[0])) {
+                            if (cols.length >= 4) { ad = formatWords(cols[1]); tarih = formatWords(cols[2]); sirket = formatWords(cols[3]); }
+                            else if (cols.length === 3) { ad = formatWords(cols[1]); tarih = formatWords(cols[2]); }
+                            else if (cols.length === 2) { ad = formatWords(cols[1]); }
+                        } else {
+                            if (cols.length >= 3) { ad = formatWords(cols[0]); tarih = formatWords(cols[1]); sirket = formatWords(cols[2]); }
+                            else if (cols.length === 2) { ad = formatWords(cols[0]); tarih = formatWords(cols[1]); }
+                            else if (cols.length === 1) { ad = formatWords(cols[0]); }
+                        }
+                        const filePath = 'Hisseler/' + encodeURIComponent(selectedHisse) + '/' + encodeURIComponent(file);
+                        list.push({
+                            uid: 'loc_' + idx + '_' + file,
+                            id: file,
+                            type: 'report',
+                            category: 'pdf',
+                            isPersonal: false,
+                            plat: { key: 'pdf', label: 'PDF Rapor', icon: 'fas fa-file-pdf', badgeCls: 'akis-badge-pdf', cardCls: 'type-pdf' },
+                            title: (ad && ad !== '-') ? ad : file,
+                            href: filePath,
+                            author: (sirket && sirket !== '-') ? sirket : '',
+                            note: '',
+                            sortTarih: parseDateStr(tarih),
+                            displayDate: (tarih && tarih !== '-') ? tarih : '-',
+                            editable: false,
+                            deletable: false,
+                            isLocalPdf: true
+                        });
+                    });
 
-                let tableHtml = `
-                <div class="dash-card" style="display: flex; flex-direction: column; padding-bottom: 0.75rem; margin-bottom: 0;">
-                    <div style="display: flex; align-items: center; justify-content: center; padding: 5px 6px; border-bottom: 1px solid var(--table-border); position: relative;">
-                        <div style="font-size: 16px; font-weight: 700; color: #113A5D; text-align: center;">Akış</div>
-                        <button class="btn" style="padding: 0 0.5rem; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-secondary); border: none; box-shadow: none; position: absolute; right: 5px;" onclick="window.toggleInlineAnaliz()" title="Yeni Not Ekle"><i class="fas fa-plus" style="font-size: 15px;"></i></button>
+                    // 3. Firebase Cloud PDF Reports
+                    const uploadedPdfs = (State.data.uploadedReports || []).filter(r => (r.hisse || '').toUpperCase() === upperSel);
+                    uploadedPdfs.forEach(r => {
+                        let displayDate = '-';
+                        if (r.tarih && r.tarih !== '-') {
+                            displayDate = (r.tarih.includes('-') && r.tarih.split('-')[0].length === 4)
+                                ? r.tarih.split('-').reverse().join('.')
+                                : r.tarih;
+                        }
+                        list.push({
+                            uid: 'fb_' + r.id,
+                            id: String(r.id),
+                            type: 'firebase_pdf',
+                            category: 'pdf',
+                            isPersonal: false,
+                            plat: { key: 'pdf', label: 'Bulut PDF', icon: 'fas fa-file-pdf', badgeCls: 'akis-badge-pdf', cardCls: 'type-pdf' },
+                            title: (r.name && r.name !== '-') ? r.name : (r.fileName || 'Rapor.pdf'),
+                            href: '',
+                            author: (r.company && r.company !== '-') ? r.company : '',
+                            note: (r.notText || '').trim(),
+                            sortTarih: parseDateStr(r.tarih),
+                            displayDate,
+                            editable: true,
+                            deletable: true,
+                            data: r
+                        });
+                    });
+
+                    list.sort((a, b) => {
+                        if (a.isPersonal && !b.isPersonal) return -1;
+                        if (!a.isPersonal && b.isPersonal) return 1;
+                        return b.sortTarih - a.sortTarih;
+                    });
+                    return list;
+                };
+
+                const filterAkisItems = (allItems) => {
+                    const q = (window.akisSearchQuery || '').trim().toLocaleLowerCase('tr-TR');
+                    const tF = window.akisFilterType || 'all';
+                    const aF = window.akisFilterAuthor || 'all';
+
+                    return allItems.filter(it => {
+                        if (tF !== 'all' && it.category !== tF) return false;
+                        if (aF !== 'all' && it.author !== aF) return false;
+                        if (q) {
+                            const hay = `${it.title} ${it.author} ${it.note} ${it.href} ${it.displayDate} ${it.plat.label}`.toLocaleLowerCase('tr-TR');
+                            if (!hay.includes(q)) return false;
+                        }
+                        return true;
+                    });
+                };
+
+                const renderCardItem = (it) => {
+                    const safeTitle = window.escapeHtml(it.title);
+                    const safeAuthor = window.escapeHtml(it.author);
+                    const safeDate = window.escapeHtml(it.displayDate);
+                    const safeNote = window.escapeHtml(it.note);
+                    const safeId = window.escapeHtml(it.id);
+                    const safeHisse = window.escapeHtml(selectedHisse);
+                    const isLongNote = it.note.length > 360 || (it.note.match(/\n/g) || []).length >= 5;
+
+                    let titleHtml = safeTitle;
+                    let openBtnHtml = '';
+                    if (it.type === 'firebase_pdf') {
+                        titleHtml = `<a href="javascript:void(0)" onclick="window.openFirebasePdf('${safeId}')">${safeTitle} <i class="fas fa-arrow-up-right-from-square" style="font-size:11.5px; opacity:0.65;"></i></a>`;
+                        openBtnHtml = `<button type="button" class="ekstre-action-btn edit" onclick="window.openFirebasePdf('${safeId}')" title="PDF'i Aç"><i class="fas fa-external-link-alt"></i></button>`;
+                    } else if (it.href) {
+                        const safeHrefAttr = window.escapeHtml(it.href);
+                        titleHtml = `<a href="${safeHrefAttr}" target="_blank" rel="noopener noreferrer">${safeTitle} <i class="fas fa-arrow-up-right-from-square" style="font-size:11.5px; opacity:0.65;"></i></a>`;
+                        openBtnHtml = `<a href="${safeHrefAttr}" target="_blank" rel="noopener noreferrer" class="ekstre-action-btn edit" title="Aç"><i class="fas fa-external-link-alt"></i></a>`;
+                    }
+
+                    const editBtnHtml = it.editable
+                        ? `<button type="button" class="ekstre-action-btn edit" onclick="window.openAkisModal({ hisse: '${safeHisse}', editType: '${it.type}', editId: '${safeId}' })" title="Düzenle"><i class="fas fa-pen"></i></button>`
+                        : '';
+                    const delBtnHtml = it.deletable
+                        ? `<button type="button" class="ekstre-action-btn delete" onclick="${it.type === 'firebase_pdf' ? `window.deleteFirebasePdf('${safeId}')` : `window.deleteAnaliz('${safeId}')`}" title="Sil"><i class="fas fa-trash-alt"></i></button>`
+                        : '';
+
+                    return `
+                        <article class="akis-card ${it.plat.cardCls}" data-akis-uid="${window.escapeHtml(it.uid)}">
+                            <div class="akis-card-top">
+                                <div class="akis-card-meta">
+                                    <span class="akis-source-badge ${it.plat.badgeCls}">
+                                        <i class="${it.plat.icon}"></i>
+                                        <span>${it.plat.label}</span>
+                                    </span>
+                                    ${it.author ? `<span class="akis-author-chip"><i class="fas fa-building-columns" style="font-size:10.5px; opacity:0.65;"></i> ${safeAuthor}</span>` : ''}
+                                    <span class="akis-date-chip"><i class="far fa-calendar" style="font-size:11px;"></i> ${safeDate}</span>
+                                </div>
+                                <div class="ekstre-row-actions">
+                                    ${openBtnHtml}${editBtnHtml}${delBtnHtml}
+                                </div>
+                            </div>
+                            <h4 class="akis-card-title">${titleHtml}</h4>
+                            ${it.note ? `<div class="akis-card-note ${isLongNote ? 'clamped' : ''}">${safeNote}</div>` : ''}
+                            ${isLongNote ? `<button type="button" class="akis-expand-btn" onclick="window.toggleAkisNoteExpand(this)">Devamını gör</button>` : ''}
+                        </article>
+                    `;
+                };
+
+                const buildAkisBodyHtml = (allItems, visibleItems) => {
+                    const safeHisse = window.escapeHtml(selectedHisse);
+                    if (allItems.length === 0) {
+                        return `
+                            <div class="ekstre-empty-state">
+                                <i class="fas fa-stream"></i>
+                                <strong>${safeHisse} için henüz akış kaydı bulunmuyor</strong>
+                                <span>Aracı kurum PDF raporları, YouTube/X analiz bağlantıları veya kişisel yatırım notlarınızı buradan takip edebilirsiniz.</span>
+                                <div style="display:flex; gap:0.5rem; margin-top:8px;">
+                                    <button type="button" class="btn ekstre-primary-cta" onclick="window.openAkisModal({ hisse: '${safeHisse}', mode: 'analiz' })"><i class="fas fa-plus" style="color:#ffffff !important;"></i> İlk Kaydı Ekle</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    if (visibleItems.length === 0) {
+                        return `
+                            <div class="ekstre-empty-state">
+                                <i class="fas fa-filter"></i>
+                                <strong>Arama veya filtrelere uygun kayıt bulunamadı</strong>
+                                <button type="button" class="ekstre-ghost-btn reset" style="margin-top:6px;" onclick="window.resetAkisFilters()"><i class="fas fa-rotate-left"></i> Filtreleri Sıfırla</button>
+                            </div>
+                        `;
+                    }
+
+                    if (window.akisViewMode === 'table') {
+                        const rowsHtml = visibleItems.map(it => {
+                            const safeTitle = window.escapeHtml(it.title);
+                            const safeId = window.escapeHtml(it.id);
+                            let titleCell = safeTitle;
+                            let openAct = '';
+                            if (it.type === 'firebase_pdf') {
+                                titleCell = `<a href="javascript:void(0)" class="akis-table-title-link" onclick="window.openFirebasePdf('${safeId}')">${safeTitle}</a>`;
+                                openAct = `<button type="button" class="ekstre-action-btn edit" onclick="window.openFirebasePdf('${safeId}')" title="PDF'i Aç"><i class="fas fa-external-link-alt"></i></button>`;
+                            } else if (it.href) {
+                                const safeHrefAttr = window.escapeHtml(it.href);
+                                titleCell = `<a href="${safeHrefAttr}" target="_blank" rel="noopener noreferrer" class="akis-table-title-link">${safeTitle}</a>`;
+                                openAct = `<a href="${safeHrefAttr}" target="_blank" rel="noopener noreferrer" class="ekstre-action-btn edit" title="Aç"><i class="fas fa-external-link-alt"></i></a>`;
+                            }
+                            const editAct = it.editable
+                                ? `<button type="button" class="ekstre-action-btn edit" onclick="window.openAkisModal({ hisse: '${safeHisse}', editType: '${it.type}', editId: '${safeId}' })" title="Düzenle"><i class="fas fa-pen"></i></button>`
+                                : '';
+                            const delAct = it.deletable
+                                ? `<button type="button" class="ekstre-action-btn delete" onclick="${it.type === 'firebase_pdf' ? `window.deleteFirebasePdf('${safeId}')` : `window.deleteAnaliz('${safeId}')`}" title="Sil"><i class="fas fa-trash-alt"></i></button>`
+                                : '';
+                            return `
+                                <tr data-akis-uid="${window.escapeHtml(it.uid)}">
+                                    <td style="text-align:center !important;">
+                                        <span class="akis-source-badge ${it.plat.badgeCls}"><i class="${it.plat.icon}"></i> ${it.plat.label}</span>
+                                    </td>
+                                    <td style="text-align:left !important; white-space:normal !important; min-width:190px; max-width:260px;">${titleCell}</td>
+                                    <td style="text-align:center !important;">${window.escapeHtml(it.displayDate)}</td>
+                                    <td style="text-align:left !important;">${window.escapeHtml(it.author || '-')}</td>
+                                    <td style="text-align:left !important; white-space:pre-wrap !important; min-width:220px;">${window.escapeHtml(it.note || '-')}</td>
+                                    <td style="text-align:center !important;">
+                                        <div class="ekstre-row-actions">${openAct}${editAct}${delAct}</div>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+
+                        return `
+                            <div class="takip-table-scroll">
+                                <table class="dash-table compact-table akis-table" style="width:100%;">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:120px;">Kaynak</th>
+                                            <th style="text-align:left !important;">Başlık</th>
+                                            <th style="width:96px;">Tarih</th>
+                                            <th style="text-align:left !important; width:145px;">Analist / Kurum</th>
+                                            <th style="text-align:left !important;">Notlar</th>
+                                            <th style="width:96px;">İşlem</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>${rowsHtml}</tbody>
+                                </table>
+                            </div>
+                        `;
+                    }
+
+                    // Card Feed Mode: Separate Pinned Personal Notes from Chronological Research Feed
+                    const personalItems = visibleItems.filter(x => x.isPersonal);
+                    const externalItems = visibleItems.filter(x => !x.isPersonal);
+
+                    let feedHtml = '';
+                    if (personalItems.length > 0) {
+                        feedHtml += `
+                            <div>
+                                <div class="akis-section-label"><i class="fas fa-thumbtack" style="color:#f59e0b;"></i> Sabitlenmiş Kişisel Notlar (${personalItems.length})</div>
+                                <div class="akis-feed-list">${personalItems.map(renderCardItem).join('')}</div>
+                            </div>
+                        `;
+                    }
+                    if (externalItems.length > 0) {
+                        feedHtml += `
+                            <div style="${personalItems.length > 0 ? 'margin-top:0.5rem;' : ''}">
+                                <div class="akis-section-label"><i class="fas fa-newspaper" style="color:#0284c7;"></i> Raporlar & Analiz Akışı (${externalItems.length})</div>
+                                <div class="akis-feed-list">${externalItems.map(renderCardItem).join('')}</div>
+                            </div>
+                        `;
+                    }
+                    return feedHtml;
+                };
+
+                const allAkis = buildUnifiedAkis();
+                const visibleAkis = filterAkisItems(allAkis);
+
+                const personalCount = allAkis.filter(x => x.category === 'personal').length;
+                const pdfItems = allAkis.filter(x => x.category === 'pdf');
+                const localPdfCount = pdfItems.filter(x => x.isLocalPdf).length;
+                const cloudPdfCount = pdfItems.length - localPdfCount;
+                const linkItems = allAkis.filter(x => x.category === 'link');
+                const distinctAuthors = [...new Set(allAkis.map(x => x.author).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'tr'));
+                if (window.akisFilterAuthor !== 'all' && !distinctAuthors.includes(window.akisFilterAuthor)) {
+                    window.akisFilterAuthor = 'all';
+                }
+                const latestDateStr = allAkis.find(x => x.displayDate && x.displayDate !== '-')?.displayDate || '-';
+                const hasAkisFilters = !!(
+                    (window.akisSearchQuery && window.akisSearchQuery.trim()) ||
+                    window.akisFilterType !== 'all' ||
+                    window.akisFilterAuthor !== 'all'
+                );
+                const safeSelH = window.escapeHtml(selectedHisse);
+
+                const akisKpiHtml = `
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-icon-box navy"><i class="fas fa-stream"></i></div>
+                            <div class="kpi-info">
+                                <div class="kpi-label">Toplam Akış Kaydı</div>
+                                <div class="kpi-value">${allAkis.length}</div>
+                                <div class="kpi-sub">Son güncelleme: ${window.escapeHtml(latestDateStr)}</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon-box slate"><i class="fas fa-thumbtack"></i></div>
+                            <div class="kpi-info">
+                                <div class="kpi-label">Kişisel Notlar</div>
+                                <div class="kpi-value">${personalCount}</div>
+                                <div class="kpi-sub">Üstte sabitlenen yatırım tezleri</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon-box red"><i class="fas fa-file-pdf"></i></div>
+                            <div class="kpi-info">
+                                <div class="kpi-label">PDF Raporları</div>
+                                <div class="kpi-value">${pdfItems.length}</div>
+                                <div class="kpi-sub">${localPdfCount} Klasör · ${cloudPdfCount} Bulut PDF</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon-box green"><i class="fas fa-link"></i></div>
+                            <div class="kpi-info">
+                                <div class="kpi-label">Analiz & Video / Link</div>
+                                <div class="kpi-value">${linkItems.length}</div>
+                                <div class="kpi-sub">${distinctAuthors.length} farklı analist / kurum</div>
+                            </div>
+                        </div>
                     </div>
-                    
-                                            <div id="inline-analiz-row" class="glass" style="display: none; flex-direction: column; gap: 1rem; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid var(--accent-color);">
-    <input type="hidden" id="analiz-hisse" value="${selectedHisse || ''}">
-    
-    <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem; border-bottom: 1px solid var(--table-border); padding-bottom: 0.5rem;">
-        <label style="color: var(--text-primary); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
-            <input type="radio" name="akisTipi" value="analiz" checked onchange="window.toggleAkisTipi()"> Genel Analiz/Rapor
-        </label>
-        <label style="color: var(--text-primary); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
-            <input type="radio" name="akisTipi" value="kisisel" onchange="window.toggleAkisTipi()"> Kişisel Not
-        </label>
-    </div>
-
-    <div id="akis-genel-inputs" style="display: flex; gap: 1rem; flex-wrap: wrap;">
-        <!-- 1. Link -->
-        <div style="flex: 2; min-width: 250px;">
-            <label style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">Link</label>
-            <input type="text" id="analiz-baglanti" class="form-control" style="width:100%;" placeholder="https://...">
-        </div>
-        
-        <!-- 2. Analist/Şirket -->
-        <div style="flex: 1; min-width: 150px;">
-            <label style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">Analist/Şirket</label>
-            <input type="text" id="analiz-borsaci" list="analiz-borsaci-list" class="form-control" style="width:100%;" placeholder="Örn: Ak Yatırım">
-        </div>
-        
-        <!-- 3. Tarih -->
-        <div style="flex: 1; min-width: 120px;">
-            <label style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">Tarih</label>
-            <input type="date" id="analiz-tarih" class="form-control" style="width:100%; color-scheme: light;" value="${today}">
-        </div>
-        
-        <!-- 4. Başlık -->
-        <div style="flex: 1.5; min-width: 200px;">
-            <label style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">Başlık (Opsiyonel)</label>
-            <input type="text" id="analiz-baslik" class="form-control" style="width:100%;" placeholder="Not/Rapor/Video Başlığı">
-        </div>
-        
-        <!-- 5. Dosya Ekle -->
-        <div style="flex: 1; min-width: 150px; display: flex; flex-direction: column;">
-            <label style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">Dosya Ekle (Opsiyonel)</label>
-            <style>
-                #upload-file { display: none; }
-            </style>
-            <label for="upload-file" class="upload-file-label" title="Bir Dosya Seç" style="padding: 7px 12px 7px 9px; background: var(--accent-color); color: #ffffff; display: flex; align-items: center; justify-content: center; border-radius: 6px; cursor: pointer; border: none; font-size: 13.5px; font-weight: 600; margin-top: 2px;">
-                <span class="fa-stack" style="font-size: 9px; width: 2em; height: 2em;"><i class="fas fa-folder-open fa-stack-2x" style="color: #ffffff;"></i></span>
-                <span style="margin-left: 5px;">PDF Seç</span>
-            </label>
-            <input type="file" id="upload-file" accept="application/pdf" onchange="const f = this.files[0]; if(f) this.previousElementSibling.innerHTML = '<i class=\'fas fa-file-pdf\' style=\'color:var(--danger-color); font-size: 15px;\'></i> <span style=\'color: #fff; margin-left: 5px; font-size:12.5px;\'>' + (f.name.length > 15 ? f.name.substring(0,15)+'...' : f.name) + '</span>'">
-        </div>
-    </div>
-    
-    <!-- 6. Notunuz -->
-    <div style="display: flex; flex-direction: column; width: 100%;">
-        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <label style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary);">Notunuz</label>
-            <textarea id="analiz-not" class="form-control" style="width:100%; min-height: 56px; resize: vertical;" placeholder="Notlarınızı buraya yazın..."></textarea>
-        </div>
-        
-        <div id="upload-status" style="font-size: 13px; font-weight: normal; min-height: 0; width: 100%; margin-top: 0.5rem; display: none;"></div>
-        
-        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 0.5rem;">
-            <button class="btn" style="background: var(--danger-color); color: #fff; padding: 7px 16px;" onclick="window.toggleInlineAnaliz()">İptal</button>
-            <button class="btn" style="background: var(--success-color); color: #fff; padding: 7px 16px;" onclick="window.saveUnifiedAnaliz()">Kaydet</button>
-        </div>
-    </div>
-</div>
-                      <div class="table-container" style="overflow-x: auto; overflow-y: visible; margin-bottom: 0;">
-                      <table class="dash-table compact-table" style="width:100%; min-width:800px; border-collapse:collapse;">
-                          <thead style="position: sticky; top: 0; z-index: 10; background: var(--table-header-bg);">
-                            <tr style="border-bottom:1px solid var(--table-border); background:var(--table-header-bg);">
-                                <th style="font-size:13px; font-weight:700; color:var(--table-header-text); text-align:center !important; padding:10px 6px; vertical-align:middle; width:1%; white-space:nowrap;">S.N.</th>
-                                <th style="font-size:13px; font-weight:700; color:var(--table-header-text); text-align:center !important; padding:10px 6px; vertical-align:middle; width:1%; white-space:nowrap;">Platform</th>
-                                <th style="font-size:13px; font-weight:700; color:var(--table-header-text); text-align:left !important; padding:10px 6px; vertical-align:middle; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">Başlık</th>
-                                <th style="font-size:13px; font-weight:700; color:var(--table-header-text); text-align:center !important; padding:10px 6px; vertical-align:middle; width:1%; white-space:nowrap;">Tarih</th>
-                                <th style="font-size:13px; font-weight:700; color:var(--table-header-text); text-align:left !important; padding:10px 6px; vertical-align:middle; width:1%; white-space:nowrap;">Analist/Şirket</th>
-                                <th style="font-size:13px; font-weight:700; color:var(--table-header-text); text-align:left !important; padding:10px 6px; vertical-align:middle;">Notlar</th>
-                                <th style="font-size:13px; font-weight:700; color:var(--table-header-text); text-align:center !important; padding:10px 6px; vertical-align:middle; width:1%; white-space:nowrap;">İşlem</th>
-                            </tr>
-                        </thead>
-                        <tbody>
                 `;
 
-                if (unifiedList.length === 0) {
-                    tableHtml += `<tr><td colspan="7" style="text-align: center; padding: 2rem; opacity: 0.5;">Henüz akış verisi bulunmuyor.</td></tr>`;
-                } else {
-                    let sn = 1;
-                    unifiedList.forEach(item => {
-                        if (item.type === 'report') {
-                            const r = item.data;
-                            let filePath = 'Hisseler/' + encodeURIComponent(selectedHisse) + '/' + encodeURIComponent(r.file);
-                            const safeRName = window.escapeHtml(r.name !== '-' && r.name ? r.name : r.file);
-                            const safeRComp = window.escapeHtml(r.company !== '-' ? r.company : '-');
-                            tableHtml += `
-                            <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">
-                                    <a href="${filePath}" target="_blank" rel="noopener noreferrer" style="text-decoration: none;" title="PDF'i Görüntüle">
-                                        <i class="fas fa-file-pdf" style="color: #dc2626; font-size: 15px;"></i>
-                                    </a>
-                                </td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:9px 6px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">
-                                    <a href="${filePath}" target="_blank" rel="noopener noreferrer" style="color: var(--text-primary); text-decoration: none; font-weight: 500;">${safeRName}</a>
-                                </td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(item.gosterimTarih)}</td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${safeRComp}</td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:9px 6px; vertical-align:top !important; white-space:pre-wrap;">-</td>
-                                <td style="padding:9px 6px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
-                                    <a href="${filePath}" target="_blank" rel="noopener noreferrer" class="btn btn-icon" style="display:inline-flex; align-items:center; justify-content:center; color: var(--accent-color); padding: 2px !important; font-size: 14px; text-decoration: none;" title="Raporu Aç"><i class="fas fa-external-link-alt"></i></a>
-                                </td>
-                            </tr>
-                            `;
-                        } else if (item.type === 'firebase_pdf') {
-                            const r = item.data;
-                            const safeId = window.escapeHtml(r.id);
-                            const safeName = window.escapeHtml(r.name && r.name !== '-' ? r.name : (r.fileName || 'Rapor.pdf'));
-                            const safeComp = window.escapeHtml(r.company && r.company !== '-' ? r.company : '-');
-                            const safeNote = window.escapeHtml(r.notText || '-');
-                            tableHtml += `
-                            <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">
-                                    <a href="javascript:void(0)" onclick="window.openFirebasePdf('${safeId}')" style="text-decoration: none;" title="PDF'i Görüntüle">
-                                        <i class="fas fa-file-pdf" style="color: #dc2626; font-size: 15px;"></i>
-                                    </a>
-                                </td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:9px 6px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">
-                                    <a href="javascript:void(0)" onclick="window.openFirebasePdf('${safeId}')" style="color: var(--text-primary); text-decoration: none; font-weight: 500;">${safeName}</a>
-                                </td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(item.gosterimTarih)}</td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${safeComp}</td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:9px 6px; vertical-align:top !important; white-space:pre-wrap;">${safeNote}</td>
-                                <td style="padding:9px 6px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
-                                    <button class="btn btn-icon" style="color: var(--accent-color); padding: 2px 4px !important; font-size: 14px;" onclick="window.openFirebasePdf('${safeId}')" title="PDF'i Aç"><i class="fas fa-external-link-alt"></i></button>
-                                    <button class="btn btn-icon" style="background: transparent; color: var(--text-secondary); padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteFirebasePdf('${safeId}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
-                                </td>
-                            </tr>
-                            `;
-                        } else {
-                            const a = item.data;
-                            let platformIcon = '<i class="fas fa-sticky-note" style="color: var(--text-secondary); font-size: 13.5px;"></i>';
-                            let titleText = window.escapeHtml(a.baslik || '-');
-                            let titleLinkHtml = titleText;
-                            const safeHref = window.sanitizeUrl(a.baglanti);
-                            
-                            if (safeHref) {
-                                let iconStr = 'fas fa-external-link-alt" style="color: var(--accent-color); font-size: 13.5px;';
-                                if (safeHref.includes('youtube.com') || safeHref.includes('youtu.be')) { 
-                                    iconStr = 'fab fa-youtube" style="color:#FF0000; font-size: 14.5px;'; 
-                                } else if (safeHref.includes('twitter.com') || safeHref.includes('x.com')) { 
-                                    iconStr = 'fa-brands fa-x-twitter" style="color: var(--text-primary); font-size: 13.5px;'; 
-                                }
-                                platformIcon = `<a href="${window.escapeHtml(safeHref)}" target="_blank" rel="noopener noreferrer" style="text-decoration: none;" title="Bağlantıya Git"><i class="${iconStr}"></i></a>`;
-                            } else if (a.isKisiselNot) {
-                                platformIcon = '<i class="fas fa-user-edit" style="color: var(--accent-color); font-size: 13.5px;"></i>';
-                            }
-                            
-                            tableHtml += `
-                            <tr style="border-bottom:1px solid var(--table-border); background: var(--table-row-bg);">
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${sn++}</td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${platformIcon}</td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-primary); text-align:left !important; padding:9px 6px; vertical-align:top !important; width:200px; max-width:200px; white-space:normal !important; word-break:break-word;">${titleLinkHtml}</td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:center !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(item.gosterimTarih)}</td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:9px 6px; vertical-align:top !important; width:1%; white-space:nowrap;">${window.escapeHtml(a.borsaci || '-')}</td>
-                                <td style="font-size:13.5px; font-weight:normal; color:var(--text-muted); text-align:left !important; padding:9px 6px; vertical-align:top !important; white-space:pre-wrap;">${window.escapeHtml(a.notText || '-')}</td>
-                                <td style="padding:9px 6px; text-align:center !important; vertical-align:top !important; width:1%; white-space:nowrap;">
-                                    <button class="btn btn-icon" style="color: var(--accent-color); padding: 4px !important; font-size: 14px;" onclick="window.editAnaliz('${a.id}')" title="Düzenle"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-icon" style="background: transparent; color: var(--text-secondary); padding: 2px !important; font-size: 14px; border: none;" onclick="window.deleteAnaliz('${a.id}')" title="Sil"><i class="fas fa-trash-alt"></i></button>
-                                </td>
-                            </tr>
-                            `;
-                        }
-                    });
-                }
-                tableHtml += `
-                        </tbody>
-                    </table>
+                contentHtml = `
+                    <div style="display:flex; flex-direction:column; gap:0.95rem;">
+                        ${akisKpiHtml}
+
+                        <div class="glass ekstre-card-shell">
+                            <div class="ekstre-toolbar-top">
+                                <div class="ekstre-tab-group">
+                                    <button type="button" class="ekstre-tab-pill ${window.akisViewMode !== 'table' ? 'active' : ''}" onclick="window.setAkisViewMode('feed')">
+                                        <i class="fas fa-layer-group"></i>
+                                        <span>Araştırma Akışı</span>
+                                        <span class="ekstre-tab-count">${allAkis.length}</span>
+                                    </button>
+                                    <button type="button" class="ekstre-tab-pill ${window.akisViewMode === 'table' ? 'active' : ''}" onclick="window.setAkisViewMode('table')">
+                                        <i class="fas fa-table"></i>
+                                        <span>Kompakt Tablo</span>
+                                    </button>
+                                </div>
+
+                                <div style="display:flex; align-items:center; gap:0.55rem; flex-wrap:wrap;">
+                                    <button type="button" class="ekstre-ghost-btn" style="color:#b45309; border-color:#fde68a; background:#fffbeb;" onclick="window.openAkisModal({ hisse: '${safeSelH}', mode: 'kisisel' })">
+                                        <i class="fas fa-thumbtack"></i>
+                                        <span>Kişisel Not</span>
+                                    </button>
+                                    <button type="button" class="btn ekstre-primary-cta" onclick="window.openAkisModal({ hisse: '${safeSelH}', mode: 'analiz' })">
+                                        <i class="fas fa-plus" style="color:#ffffff !important;"></i>
+                                        <span>Yeni Kayıt</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="ekstre-filter-bar">
+                                <div class="ekstre-filter-left">
+                                    <div class="ekstre-search-wrap">
+                                        <i class="fas fa-search"></i>
+                                        <input type="text" id="akis-search-input" class="ekstre-search-input" placeholder="Başlık, kurum veya not ara..." value="${window.escapeHtml(window.akisSearchQuery || '')}" oninput="window.filterAkisFeed(this.value)">
+                                        <button type="button" id="akis-search-clear-btn" class="ekstre-search-clear" style="display: ${window.akisSearchQuery ? 'inline-flex' : 'none'};" onclick="const i=document.getElementById('akis-search-input'); if(i){i.value=''; i.focus();} window.filterAkisFeed('');" title="Aramayı temizle">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="ekstre-segmented" role="group" aria-label="Akış türü filtresi">
+                                        <button type="button" class="ekstre-seg-btn ${window.akisFilterType === 'all' ? 'active' : ''}" onclick="window.setAkisFilter('type', 'all')">Tümü</button>
+                                        <button type="button" class="ekstre-seg-btn ${window.akisFilterType === 'personal' ? 'active' : ''}" onclick="window.setAkisFilter('type', 'personal')">Kişisel Not</button>
+                                        <button type="button" class="ekstre-seg-btn ${window.akisFilterType === 'pdf' ? 'active' : ''}" onclick="window.setAkisFilter('type', 'pdf')">PDF Rapor</button>
+                                        <button type="button" class="ekstre-seg-btn ${window.akisFilterType === 'link' ? 'active' : ''}" onclick="window.setAkisFilter('type', 'link')">Video / Link</button>
+                                    </div>
+
+                                    ${distinctAuthors.length > 0 ? `
+                                    <select class="ekstre-select" aria-label="Analist veya kurum filtresi" onchange="window.setAkisFilter('author', this.value)">
+                                        <option value="all" ${window.akisFilterAuthor === 'all' ? 'selected' : ''}>Tüm Kaynaklar (${distinctAuthors.length})</option>
+                                        ${distinctAuthors.map(a => `<option value="${window.escapeHtml(a)}" ${window.akisFilterAuthor === a ? 'selected' : ''}>${window.escapeHtml(a)}</option>`).join('')}
+                                    </select>` : ''}
+                                </div>
+
+                                <div class="ekstre-filter-right">
+                                    <span id="akis-reset-wrap" style="display: ${hasAkisFilters ? 'inline-flex' : 'none'};">
+                                        <button type="button" class="ekstre-ghost-btn reset" onclick="window.resetAkisFilters()">
+                                            <i class="fas fa-rotate-left"></i>
+                                            <span>Sıfırla</span>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div id="akis-content-wrap">
+                                ${buildAkisBodyHtml(allAkis, visibleAkis)}
+                            </div>
+                        </div>
                     </div>
-                </div>`;
-                contentHtml += tableHtml;
-                setTimeout(() => {
-                    const uniqueBorsacilar = [...new Set((State.data.analizler || []).map(a => a.borsaci ? a.borsaci.trim() : '').filter(b => b))].sort();
-                    if (typeof window.setupCustomDropdown === 'function') {
-                        window.setupCustomDropdown('analiz-borsaci', uniqueBorsacilar);
+                `;
+
+                window.updateAkisViewOnly = () => {
+                    const wrap = document.getElementById('akis-content-wrap');
+                    if (!wrap) { renderUI(); return; }
+                    const freshAll = buildUnifiedAkis();
+                    const freshVis = filterAkisItems(freshAll);
+                    wrap.innerHTML = buildAkisBodyHtml(freshAll, freshVis);
+                    const clr = document.getElementById('akis-search-clear-btn');
+                    if (clr) clr.style.display = window.akisSearchQuery ? 'inline-flex' : 'none';
+                    const rst = document.getElementById('akis-reset-wrap');
+                    if (rst) {
+                        const active = !!((window.akisSearchQuery && window.akisSearchQuery.trim()) || window.akisFilterType !== 'all' || window.akisFilterAuthor !== 'all');
+                        rst.style.display = active ? 'inline-flex' : 'none';
                     }
-                }, 50);
+                };
             }
             let stockHeaderHtml = '';
             if (selectedHisse) {
@@ -7422,6 +7604,10 @@ const renderVeriler = (container) => {
 
 window.toggleInlineAnaliz = () => {
     const row = document.getElementById('inline-analiz-row');
+    if (!row && typeof window.openAkisModal === 'function') {
+        window.openAkisModal({ hisse: window.currentSelectedHisse });
+        return;
+    }
     if (row) {
         const displayType = row.tagName.toUpperCase() === 'TR' ? 'table-row' : 'flex';
         row.style.display = row.style.display === 'none' ? displayType : 'none';
@@ -7623,6 +7809,345 @@ window.deleteFirebasePdf = async (reportId) => {
         console.error('Firebase PDF silme hatası:', err);
         window.showToast('PDF silinirken hata oluştu: ' + (err.message || ''), 'error');
     }
+};
+
+window.updateFirebasePdfMeta = async (reportId, updates) => {
+    const list = State.data.uploadedReports || [];
+    const idx = list.findIndex(r => String(r.id) === String(reportId));
+    if (idx === -1) return false;
+    const updated = {
+        ...list[idx],
+        name: (updates.name || '').trim() || list[idx].name,
+        tarih: (updates.tarih || '').trim() || list[idx].tarih,
+        company: (updates.company || '').trim() || '-',
+        notText: (updates.notText || '').trim()
+    };
+    list[idx] = updated;
+    State.save();
+    try {
+        if (currentUser && typeof db !== 'undefined') {
+            await db.collection('app_data').doc(currentUser.uid).collection('pdf_reports').doc(reportId).set(updated, { merge: true });
+        }
+    } catch (e) {
+        console.warn('Firestore PDF metadata update warning:', e);
+    }
+    return true;
+};
+
+window.openAkisModal = (opts = {}) => {
+    const existingOverlay = document.getElementById('akis-modal-overlay');
+    if (existingOverlay) existingOverlay.remove();
+
+    const hisse = String(opts.hisse || window.currentSelectedHisse || '').trim().toUpperCase();
+    const editType = opts.editType || null; // 'analiz' | 'firebase_pdf' | null
+    const editId = opts.editId || null;
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    let existingItem = null;
+    if (editType === 'analiz' && editId) {
+        existingItem = (State.data.analizler || []).find(a => String(a.id) === String(editId)) || null;
+    } else if (editType === 'firebase_pdf' && editId) {
+        existingItem = (State.data.uploadedReports || []).find(r => String(r.id) === String(editId)) || null;
+    }
+
+    let modalMode = opts.mode || 'analiz'; // 'analiz' | 'pdf' | 'kisisel'
+    if (existingItem) {
+        if (editType === 'firebase_pdf') modalMode = 'pdf';
+        else modalMode = existingItem.isKisiselNot ? 'kisisel' : 'analiz';
+    }
+
+    const initTarih = existingItem ? (existingItem.tarih || todayStr) : todayStr;
+    const initBaslik = existingItem
+        ? (editType === 'firebase_pdf' ? (existingItem.name || '') : (existingItem.baslik && existingItem.baslik !== '-' ? existingItem.baslik : ''))
+        : '';
+    const initAuthor = existingItem
+        ? (editType === 'firebase_pdf' ? (existingItem.company && existingItem.company !== '-' ? existingItem.company : '') : (existingItem.borsaci && existingItem.borsaci !== '-' ? existingItem.borsaci : ''))
+        : '';
+    const initLink = (existingItem && editType === 'analiz') ? (existingItem.baglanti || '') : '';
+    const initNote = existingItem ? (existingItem.notText || '') : '';
+
+    // Refresh author suggestions datalist
+    const allAuthors = new Set();
+    (State.data.analizler || []).forEach(a => { if (a.borsaci && a.borsaci !== '-' && !a.isKisiselNot) allAuthors.add(a.borsaci.trim()); });
+    (State.data.uploadedReports || []).forEach(r => { if (r.company && r.company !== '-') allAuthors.add(r.company.trim()); });
+    let authorDl = document.getElementById('analiz-borsaci-list');
+    if (!authorDl) {
+        authorDl = document.createElement('datalist');
+        authorDl.id = 'analiz-borsaci-list';
+        document.body.appendChild(authorDl);
+    }
+    authorDl.innerHTML = [...allAuthors].sort((a, b) => a.localeCompare(b, 'tr')).map(a => `<option value="${window.escapeHtml(a)}">`).join('');
+
+    const overlay = document.createElement('div');
+    overlay.id = 'akis-modal-overlay';
+    overlay.className = 'ekstre-modal-overlay';
+    overlay.addEventListener('click', (ev) => { if (ev.target === overlay) overlay.remove(); });
+
+    const isEditing = !!existingItem;
+    const modalHeading = isEditing
+        ? (editType === 'firebase_pdf' ? `${hisse} · PDF Raporunu Düzenle` : `${hisse} · Akış Kaydını Düzenle`)
+        : `${hisse} · Yeni Akış Kaydı`;
+
+    overlay.innerHTML = `
+        <div class="ekstre-modal-card" role="dialog" aria-modal="true" style="width: min(560px, 100%);">
+            <div class="ekstre-modal-header">
+                <h3>
+                    <i class="fas ${isEditing ? 'fa-pen-to-square' : 'fa-stream'}" style="color: #0284c7;"></i>
+                    <span>${window.escapeHtml(modalHeading)}</span>
+                </h3>
+                <button type="button" class="ekstre-modal-close" aria-label="Kapat" onclick="document.getElementById('akis-modal-overlay')?.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="akis-modal-form" class="ekstre-modal-body">
+                ${editType !== 'firebase_pdf' ? `
+                <div class="ekstre-segmented" id="am-mode-tabs" style="width:100%; display:grid; grid-template-columns:${isEditing ? '1fr 1fr' : '1fr 1fr 1fr'}; height:40px;">
+                    <button type="button" class="ekstre-seg-btn ${modalMode === 'analiz' ? 'active' : ''}" data-mode="analiz" style="justify-content:center;"><i class="fas fa-link"></i> Analiz / Link</button>
+                    ${!isEditing ? `<button type="button" class="ekstre-seg-btn ${modalMode === 'pdf' ? 'active' : ''}" data-mode="pdf" style="justify-content:center;"><i class="fas fa-file-pdf" style="color:#dc2626;"></i> PDF Rapor</button>` : ''}
+                    <button type="button" class="ekstre-seg-btn ${modalMode === 'kisisel' ? 'active' : ''}" data-mode="kisisel" style="justify-content:center;"><i class="fas fa-thumbtack" style="color:#d97706;"></i> Kişisel Not</button>
+                </div>` : ''}
+
+                <div id="am-link-section" class="ekstre-field">
+                    <label for="am-link" style="display:flex; justify-content:space-between; align-items:center;">
+                        <span>Bağlantı (YouTube, X, KAP veya Web)</span>
+                        <span id="am-platform-pill"></span>
+                    </label>
+                    <input type="text" id="am-link" class="form-control" placeholder="https://..." value="${window.escapeHtml(initLink)}">
+                </div>
+
+                <div id="am-pdf-section" class="ekstre-field" style="display:none;">
+                    <label>PDF Rapor Dosyası (Maks. 10 MB)</label>
+                    <div id="am-dropzone" class="akis-dropzone">
+                        <i class="fas fa-cloud-arrow-up" style="font-size:24px; color:#0284c7;"></i>
+                        <strong id="am-dropzone-title">PDF dosyasını buraya sürükleyin veya tıklayıp seçin</strong>
+                        <span id="am-dropzone-sub" style="font-size:12px; opacity:0.8;">Yalnızca .pdf dosyaları · Buluta güvenle kaydedilir</span>
+                    </div>
+                    <input type="file" id="am-pdf-input" accept="application/pdf" style="display:none;">
+                </div>
+
+                <div class="ekstre-form-grid-2">
+                    <div class="ekstre-field">
+                        <label for="am-baslik">Başlık</label>
+                        <input type="text" id="am-baslik" class="form-control" placeholder="Örn: 2026/6 Bilanço Değerlendirmesi" value="${window.escapeHtml(initBaslik)}">
+                    </div>
+                    <div class="ekstre-field">
+                        <label for="am-tarih">Tarih</label>
+                        <input type="date" id="am-tarih" class="form-control" value="${window.escapeHtml(initTarih)}" required>
+                    </div>
+                </div>
+
+                <div id="am-author-section" class="ekstre-field">
+                    <label for="am-author">Analist / Aracı Kurum</label>
+                    <input type="text" id="am-author" list="analiz-borsaci-list" class="form-control" placeholder="Örn: Ak Yatırım, İş Yatırım, Analist Adı" value="${window.escapeHtml(initAuthor)}" autocomplete="off">
+                </div>
+
+                <div class="ekstre-field">
+                    <label for="am-not">Notlar & Önemli Çıkarımlar</label>
+                    <textarea id="am-not" class="takip-note-textarea" style="min-height:115px;" placeholder="Raporun öne çıkan noktaları, hedef fiyat veya kişisel yatırım teziniz...">${window.escapeHtml(initNote)}</textarea>
+                </div>
+
+                <div id="am-status" style="display:none; font-size:13px; font-weight:600;"></div>
+
+                <div class="ekstre-modal-footer" style="margin: 0.25rem -1.35rem -1.25rem -1.35rem;">
+                    <button type="button" class="ekstre-ghost-btn" onclick="document.getElementById('akis-modal-overlay')?.remove()">İptal</button>
+                    <button type="submit" id="am-submit-btn" class="btn" style="padding: 9px 22px;">
+                        <i class="fas fa-check" style="margin-right: 6px; color: #ffffff !important;"></i>${isEditing ? 'Değişiklikleri Kaydet' : 'Kaydet'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    const linkSec = document.getElementById('am-link-section');
+    const pdfSec = document.getElementById('am-pdf-section');
+    const authorSec = document.getElementById('am-author-section');
+    const inpLink = document.getElementById('am-link');
+    const inpBaslik = document.getElementById('am-baslik');
+    const inpTarih = document.getElementById('am-tarih');
+    const inpAuthor = document.getElementById('am-author');
+    const inpNote = document.getElementById('am-not');
+    const inpPdf = document.getElementById('am-pdf-input');
+    const dropzone = document.getElementById('am-dropzone');
+    const dropTitle = document.getElementById('am-dropzone-title');
+    const dropSub = document.getElementById('am-dropzone-sub');
+    const platPill = document.getElementById('am-platform-pill');
+    const statusEl = document.getElementById('am-status');
+    const submitBtn = document.getElementById('am-submit-btn');
+
+    let selectedFile = null;
+
+    const refreshModeUI = () => {
+        linkSec.style.display = (modalMode === 'analiz') ? 'flex' : 'none';
+        pdfSec.style.display = (modalMode === 'pdf' && !isEditing) ? 'flex' : 'none';
+        authorSec.style.display = (modalMode === 'kisisel') ? 'none' : 'flex';
+        overlay.querySelectorAll('#am-mode-tabs button').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-mode') === modalMode);
+        });
+    };
+
+    const updatePlatformBadge = () => {
+        if (!platPill) return;
+        const val = (inpLink.value || '').trim().toLowerCase();
+        if (!val) { platPill.innerHTML = ''; return; }
+        if (val.includes('youtube.com') || val.includes('youtu.be')) {
+            platPill.innerHTML = '<span class="akis-source-badge akis-badge-youtube"><i class="fab fa-youtube"></i> YouTube</span>';
+        } else if (val.includes('twitter.com') || val.includes('x.com')) {
+            platPill.innerHTML = '<span class="akis-source-badge akis-badge-x"><i class="fa-brands fa-x-twitter"></i> X / Twitter</span>';
+        } else if (val.includes('kap.org.tr')) {
+            platPill.innerHTML = '<span class="akis-source-badge akis-badge-kap"><i class="fas fa-landmark"></i> KAP</span>';
+        } else {
+            platPill.innerHTML = '<span class="akis-source-badge akis-badge-link"><i class="fas fa-globe"></i> Web</span>';
+        }
+    };
+
+    const setPickedFile = (file) => {
+        if (!file) return;
+        selectedFile = file;
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+        dropzone.classList.add('has-file');
+        dropTitle.textContent = file.name;
+        dropSub.textContent = `${sizeMb} MB · Yüklemeye hazır`;
+        if (!inpBaslik.value.trim()) {
+            inpBaslik.value = file.name.replace(/\.pdf$/i, '').replace(/[_-]+/g, ' ');
+        }
+    };
+
+    if (dropzone && inpPdf) {
+        dropzone.addEventListener('click', () => inpPdf.click());
+        dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+            if (f) setPickedFile(f);
+        });
+        inpPdf.addEventListener('change', () => {
+            if (inpPdf.files && inpPdf.files[0]) setPickedFile(inpPdf.files[0]);
+        });
+    }
+
+    overlay.querySelectorAll('#am-mode-tabs button').forEach(b => {
+        b.addEventListener('click', () => {
+            modalMode = b.getAttribute('data-mode') || 'analiz';
+            refreshModeUI();
+        });
+    });
+
+    inpLink.addEventListener('input', updatePlatformBadge);
+    refreshModeUI();
+    updatePlatformBadge();
+
+    const onKeyDown = (ke) => {
+        if (ke.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', onKeyDown); }
+    };
+    document.addEventListener('keydown', onKeyDown);
+
+    document.getElementById('akis-modal-form').addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        const baslik = (inpBaslik.value || '').trim();
+        const tarih = (inpTarih.value || '').trim() || todayStr;
+        const author = (inpAuthor.value || '').trim();
+        const link = (inpLink.value || '').trim();
+        const notText = (inpNote.value || '').trim();
+
+        // Case 1: Editing existing Firebase PDF metadata
+        if (editType === 'firebase_pdf' && existingItem) {
+            await window.updateFirebasePdfMeta(existingItem.id, {
+                name: baslik || existingItem.fileName || 'Rapor.pdf',
+                tarih,
+                company: author || '-',
+                notText
+            });
+            document.removeEventListener('keydown', onKeyDown);
+            overlay.remove();
+            window.showToast('PDF raporu bilgileri güncellendi.', 'success');
+            if (typeof renderPage === 'function') renderPage();
+            return;
+        }
+
+        // Case 2: New PDF Upload
+        if (modalMode === 'pdf' && !isEditing) {
+            if (!selectedFile) {
+                window.showToast('Lütfen yüklenecek bir PDF dosyası seçin.', 'warning');
+                return;
+            }
+            submitBtn.disabled = true;
+            statusEl.style.display = 'block';
+            statusEl.style.color = '#0369a1';
+            statusEl.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right:6px;"></i>PDF buluta yükleniyor...';
+            try {
+                await window.uploadPdfToFirebase(selectedFile, hisse, {
+                    name: baslik || selectedFile.name.replace(/\.pdf$/i, ''),
+                    tarih,
+                    company: author || '-',
+                    notText
+                });
+                document.removeEventListener('keydown', onKeyDown);
+                overlay.remove();
+                window.showToast('PDF raporu başarıyla yüklendi.', 'success');
+                if (typeof renderPage === 'function') renderPage();
+            } catch (err) {
+                submitBtn.disabled = false;
+                statusEl.style.color = '#dc2626';
+                statusEl.textContent = 'Hata: ' + (err.message || 'Yükleme başarısız');
+                window.showToast(err.message || 'PDF yüklenemedi.', 'error');
+            }
+            return;
+        }
+
+        // Case 3: Kişisel Not or Analiz / Link
+        const isKisiselNot = modalMode === 'kisisel';
+        const activeUser = (typeof currentUser !== 'undefined' ? currentUser : null) || window.currentUser;
+        const activeUserName = (activeUser && (activeUser.displayName || (activeUser.email ? activeUser.email.split('@')[0] : ''))) || 'Kişisel Not';
+
+        if (isKisiselNot) {
+            if (!notText && !baslik) {
+                window.showToast('Lütfen not veya başlık girin.', 'warning');
+                inpNote.focus();
+                return;
+            }
+        } else {
+            if (!author && !baslik && !link) {
+                window.showToast('Lütfen en azından Analist/Kurum, Başlık veya Bağlantı girin.', 'warning');
+                inpAuthor.focus();
+                return;
+            }
+        }
+
+        const payload = {
+            tarih,
+            hisse,
+            borsaci: isKisiselNot ? activeUserName : (author || '-'),
+            baslik: baslik || (isKisiselNot ? 'Kişisel Yatırım Notu' : '-'),
+            baglanti: isKisiselNot ? '' : link,
+            notText,
+            isKisiselNot
+        };
+
+        if (!State.data.analizler) State.data.analizler = [];
+        if (editType === 'analiz' && existingItem) {
+            const idx = State.data.analizler.findIndex(a => String(a.id) === String(existingItem.id));
+            if (idx !== -1) State.data.analizler[idx] = { ...State.data.analizler[idx], ...payload };
+            window.showToast('Akış kaydı güncellendi.', 'success');
+        } else {
+            State.data.analizler.push({ ...payload, id: Date.now() });
+            window.showToast(isKisiselNot ? 'Kişisel not eklendi.' : 'Analiz kaydı eklendi.', 'success');
+        }
+
+        State.save();
+        document.removeEventListener('keydown', onKeyDown);
+        overlay.remove();
+        if (typeof renderPage === 'function') renderPage();
+    });
+
+    setTimeout(() => {
+        if (modalMode === 'kisisel') inpNote.focus();
+        else if (modalMode === 'analiz') inpLink.focus();
+        else inpBaslik.focus();
+    }, 30);
 };
 
 window.saveUnifiedAnaliz = async () => {
