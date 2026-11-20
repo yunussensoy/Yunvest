@@ -214,41 +214,43 @@ const toTitleCase = (str) => {
 
 
 const genFintablesBilanco = (title, headers, rows) => {
-    const docIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; vertical-align:middle; color:var(--text-secondary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
-    const leftArrow = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; color:var(--text-secondary);"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
-    const rightArrow = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; color:var(--text-primary);"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+    const col0Label = title === 'Bilanço' ? 'Bilanço Kalemleri' : `${title} Kalemleri`;
 
     let html = `<div style="background:var(--surface-color); border-radius:12px; border:1px solid var(--surface-border); overflow:hidden; font-family:var(--font-family);">
         <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse; color:var(--text-primary); font-size:13px; text-align:right;">
+            <table style="width:100%; border-collapse:separate; border-spacing:0; color:var(--text-primary); font-size:13px; text-align:right;">
                 <thead>
                     <tr style="background:var(--table-header-bg); border-bottom:1px solid var(--surface-border);">
-                        <th style="text-align:left; padding:16px; font-size:15px; font-weight:700;  white-space:nowrap;">Bilanço Kalemleri</th>`;
+                        <th style="position:sticky; left:0; z-index:5; background:var(--table-header-bg); text-align:left !important; padding:12px 14px; font-size:13.5px; font-weight:700; white-space:nowrap; box-shadow: 2px 0 6px -2px rgba(15,23,42,0.08);">${col0Label}</th>`;
 
     headers.forEach((h, i) => {
         if (i === 0) return;
-        let arrowL = i === 1 ? `<span style="margin-right:8px; vertical-align:middle;">${leftArrow}</span>` : '';
-        let arrowR = i === headers.length - 1 ? `<span style="margin-left:8px; vertical-align:middle;">${rightArrow}</span>` : '';
-        let eSpan = `<span style="color:#2196f3; font-weight:bold; font-size:10px; margin-left:2px; vertical-align:top;">E</span>`;
-        html += `<th style="padding:16px;  white-space:nowrap; color:var(--accent-color); text-align:right;">${h}</th>`;
+        html += `<th style="padding:12px 14px; white-space:nowrap; color:var(--accent-color); text-align:right !important;">${h}</th>`;
     });
     html += `</tr></thead><tbody>`;
 
-    const mainCategories = ['dönen varlıklar', 'duran varlıklar', 'toplam varlıklar', 'kısa vadeli yükümlülükler', 'uzun vadeli yükümlülükler', 'özkaynaklar', 'toplam kaynaklar'];
+    const mainCategories = [
+        'dönen varlıklar', 'duran varlıklar', 'toplam varlıklar',
+        'kısa vadeli yükümlülükler', 'uzun vadeli yükümlülükler', 'özkaynaklar', 'toplam kaynaklar',
+        'işletme faaliyetlerinden nakit akışları', 'faaliyetlerden elde edilen nakit akışları',
+        'yatırım faaliyetlerinden kaynaklanan nakit akışları', 'finansman faaliyetlerinden nakit akışları',
+        'dönem sonu nakit ve nakit benzerleri'
+    ];
 
     rows.forEach(r => {
         const rowName = r[0] ? r[0].trim() : '';
+        if (!rowName || rowName.startsWith('Sistem_')) return;
         const isMainCat = mainCategories.includes(rowName.toLocaleLowerCase('tr-TR'));
+        const rowBg = isMainCat ? '#f1f5f9' : '#ffffff';
 
-        let trStyle = isMainCat ? `background:#f1f5f9; font-weight:600;` : `transition: background 0.2s;`;
-        html += `<tr style="${trStyle} border-bottom:1px solid var(--table-border);" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='${isMainCat ? '#f1f5f9' : 'transparent'}'">`;
+        html += `<tr style="background:${rowBg}; ${isMainCat ? 'font-weight:700;' : ''} border-bottom:1px solid var(--table-border);">`;
 
         r.forEach((cell, i) => {
             if (i === 0) {
-                let cellColor = isMainCat ? 'var(--text-primary)' : 'var(--text-secondary)';
-                html += `<td style="text-align:left; padding:12px 16px; color:${cellColor}; white-space:nowrap; border-right:none;">${cell}</td>`;
+                const cellColor = isMainCat ? '#0f172a' : 'var(--text-secondary)';
+                html += `<td style="position:sticky; left:0; z-index:2; background:${rowBg}; text-align:left !important; padding:9px 14px; color:${cellColor} !important; ${isMainCat ? 'font-weight:700 !important;' : ''} white-space:nowrap; border-right:1px solid var(--table-border); box-shadow: 2px 0 6px -2px rgba(15,23,42,0.06);">${window.escapeHtml(cell)}</td>`;
             } else {
-                html += `<td style="padding:12px 16px; color:var(--text-primary); white-space:nowrap; border-right:none;">${cell}</td>`;
+                html += `<td style="text-align:right !important; padding:9px 14px; color:var(--text-primary) !important; ${isMainCat ? 'font-weight:700 !important;' : ''} white-space:nowrap; border-right:none;">${window.escapeHtml(cell)}</td>`;
             }
         });
         html += `</tr>`;
@@ -2204,7 +2206,7 @@ const renderHisseler = (container) => {
     window.currentSelectedHisse = selectedHisse; // sync it back
     const hName = selectedHisse || 'Hisse';
 
-    const validTabs = ['Özet Rapor', 'Akış', 'Değerleme', 'Gelir Tablosu'];
+    const validTabs = ['Özet Rapor', 'Değerleme', 'Bilanço', 'Gelir Tablosu', 'Nakit Akım Tablosu', 'Akış'];
     let activeTab = window.currentHisseTab || 'Özet Rapor';
     if (!validTabs.includes(activeTab)) {
         activeTab = 'Özet Rapor';
@@ -2286,13 +2288,11 @@ const renderHisseler = (container) => {
         }
         const tabIcons = {
             'Özet Rapor': 'fas fa-chart-pie',
-
             'Değerleme': 'fas fa-gem',
-            'Gelir Tablosu': 'fas fa-file-invoice-dollar',
+            'Bilanço': 'fas fa-balance-scale',
             'Gelir Tablosu': 'fas fa-file-invoice-dollar',
             'Nakit Akım Tablosu': 'fas fa-water',
-            'Rasyo Analiz Tablosu': 'fas fa-percentage',
-            'Bilanço': 'fas fa-balance-scale'
+            'Akış': 'fas fa-stream'
         };
 
         const makeBtn = (t) => `<button class="nav-btn ${activeTab === t ? 'active' : ''}" style="margin:0; font-size:13.5px; font-weight:600; padding:0.45rem 0.9rem; white-space:nowrap;" onclick="window.setHisseTab('${t}')"><i class="${tabIcons[t] || 'fas fa-file'}" style="margin-right:5px;"></i>${t}</button>`;
@@ -2304,7 +2304,7 @@ const renderHisseler = (container) => {
                 </div>
             </div>`;
 
-        let tabsHtml = makeBtn('Özet Rapor') + makeBtn('Akış') + makeBtn('Değerleme') + makeBtn('Gelir Tablosu');
+        let tabsHtml = makeBtn('Özet Rapor') + makeBtn('Değerleme') + makeBtn('Bilanço') + makeBtn('Gelir Tablosu') + makeBtn('Nakit Akım Tablosu') + makeBtn('Akış');
 
         let contentHtml = '';
 
@@ -3136,42 +3136,92 @@ const renderHisseler = (container) => {
                 `;
                 window.shouldRenderDashboardCharts = true;
             } else if (activeTab === 'Bilanço') {
-                let tBilancoTabDynamic = tBilanco;
-                if (sData.bilanco) tBilancoTabDynamic = genFintablesBilanco('Bilanço', sData.bilanco.headers, sData.bilanco.rows);
+                const hasBilanco = sData && sData.bilanco && sData.bilanco.headers && sData.bilanco.rows && sData.bilanco.rows.length > 0;
+                const tBilancoTabDynamic = hasBilanco
+                    ? genFintablesBilanco('Bilanço', sData.bilanco.headers, sData.bilanco.rows)
+                    : `<div class="glass ekstre-empty-state" style="border-radius:12px;"><i class="fas fa-balance-scale"></i><strong>${window.escapeHtml(selectedHisse)} için bilanço verisi bulunamadı</strong><span>Bu hissenin Excel mali tablosu eklendiğinde bilanço kalemleri burada görüntülenir.</span></div>`;
                 contentHtml = `
-                <style>
-                .compact-table { table-layout: auto !important; width: 100%; }
-                .compact-table th, .compact-table td { padding: 0.45rem 0.4rem !important; white-space: nowrap; font-size: 13px !important; }
-                .compact-card { padding: 1rem 0.5rem !important; }
-                </style>
                 <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
                     ${tBilancoTabDynamic}
                 </div>
                 `;
             } else if (activeTab === 'Nakit Akım Tablosu') {
-                let tNakitDynamic = tNakit;
-                if (sData.nakit) tNakitDynamic = genTable('Nakit Akım Tablosu', sData.nakit.headers, sData.nakit.rows);
-                contentHtml = `
-                <style>
-                .compact-table { table-layout: auto !important; width: 100%; }
-                .compact-table th, .compact-table td { padding: 0.45rem 0.4rem !important; white-space: nowrap; font-size: 13px !important; }
-                .compact-card { padding: 1rem 0.5rem !important; }
-                </style>
-                <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
-                    <div class="grid-2-col">
-                        <div class="dash-card" style="margin-bottom: 0;">
-                            <div class="dash-title">Çeyreklik Nakit Akışı</div>
-                            <div style="position: relative; height: 250px;"><canvas id="chart-nakit-q"></canvas></div>
+                window.nakitTabMode = window.nakitTabMode || 'yillik';
+                window.setNakitTabMode = (mode) => {
+                    window.nakitTabMode = mode;
+                    renderUI();
+                };
+
+                const sheetYillik = sData && sData.nakitYillik && sData.nakitYillik.rows ? sData.nakitYillik : (sData && sData.nakitAkim && sData.nakitAkim.rows ? sData.nakitAkim : null);
+                const sheetCeyrek = sData && sData.nakitCeyrek && sData.nakitCeyrek.rows ? sData.nakitCeyrek : null;
+                const sheetDonemsel = sData && sData.nakitDonemsel && sData.nakitDonemsel.rows ? sData.nakitDonemsel : null;
+
+                let activeNakitSheet = sheetYillik;
+                if (window.nakitTabMode === 'ceyrek' && sheetCeyrek) activeNakitSheet = sheetCeyrek;
+                else if (window.nakitTabMode === 'donemsel' && sheetDonemsel) activeNakitSheet = sheetDonemsel;
+                else if (!activeNakitSheet) activeNakitSheet = sheetDonemsel || sheetCeyrek;
+
+                const hasNakit = activeNakitSheet && activeNakitSheet.headers && activeNakitSheet.rows && activeNakitSheet.rows.length > 0;
+
+                const extractCashSeries = (sheet) => {
+                    if (!sheet || !sheet.headers || !sheet.rows) return null;
+                    const parseN = (v) => {
+                        if (typeof v === 'number') return isFinite(v) ? v : 0;
+                        if (!v || v === '-') return 0;
+                        const p = parseFloat(String(v).replace(/\./g, '').replace(/,/g, '.'));
+                        return isNaN(p) ? 0 : p;
+                    };
+                    const findRow = (substr) => sheet.rows.find(r => r[0] && r[0].toString().toLocaleLowerCase('tr-TR').includes(substr));
+                    const rIsl = findRow('işletme faaliyetlerinden nakit akış');
+                    const rYat = findRow('yatırım faaliyetlerinden kaynaklanan nakit akış');
+                    const rFin = findRow('finansman faaliyetlerinden nakit akış');
+                    if (!rIsl && !rYat && !rFin) return null;
+                    const maxPts = Math.min(sheet.headers.length - 1, 12);
+                    const labels = [];
+                    const isletme = [], yatirim = [], finansman = [];
+                    for (let i = maxPts; i >= 1; i--) {
+                        labels.push(String(sheet.headers[i] || ''));
+                        isletme.push(rIsl ? parseN(rIsl[i]) : 0);
+                        yatirim.push(rYat ? parseN(rYat[i]) : 0);
+                        finansman.push(rFin ? parseN(rFin[i]) : 0);
+                    }
+                    return { labels, isletme, yatirim, finansman };
+                };
+
+                window.nakitChartPayload = hasNakit ? {
+                    ceyrek: extractCashSeries(sheetCeyrek || sheetDonemsel),
+                    yillik: extractCashSeries(sheetYillik || sheetDonemsel)
+                } : null;
+
+                if (hasNakit) {
+                    const tNakitDynamic = genFintablesBilanco('Nakit Akım', activeNakitSheet.headers, activeNakitSheet.rows);
+                    contentHtml = `
+                    <div style="display:flex; flex-direction:column; gap: 1rem; margin-top: 0;">
+                        ${(window.nakitChartPayload.ceyrek || window.nakitChartPayload.yillik) ? `
+                        <div class="grid-2-col">
+                            <div class="dash-card" style="margin-bottom: 0;">
+                                <div class="dash-title">Çeyreklik Nakit Akışları</div>
+                                <div style="position: relative; height: 250px;"><canvas id="chart-nakit-q"></canvas></div>
+                            </div>
+                            <div class="dash-card" style="margin-bottom: 0;">
+                                <div class="dash-title">Yıllıklandırılmış Nakit Akışları</div>
+                                <div style="position: relative; height: 250px;"><canvas id="chart-nakit-y"></canvas></div>
+                            </div>
+                        </div>` : ''}
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                            <div class="ekstre-segmented">
+                                ${sheetYillik ? `<button type="button" class="ekstre-seg-btn ${window.nakitTabMode === 'yillik' ? 'active' : ''}" onclick="window.setNakitTabMode('yillik')">Yıllıklandırılmış</button>` : ''}
+                                ${sheetCeyrek ? `<button type="button" class="ekstre-seg-btn ${window.nakitTabMode === 'ceyrek' ? 'active' : ''}" onclick="window.setNakitTabMode('ceyrek')">Çeyreklik</button>` : ''}
+                                ${sheetDonemsel ? `<button type="button" class="ekstre-seg-btn ${window.nakitTabMode === 'donemsel' ? 'active' : ''}" onclick="window.setNakitTabMode('donemsel')">Dönemsel</button>` : ''}
+                            </div>
                         </div>
-                        <div class="dash-card" style="margin-bottom: 0;">
-                            <div class="dash-title">Yıllık Nakit Akışı</div>
-                            <div style="position: relative; height: 250px;"><canvas id="chart-nakit-y"></canvas></div>
-                        </div>
+                        ${tNakitDynamic}
                     </div>
-                    ${tNakitDynamic}
-                </div>
-                `;
-                window.shouldRenderDashboardCharts = true;
+                    `;
+                    window.shouldRenderDashboardCharts = true;
+                } else {
+                    contentHtml = `<div class="glass ekstre-empty-state" style="border-radius:12px;"><i class="fas fa-water"></i><strong>${window.escapeHtml(selectedHisse)} için nakit akım tablosu bulunamadı</strong><span>Bu hissenin Excel mali tablosu eklendiğinde nakit akışı grafikleri ve tablosu burada görüntülenir.</span></div>`;
+                }
             } else if (['Likidite Oranları', 'Kaldıraç Oranları', 'Faaliyet Etkinlik Oranları', 'Karlılık Oranları', 'Diğer Kalemler'].includes(activeTab)) {
                 contentHtml = `<div style="display:flex; justify-content:center; align-items:center; height:200px; opacity:0.5; font-style:italic;">${activeTab} sayfası henüz yapım aşamasındadır.</div>`;
             } else if (activeTab === 'Değerleme') {
@@ -3928,10 +3978,19 @@ const renderHisseler = (container) => {
                 if (isPos && hDegisim > 0) initChangeStr = '+' + initChangeStr;
                 else if (!isPos) initChangeStr = '-' + initChangeStr;
 
+                const switcherSymbols = Array.from(new Set([
+                    selectedHisse,
+                    ...((State.data && State.data.takipListesi) ? State.data.takipListesi : []),
+                    ...Object.keys((State.data && State.data.degerleme) ? State.data.degerleme : {})
+                ])).filter(Boolean).sort((a, b) => a.localeCompare(b));
+
                 stockHeaderHtml = `
-            <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 0; flex-shrink: 0;">
-                <div>
-                    <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 0.5px; color: var(--text-primary);">${selectedHisse}</h1>
+            <div id="hisse-header-border" class="glass" style="display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 1.25rem; border-radius: 12px; border-left: 5px solid ${hColor}; margin: 0; flex-shrink: 0; flex-wrap: wrap; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+                    <h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 0.5px; color: var(--text-primary);">${window.escapeHtml(selectedHisse)}</h1>
+                    <select id="hisse-switcher-select" class="ekstre-select" style="height: 34px; font-weight: 700; min-width: 120px;" title="Başka hisseye geç" onchange="window.switchSelectedHisse && window.switchSelectedHisse(this.value)">
+                        ${switcherSymbols.map(s => `<option value="${window.escapeHtml(s)}" ${s === selectedHisse ? 'selected' : ''}>${window.escapeHtml(s)}</option>`).join('')}
+                    </select>
                 </div>
                 <div style="display: flex; align-items: baseline; gap: 0.8rem;">
                     <div style="font-size: 18px; font-weight: 700; color: var(--text-primary);">${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(hFiyat)} ₺</div>
@@ -3998,6 +4057,59 @@ const renderHisseler = (container) => {
             if (window.shouldRenderDashboardCharts) {
                 window.shouldRenderDashboardCharts = false;
                 setTimeout(() => {
+                    // --- Nakit Akım Grafikleri (Çeyreklik & Yıllıklandırılmış) ---
+                    if (window.nakitChartPayload && typeof Chart !== 'undefined') {
+                        const renderNakitChart = (canvasId, series) => {
+                            const cv = document.getElementById(canvasId);
+                            if (!cv || !series || !series.labels || series.labels.length === 0) return;
+                            let ex = Chart.getChart ? Chart.getChart(cv) : null;
+                            if (ex) ex.destroy();
+                            new Chart(cv.getContext('2d'), {
+                                type: 'bar',
+                                data: {
+                                    labels: series.labels,
+                                    datasets: [
+                                        { label: 'İşletme', data: series.isletme, backgroundColor: 'rgba(16, 185, 129, 0.8)', borderRadius: 3 },
+                                        { label: 'Yatırım', data: series.yatirim, backgroundColor: 'rgba(239, 68, 68, 0.75)', borderRadius: 3 },
+                                        { label: 'Finansman', data: series.finansman, backgroundColor: 'rgba(2, 132, 199, 0.78)', borderRadius: 3 }
+                                    ]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    interaction: { mode: 'index', intersect: false },
+                                    plugins: {
+                                        datalabels: { display: false },
+                                        legend: { display: true, position: 'bottom', labels: { boxWidth: 10, color: '#475569', font: { size: 11 } } },
+                                        tooltip: {
+                                            callbacks: {
+                                                label: (c) => `${c.dataset.label}: ${new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(c.parsed.y || 0)}`
+                                            }
+                                        }
+                                    },
+                                    scales: {
+                                        x: { ticks: { font: { size: 10 }, color: '#475569' }, grid: { display: false } },
+                                        y: {
+                                            ticks: {
+                                                font: { size: 10 },
+                                                color: '#475569',
+                                                callback: (v) => {
+                                                    if (Math.abs(v) >= 1e9) return (v / 1e9).toFixed(1) + ' Mlr';
+                                                    if (Math.abs(v) >= 1e6) return (v / 1e6).toFixed(0) + ' M';
+                                                    return v;
+                                                }
+                                            },
+                                            grid: { color: 'rgba(15, 23, 42, 0.08)' }
+                                        }
+                                    }
+                                }
+                            });
+                        };
+                        renderNakitChart('chart-nakit-q', window.nakitChartPayload.ceyrek);
+                        renderNakitChart('chart-nakit-y', window.nakitChartPayload.yillik);
+                        window.nakitChartPayload = null;
+                    }
+
                     if (!window.dashboardChartData) return;
                     const dData = window.dashboardChartData;
                     if (!dData.labels || dData.labels.length === 0) return;
@@ -4441,7 +4553,32 @@ const renderHisseler = (container) => {
     window.setHisseTab = (tab) => {
         activeTab = tab;
         window.currentHisseTab = tab;
+        if (tab === 'Değerleme' && currentPage === 'hisse_detay') {
+            currentPage = 'hisse_degerleme';
+        } else if (tab !== 'Değerleme' && currentPage === 'hisse_degerleme') {
+            currentPage = 'hisse_detay';
+        }
+        const headerTitleEl = document.getElementById('header-active-title');
+        const headerIconEl = document.getElementById('header-active-icon');
+        if (headerTitleEl && selectedHisse) {
+            headerTitleEl.textContent = tab === 'Değerleme' ? `${selectedHisse} · Değerleme` : `${selectedHisse} · ${tab}`;
+        }
+        if (headerIconEl) {
+            headerIconEl.className = tab === 'Değerleme' ? 'fas fa-gem' : 'fas fa-chart-bar';
+        }
+        document.querySelectorAll('.nav-btn[data-target]').forEach(b => b.classList.remove('active'));
+        if (tab === 'Değerleme') {
+            document.querySelectorAll('.nav-btn[data-target="hisse_degerleme"]').forEach(b => b.classList.add('active'));
+        }
         renderUI();
+    };
+
+    window.switchSelectedHisse = (sym) => {
+        const clean = String(sym || '').trim().toUpperCase();
+        if (!clean) return;
+        window.currentSelectedHisse = clean;
+        window.currentHisseTab = activeTab;
+        if (typeof renderPage === 'function') renderPage();
     };
 
     renderUI();
@@ -9154,6 +9291,8 @@ const _renderPageActual = () => {
     const headerIconEl = document.getElementById('header-active-icon');
     const pageMeta = {
         anasayfa: { title: 'Takip Listesi', icon: 'fas fa-list-ul' },
+        hisse_degerleme: { title: window.currentSelectedHisse ? `${window.currentSelectedHisse} · Değerleme` : 'Hisse Değerleme', icon: 'fas fa-gem' },
+        analizler: { title: 'Analizler', icon: 'fas fa-magnifying-glass-chart' },
         portfoy: { title: 'Portföy', icon: 'fas fa-briefcase' },
         hisse_islemleri: { title: 'Ekstreler', icon: 'fas fa-receipt' },
         veriler: { title: 'Enflasyon Verileri', icon: 'fas fa-chart-line' },
@@ -9167,6 +9306,18 @@ const _renderPageActual = () => {
 
     switch (currentPage) {
         case 'anasayfa': renderAnasayfa(container); break;
+        case 'hisse_degerleme': {
+            if (!window.currentSelectedHisse) {
+                const takipSorted = (State.data && State.data.takipListesi ? [...State.data.takipListesi] : []).sort((a, b) => a.localeCompare(b));
+                const degKeys = Object.keys((State.data && State.data.degerleme) || {}).sort((a, b) => a.localeCompare(b));
+                const stockKeys = Object.keys(window.stockData || {}).sort((a, b) => a.localeCompare(b));
+                window.currentSelectedHisse = takipSorted.find(s => degKeys.includes(s)) || takipSorted[0] || degKeys[0] || stockKeys[0] || 'AKSA';
+            }
+            window.currentHisseTab = 'Değerleme';
+            if (headerTitleEl) headerTitleEl.textContent = `${window.currentSelectedHisse} · Değerleme`;
+            renderHisseler(container);
+            break;
+        }
         case 'portfoy': renderPortfoy(container); break;
         case 'hedef': renderHedef(container); break;
         case 'hisse_islemleri': renderHisseIslemleri(container); break;

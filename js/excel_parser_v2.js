@@ -215,10 +215,12 @@ window.parseExcelData = (selectedHisse) => {
         };
 
         const parsedBilanco = parseSheet(['Bilanço', 'Bilanço (TL)', workbook.SheetNames[0]], false);
-        const parsedGelirYillik = parseSheet(['Yıllıklan', 'Yıllık'], true, true);
-        const parsedGelirDonemsel = parseSheet(['Gelir Tablosu (Yıllık)', 'Gelir Tablosu (Dönemsel)', 'Gelir Tablosu'], true);
+        const parsedGelirYillik = parseSheet(['Gelir Tablosu (Yıllıklan', 'Gelir Tablosu (Yıllık)', 'Yıllıklan', 'Yıllık'], true, true);
+        const parsedGelirDonemsel = parseSheet(['Gelir Tablosu (Dönemsel)', 'Gelir Tablosu (Yıllık)', 'Gelir Tablosu'], true);
         const parsedGelirCeyrek = parseSheet(['Gelir Tablosu (Çeyreklik)'], true);
-        const parsedNakitAkim = parseSheet(['Nakit Akım', 'Nakit Akım Tablosu'], false);
+        const parsedNakitDonemsel = parseSheet(['Nakit Akış (Dönemsel)', 'Nakit Akım (Dönemsel)', 'Nakit Akış Tablosu', 'Nakit Akım Tablosu', 'Nakit Akış', 'Nakit Akım'], true);
+        const parsedNakitCeyrek = parseSheet(['Nakit Akış (Çeyreklik)', 'Nakit Akım (Çeyreklik)'], true);
+        const parsedNakitYillik = parseSheet(['Nakit Akış (Yıllıklan', 'Nakit Akım (Yıllıklan'], true);
 
         if (parsedBilanco) {
             window.stockData[selectedHisse].bilanco = parsedBilanco;
@@ -226,7 +228,10 @@ window.parseExcelData = (selectedHisse) => {
             window.stockData[selectedHisse].gelirDonemsel = parsedGelirDonemsel || parsedBilanco;
             window.stockData[selectedHisse].gelirYillik = parsedGelirYillik || parsedGelirDonemsel || parsedBilanco;
             window.stockData[selectedHisse].gelirCeyrek = parsedGelirCeyrek || parsedBilanco;
-            window.stockData[selectedHisse].nakitAkim = parsedNakitAkim || parsedBilanco;
+            if (parsedNakitDonemsel) window.stockData[selectedHisse].nakitDonemsel = parsedNakitDonemsel;
+            if (parsedNakitCeyrek) window.stockData[selectedHisse].nakitCeyrek = parsedNakitCeyrek;
+            if (parsedNakitYillik) window.stockData[selectedHisse].nakitYillik = parsedNakitYillik;
+            window.stockData[selectedHisse].nakitAkim = parsedNakitYillik || parsedNakitDonemsel || parsedNakitCeyrek || null;
         }
 
         return true;
