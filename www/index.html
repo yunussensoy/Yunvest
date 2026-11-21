@@ -377,27 +377,5 @@
     </script>
     <datalist id="analiz-borsaci-list"></datalist>
 
-    <!-- Takip Düzenle Modal -->
-    <div id="takip-edit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: transparent; z-index: 10000;" onclick="if(event.target === this) { this.style.display='none'; const btn = document.getElementById('takip-edit-btn'); if(btn) { btn.className='fas fa-pen'; btn.innerHTML=''; } }">
-        <div id="takip-edit-glass" class="glass" style="padding: 1.25rem; width: 225px; max-width: 90%; border-radius: var(--border-radius); position: absolute; display: flex; flex-direction: column; gap: 0.85rem; box-shadow: var(--shadow-lg);">
-            <style>
-                #takip-edit-arama-input:focus {
-                    border-color: #0284c7 !important;
-                    outline: none !important;
-                }
-            </style>
-            <h3 style="margin: 0; color: #113A5D; font-size: 14.5px; font-weight: 700; white-space: nowrap; text-align: left;">Takip Listesi Düzenle</h3>
-
-            <div style="position: relative; display: flex; width: 100%;">
-                <input type="text" id="takip-edit-arama-input" class="form-control" placeholder="Hisse ara..." style="width: 100%; font-size: 13.5px; text-transform: uppercase; background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-primary); padding: 6px 32px 6px 10px; border-radius: 7px;">
-                <i class="fas fa-plus" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #0369a1; font-size: 13.5px; padding: 4px;" onclick="window.addHisseToTakipFromModal()"></i>
-                <div id="takip-edit-autocomplete-list" style="display:none; position:absolute; top:100%; left:0; right:0; background:var(--dropdown-bg); border:1px solid var(--surface-border); border-top:none; z-index:1001; max-height:200px; overflow-y:auto; flex-direction:column; border-radius: 0 0 8px 8px; box-shadow: var(--shadow-md);"></div>
-            </div>
-
-            <div id="takip-edit-list-container" style="display: flex; flex-direction: column; gap: 0.5rem; flex: 1; overflow-y: auto; padding-right: 5px; margin-top: 0.25rem;">
-            </div>
-        </div>
-    </div>
-
 </body>
 </html>

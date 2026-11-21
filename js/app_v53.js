@@ -10029,89 +10029,6 @@ window.removeHisseFromTakip = (hisseKodu) => {
     document.getElementById('theme-confirm-modal').style.display = 'flex';
 };
 
-// Takip Listesi Modal Functions
-window.toggleTakipEditModal = (event) => {
-    const modal = document.getElementById('takip-edit-modal');
-    const glass = document.getElementById('takip-edit-glass');
-    const btn = document.getElementById('takip-edit-btn');
-
-    if (modal.style.display === 'block') {
-        modal.style.display = 'none';
-        if (btn) {
-            btn.className = 'fas fa-pen';
-            btn.innerHTML = '';
-            btn.style.fontSize = '13px';
-        }
-    } else {
-        modal.style.display = 'block';
-        if (event && event.target) {
-            const rect = (btn ? btn.getBoundingClientRect() : event.target.getBoundingClientRect());
-            glass.style.top = (rect.bottom) + 'px';
-            glass.style.left = (rect.right - 195) + 'px';
-            glass.style.bottom = '20px';
-        }
-        if (btn) {
-            btn.className = 'fas fa-pen';
-            btn.innerHTML = '';
-            btn.style.fontSize = '13px';
-        }
-        document.getElementById('takip-edit-arama-input').value = '';
-        document.getElementById('takip-edit-autocomplete-list').style.display = 'none';
-        window.renderTakipEditList();
-        setTimeout(() => document.getElementById('takip-edit-arama-input').focus(), 100);
-    }
-};
-
-window.renderTakipEditList = () => {
-    const container = document.getElementById('takip-edit-list-container');
-    if (!container) return;
-    const list = (State.data.takipListesi || []).slice().sort((a, b) => a.localeCompare(b));
-
-    if (list.length === 0) {
-        container.innerHTML = '<div style="text-align:center; color:var(--text-secondary); padding:1rem; font-size:13px;">Takip listeniz boş.</div>';
-        return;
-    }
-
-    container.innerHTML = list.map(hisse => `
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.25rem 0.3rem; border-bottom: 1px solid var(--surface-border);">
-              <span style="color: var(--text-primary); font-weight: 600; font-size: 13.5px;">${hisse}</span>
-                <i class="fas fa-trash-alt" style="cursor: pointer; color: var(--text-secondary); font-size: 13px; padding: 4px;" onclick="window.removeHisseFromTakipModal('${hisse}')"></i>
-          </div>
-      `).join('');
-};
-
-window.addHisseToTakipFromModal = () => {
-    const input = document.getElementById('takip-edit-arama-input');
-    if (!input) return;
-    let val = input.value.trim().toUpperCase();
-    if (!val) return;
-
-    const validStocks = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : (window.defaultStocksArray || []);
-    if (!validStocks.includes(val)) {
-        window.showToast('Geçersiz hisse kodu: ' + val, 'warning');
-        return;
-    }
-
-    if (!State.data.takipListesi) State.data.takipListesi = [];
-    if (!State.data.takipListesi.includes(val)) {
-        State.data.takipListesi.push(val);
-        input.value = '';
-        document.getElementById('takip-edit-autocomplete-list').style.display = 'none';
-        State.save();
-        window.renderTakipEditList();
-        if (currentPage === 'anasayfa') renderPage();
-    } else {
-        window.showToast('Bu hisse zaten takip listesinde.', 'info');
-    }
-};
-
-window.removeHisseFromTakipModal = (hisse) => {
-    State.removeTakip(hisse);
-    State.save();
-    window.renderTakipEditList();
-    if (currentPage === 'anasayfa') renderPage();
-};
-
 window.toggleTakipSort = (col) => {
     if (!window.takipSort) window.takipSort = { col: null, asc: true };
     const ascDefaultCols = new Set(['hisse', 'fk', 'fdFavok', 'pdDd', 'netBorcFavok']);
@@ -11076,7 +10993,6 @@ const renderAnasayfa = (container) => {
                                     <span>Ekle</span>
                                 </button>
                             </form>
-                            <span id="takip-edit-btn" class="fas fa-pen" style="color: var(--text-secondary); cursor: pointer; font-size: 13px; width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; background: #ffffff; border: 1px solid #cbd5e1;" title="Takip Listesini Toplu Düzenle" onclick="window.toggleTakipEditModal(event)"></span>
                         </div>
                     </div>
 
@@ -12712,68 +12628,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-
-
-// Setup Custom Autocomplete for Search Box
-const setupSearchAutocomplete = () => {
-    const input = document.getElementById('takip-edit-arama-input');
-    const list = document.getElementById('takip-edit-autocomplete-list');
-    if (!input || !list) return;
-
-    if (input._searchAutocompleteHandler) {
-    input.removeEventListener('input', input._searchAutocompleteHandler);
-}
-input._searchAutocompleteHandler = function () {
-        let val = this.value.toUpperCase();
-        list.innerHTML = '';
-        if (!val) {
-            list.style.display = 'none';
-            return;
-        }
-
-        const validStocks = (State.bistStocks && State.bistStocks.length > 0) ? State.bistStocks : (window.defaultStocksArray || []);
-
-        let matches = validStocks.filter(s => s.startsWith(val));
-        if (matches.length === 0) {
-            list.style.display = 'none';
-            return;
-        }
-
-        matches.slice(0, 10).forEach(hisse => {
-            let div = document.createElement('div');
-            div.innerHTML = `<strong style="color: var(--text-primary);">${hisse.substr(0, val.length)}</strong>${hisse.substr(val.length)}`;
-            div.style.padding = '0.5rem 1rem';
-            div.style.cursor = 'pointer';
-            div.style.fontSize = '12px';
-            div.style.color = 'var(--text-secondary)';
-            div.className = 'autocomplete-item';
-            div.onmouseover = () => div.style.background = 'var(--overlay-bg)';
-            div.onmouseout = () => div.style.background = 'transparent';
-
-            div.addEventListener('mousedown', function (e) {
-                e.stopPropagation();
-                input.value = hisse;
-                list.style.display = 'none';
-            });
-            list.appendChild(div);
-        });
-        list.style.display = 'flex';
-    };
-input.addEventListener('input', input._searchAutocompleteHandler);
-
-    // Hide when clicking outside
-    if (window.takipEditListener) {
-        document.removeEventListener('click', window.takipEditListener);
-    }
-    window.takipEditListener = function (e) {
-        if (e.target !== input && e.target !== list) {
-            list.style.display = 'none';
-        }
-    };
-    document.addEventListener('click', window.takipEditListener);
-};
-
-setTimeout(setupSearchAutocomplete, 1000);
 
 let takipHideTimeout = null;
 
