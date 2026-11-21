@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yunvest-pwa-cache-v83';
+const CACHE_NAME = 'yunvest-pwa-cache-v84';
 const urlsToCache = [
   '/',
   '/index.html',

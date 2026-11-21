@@ -218,14 +218,14 @@ const genFintablesBilanco = (title, headers, rows) => {
 
     let html = `<div style="background:var(--surface-color); border-radius:12px; border:1px solid var(--surface-border); overflow:hidden; font-family:var(--font-family);">
         <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:separate; border-spacing:0; color:var(--text-primary); font-size:13px; text-align:right;">
+            <table class="fintables-stmt-table" style="width:100%; border-collapse:separate; border-spacing:0; color:var(--text-primary); text-align:right;">
                 <thead>
                     <tr style="background:var(--table-header-bg); border-bottom:1px solid var(--surface-border);">
-                        <th style="position:sticky; left:0; z-index:5; background:var(--table-header-bg); text-align:left !important; padding:12px 14px; font-size:13.5px; font-weight:700; white-space:nowrap; box-shadow: 2px 0 6px -2px rgba(15,23,42,0.08);">${col0Label}</th>`;
+                        <th style="position:sticky; left:0; z-index:5; background:var(--table-header-bg); text-align:left !important; font-weight:700; box-shadow: 2px 0 6px -2px rgba(15,23,42,0.08);"><div class="fintables-col0-text">${col0Label}</div></th>`;
 
     headers.forEach((h, i) => {
         if (i === 0) return;
-        html += `<th style="padding:12px 14px; white-space:nowrap; color:var(--accent-color); text-align:right !important;">${h}</th>`;
+        html += `<th style="white-space:nowrap; color:var(--accent-color); text-align:right !important;">${h}</th>`;
     });
     html += `</tr></thead><tbody>`;
 
@@ -248,9 +248,9 @@ const genFintablesBilanco = (title, headers, rows) => {
         r.forEach((cell, i) => {
             if (i === 0) {
                 const cellColor = isMainCat ? '#0f172a' : 'var(--text-secondary)';
-                html += `<td style="position:sticky; left:0; z-index:2; background:${rowBg}; text-align:left !important; padding:9px 14px; color:${cellColor} !important; ${isMainCat ? 'font-weight:700 !important;' : ''} white-space:nowrap; border-right:1px solid var(--table-border); box-shadow: 2px 0 6px -2px rgba(15,23,42,0.06);">${window.escapeHtml(cell)}</td>`;
+                html += `<td style="position:sticky; left:0; z-index:2; background:${rowBg}; text-align:left !important; color:${cellColor} !important; ${isMainCat ? 'font-weight:700 !important;' : ''} border-right:1px solid var(--table-border); box-shadow: 2px 0 6px -2px rgba(15,23,42,0.06);" title="${window.escapeHtml(rowName)}"><div class="fintables-col0-text">${window.escapeHtml(cell)}</div></td>`;
             } else {
-                html += `<td style="text-align:right !important; padding:9px 14px; color:var(--text-primary) !important; ${isMainCat ? 'font-weight:700 !important;' : ''} white-space:nowrap; border-right:none;">${window.escapeHtml(cell)}</td>`;
+                html += `<td style="text-align:right !important; color:var(--text-primary) !important; ${isMainCat ? 'font-weight:700 !important;' : ''} white-space:nowrap; border-right:none;">${window.escapeHtml(cell)}</td>`;
             }
         });
         html += `</tr>`;
