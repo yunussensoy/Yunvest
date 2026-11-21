@@ -5358,32 +5358,39 @@ tr:hover .pf-quick-trade-btn,
 /* Bilanço & Nakit Akım Fintables Tablo Kompakt Görünümü */
 table.fintables-stmt-table {
     font-variant-numeric: tabular-nums;
+    width: auto !important;
+    min-width: 100%;
+    white-space: normal !important;
 }
 
 table.fintables-stmt-table th {
-    font-size: 11.5px !important;
-    padding: 8px 10px !important;
+    font-size: 10.5px !important;
+    padding: 6px 7px !important;
+    letter-spacing: -0.1px !important;
 }
 
 table.fintables-stmt-table td {
-    font-size: 12px !important;
-    padding: 6px 10px !important;
+    font-size: 11px !important;
+    padding: 4px 7px !important;
+    letter-spacing: -0.2px !important;
 }
 
 table.fintables-stmt-table th:first-child,
 table.fintables-stmt-table td:first-child {
-    width: 270px !important;
-    min-width: 220px !important;
-    max-width: 270px !important;
+    width: 220px !important;
+    min-width: 200px !important;
+    max-width: 220px !important;
+    padding: 5px 8px !important;
     white-space: normal !important;
-    line-height: 1.3 !important;
+    line-height: 1.25 !important;
+    letter-spacing: 0 !important;
 }
 
 table.fintables-stmt-table .fintables-col0-text {
-    width: 250px;
-    max-width: 250px;
-    white-space: normal;
-    line-height: 1.3;
+    width: 204px;
+    max-width: 204px;
+    white-space: normal !important;
+    line-height: 1.25;
     word-break: break-word;
     overflow-wrap: break-word;
 }
@@ -5391,14 +5398,14 @@ table.fintables-stmt-table .fintables-col0-text {
 @media (max-width: 768px) {
     table.fintables-stmt-table th:first-child,
     table.fintables-stmt-table td:first-child {
-        width: 190px !important;
-        min-width: 170px !important;
-        max-width: 190px !important;
+        width: 165px !important;
+        min-width: 150px !important;
+        max-width: 165px !important;
     }
 
     table.fintables-stmt-table .fintables-col0-text {
-        width: 170px;
-        max-width: 170px;
+        width: 150px !important;
+        max-width: 150px !important;
     }
 }
 

@@ -1,10 +1,10 @@
-const CACHE_NAME = 'yunvest-pwa-cache-v84';
+const CACHE_NAME = 'yunvest-pwa-cache-v85';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/css/styles.css',
+  '/css/styles.css?v=85',
   '/js/custom_autocomplete.js',
-  '/js/app_v53.js'
+  '/js/app_v53.js?v=85'
 ];
 
 self.addEventListener('install', event => {
